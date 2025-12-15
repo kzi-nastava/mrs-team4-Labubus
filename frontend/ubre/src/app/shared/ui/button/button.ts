@@ -7,9 +7,10 @@ import { Component, Input } from '@angular/core';
   templateUrl: './button.html',
   styleUrl: './button.css',
 })
-export class ButtonComponent {
+export class Button {
   @Input() type: 'button' | 'submit' = 'button';
-  @Input() disabled = false;
+  @Input() disabled: boolean = false;
   @Input() variant: 'filled' | 'outlined' = 'filled';
-  @Input() shadow = false;
+  @Input() shadow: boolean = false;
+  @Input() width: string | null = null;
 }

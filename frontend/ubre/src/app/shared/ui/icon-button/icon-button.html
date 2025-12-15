@@ -1,1 +1,11 @@
-<p>icon-button works!</p>
+<button class="icon-btn" [attr.aria-label]="ariaLabel">
+  @if (iconUrl) {
+    <img [src]="iconUrl" />
+  } @else {
+    <ng-content></ng-content>
+  }
+
+  @if (badge) {
+    <span class="badge"></span>
+  }
+</button>

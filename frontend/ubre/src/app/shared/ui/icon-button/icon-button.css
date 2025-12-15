@@ -1,0 +1,21 @@
+.icon {
+  cursor: pointer;
+  box-shadow: var(--drop-shadow);
+  background: var(--color-surface);
+  border-radius: var(--border-radius-icons);
+  width: var(--icon-width-regular);
+  height: var(--icon-width-regular);
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-error);
+}
