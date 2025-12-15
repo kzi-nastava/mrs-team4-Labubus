@@ -5,3 +5,33 @@ html, body {
   width: 100%;
 }
 
+:root {
+  --color-primary: #0A2A66;
+  --color-primary-light: #1B3F85;
+  --color-primary-dark: #071F4B;
+  --color-surface: #FFFFFF;
+  --color-text-primary: #0A0A0A;
+  --color-secondary: #F2C94C;
+  --color-secondary-dark: #D4A533;
+  --color-background: #F7F9FC;
+  --color-error: #E53935;
+  --color-neutral-dark-gray: #838383;
+  --color-neutral-light-gray: #E6E6E6;
+
+  --font-family: 'Poppins', sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+
+  --font-size-regular: 16px; 
+  --font-size-small: 12px;
+  --font-size-medium: 20px; 
+  --font-size-large: 24px; 
+  --font-size-placeholder: 14px;
+
+  --border-radius-regular: 24px;
+  --border-radius-icons: 20px;
+  --border-radius-buttons-large: 100px;
+  --border-radius-buttons-small: 12px;
+
+  --drop-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
