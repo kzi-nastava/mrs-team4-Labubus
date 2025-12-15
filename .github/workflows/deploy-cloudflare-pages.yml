@@ -1,0 +1,28 @@
+name: deploy-cloudflare-pages
+
+on:
+  push:
+    branches: [development]
+    paths:
+      - "frontend/ubre/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/ubre
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - run: npm run build
+      - uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: ubre
+          directory: frontend/ubre/dist/ubre
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
