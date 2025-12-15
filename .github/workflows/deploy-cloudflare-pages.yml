@@ -25,5 +25,5 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: ubre
-          directory: frontend/ubre/dist/ubre
+          directory: frontend/ubre/dist/ubre/browser
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
