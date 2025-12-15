@@ -27,3 +27,4 @@ jobs:
           projectName: ubre
           directory: frontend/ubre/dist/ubre/browser
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
