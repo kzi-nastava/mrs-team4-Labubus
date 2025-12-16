@@ -3,7 +3,7 @@
 
   <div class="overlay">
     @if (cdModalOpen) {
-      <app-modal class="cd-modal"
+      <app-modal class="cd-modal show"
         title="Choose a destination"
         message="Please select a valid destination"
         buttonText="Continue"
@@ -11,15 +11,19 @@
       </app-modal>
     }
 
-    <app-icon-button class="position-menu"
+    <app-icon-button class="menu-button"
       iconUrl="side_navigation_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
       (click)="openMenu()">
+    </app-icon-button>
+
+    <app-icon-button class="chat-button"
+      iconUrl="chat_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
+      (click)="openChat()">
     </app-icon-button>
 
     @if (toastOpen) {
       <app-toast [title]="toastTitle" [message]="toastMessage"></app-toast>
     }
-
 
     <app-side-menu
       [open]="menuOpen"

@@ -1,0 +1,12 @@
+z-indexes:
+
+MAP CONTAINER:
+map ----> 0
+
++
+
+OVERLAY CONTAINER:
+icons (menu, chat, linked p) ----> 2000
+side menu (backdrop) ----> 3000
+side menu (panel) ----> 3100
+cd modal ----> 2100

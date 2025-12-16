@@ -27,14 +27,13 @@ export class RegisteredUser {
 
   cdModalOpen = true; // Choose a destination modal
 
-
   openMenu() { this.menuOpen = true; }
   closeMenu() { this.menuOpen = false; }
   openCdModal() { this.cdModalOpen = true; }
   closeCdModal() { this.cdModalOpen = false; }
 
-  handleMenuAction(a: string) {
-    if (a === 'logout') { /* logout */ }
+  handleMenuAction(action: string) {
+    if (action === 'logout') { /* logout */ }
     this.closeMenu();
   }
 
@@ -51,6 +50,10 @@ export class RegisteredUser {
   onCdModalAction() {
     this.cdModalOpen = false;
     this.showToast('Destination chosen', 'You have successfully chosen a destination.');
+  }
+
+  openChat() {
+    // Open chat widget
   }
 }
 

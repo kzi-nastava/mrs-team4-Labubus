@@ -15,8 +15,9 @@
   bottom: 0;
   width: 400px;
   background: var(--color-surface);
-  transform: translateX(-110%);
-  transition: transform 0.22s ease;
+  transform: translateX(-100%);
+  transition: transform 0.5s cubic-bezier(.22,.61,.36,1);
+  will-change: transform;
   z-index: 3100;
   box-shadow: 12px 0 40px rgba(0, 0, 0, 0.18);
   padding: 24px;
