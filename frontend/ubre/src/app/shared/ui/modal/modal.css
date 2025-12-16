@@ -3,7 +3,7 @@
   height: 200px;
   background: var(--color-surface);
   border-radius: var(--border-radius-icons);
-  padding: 40px 34px;
+  padding: 35px 34px;
   box-shadow: var(--drop-shadow);
   font-family: var(--font-family);
   box-sizing: border-box;

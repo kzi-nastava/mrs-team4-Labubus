@@ -13,7 +13,12 @@ import { Modal } from '../../shared/ui/modal/modal';
   styleUrl: './registered-user.css',
 })
 export class RegisteredUser {
-  showMenuButton = true;
+
+  user = {
+    name: 'John Doe',
+    phone: '+44 7700 900123',
+  };
+
   menuOpen = false;
 
   toastOpen = false;
@@ -22,10 +27,6 @@ export class RegisteredUser {
 
   cdModalOpen = true; // Choose a destination modal
 
-  user = {
-    name: 'John Doe',
-    phone: '+44 7700 900123',
-  };
 
   openMenu() { this.menuOpen = true; }
   closeMenu() { this.menuOpen = false; }

@@ -11,12 +11,10 @@
       </app-modal>
     }
 
-    @if (showMenuButton) {
-      <app-icon-button class="position-menu"
-        iconUrl="side_navigation_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
-        (click)="openMenu()">
-      </app-icon-button>
-    }
+    <app-icon-button class="position-menu"
+      iconUrl="side_navigation_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
+      (click)="openMenu()">
+    </app-icon-button>
 
     @if (toastOpen) {
       <app-toast [title]="toastTitle" [message]="toastMessage"></app-toast>
