@@ -1,0 +1,24 @@
+.screen {
+  position: relative;
+  height: 100vh; 
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  pointer-events: none;
+}
+
+.position-menu {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+}
+

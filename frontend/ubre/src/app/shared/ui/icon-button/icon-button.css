@@ -8,6 +8,25 @@
   display: grid;
   place-items: center;
   position: relative;
+  border: none;
+  outline: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.icon:hover{
+  transform: translateY(-2px) scale(1.03);
+}
+
+.icon:active{
+  transform: translateY(0) scale(0.98);
+}
+
+.icon.red {
+  background: var(--color-error);
+}
+
+.icon.yellow {
+  background: var(--color-secondary);
 }
 
 .badge {
@@ -18,4 +37,8 @@
   height: 10px;
   border-radius: 50%;
   background: var(--color-error);
+}
+
+:host {
+  pointer-events: auto;
 }

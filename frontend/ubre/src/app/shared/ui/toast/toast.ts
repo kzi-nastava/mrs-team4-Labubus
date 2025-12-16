@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-toast',
@@ -6,6 +6,8 @@ import { Component } from '@angular/core';
   templateUrl: './toast.html',
   styleUrl: './toast.css',
 })
-export class Toast {
 
+export class Toast {
+  @Input() title = "";
+  @Input() message = "";
 }
