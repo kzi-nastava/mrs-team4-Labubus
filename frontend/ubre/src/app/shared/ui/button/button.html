@@ -6,6 +6,7 @@
   [disabled]="disabled"
   [class.shadow]="shadow"
   [style.width]="width"
+  (click)="clicked.emit()"
 >
   <ng-content></ng-content>
 </button>

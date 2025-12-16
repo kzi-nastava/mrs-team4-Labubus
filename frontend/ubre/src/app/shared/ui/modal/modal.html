@@ -1,0 +1,10 @@
+<div class="backdrop">
+  <div class="modal">
+    <div class="title">{{ title }}</div>
+    <div class="msg">{{ message }}</div>
+
+    <app-button width="100%" (clicked)="action.emit()">
+      {{ buttonText }}
+    </app-button>
+  </div>
+</div>

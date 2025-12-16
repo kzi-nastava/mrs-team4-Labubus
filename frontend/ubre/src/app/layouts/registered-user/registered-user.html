@@ -2,6 +2,15 @@
   <app-map class="map"></app-map>
 
   <div class="overlay">
+    @if (cdModalOpen) {
+      <app-modal class="cd-modal"
+        title="Choose a destination"
+        message="Please select a valid destination"
+        buttonText="Continue"
+        (action)="onCdModalAction()">
+      </app-modal>
+    }
+
     @if (showMenuButton) {
       <app-icon-button class="position-menu"
         iconUrl="side_navigation_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"

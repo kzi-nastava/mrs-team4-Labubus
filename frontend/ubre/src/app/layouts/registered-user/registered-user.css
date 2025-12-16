@@ -22,3 +22,10 @@
   left: 16px;
 }
 
+.cd-modal {
+  pointer-events: auto;
+  bottom: 16px;
+  right: 16px;
+  position: fixed;
+}
+
