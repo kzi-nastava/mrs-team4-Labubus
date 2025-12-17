@@ -25,3 +25,15 @@
 .btn.shadow {
   box-shadow: var(--drop-shadow);
 }
+
+:host { display: inline-block; } 
+
+:host-context(.footer-actions) {
+  display: block;
+  width: 100%;
+}
+
+:host-context(.footer-actions) .btn {
+  width: 100%;
+}
+

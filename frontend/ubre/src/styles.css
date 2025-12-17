@@ -29,6 +29,7 @@ html, body {
   --font-size-medium: 20px; 
   --font-size-large: 24px; 
   --font-size-placeholder: 14px;
+  --font-size-card: 45px;
 
   --border-radius-regular: 24px;
   --border-radius-icons: 20px;
@@ -40,8 +41,13 @@ html, body {
 
   --icon-width-regular: 84px;
   --icon-width-small: 60px;
+  --icon-width-tiny: 28px;
 
   --padding-regular: 12px;
+  --padding-card: 20px;
+  --padding-modal: 35px;
+
+  --conatainer-gap: 20px
 
   /* TODO: Define spacing variables */
 }
