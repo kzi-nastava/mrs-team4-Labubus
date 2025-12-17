@@ -19,7 +19,7 @@ export class Map implements AfterViewInit {
 
     const icon = L.icon({
       iconUrl: 'location.svg',
-      iconSize:     [58, 58],
+      iconSize:     [62, 62],
       iconAnchor:   [19, 38],
     });
 
