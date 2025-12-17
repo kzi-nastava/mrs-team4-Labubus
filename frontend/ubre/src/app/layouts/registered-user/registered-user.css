@@ -39,6 +39,13 @@
 .cd-modal.show {
   animation: slideUp 0.3s ease forwards;
 }
+
+:host .checkout-modal {
+  bottom: 10px;
+  left: 10px;
+  width: 360px;
+  position: fixed;
+}
   
 @keyframes slideUp {
   from {
