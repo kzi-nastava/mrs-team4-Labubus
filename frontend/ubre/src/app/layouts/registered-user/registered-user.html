@@ -33,5 +33,12 @@
       (closed)="closeMenu()"
       (action)="handleMenuAction($event)">
     </app-side-menu>
+
+    @if (checkoutModalOpen) {
+      <app-modal-container class="checkout-modal" title="Checkout" [showTitleBar]="true" (backPressed)="onCheckoutModalBack()">
+        <app-stat-card value="$12.50" label="Estimated price" variant="dark"></app-stat-card>
+        <app-button width="290px" (click)="onCheckoutModalBack()">Confirm ride</app-button>
+      </app-modal-container>
+    }
   </div>
 </div>

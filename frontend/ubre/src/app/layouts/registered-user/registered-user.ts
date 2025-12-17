@@ -4,11 +4,14 @@ import { IconButton } from '../../shared/ui/icon-button/icon-button';
 import { SideMenu } from '../../shared/ui/side-menu/side-menu';
 import { Toast } from '../../shared/ui/toast/toast';
 import { Modal } from '../../shared/ui/modal/modal';
+import { ModalContainer } from '../../shared/ui/modal-container/modal-container';
+import { StatCard } from '../../shared/ui/stat-card/stat-card';
+import { Button } from '../../shared/ui/button/button';
 
 @Component({
   selector: 'app-registered-user',
   standalone: true,
-  imports: [Map, IconButton, SideMenu, Toast, Modal],
+  imports: [Map, IconButton, SideMenu, Toast, Modal, ModalContainer, StatCard, Button],
   templateUrl: './registered-user.html',
   styleUrl: './registered-user.css',
 })
@@ -26,6 +29,8 @@ export class RegisteredUser {
   toastMessage = 'This is just a demo message for the toast';
 
   cdModalOpen = true; // Choose a destination modal
+
+  checkoutModalOpen = true
 
   openMenu() { this.menuOpen = true; }
   closeMenu() { this.menuOpen = false; }
@@ -50,6 +55,10 @@ export class RegisteredUser {
   onCdModalAction() {
     this.cdModalOpen = false;
     this.showToast('Destination chosen', 'You have successfully chosen a destination.');
+  }
+
+  onCheckoutModalBack() {
+    this.checkoutModalOpen = false
   }
 
   openChat() {

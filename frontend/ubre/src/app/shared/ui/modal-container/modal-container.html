@@ -1,0 +1,11 @@
+<div class="modal-container">
+    @if (showTitleBar) { 
+        <div class="title-bar">
+            <img src="arrow_back_28dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg" alt="" class="back" (click)="back()">
+            <h5 class="title">{{ title }}</h5>
+        </div>
+    }
+    <div class="content-wrapper">
+        <ng-content></ng-content>
+    </div>
+</div>
