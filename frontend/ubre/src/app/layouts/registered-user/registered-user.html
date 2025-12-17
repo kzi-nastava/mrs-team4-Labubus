@@ -47,9 +47,81 @@
       (back)="onAccountSettingsBack()"
       >
 
-      <ng-content></ng-content>
+      <div class="as-wrap">
 
-      <div sheetFooter>
+        <div class="as-section-title"><span>Account information</span></div>
+
+        <div class="as-avatar">
+          <img [src]="editing.avatarUrl" alt="avatar">
+        </div>
+
+        <div class="as-field">
+          <div class="as-label">Email</div>
+          <input class="as-input" [(ngModel)]="editing.email" readonly>
+        </div>
+
+        <div class="as-field">
+          <div class="as-label">Password</div>
+
+          <div class="as-input-row">
+            <input class="as-input"
+                  [type]="hidePassword ? 'password' : 'text'"
+                  [value]="editing.passwordMasked"
+                  readonly>
+
+            <button class="as-eye" type="button" (click)="hidePassword = !hidePassword">
+              <img
+                [src]="hidePassword ? 'visibility_off_24dp_B3B3B3_FILL0_wght400_GRAD0_opsz24.svg' : 'visibility_24dp_B3B3B3_FILL0_wght400_GRAD0_opsz24.svg'"
+                alt="toggle password visibility">
+            </button>
+          </div>
+
+          <button class="as-link" type="button" (click)="onChangePassword()">
+            Change password
+          </button>
+        </div>
+
+        @if (editing.role === 'driver') {
+          <div class="as-section-title"><span>Statistics</span></div>
+          <div class="as-stat">
+            <app-stat-card [value]="editing.activeLast24h ?? '0m'"
+                          label="Active in last 24h"
+                          variant="dark"></app-stat-card>
+          </div>
+        }
+
+        <div class="as-section-title"><span>Personal information</span></div>
+
+        <div class="as-field">
+          <div class="as-label">Name</div>
+          <input class="as-input" [(ngModel)]="editing.name">
+        </div>
+
+        <div class="as-field">
+          <div class="as-label">Surname</div>
+          <input class="as-input" [(ngModel)]="editing.surname">
+        </div>
+
+        <div class="as-field">
+          <div class="as-label">Residental address</div>
+          <input class="as-input" [(ngModel)]="editing.address">
+        </div>
+
+        <div class="as-field">
+          <div class="as-label">Phone number</div>
+          <input class="as-input" [(ngModel)]="editing.phone">
+        </div>
+
+        @if (editing.role === 'driver') {
+          <button class="as-link as-link-bottom" type="button" (click)="onViewVehicleInfo()">
+            View vehicle information
+          </button>
+        }
+
+      </div>
+
+
+      <div class="footer-actions" sheetFooter>
         <app-button (clicked)="saveAccountSettings()">Save</app-button>
         <app-button variant="outlined"
                     (clicked)="accountSettingsOpen=false">
