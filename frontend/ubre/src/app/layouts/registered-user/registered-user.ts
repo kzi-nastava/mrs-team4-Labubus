@@ -34,6 +34,9 @@ export class RegisteredUser {
 
   cdModalOpen = true; // Choose a destination modal
 
+  selectedRide = undefined;
+  favoriteRides : any[] = [];
+
   openMenu() { this.menuOpen = true; }
   closeMenu() { this.menuOpen = false; }
   openCdModal() { this.cdModalOpen = true; }
@@ -86,5 +89,19 @@ export class RegisteredUser {
     this.menuOpen = true;
   }
 
+  // EXAMPLE FOR RIDE CARD EVENT HANDLERS
+  // onRideSelected(ride : any) {
+  //   if (this.selectedRide === ride.id)
+  //     this.selectedRide = undefined;
+  //   else
+  //     this.selectedRide = ride.id;
+  // }
+
+  // onRideAction(ride : any) {
+  //   if (this.favoriteRides.includes(ride.id))
+  //     this.favoriteRides = this.favoriteRides.filter(id => id != ride.id)
+  //   else
+  //     this.favoriteRides.push(ride.id);
+  // }
 }
 
