@@ -4,6 +4,7 @@ import { IconButton } from '../../shared/ui/icon-button/icon-button';
 import { SideMenu } from '../../shared/ui/side-menu/side-menu';
 import { Toast } from '../../shared/ui/toast/toast';
 import { Modal } from '../../shared/ui/modal/modal';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-registered-user',
@@ -13,6 +14,8 @@ import { Modal } from '../../shared/ui/modal/modal';
   styleUrl: './registered-user.css',
 })
 export class RegisteredUser {
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   user = {
     name: 'John Doe',
@@ -41,6 +44,11 @@ export class RegisteredUser {
     this.toastTitle = title;
     this.toastMessage = message;
     this.toastOpen = true;
+
+    setTimeout(() => {
+      this.hideToast();
+      this.cdr.detectChanges();
+    }, 3000);
   }
 
   hideToast() {
