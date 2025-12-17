@@ -31,7 +31,6 @@
   color: var(--color-neutral-dark-gray);
 }
 
-/* Kada se pojavljuje toast, iskače od donjeg dela ekrana na gore */
 @keyframes slideInUp {
   from {
     transform: translateY(100%);

@@ -10,7 +10,7 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
   registered: [
     { label: 'Ride history',      icon: 'directions_car_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',   action: 'ride-history' },
     { label: 'My favourites',     icon: 'favorite_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',     action: 'favourites' },
-    { label: 'Account settings',  icon: 'settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',  action: 'settings' },
+    { label: 'Account settings',  icon: 'settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',  action: 'account-settings' },
     { label: 'Reports',           icon: 'analytics_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',    action: 'reports' },
     { label: 'Log Out',           icon: 'logout_24dp_E53935_FILL0_wght400_GRAD0_opsz24.svg',     action: 'logout' },
   ],
