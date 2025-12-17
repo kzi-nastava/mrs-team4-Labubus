@@ -16,6 +16,13 @@ export class Map implements AfterViewInit {
   }
 
   private initMap(): void {
+
+    const icon = L.icon({
+      iconUrl: 'location.svg',
+      iconSize:     [58, 58],
+      iconAnchor:   [19, 38],
+    });
+
     this.map = L.map('map', { 
       zoomControl : false, 
       attributionControl : false,
@@ -25,6 +32,6 @@ export class Map implements AfterViewInit {
       maxZoom: 19,
     }).addTo(this.map);
 
-    L.marker([44.8200, 20.4481]).addTo(this.map)
+    L.marker([44.8200, 20.4481], { icon }).addTo(this.map)
   }
 }
