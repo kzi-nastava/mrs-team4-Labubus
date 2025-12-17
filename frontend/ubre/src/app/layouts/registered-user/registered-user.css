@@ -45,6 +45,7 @@
   left: 16px;
   width: 360px;
   position: fixed;
+  animation: slideUp 0.3s ease-in;
 }
   
 @keyframes slideUp {

@@ -9,6 +9,7 @@
     box-shadow: var(--drop-shadow);
     z-index: 2100;
     pointer-events: auto;
+    transition: transform 0.3s ease-in;
 }
 
 .modal-container > *:first-child:not(.title-bar) {
