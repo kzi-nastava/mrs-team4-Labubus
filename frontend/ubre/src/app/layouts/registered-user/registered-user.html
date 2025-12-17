@@ -33,5 +33,23 @@
       (closed)="closeMenu()"
       (action)="handleMenuAction($event)">
     </app-side-menu>
+
+    <app-sheet
+      [open]="accountSettingsOpen"
+      title="Account settings"
+      (closed)="closeAllSidePanels()"
+      (back)="onAccountSettingsBack()"
+      >
+
+      <ng-content></ng-content>
+
+      <div sheetFooter>
+        <app-button (clicked)="saveAccountSettings()">Save</app-button>
+        <app-button variant="outlined"
+                    (clicked)="accountSettingsOpen=false">
+          Cancel
+        </app-button>
+      </div>
+    </app-sheet>
   </div>
 </div>

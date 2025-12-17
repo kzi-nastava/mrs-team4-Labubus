@@ -1,0 +1,20 @@
+@if (open) {
+  <div class="backdrop" (click)="close()"></div>
+}
+
+<aside class="sheet" [class.open]="open">
+  <div class="header">
+    <button class="back" type="button" (click)="onBack()">
+      <img src="arrow_back_28dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg" alt="back">
+    </button>
+    <div class="title">{{ title }}</div>
+  </div>
+
+  <div class="body no-scrollbar">
+    <ng-content></ng-content>
+  </div>
+
+  <div class="footer">
+    <ng-content select="[sheetFooter]"></ng-content>
+  </div>
+</aside>
