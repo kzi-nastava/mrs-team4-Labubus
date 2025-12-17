@@ -41,8 +41,8 @@
 }
 
 :host .checkout-modal {
-  bottom: 10px;
-  left: 10px;
+  bottom: 16px;
+  left: 16px;
   width: 360px;
   position: fixed;
 }
