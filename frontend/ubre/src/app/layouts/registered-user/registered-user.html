@@ -21,10 +21,12 @@
       (click)="openChat()">
     </app-icon-button>
 
+    <!-- TOAST NOTIFICATION -->
     @if (toastOpen) {
       <app-toast [title]="toastTitle" [message]="toastMessage"></app-toast>
     }
 
+    <!-- SIDE MENU -->
     <app-side-menu
       [open]="menuOpen"
       title="Account"
@@ -34,12 +36,15 @@
       (action)="handleMenuAction($event)">
     </app-side-menu>
 
+    <!-- CHECKOUT MODAL -->
     @if (checkoutModalOpen) {
       <app-modal-container class="checkout-modal" title="Checkout" [showTitleBar]="true" (backPressed)="onCheckoutModalBack()">
         <app-stat-card value="$12.50" label="Estimated price" variant="dark"></app-stat-card>
         <app-button width="290px" (click)="onCheckoutModalBack()">Confirm ride</app-button>
       </app-modal-container>
     }
+
+    <!-- ACCOUNT SETTINGS SHEET -->
     <app-sheet
       [open]="accountSettingsOpen"
       title="Account settings"
@@ -129,6 +134,44 @@
         </app-button>
       </div>
     </app-sheet>
+
+    <!-- CHANGE PASSWORD SHEET -->
+    <app-sheet
+      [open]="changePasswordOpen"
+      title="Change password"
+      (closed)="closeChangePassword()"
+      (back)="onChangePasswordBack()">
+
+      <div class="cp-wrap">
+        <div class="cp-field">
+          <div class="cp-label">New password</div>
+          <input
+            class="cp-input"
+            type="password"
+            [(ngModel)]="newPassword"
+            placeholder="Enter your password">
+        </div>
+
+        <div class="cp-field">
+          <div class="cp-label">Confirm password</div>
+          <input
+            class="cp-input"
+            type="password"
+            [(ngModel)]="confirmPassword"
+            placeholder="Enter your password">
+        </div>
+
+        @if (passwordMismatch) {
+          <div class="cp-error">Passwords do not match</div>
+        }
+      </div>
+
+      <div class="footer-actions" sheetFooter>
+        <app-button (clicked)="savePassword()">Save</app-button>
+        <app-button variant="outlined" (clicked)="closeChangePassword()">Cancel</app-button>
+      </div>
+    </app-sheet>
+
 
     <!-- EXAMPLE OF RIDE CARD USE -->
     <!-- <app-ride-card [selected]="selectedRide === 1" [iconUrl]="favoriteRides.includes(1) ? 'favorite-red.svg' : 'favorite-grey.svg'" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card> -->

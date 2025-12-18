@@ -80,6 +80,7 @@ export class RegisteredUser {
   closeAllSidePanels() {
     this.closeMenu();
     this.closeAccountSettings();
+    this.closeChangePassword();
   }
 
   handleMenuAction(action: string) {
@@ -147,9 +148,45 @@ export class RegisteredUser {
     this.showToast('Vehicle info', 'Clicked.');
   }
 
+
+
+
+  // CHANGE PASSWORD SHEET LOGIC
+
+  changePasswordOpen = false;
+
+  newPassword = '';
+  confirmPassword = '';
+  passwordMismatch = false;
+
   onChangePassword() {
-    // ovde kasnije otvaraš modal / sheet za promenu lozinke
-    this.showToast('Change password', 'Clicked.');
+    this.accountSettingsOpen = false;
+    this.changePasswordOpen = true;
+
+    this.newPassword = '';
+    this.confirmPassword = '';
+    this.passwordMismatch = false;
   }
+
+  closeChangePassword() {
+    this.changePasswordOpen = false;
+    this.passwordMismatch = false;
+  }
+
+  onChangePasswordBack() {
+    this.closeChangePassword();
+    this.accountSettingsOpen = true; 
+  }
+
+  savePassword() {
+    this.passwordMismatch = this.newPassword !== this.confirmPassword;
+
+    if (this.passwordMismatch) return;
+
+    // TODO: API call za promenu lozinke
+    this.closeChangePassword();
+    this.showToast('Password changed', 'Your password has been updated.');
+  }
+
 }
 
