@@ -10,6 +10,7 @@ import { Button } from '../../shared/ui/button/button';
 import { ChangeDetectorRef } from '@angular/core';
 import { Sheet } from '../../shared/ui/sheet/sheet';
 import { FormsModule } from '@angular/forms';
+import { RideCard } from '../../shared/ui/ride-card/ride-card';
 
 
 
@@ -32,7 +33,7 @@ type UserSettingsVM = {
   standalone: true,
   imports: [Map, IconButton, SideMenu, Toast, 
             Modal, ModalContainer, StatCard, 
-            Button, Sheet, FormsModule],
+            Button, Sheet, FormsModule, RideCard],
   templateUrl: './registered-user.html',
   styleUrl: './registered-user.css',
 })
