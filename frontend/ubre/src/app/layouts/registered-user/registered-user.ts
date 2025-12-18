@@ -26,6 +26,16 @@ type UserSettingsVM = {
   activeLast24h?: string;   // driver
 };
 
+// TESTING PURPOSES ONLY - WILL NOT BE AVAILABLE FOR THE USER TO EDIT
+type VehicleInformationVM = {
+  model: string;
+  type: string;
+  plates: string;
+  seats: number;
+  babyFriendly: 'Yes' | 'No';
+  petFriendly: 'Yes' | 'No';
+};
+
 
 
 @Component({
@@ -41,6 +51,10 @@ export class RegisteredUser {
 
   constructor(private cdr: ChangeDetectorRef) {}
 
+
+
+
+
   user : UserSettingsVM = {
     role: 'driver',
     avatarUrl: 'default-avatar.jpg',
@@ -52,6 +66,22 @@ export class RegisteredUser {
     phone: '+1 234 567 8900',
     activeLast24h: '5h 30m',
   };
+
+  // NOTE: Dummy vehicle data is here ONLY for testing in registered-user layout.
+  // In real app, it lives in driver layout / driver state.
+  vehicle: VehicleInformationVM = {
+    model: 'Toyota Corolla 2021',
+    type: 'Standard',
+    plates: 'AB-123-CD',
+    seats: 4,
+    babyFriendly: 'Yes',
+    petFriendly: 'No',
+  };
+
+
+
+
+
 
   editing : UserSettingsVM = { ...this.user };
   hidePassword = true;
@@ -66,55 +96,52 @@ export class RegisteredUser {
 
   cdModalOpen = true; // Choose a destination modal
   
-  // EXAMPLE OF RIDE CARD CONTROL VARIABLES
-  // selectedRide = undefined;
-  // favoriteRides : any[] = [];
   
   checkoutModalOpen = true
-
+  
   openMenu() { this.menuOpen = true; }
   closeMenu() { this.menuOpen = false; }
   openCdModal() { this.cdModalOpen = true; }
   closeCdModal() { this.cdModalOpen = false; }
-
+  
   closeAllSidePanels() {
     this.closeMenu();
     this.closeAccountSettings();
     this.closeChangePassword();
   }
-
+  
   handleMenuAction(action: string) {
     if (action === 'logout') { /* logout */ }
     if (action === 'account-settings') { this.openAccountSettings(); }
     this.closeMenu();
   }
-
+  
   showToast(title: string, message: string) {
     this.toastTitle = title;
     this.toastMessage = message;
     this.toastOpen = true;
-
+    
     setTimeout(() => {
       this.hideToast();
       this.cdr.detectChanges();
     }, 3000);
   }
-
+  
   hideToast() { this.toastOpen = false; }
-
+  
   onCdModalAction() {
     this.cdModalOpen = false;
     this.showToast('Destination chosen', 'You have successfully chosen a destination.');
   }
-
+  
   onCheckoutModalBack() {
     this.checkoutModalOpen = false
   }
-
+  
   openChat() {
     // Open chat widget
   }
-
+  
   openAccountSettings() { this.accountSettingsOpen = true; this.editing = { ...this.user }; }
   closeAccountSettings() { this.accountSettingsOpen = false; this.user = { ...this.editing }; }
 
@@ -123,20 +150,33 @@ export class RegisteredUser {
     this.closeAccountSettings();
     this.showToast('Settings saved', 'Your account settings have been updated.');
   }
-
+  
   onAccountSettingsBack() {
     this.closeAccountSettings();
     this.menuOpen = true;
   }
 
+
+
+
+
+
+
+
+
+
+  // EXAMPLE OF RIDE CARD CONTROL VARIABLES
+  // selectedRide = undefined;
+  // favoriteRides : any[] = [];
+  
   // EXAMPLE FOR RIDE CARD EVENT HANDLERS
   // onRideSelected(ride : any) {
-  //   if (this.selectedRide === ride.id)
-  //     this.selectedRide = undefined;
-  //   else
-  //     this.selectedRide = ride.id;
-  // }
-
+    //   if (this.selectedRide === ride.id)
+    //     this.selectedRide = undefined;
+    //   else
+      //     this.selectedRide = ride.id;
+    // }
+    
   // onRideAction(ride : any) {
   //   if (this.favoriteRides.includes(ride.id))
   //     this.favoriteRides = this.favoriteRides.filter(id => id != ride.id)
@@ -144,9 +184,14 @@ export class RegisteredUser {
   //     this.favoriteRides.push(ride.id);
   // }
 
-  onViewVehicleInfo() {
-    this.showToast('Vehicle info', 'Clicked.');
-  }
+
+
+
+
+
+
+
+
 
 
 
@@ -187,6 +232,31 @@ export class RegisteredUser {
     this.closeChangePassword();
     this.showToast('Password changed', 'Your password has been updated.');
   }
+
+
+
+
+
+
+
+
+  // VEHICLE INFORMATION SHEET LOGIC
+
+  vehicleInfoOpen = false;
+
+  openVehicleInfo() { this.vehicleInfoOpen = true; }
+  closeVehicleInfo() { this.vehicleInfoOpen = false; }
+
+  onVehicleInfoBack() {
+    this.closeVehicleInfo();
+    this.accountSettingsOpen = true;
+  }
+
+  onViewVehicleInfo() {
+    this.accountSettingsOpen = false;
+    this.openVehicleInfo();
+  }
+
 
 }
 

@@ -172,6 +172,46 @@
       </div>
     </app-sheet>
 
+    <!-- VEHICLE INFORMATION SHEET -->
+    <app-sheet
+      [open]="vehicleInfoOpen"
+      title="Vehicle information"
+      (closed)="closeVehicleInfo()"
+      (back)="onVehicleInfoBack()">
+
+      <div class="vi-wrap">
+        <div class="vi-field">
+          <div class="vi-label">Vehicle model</div>
+          <input class="vi-input" [value]="vehicle.model" readonly>
+        </div>
+
+        <div class="vi-field">
+          <div class="vi-label">Vehicle type</div>
+          <input class="vi-input" [value]="vehicle.type" readonly>
+        </div>
+
+        <div class="vi-field">
+          <div class="vi-label">License plates</div>
+          <input class="vi-input" [value]="vehicle.plates" readonly>
+        </div>
+
+        <div class="vi-field">
+          <div class="vi-label">Number of seats</div>
+          <input class="vi-input" [value]="vehicle.seats" readonly>
+        </div>
+
+        <div class="vi-field">
+          <div class="vi-label">Baby-friendly</div>
+          <input class="vi-input" [value]="vehicle.babyFriendly" readonly>
+        </div>
+
+        <div class="vi-field">
+          <div class="vi-label">Pet-friendly</div>
+          <input class="vi-input" [value]="vehicle.petFriendly" readonly>
+        </div>
+      </div>
+    </app-sheet>
+
 
     <!-- EXAMPLE OF RIDE CARD USE -->
     <!-- <app-ride-card [selected]="selectedRide === 1" [iconUrl]="favoriteRides.includes(1) ? 'favorite-red.svg' : 'favorite-grey.svg'" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card> -->
