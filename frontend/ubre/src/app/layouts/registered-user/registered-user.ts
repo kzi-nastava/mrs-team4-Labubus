@@ -64,7 +64,11 @@ export class RegisteredUser {
   toastMessage = 'This is just a demo message for the toast';
 
   cdModalOpen = true; // Choose a destination modal
-
+  
+  // EXAMPLE OF RIDE CARD CONTROL VARIABLES
+  // selectedRide = undefined;
+  // favoriteRides : any[] = [];
+  
   checkoutModalOpen = true
 
   openMenu() { this.menuOpen = true; }
@@ -122,6 +126,21 @@ export class RegisteredUser {
     this.closeAccountSettings();
     this.menuOpen = true;
   }
+
+  // EXAMPLE FOR RIDE CARD EVENT HANDLERS
+  // onRideSelected(ride : any) {
+  //   if (this.selectedRide === ride.id)
+  //     this.selectedRide = undefined;
+  //   else
+  //     this.selectedRide = ride.id;
+  // }
+
+  // onRideAction(ride : any) {
+  //   if (this.favoriteRides.includes(ride.id))
+  //     this.favoriteRides = this.favoriteRides.filter(id => id != ride.id)
+  //   else
+  //     this.favoriteRides.push(ride.id);
+  // }
 
   onViewVehicleInfo() {
     this.showToast('Vehicle info', 'Clicked.');
