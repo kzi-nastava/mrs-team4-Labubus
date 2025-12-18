@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# ========================================
+# Local Development Configuration
+# ========================================
+application-local.properties
+*-local.properties
+
+# Keep the example template
+!application-local.properties.example

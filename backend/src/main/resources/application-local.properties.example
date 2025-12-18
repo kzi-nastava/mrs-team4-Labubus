@@ -1,0 +1,7 @@
+# to: application-local.properties
+# na diskordu su kredencijali
+spring.datasource.url=jdbc:postgresql://localhost:5432/ubre_db
+spring.datasource.username=postgres
+spring.datasource.password=DSAd12j38sease!123
+jwt.secret=GENERATE_YOUR_SECRET
+spring.mail.password=SG.YOUR_KEY
