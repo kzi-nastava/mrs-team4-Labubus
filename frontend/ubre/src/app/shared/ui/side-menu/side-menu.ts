@@ -3,6 +3,7 @@ import { MENU_BY_ROLE, Role, MenuItem } from './menu.config';
 
 type UserVM = {
   name: string;
+  surname: string;
   phone?: string;
   avatarUrl?: string; // npr: 'avatars/me.png' iz public
 };

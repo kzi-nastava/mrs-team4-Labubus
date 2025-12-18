@@ -15,7 +15,7 @@
          [src]="user?.avatarUrl ?? 'default-avatar.jpg'"
          alt="avatar">
     <div class="meta">
-      <div class="name">{{ user?.name ?? 'Guest' }}</div>
+      <div class="name">{{ user ? (user.name + ' ' + user.surname).trim() : 'Guest' }}</div>
       @if (user?.phone) { <div class="phone">{{ user?.phone }}</div> }
     </div>
   </div>

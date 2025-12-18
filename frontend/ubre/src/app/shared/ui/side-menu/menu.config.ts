@@ -1,4 +1,4 @@
-export type Role = 'admin' | 'driver' | 'registered' | 'guest';
+export type Role = 'admin' | 'driver' | 'registered-user' | 'guest';
 
 export type MenuItem = {
   label: string;
@@ -7,7 +7,7 @@ export type MenuItem = {
 };
 
 export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
-  registered: [
+  'registered-user': [
     { label: 'Ride history',      icon: 'directions_car_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',   action: 'ride-history' },
     { label: 'My favourites',     icon: 'favorite_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',     action: 'favourites' },
     { label: 'Account settings',  icon: 'settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',  action: 'account-settings' },

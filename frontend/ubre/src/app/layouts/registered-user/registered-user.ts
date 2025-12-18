@@ -15,7 +15,7 @@ import { RideCard } from '../../shared/ui/ride-card/ride-card';
 
 
 type UserSettingsVM = {
-  role: 'registered-user' | 'driver' | 'admin' ;
+  role: 'registered-user' | 'driver' | 'admin' | 'guest';
   avatarUrl: string;        
   email: string;
   passwordMasked: string;   
