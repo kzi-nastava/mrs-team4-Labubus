@@ -23,3 +23,7 @@ Maven konfiguracija projekta
 macOS ili Linux
 ```bash
 ./mvnw spring-boot:run
+
+
+## buld packagea
+./mvnw clean package -DskipTests
