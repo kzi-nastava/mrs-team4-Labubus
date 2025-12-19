@@ -88,12 +88,11 @@ export class RegisteredUser {
 
   menuOpen = false;
 
-  accountSettingsOpen = false;
-
+  
   toastOpen = false;
   toastTitle = 'Ignore this toast';
   toastMessage = 'This is just a demo message for the toast';
-
+  
   cdModalOpen = true; // Choose a destination modal
   
   
@@ -142,9 +141,19 @@ export class RegisteredUser {
     // Open chat widget
   }
   
+  
+
+
+
+  
+  
+  // ACCOUNT SETTINGS SHEET LOGIC
+  
+  accountSettingsOpen = false;
+  
   openAccountSettings() { this.accountSettingsOpen = true; this.editing = { ...this.user }; }
   closeAccountSettings() { this.accountSettingsOpen = false; this.user = { ...this.editing }; }
-
+  
   saveAccountSettings() {
     // Save account settings logic
     this.closeAccountSettings();
@@ -155,7 +164,7 @@ export class RegisteredUser {
     this.closeAccountSettings();
     this.menuOpen = true;
   }
-
+  
 
 
 
