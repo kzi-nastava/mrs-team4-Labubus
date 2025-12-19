@@ -39,15 +39,16 @@ type VehicleInformationVM = {
 
 
 @Component({
-  selector: 'app-registered-user',
+  selector: 'app-user-layout',
   standalone: true,
   imports: [Map, IconButton, SideMenu, Toast, 
             Modal, ModalContainer, StatCard, 
             Button, Sheet, FormsModule, RideCard],
-  templateUrl: './registered-user.html',
-  styleUrl: './registered-user.css',
+  templateUrl: './user-layout.html',
+  styleUrl: './user-layout.css',
 })
-export class RegisteredUser {
+
+export class UserLayout {
 
   constructor(private cdr: ChangeDetectorRef) {}
 
