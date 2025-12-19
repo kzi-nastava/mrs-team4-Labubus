@@ -10,6 +10,7 @@
     z-index: 2100;
     pointer-events: auto;
     transition: transform 0.3s ease-in;
+    max-height: 100%;
 }
 
 .modal-container > *:first-child:not(.title-bar) {
@@ -20,12 +21,16 @@
     display: flex;
     flex-direction: row;
     gap: var(--conatainer-gap);
+    position: sticky;
 }
 
 .modal-container > .content-wrapper {
     display: flex;
     flex-direction: column;
     gap: var(--conatainer-gap);
+    flex: 1;
+    overflow: auto;
+    scrollbar-width: none;
 }
 
 .modal-container > .title-bar > .title {
@@ -39,4 +44,8 @@
     aspect-ratio: 1/1;
     width: var(--icon-width-tiny);
     cursor: pointer;
+}
+
+:host.move-down {
+  transform: translateY(100%);
 }

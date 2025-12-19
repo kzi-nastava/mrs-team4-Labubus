@@ -66,10 +66,6 @@ export class RegisteredUser {
 
   cdModalOpen = true; // Choose a destination modal
   
-  // EXAMPLE OF RIDE CARD CONTROL VARIABLES
-  // selectedRide = undefined;
-  // favoriteRides : any[] = [];
-  
   checkoutModalOpen = true
 
   openMenu() { this.menuOpen = true; }
@@ -85,7 +81,8 @@ export class RegisteredUser {
 
   handleMenuAction(action: string) {
     if (action === 'logout') { /* logout */ }
-    if (action === 'account-settings') { this.openAccountSettings(); }
+    else if (action === 'account-settings') { this.openAccountSettings(); }
+    else if (action === 'ride-history') { this.showRideHistory = true }
     this.closeMenu();
   }
 
@@ -129,20 +126,45 @@ export class RegisteredUser {
     this.menuOpen = true;
   }
 
-  // EXAMPLE FOR RIDE CARD EVENT HANDLERS
-  // onRideSelected(ride : any) {
-  //   if (this.selectedRide === ride.id)
-  //     this.selectedRide = undefined;
-  //   else
-  //     this.selectedRide = ride.id;
-  // }
 
-  // onRideAction(ride : any) {
-  //   if (this.favoriteRides.includes(ride.id))
-  //     this.favoriteRides = this.favoriteRides.filter(id => id != ride.id)
-  //   else
-  //     this.favoriteRides.push(ride.id);
-  // }
+
+
+
+
+
+  // Ride History logic block
+  showRideHistory = false
+  rides = [
+    { id:1, time: Date.now(), start: "Narodnog fronta", destination: "Bulevar despota Stefana"},
+    { id:2, time: Date.now(), start: "Narodnog fronta", destination: "Bulevar despota Stefana"},
+    { id:3, time: Date.now(), start: "Narodnog fronta", destination: "Bulevar despota Stefana"},
+    { id:4, time: Date.now(), start: "Narodnog fronta", destination: "Bulevar despota Stefana"}
+  ]
+  selectedRide = undefined;
+  favoriteRides : any[] = [];
+
+  onRideSelected(ride : any) {
+    if (this.selectedRide === ride.id)
+      this.selectedRide = undefined;
+    else
+      this.selectedRide = ride.id;
+  }
+
+  onRideAction(ride : any) {
+    if (this.favoriteRides.includes(ride.id))
+      this.favoriteRides = this.favoriteRides.filter(id => id != ride.id)
+    else
+      this.favoriteRides.push(ride.id);
+  }
+
+  onRideHistoryBack() {
+    this.showRideHistory = false
+    this.menuOpen = true
+  }
+
+
+
+
 
   onViewVehicleInfo() {
     this.showToast('Vehicle info', 'Clicked.');
