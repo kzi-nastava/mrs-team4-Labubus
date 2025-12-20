@@ -10,7 +10,7 @@ import { Button } from '../../shared/ui/button/button';
 import { ChangeDetectorRef } from '@angular/core';
 import { Sheet } from '../../shared/ui/sheet/sheet';
 import { FormsModule } from '@angular/forms';
-import { RideCard } from '../../shared/ui/ride-card/ride-card';
+import { RideList } from '../../shared/ui/ride-list/ride-list';
 
 
 
@@ -33,7 +33,7 @@ type UserSettingsVM = {
   standalone: true,
   imports: [Map, IconButton, SideMenu, Toast, 
             Modal, ModalContainer, StatCard, 
-            Button, Sheet, FormsModule, RideCard],
+            Button, Sheet, FormsModule, RideList],
   templateUrl: './registered-user.html',
   styleUrl: './registered-user.css',
 })
@@ -135,27 +135,12 @@ export class RegisteredUser {
   // Ride History logic block
   showRideHistory = false
   rides = [
-    { id:1, time: Date.now(), start: "Narodnog fronta", destination: "Bulevar despota Stefana"},
-    { id:2, time: Date.now(), start: "Narodnog fronta", destination: "Bulevar despota Stefana"},
-    { id:3, time: Date.now(), start: "Narodnog fronta", destination: "Bulevar despota Stefana"},
-    { id:4, time: Date.now(), start: "Narodnog fronta", destination: "Bulevar despota Stefana"}
+    { id:1, time: new Date(), waypoints: ["Narodnog fronta", "Bulevar despota Stefana"] },
+    { id:2, time: new Date(), waypoints: ["Narodnog fronta", "Bulevar despota Stefana"] },
+    { id:3, time: new Date(), waypoints: ["Narodnog fronta", "Bulevar despota Stefana"] },
+    { id:4, time: new Date(), waypoints: ["Narodnog fronta", "Bulevar despota Stefana"] },
+    { id:5, time: new Date(), waypoints: ["Narodnog fronta", "Bulevar despota Stefana"] },
   ]
-  selectedRide = undefined;
-  favoriteRides : any[] = [];
-
-  onRideSelected(ride : any) {
-    if (this.selectedRide === ride.id)
-      this.selectedRide = undefined;
-    else
-      this.selectedRide = ride.id;
-  }
-
-  onRideAction(ride : any) {
-    if (this.favoriteRides.includes(ride.id))
-      this.favoriteRides = this.favoriteRides.filter(id => id != ride.id)
-    else
-      this.favoriteRides.push(ride.id);
-  }
 
   onRideHistoryBack() {
     this.showRideHistory = false
