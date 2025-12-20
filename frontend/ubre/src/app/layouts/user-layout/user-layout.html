@@ -9,7 +9,7 @@
 
     <!-- MAP CHOOSE A DESTINATION OVERLAY -->
     @if (destOpen) {
-      <div class="dest-card">
+      <div class="dest-card show">
         <div class="dest-header">
           <button type="button" class="dest-back" (click)="onDestBack()">
             <img src="arrow_back_28dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg" alt="back">
@@ -58,6 +58,9 @@
       </app-modal>
     }
 
+
+    <!-- ICONS -->
+
     <app-icon-button class="menu-button"
       iconUrl="side_navigation_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
       (click)="openMenu()">
@@ -66,6 +69,11 @@
     <app-icon-button class="chat-button"
       iconUrl="chat_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
       (click)="openChat()">
+    </app-icon-button>
+
+    <app-icon-button class="map-button"
+      iconUrl="map_search_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
+      (click)="toggleDest()">
     </app-icon-button>
 
     <!-- TOAST NOTIFICATION -->

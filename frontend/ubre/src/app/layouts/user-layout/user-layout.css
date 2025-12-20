@@ -16,17 +16,6 @@
   pointer-events: none;
 }
 
-.menu-button {
-  position: fixed;
-  top: 16px;
-  left: 16px;
-}
-
-.chat-button {
-  position: fixed;
-  bottom: 16px;
-  right: 16px;
-}
 
 .cd-modal {
   pointer-events: auto;
@@ -50,7 +39,7 @@
   overflow: hidden;
   box-shadow: var(--drop-shadow);
 }
-  
+
 @keyframes slideUp {
   from {
     transform: translateY(100%);
@@ -61,6 +50,42 @@
     opacity: 1;
   }
 }
+
+
+
+
+
+
+
+/* Icon-Button styles */
+
+.menu-button {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+}
+
+.chat-button {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+}
+
+.map-button {
+  position: fixed;
+  top: 16px;
+  left: 116px;
+}
+
+
+
+
+
+
+
+
+
+
 
 
 /* Footer Actions Styles */
@@ -389,6 +414,14 @@
   font-family:var(--font-family);
   pointer-events:auto;
   z-index:2100;
+
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+
+.dest-card.show{
+  animation: slideUp 0.3s ease forwards;
 }
 
 .dest-header{

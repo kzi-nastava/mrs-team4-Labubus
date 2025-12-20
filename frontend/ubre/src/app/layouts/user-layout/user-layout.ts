@@ -214,6 +214,7 @@ export class UserLayout {
   }
 
   addFromMapClick(lat: number, lon: number) {
+    if (this.destOpen === false) return;
     const id = crypto.randomUUID();
 
     const fallback = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
@@ -257,8 +258,14 @@ export class UserLayout {
     this.suggestions = [];
     this.query = '';
     this.closeDest();
-    this.cdModalOpen = true;
   }
+
+  toggleDest() {
+    this.destOpen = !this.destOpen;
+    if (this.destOpen) this.cdModalOpen = false;
+  }
+
+
 
 
 
