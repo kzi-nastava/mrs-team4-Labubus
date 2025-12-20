@@ -11,6 +11,8 @@ import { ChangeDetectorRef } from '@angular/core';
 import { Sheet } from '../../shared/ui/sheet/sheet';
 import { FormsModule } from '@angular/forms';
 import { RideCard } from '../../shared/ui/ride-card/ride-card';
+import { ConfettiService } from '../../services/confetti';
+import { inject } from '@angular/core';
 
 
 
@@ -320,6 +322,7 @@ export class UserLayout {
 
     this.closeRegisterDriver();
     this.showToast('Driver registered', 'Activation mail has been sent to the driver.');
+    this.confetti.fire();
   }
 
   onRegisterDriverBack() {
@@ -333,6 +336,10 @@ export class UserLayout {
 
   decDriverSeats() { this.driverRegister.seats = Math.max(0, this.driverRegister.seats - 1); }
   incDriverSeats() { this.driverRegister.seats = Math.min(9, this.driverRegister.seats + 1); }
+
+  // EASTER EGG
+
+  private confetti = inject(ConfettiService);
 
 }
 
