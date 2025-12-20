@@ -3,12 +3,14 @@ import { KeyValuePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RideCard } from '../ride-card/ride-card';
 import { ModalContainer } from '../modal-container/modal-container';
+import { RideDetails } from '../ride-details/ride-details';
 import { Ride } from '../../../models/ride';
+import { User } from '../../../models/user';
 
 
 @Component({
   selector: 'app-ride-list',
-  imports: [RideCard, ModalContainer, KeyValuePipe, FormsModule],
+  imports: [RideCard, ModalContainer, KeyValuePipe, FormsModule, RideDetails],
   templateUrl: './ride-list.html',
   styleUrl: './ride-list.css',
 })
@@ -16,9 +18,10 @@ export class RideList {
   @Input() rides : Ride[] = [];
   @Input() title : string = "";
   @Input() open : boolean = false;
+  @Input() user : User = {email: '', firstName: '', lastName: '', profilePicture: '', role: 'user'}
   @Output() onClose = new EventEmitter<void>();
 
-  selectedRide : Number | undefined = undefined;
+  selectedRide : Ride | undefined = undefined;
   favoriteRides : Number[] = [];
 
   filterDate : Date = new Date();
@@ -28,10 +31,10 @@ export class RideList {
   ascending : boolean = false;
 
   onRideSelected(ride : Ride) {
-    if (this.selectedRide === ride.id)
+    if (this.selectedRide !== undefined && this.selectedRide.id == ride.id)
       this.selectedRide = undefined;
     else
-      this.selectedRide = ride.id;
+      this.selectedRide = ride;
   }
 
   onRideAction(ride : Ride) {

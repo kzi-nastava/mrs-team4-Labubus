@@ -172,13 +172,6 @@
       </div>
     </app-sheet>
 
-    <app-ride-list (onClose)="onRideHistoryBack()" [open]="showRideHistory" [rides]="rides" title="Ride history"></app-ride-list>
-
-    <!-- <app-modal-container [showTitleBar]="false" class="ride-history-sort">
-
-    </app-modal-container> -->
-
-    <!-- EXAMPLE OF RIDE CARD USE -->
-    <!-- <app-ride-card [selected]="selectedRide === 1" [iconUrl]="favoriteRides.includes(1) ? 'favorite-red.svg' : 'favorite-grey.svg'" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card> -->
+    <app-ride-list (onClose)="onRideHistoryBack()" [open]="showRideHistory" [rides]="rides" [user]="{email: 'mika@mikic.com', firstName: 'Mika', lastName: 'Mikic', profilePicture: '', role: 'admin'}" title="Ride history"></app-ride-list>
   </div>
 </div>

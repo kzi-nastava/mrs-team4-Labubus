@@ -30,6 +30,10 @@
   box-shadow: var(--drop-shadow);
 }
 
+:host .sort {
+  flex-shrink: 0;
+}
+
 :host .sort .selectedField {
   position: relative;
   display: flex;
@@ -74,6 +78,7 @@
 :host .options .details {
   border-bottom-left-radius: 0px; 
   border-bottom-right-radius: 0px;
+  animation: slideUp 0.3s ease forwards;
 }
 
 input{
@@ -97,6 +102,17 @@ input{
   }
   to {
     height: auto;
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
     opacity: 1;
   }
 }

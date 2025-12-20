@@ -1,6 +1,6 @@
 <app-modal-container class="list" [class.move-down]="!open" (backPressed)="onBack()" [title]="title">
       @for (ride of rides; track ride.id) {
-        <app-ride-card [selected]="selectedRide === ride.id" [ride]="ride" [iconUrl]="favoriteRides.includes(ride.id) ? 'favorite-red.svg' : 'favorite-grey.svg'" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card>
+        <app-ride-card [selected]="!(selectedRide === undefined) && selectedRide.id === ride.id" [ride]="ride" [iconUrl]="favoriteRides.includes(ride.id) ? 'favorite-red.svg' : 'favorite-grey.svg'" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card>
       }
 </app-modal-container>
 
@@ -8,7 +8,7 @@
   <div class="sort">
     <app-modal-container [showTitleBar] = false>
         <input type="datetime-local" placeholder="Date created" [(ngModel)]="filterDate">
-        <input type="text" placeholder="Driver" [(ngModel)]="filterDriver">
+        @if (user.role === 'admin') {<input type="text" placeholder="Driver" [(ngModel)]="filterDriver">}
          <div class="selectedField">
            <input readonly placeholder="Sort by" [value]="selectedField">
            <img [class.flip]="sortOpen" src="arrow-down-surface.svg" alt="" class="drop-down" (click)="onToggleSort()">
@@ -23,9 +23,7 @@
           }
     </app-modal-container>
   </div>
-  <div class="details">
-    <app-modal-container [showTitleBar] = false>
-    
-    </app-modal-container>
-  </div>
+  @if (selectedRide != undefined) {
+    <app-ride-details class="details" [ride]="selectedRide" [user]="user"></app-ride-details>
+  }
 </div>
