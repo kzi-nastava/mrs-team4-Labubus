@@ -13,7 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { RideCard } from '../../shared/ui/ride-card/ride-card';
 import { ConfettiService } from '../../services/confetti';
 import { inject } from '@angular/core';
-
+import { HttpClient } from '@angular/common/http';
 
 
 type UserSettingsVM = {
@@ -59,6 +59,14 @@ type DriverRegisterVM = {
   petFriendly: boolean;
 };
 
+type Waypoint = { id: string; label: string; lat: number; lon: number; };
+
+type NominatimItem = {
+  place_id: string;
+  display_name: string;
+  lat: string;
+  lon: string;
+}
 
 
 @Component({
@@ -66,21 +74,25 @@ type DriverRegisterVM = {
   standalone: true,
   imports: [Map, IconButton, SideMenu, Toast, 
             Modal, ModalContainer, StatCard, 
-            Button, Sheet, FormsModule, RideCard],
+            Button, Sheet, FormsModule, RideCard,
+            ],
   templateUrl: './user-layout.html',
   styleUrl: './user-layout.css',
 })
 
 export class UserLayout {
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient,
+  ) {}
 
 
 
 
 
   user : UserSettingsVM = {
-    role: 'admin',
+    role: 'registered-user',
     avatarUrl: 'default-avatar.jpg',
     email: 'john@doe.com',
     passwordMasked: '********',
@@ -126,6 +138,141 @@ export class UserLayout {
 
 
 
+
+  // MAP AND DESTINATION SELECTION LOGIC
+  waypoints : Waypoint[] = [];
+  query = '';
+  suggestions : NominatimItem[] = [];
+  suggestTimer : any = null;
+  private suggestReqId = 0;
+
+  destOpen = false;
+
+  openDest() { this.destOpen = true; }
+  closeDest() { this.destOpen = false; }
+
+  toLatin(s: string) {
+    const map: Record<string, string> = {
+      А:'A', Б:'B', В:'V', Г:'G', Д:'D', Ђ:'Đ', Е:'E', Ж:'Ž', З:'Z', И:'I',
+      Ј:'J', К:'K', Л:'L', Љ:'Lj', М:'M', Н:'N', Њ:'Nj', О:'O', П:'P',
+      Р:'R', С:'S', Т:'T', Ћ:'Ć', У:'U', Ф:'F', Х:'H', Ц:'C', Ч:'Č',
+      Џ:'Dž', Ш:'Š',
+      а:'a', б:'b', в:'v', г:'g', д:'d', ђ:'đ', е:'e', ж:'ž', з:'z', и:'i',
+      ј:'j', к:'k', л:'l', љ:'lj', м:'m', н:'n', њ:'nj', о:'o', п:'p',
+      р:'r', с:'s', т:'t', ћ:'ć', у:'u', ф:'f', х:'h', ц:'c', ч:'č',
+      џ:'dž', ш:'š'
+    };
+
+    return s.replace(/[\u0400-\u04FF]/g, ch => map[ch] ?? ch);
+  }
+
+
+  onQueryChange() {
+    const q = this.query.trim();
+
+    if (this.suggestTimer) clearTimeout(this.suggestTimer);
+
+    if (q.length < 3) {
+      this.suggestions = [];
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.suggestTimer = setTimeout(() => {
+      const reqId = ++this.suggestReqId;
+
+      const url =
+    `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&q=${encodeURIComponent(q + ', Novi Sad, Serbia')}`;
+
+      this.http.get<NominatimItem[]>(url).subscribe(items => {
+        if (reqId !== this.suggestReqId) return;
+
+        this.suggestions = (items ?? []).map(i => ({
+          ...i,
+          display_name: this.toLatin(i.display_name),
+        }));
+        this.cdr.detectChanges();
+      });
+    }, 250);
+  }
+
+  addFromSuggestion(s: NominatimItem) {
+    const wp: Waypoint = {
+      id: String(s.place_id),
+      label: s.display_name,
+      lat: Number(s.lat),
+      lon: Number(s.lon),
+    };
+    this.waypoints = [...this.waypoints, wp];
+
+    this.query = '';
+    this.suggestions = [];
+  }
+
+  addFromMapClick(lat: number, lon: number) {
+    const id = crypto.randomUUID();
+
+    const fallback = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+
+    this.waypoints = [
+      ...this.waypoints,
+      { id, label: fallback, lat, lon }
+    ];
+
+    const url =
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=sr-Latn`;
+
+    this.http.get<any>(url).subscribe({
+      next: res => {
+        const label = res?.display_name
+          ? this.toLatin(res.display_name)
+          : fallback;
+
+        this.waypoints = this.waypoints.map(w =>
+          w.id === id ? { ...w, label } : w
+        );
+
+        this.cdr.detectChanges();
+      },
+      error: () => {
+      }
+    });
+  }
+
+
+  removeWaypoint(id: string) {
+    this.waypoints = this.waypoints.filter(w => w.id !== id);
+  }
+
+  get currentRoute() {
+    return this.waypoints.map(wp => [wp.lat, wp.lon] as [number, number]);
+  }
+
+  onDestBack() {
+    this.waypoints = [];
+    this.suggestions = [];
+    this.query = '';
+    this.closeDest();
+    this.cdModalOpen = true;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   editing : UserSettingsVM = { ...this.user };
   hidePassword = true;
 
@@ -137,7 +284,6 @@ export class UserLayout {
   toastMessage = 'This is just a demo message for the toast';
   
   cdModalOpen = true; // Choose a destination modal
-  
   
   checkoutModalOpen = true
   
@@ -152,6 +298,7 @@ export class UserLayout {
     this.closeChangePassword();
     this.closeVehicleInfo();
     this.closeRegisterDriver();
+    this.closeDest();
   }
   
   handleMenuAction(action: string) {
@@ -176,7 +323,7 @@ export class UserLayout {
   
   onCdModalAction() {
     this.cdModalOpen = false;
-    this.showToast('Destination chosen', 'You have successfully chosen a destination.');
+    this.destOpen = true;
   }
   
   onCheckoutModalBack() {
