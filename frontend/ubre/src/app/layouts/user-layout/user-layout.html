@@ -408,5 +408,8 @@
         </div>
       </app-sheet>
     }
+
+    <!-- RIDE HISTORY SHEET -->
+    <app-ride-list (onClose)="onRideHistoryBack()" [open]="showRideHistory" [rides]="rides" [user]="{email: 'mika@mikic.com', firstName: 'Mika', lastName: 'Mikic', profilePicture: '', role: 'admin'}" title="Ride history"></app-ride-list>
   </div>
 </div>

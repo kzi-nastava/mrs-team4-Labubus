@@ -46,6 +46,9 @@
   width: 360px;
   position: fixed;
   animation: slideUp 0.5s ease forwards;
+  border-radius: var(--border-radius-icons);
+  overflow: hidden;
+  box-shadow: var(--drop-shadow);
 }
   
 @keyframes slideUp {

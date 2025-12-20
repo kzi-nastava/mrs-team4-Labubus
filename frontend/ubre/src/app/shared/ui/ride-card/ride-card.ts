@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { Ride } from '../../../models/ride';
 
 @Component({
   selector: 'app-ride-card',
@@ -8,7 +9,7 @@ import { DatePipe } from '@angular/common';
   styleUrl: './ride-card.css',
 })
 export class RideCard {
-  @Input() ride = { id:1, time: Date.now(), start: "Narodnog fronta", destination: "Bulevar despota Stefana"};
+  @Input() ride : Ride | null = null;
   @Input() iconUrl : string = "http://localhost:4200/favorite_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg"
   @Input() selected : boolean = false;
   @Output() select = new EventEmitter<any>();

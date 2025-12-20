@@ -1,0 +1,89 @@
+.time {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    column-gap: 12px;
+    place-content: center;
+}
+
+.time > div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: fit-content;
+}
+
+.time > * {
+    align-self: center;
+    justify-self: center;
+}
+
+.time p {
+    margin: 4px 0;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.time .start-icon {
+    width: 12px;
+    aspect-ratio: 1/1;
+    background-color: var(--color-primary-dark);
+    border-radius: 50%;
+}
+
+.time .dots {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 4px;
+}
+
+.time .dots .dot {
+    aspect-ratio: 1/1;
+    width: 2px;
+    background-color: var(--color-primary-dark);
+}
+
+.time .waypoint-icon {
+    width: 12px;
+    aspect-ratio: 1/1;
+    background-color: var(--color-primary-light);
+}
+
+.time .separator {
+    width: 95%;
+    height: 1px;
+    background-color: var(--color-neutral-dark-gray);
+    margin: 10px 5% 10px 0;
+}
+
+.stats {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+}
+
+.stats .icon {
+    width: 22px;
+    aspect-ratio: 1/1;
+    border-radius: 6px;
+    background-color: var(--color-error);
+    padding: 4px;
+}
+
+.stats .user-canceled {
+    background-color: var(--color-secondary-dark);
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.profile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
