@@ -27,11 +27,10 @@
     }
 
     <!-- SIDE MENU -->
-    <!-- CHANGE LATER TO [role]="user.role" -->
     <app-side-menu
       [open]="menuOpen"
       title="Account"
-      role="registered-user"
+      [role]="user.role"
       [user]="user"
       (closed)="closeMenu()"
       (action)="handleMenuAction($event)">
@@ -216,5 +215,151 @@
 
     <!-- EXAMPLE OF RIDE CARD USE -->
     <!-- <app-ride-card [selected]="selectedRide === 1" [iconUrl]="favoriteRides.includes(1) ? 'favorite-red.svg' : 'favorite-grey.svg'" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card> -->
+
+
+    <!-- REGISTER A DRIVER (ADMIN ROLE)-->  
+    @if (user.role === 'admin') {
+      <app-sheet
+        [open]="registerDriverOpen"
+        title="Register a driver"
+        (closed)="closeAllSidePanels()"
+        (back)="onRegisterDriverBack()"
+      >
+        <div class="rd-wrap">
+
+          <div class="rd-section-title"><span>Account information</span></div>
+
+          <div class="rd-avatar">
+            <img [src]="driverRegister.avatarUrl" alt="avatar">
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label">Email</div>
+            <input class="rd-input" [(ngModel)]="driverRegister.email" placeholder="Driver's email">
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label-row">
+              <span>Password</span>
+              @if (driverRegister.passwordError) { <span class="rd-required">Required</span> }
+            </div>
+
+            <input
+              class="rd-input"
+              [class.error]="driverRegister.passwordError"
+              type="password"
+              [(ngModel)]="driverRegister.password"
+              placeholder="Driver's password"
+              (blur)="validateDriverPassword()"
+            >
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label">Confirm password</div>
+            <input class="rd-input" type="password" [(ngModel)]="driverRegister.confirmPassword" placeholder="Driver's password">
+          </div>
+
+
+          <div class="rd-section-title"><span>Personal information</span></div>
+
+          <div class="rd-field">
+            <div class="rd-label">Name</div>
+            <input class="rd-input" [(ngModel)]="driverRegister.name" placeholder="Driver's name">
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label">Surname</div>
+            <input class="rd-input" [(ngModel)]="driverRegister.surname" placeholder="Driver's surname">
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label">Residental address</div>
+            <input class="rd-input" [(ngModel)]="driverRegister.address" placeholder="Driver's residental address">
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label">Phone number</div>
+            <input class="rd-input" [(ngModel)]="driverRegister.phone" placeholder="Driver's phone number">
+          </div>
+
+
+          <div class="rd-section-title"><span>Vehicle information</span></div>
+
+          <div class="rd-field">
+            <div class="rd-label">Vehicle model</div>
+            <input class="rd-input" [(ngModel)]="driverRegister.vehicleModel" placeholder="Driver's vehicle model">
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label">Vehicle type</div>
+
+            <div class="rd-pills">
+              <button class="rd-pill"
+                      type="button"
+                      [class.active]="driverRegister.vehicleType==='Standard'"
+                      (click)="driverRegister.vehicleType='Standard'">
+                Standard
+              </button>
+
+              <button class="rd-pill"
+                      type="button"
+                      [class.active]="driverRegister.vehicleType==='Luxury'"
+                      (click)="driverRegister.vehicleType='Luxury'">
+                Luxury
+              </button>
+
+              <button class="rd-pill"
+                      type="button"
+                      [class.active]="driverRegister.vehicleType==='Van'"
+                      (click)="driverRegister.vehicleType='Van'">
+                Van
+              </button>
+            </div>
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label">License plates</div>
+            <input class="rd-input" [(ngModel)]="driverRegister.plates" placeholder="Vehicle license plates">
+          </div>
+
+          <div class="rd-row">
+            <div class="rd-row-label">Number of seats</div>
+
+            <div class="rd-stepper">
+              <button class="rd-step" type="button" (click)="decDriverSeats()">−</button>
+              <div class="rd-step-value">{{ driverRegister.seats }}</div>
+              <button class="rd-step" type="button" (click)="incDriverSeats()">+</button>
+            </div>
+          </div>
+
+          <div class="rd-row">
+            <div class="rd-row-label">Baby-friendly</div>
+            <button class="rd-switch"
+                    type="button"
+                    [class.on]="driverRegister.babyFriendly"
+                    (click)="driverRegister.babyFriendly=!driverRegister.babyFriendly">
+              <span class="rd-knob"></span>
+            </button>
+          </div>
+
+          <div class="rd-row">
+            <div class="rd-row-label">Pet-friendly</div>
+            <button class="rd-switch dark"
+                    type="button"
+                    [class.on]="driverRegister.petFriendly"
+                    (click)="driverRegister.petFriendly=!driverRegister.petFriendly">
+              <span class="rd-knob"></span>
+            </button>
+          </div>
+        </div>
+        <div class="footer-actions" sheetFooter>
+          <app-button (clicked)="onRegisterDriver()">Register driver</app-button>
+          <app-button variant="outlined"
+                      (clicked)="closeRegisterDriver()">
+            Cancel
+          </app-button>
+        </div>
+      </app-sheet>
+    }
   </div>
 </div>

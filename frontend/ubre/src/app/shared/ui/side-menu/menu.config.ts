@@ -25,6 +25,7 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
     { label: 'Active rides',             icon: '',     action: 'admin-users' },
     { label: 'Account settings',             icon: '',     action: 'admin-users' },
     { label: 'Price adjustment',             icon: '',     action: 'admin-users' },
+    { label: 'Register a driver',             icon: 'person_add_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',     action: 'register-driver' },
     { label: 'Panic notifications',             icon: '',     action: 'admin-users' },
     { label: 'Reports',           icon: '',    action: 'reports' },
     { label: 'Log out',           icon: 'logout_24dp_E53935_FILL0_wght400_GRAD0_opsz24.svg',     action: 'logout' },

@@ -36,6 +36,27 @@ type VehicleInformationVM = {
   petFriendly: 'Yes' | 'No';
 };
 
+type DriverRegisterVM = {
+  avatarUrl: string;
+
+  email: string;
+  password: string;
+  confirmPassword: string;
+  passwordError: boolean;
+
+  name: string;
+  surname: string;
+  address: string;
+  phone: string;
+
+  vehicleModel: string;
+  vehicleType: 'Standard' | 'Luxury' | 'Van';
+  plates: string;
+  seats: number;
+  babyFriendly: boolean;
+  petFriendly: boolean;
+};
+
 
 
 @Component({
@@ -57,7 +78,7 @@ export class UserLayout {
 
 
   user : UserSettingsVM = {
-    role: 'driver',
+    role: 'admin',
     avatarUrl: 'default-avatar.jpg',
     email: 'john@doe.com',
     passwordMasked: '********',
@@ -69,7 +90,6 @@ export class UserLayout {
   };
 
   // NOTE: Dummy vehicle data is here ONLY for testing in registered-user layout.
-  // In real app, it lives in driver layout / driver state.
   vehicle: VehicleInformationVM = {
     model: 'Toyota Corolla 2021',
     type: 'Standard',
@@ -77,6 +97,26 @@ export class UserLayout {
     seats: 4,
     babyFriendly: 'Yes',
     petFriendly: 'No',
+  };
+
+  driverRegister : DriverRegisterVM = {
+    avatarUrl: 'default-avatar.jpg',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    passwordError: false,
+
+    name: '',
+    surname: '',
+    address: '',
+    phone: '',
+
+    vehicleModel: '',
+    vehicleType: 'Standard',
+    plates: '',
+    seats: 4,
+    babyFriendly: false,
+    petFriendly: false,
   };
 
 
@@ -108,11 +148,14 @@ export class UserLayout {
     this.closeMenu();
     this.closeAccountSettings();
     this.closeChangePassword();
+    this.closeVehicleInfo();
+    this.closeRegisterDriver();
   }
   
   handleMenuAction(action: string) {
     if (action === 'logout') { /* logout */ }
     if (action === 'account-settings') { this.openAccountSettings(); }
+    if (action === 'register-driver') { this.openRegisterDriver(); }
     this.closeMenu();
   }
   
@@ -149,7 +192,6 @@ export class UserLayout {
   
   
   // ACCOUNT SETTINGS SHEET LOGIC
-  
   accountSettingsOpen = false;
   
   openAccountSettings() { this.accountSettingsOpen = true; this.editing = { ...this.user }; }
@@ -207,7 +249,6 @@ export class UserLayout {
 
 
   // CHANGE PASSWORD SHEET LOGIC
-
   changePasswordOpen = false;
 
   newPassword = '';
@@ -251,7 +292,6 @@ export class UserLayout {
 
 
   // VEHICLE INFORMATION SHEET LOGIC
-
   vehicleInfoOpen = false;
 
   openVehicleInfo() { this.vehicleInfoOpen = true; }
@@ -267,6 +307,32 @@ export class UserLayout {
     this.openVehicleInfo();
   }
 
+
+
+
+  registerDriverOpen = false;
+
+  openRegisterDriver() { this.registerDriverOpen = true; }
+  closeRegisterDriver() { this.registerDriverOpen = false; }
+
+  onRegisterDriver() {
+    // TODO: API call za registraciju vozača
+
+    this.closeRegisterDriver();
+    this.showToast('Driver registered', 'Activation mail has been sent to the driver.');
+  }
+
+  onRegisterDriverBack() {
+    this.closeRegisterDriver();
+    this.menuOpen = true;
+  }
+
+  validateDriverPassword() {
+    this.driverRegister.passwordError = !this.driverRegister.password.trim();
+  }
+
+  decDriverSeats() { this.driverRegister.seats = Math.max(0, this.driverRegister.seats - 1); }
+  incDriverSeats() { this.driverRegister.seats = Math.min(9, this.driverRegister.seats + 1); }
 
 }
 
