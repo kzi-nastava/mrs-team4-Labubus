@@ -10,6 +10,8 @@
   border-bottom-left-radius: 0px; 
   border-bottom-right-radius: 0px;
   font-family: var(--font-family);
+  transform: translateY(100%);
+  padding-bottom: calc();
 }
 
 :host .list {
@@ -87,8 +89,9 @@ input{
   outline:none; font-size:14px; background:#fff;
 }
 
-.move-down {
-  transform: translateY(100%);
+:host .list.move-up, :host .options.move-up {
+  /* transform: translateY(var(--padding-modal)); */
+  transform: translateY(0);
 }
 
 .flip {

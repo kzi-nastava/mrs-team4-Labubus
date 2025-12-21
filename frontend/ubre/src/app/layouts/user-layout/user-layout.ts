@@ -521,6 +521,7 @@ export class UserLayout {
 
   // Ride HISTORY SHEET LOGIC
   showRideHistory = false
+  currentUser : User = {email: 'mika@mikic.com', firstName: 'Mika', lastName: 'Mikic', profilePicture: '', role: 'admin'}
   rides = [
     { id:1, startTime: new Date(), endTime: new Date(), waypoints: ["Narodnog fronta", "Bulevar oslobodjenja", "Bulevar despota Stefana"], 
       driver: {email: 'pera@peric.com', firstName: 'Pera', lastName: 'Peric', profilePicture: '', role: 'driver'} as User,

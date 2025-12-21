@@ -3,7 +3,7 @@
         <div class="start-icon icon"></div>
         <p class="start">{{ waypoints[0] }}</p>
 
-        @for (waypoint of waypoints.slice(0, waypoints.length); track waypoint) {
+        @for (waypoint of waypoints.slice(1, waypoints.length); track waypoint) {
             <div class="dots">
                 <div class="dot"></div>
                 <div class="dot"></div>
