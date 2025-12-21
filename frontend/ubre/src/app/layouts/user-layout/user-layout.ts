@@ -119,7 +119,7 @@ export class UserLayout {
 
 
   user : UserSettingsVM = {
-    role: 'registered-user',
+    role: 'admin',
     avatarUrl: 'default-avatar.jpg',
     email: 'john@doe.com',
     passwordMasked: '********',
@@ -666,7 +666,7 @@ export class UserLayout {
 
 
 
-  // CHECKOUT MODAL LOGIC
+  // CHECKOUT MODAL LOGIC 
   checkoutModalOpen = false;
 
   onCheckoutModalBack() {
@@ -679,6 +679,7 @@ export class UserLayout {
     this.checkoutModalOpen = false;
     this.showToast('Ride confirmed', 'Your ride has been confirmed successfully.');
   }
+  
   
 }
 
