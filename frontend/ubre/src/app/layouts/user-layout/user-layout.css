@@ -536,3 +536,11 @@
   font-size:var(--font-size-small);
   color:var(--color-neutral-dark-gray);
 }
+
+.dest-footer {
+  padding-top: 16px;
+}
+
+.dest-footer app-button {
+  width: 100%;
+}

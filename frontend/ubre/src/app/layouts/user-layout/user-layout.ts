@@ -265,6 +265,15 @@ export class UserLayout {
     if (this.destOpen) this.cdModalOpen = false;
   }
 
+  onCdProceed() {
+    if (this.waypoints.length === 0) {
+      this.showToast('No destination', 'Please add at least one destination waypoint.');
+      return;
+    }
+    this.closeDest();
+  }
+
+
 
 
 
