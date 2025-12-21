@@ -50,8 +50,8 @@
   background-color: var(--color-primary-light);
   border-radius: var(--border-radius-buttons-small);
   position: absolute;
-  right: 48px;
-  bottom: 3px;
+  right: 47px;
+  bottom: 3.5px;
   cursor: pointer;
 }
 

@@ -8,7 +8,7 @@ import { User } from '../../../models/user';
   styleUrl: './profile-card.css',
 })
 export class ProfileCard {
-  @Input({ required: true }) user : User = {email: "", firstName: "", lastName: "", profilePicture: "", role: "user"};
+  @Input({ required: true }) user : User = {email: "", firstName: "", lastName: "", profilePicture: "", role: "guest"};
   @Input() icon : string = "";
   @Output() onAction = new EventEmitter<void>();
 

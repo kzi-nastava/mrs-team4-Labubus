@@ -27,7 +27,7 @@
             }
       </div>
 
-      @if (user.role !== 'user') {
+      @if (user.role == 'driver' || user.role === 'admin') {
             <div class="section">
                   <div class="section-title"> Passengers</div>
                   <div class="profile-list">
@@ -38,7 +38,7 @@
                   </div>
             </div>
       }
-      @if (user.role !== 'driver') {
+      @if (user.role === 'registered-user' || user.role === 'admin') {
             <div class="section">
                   <div class="section-title"> Driver</div>
                   <app-profile-card [user]="ride.driver" icon="review-primary-text.svg"></app-profile-card>
