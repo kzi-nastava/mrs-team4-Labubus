@@ -659,6 +659,11 @@ export class UserLayout {
 
 
 
+
+
+
+  
+
   // CHECKOUT MODAL LOGIC
   checkoutModalOpen = false;
 
