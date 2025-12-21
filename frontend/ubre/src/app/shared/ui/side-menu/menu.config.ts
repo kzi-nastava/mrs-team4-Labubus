@@ -16,7 +16,7 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
   ],
   driver: [
     { label: 'Ride history',          icon: 'directions_car_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',   action: 'ride-history' },
-    { label: 'Account settings',  icon: 'settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',  action: '' },
+    { label: 'Account settings',  icon: 'settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',  action: 'account-settings' },
     { label: 'Reports',           icon: 'analytics_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',    action: 'reports' },
     { label: 'Log out',           icon: 'logout_24dp_E53935_FILL0_wght400_GRAD0_opsz24.svg',     action: 'logout' },
   ],
