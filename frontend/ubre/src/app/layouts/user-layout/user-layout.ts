@@ -72,6 +72,29 @@ type NominatimItem = {
   lon: string;
 }
 
+type RideOptionsVM = {
+  rideType: 'Standard' | 'Luxury' | 'Van';
+  babyFriendly: boolean;
+  petFriendly: boolean;
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @Component({
   selector: 'app-user-layout',
@@ -271,6 +294,7 @@ export class UserLayout {
       return;
     }
     this.closeDest();
+    this.rideOptionsOpen = true;
   }
 
 
@@ -305,7 +329,6 @@ export class UserLayout {
   
   cdModalOpen = true; // Choose a destination modal
   
-  checkoutModalOpen = true
   
   openMenu() { this.menuOpen = true; }
   closeMenu() { this.menuOpen = false; }
@@ -348,18 +371,14 @@ export class UserLayout {
     this.destOpen = true;
   }
   
-  onCheckoutModalBack() {
-    this.checkoutModalOpen = false
-  }
-  
   openChat() {
     // Open chat widget
   }
   
   
-
-
-
+  
+  
+  
   
   
   // ACCOUNT SETTINGS SHEET LOGIC
@@ -379,15 +398,15 @@ export class UserLayout {
     this.menuOpen = true;
   }
   
+  
+  
+  
+  
+  
+  
+  
 
-
-
-
-
-
-
-
-
+  
   // EXAMPLE OF RIDE CARD CONTROL VARIABLES
   // selectedRide = undefined;
   // favoriteRides : any[] = [];
@@ -400,125 +419,125 @@ export class UserLayout {
       //     this.selectedRide = ride.id;
     // }
     
-  // onRideAction(ride : any) {
-  //   if (this.favoriteRides.includes(ride.id))
-  //     this.favoriteRides = this.favoriteRides.filter(id => id != ride.id)
-  //   else
-  //     this.favoriteRides.push(ride.id);
-  // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // CHANGE PASSWORD SHEET LOGIC
-  changePasswordOpen = false;
-
-  newPassword = '';
-  confirmPassword = '';
-  passwordMismatch = false;
-
-  onChangePassword() {
-    this.accountSettingsOpen = false;
-    this.changePasswordOpen = true;
-
-    this.newPassword = '';
-    this.confirmPassword = '';
-    this.passwordMismatch = false;
-  }
-
-  closeChangePassword() {
-    this.changePasswordOpen = false;
-    this.passwordMismatch = false;
-  }
-
-  onChangePasswordBack() {
-    this.closeChangePassword();
-    this.accountSettingsOpen = true; 
-  }
-
-  savePassword() {
-    this.passwordMismatch = this.newPassword !== this.confirmPassword;
-
-    if (this.passwordMismatch) return;
-
-    // TODO: API call za promenu lozinke
+    // onRideAction(ride : any) {
+      //   if (this.favoriteRides.includes(ride.id))
+      //     this.favoriteRides = this.favoriteRides.filter(id => id != ride.id)
+      //   else
+        //     this.favoriteRides.push(ride.id);
+      // }
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      // CHANGE PASSWORD SHEET LOGIC
+      changePasswordOpen = false;
+      
+      newPassword = '';
+      confirmPassword = '';
+      passwordMismatch = false;
+      
+      onChangePassword() {
+        this.accountSettingsOpen = false;
+        this.changePasswordOpen = true;
+        
+        this.newPassword = '';
+        this.confirmPassword = '';
+        this.passwordMismatch = false;
+      }
+      
+      closeChangePassword() {
+        this.changePasswordOpen = false;
+        this.passwordMismatch = false;
+      }
+      
+      onChangePasswordBack() {
+        this.closeChangePassword();
+        this.accountSettingsOpen = true; 
+      }
+      
+      savePassword() {
+        this.passwordMismatch = this.newPassword !== this.confirmPassword;
+        
+        if (this.passwordMismatch) return;
+        
+        // TODO: API call za promenu lozinke
     this.closeChangePassword();
     this.showToast('Password changed', 'Your password has been updated.');
   }
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  
   // VEHICLE INFORMATION SHEET LOGIC
   vehicleInfoOpen = false;
-
+  
   openVehicleInfo() { this.vehicleInfoOpen = true; }
   closeVehicleInfo() { this.vehicleInfoOpen = false; }
-
+  
   onVehicleInfoBack() {
     this.closeVehicleInfo();
     this.accountSettingsOpen = true;
   }
-
+  
   onViewVehicleInfo() {
     this.accountSettingsOpen = false;
     this.openVehicleInfo();
   }
-
-
-
-
+  
+  
+  
+  
   registerDriverOpen = false;
-
+  
   openRegisterDriver() { this.registerDriverOpen = true; }
   closeRegisterDriver() { this.registerDriverOpen = false; }
-
+  
   onRegisterDriver() {
     // TODO: API call za registraciju vozača
-
+    
     this.closeRegisterDriver();
     this.showToast('Driver registered', 'Activation mail has been sent to the driver.');
     this.confetti.fire();
   }
-
+  
   onRegisterDriverBack() {
     this.closeRegisterDriver();
     this.menuOpen = true;
   }
-
+  
   validateDriverPassword() {
     this.driverRegister.passwordError = !this.driverRegister.password.trim();
   }
-
+  
   decDriverSeats() { this.driverRegister.seats = Math.max(0, this.driverRegister.seats - 1); }
   incDriverSeats() { this.driverRegister.seats = Math.min(9, this.driverRegister.seats + 1); }
-
+  
   // EASTER EGG
-
+  
   private confetti = inject(ConfettiService);
-
-
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   // Ride HISTORY SHEET LOGIC
   showRideHistory = false
   rides = [
@@ -576,15 +595,83 @@ export class UserLayout {
     this.showRideHistory = false
     this.menuOpen = true
   }
-
+  
   openRideHistory() {
     this.showRideHistory = true
     this.menuOpen = false
   }
-
+  
   closeRideHistory() {
     this.showRideHistory = false
   }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  // RIDE OPTIONS SHEET LOGIC
+  
+  rideOptions = {
+    rideType: 'Standard' as 'Standard' | 'Luxury' | 'Van',
+    babyFriendly: false,
+    petFriendly: false,
+  }
+  
+  rideOptionsOpen = false;
+  setRideType(type: 'Standard' | 'Luxury' | 'Van') {
+    this.rideOptions.rideType = type;
+  }
+  
+  toggleRideBaby() { this.rideOptions.babyFriendly = !this.rideOptions.babyFriendly; }
+  toggleRidePet() { this.rideOptions.petFriendly = !this.rideOptions.petFriendly;}
+  
+  closeRideOptions() { this.rideOptionsOpen = false;  }
+  openRideOptions() { this.rideOptionsOpen = true; }
+  onRideOptionsBack() { this.rideOptionsOpen = false; this.destOpen = true; }
+  
+  onScheduleRide() {
+    this.closeRideOptions();
+    this.showToast('Ride scheduled', 'Your ride has been scheduled successfully.');
+  }
+  
+  onCheckout() {
+    this.closeRideOptions();
+    this.checkoutModalOpen = true;
+  }
 
+
+
+
+
+
+
+
+
+
+
+  // CHECKOUT MODAL LOGIC
+  checkoutModalOpen = false;
+
+  onCheckoutModalBack() {
+    this.checkoutModalOpen = false;
+    this.rideOptionsOpen = true;
+  }
+
+  onConfirmRide() {
+    // TODO: API call za potvrdu vožnje
+    this.checkoutModalOpen = false;
+    this.showToast('Ride confirmed', 'Your ride has been confirmed successfully.');
+  }
+  
 }
 
