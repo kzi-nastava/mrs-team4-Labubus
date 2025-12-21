@@ -1,10 +1,10 @@
-<app-modal-container class="list" [class.move-down]="!open" (backPressed)="onBack()" [title]="title">
+<app-modal-container class="list" [class.move-up]="open" (backPressed)="onBack()" [title]="title">
       @for (ride of rides; track ride.id) {
         <app-ride-card [selected]="!(selectedRide === undefined) && selectedRide.id === ride.id" [ride]="ride" [iconUrl]="favoriteRides.includes(ride.id) ? 'favorite-red.svg' : 'favorite-grey.svg'" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card>
       }
 </app-modal-container>
 
-<div class="options" [class.move-down]="!open">
+<div class="options" [class.move-up]="open">
   <div class="sort">
     <app-modal-container [showTitleBar] = false>
         <input type="datetime-local" placeholder="Date created" [(ngModel)]="filterDate">

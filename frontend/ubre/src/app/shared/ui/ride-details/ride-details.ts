@@ -17,5 +17,5 @@ import { User } from '../../../models/user';
 })
 export class RideDetails {
   @Input({required: true}) ride! : Ride;
-  @Input() user : User = {email: '', firstName: '', lastName: '', profilePicture: '', role: 'user'}
+  @Input() user : User = {email: '', firstName: '', lastName: '', profilePicture: '', role: 'guest'}
 }

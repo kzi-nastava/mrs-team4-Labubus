@@ -18,7 +18,7 @@ export class RideList {
   @Input() rides : Ride[] = [];
   @Input() title : string = "";
   @Input() open : boolean = false;
-  @Input() user : User = {email: '', firstName: '', lastName: '', profilePicture: '', role: 'user'}
+  @Input() user : User = {email: '', firstName: '', lastName: '', profilePicture: '', role: 'guest'}
   @Output() onClose = new EventEmitter<void>();
 
   selectedRide : Ride | undefined = undefined;
