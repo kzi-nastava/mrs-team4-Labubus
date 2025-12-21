@@ -484,6 +484,8 @@
   border:0;
   background:transparent;
   cursor:pointer;
+  margin-top: 4px;
+  margin-right: 4px;
   border-radius:10px;
 }
 

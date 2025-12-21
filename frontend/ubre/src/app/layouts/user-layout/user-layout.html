@@ -21,7 +21,9 @@
           <div class="wp-row">
             <img src="waypoint.svg" alt="pin" class="wp-ico">
             <span class="wp-text">{{ w.label }}</span>
-            <button type="button" class="wp-x" (click)="removeWaypoint(w.id)">×</button>
+            <button type="button" class="wp-x" (click)="removeWaypoint(w.id)">
+              <img src="cancel_16dp_999999_FILL0_wght400_GRAD0_opsz20.svg" alt="remove waypoint">
+            </button>
           </div>
         }
 
