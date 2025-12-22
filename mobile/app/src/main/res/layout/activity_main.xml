@@ -19,7 +19,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-        <!-- DUGME ZA MENI -->
         <ImageButton
             android:id="@+id/btn_menu"
             android:layout_width="48dp"
@@ -31,7 +30,6 @@
             app:layout_constraintStart_toStartOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- SIDE MENI -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
@@ -39,6 +37,6 @@
         android:background="@color/surface"
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header_account"
-
         />
 </androidx.drawerlayout.widget.DrawerLayout>
+

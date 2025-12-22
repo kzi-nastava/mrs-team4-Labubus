@@ -30,11 +30,9 @@ public class DriverRegistrationDto {
     public String getAvatarUrl() {
         return avatarUrl;
     }
-
     public String getEmail() {
         return email;
     }
-
     public String getPassword() {
         return password;
     }
@@ -42,19 +40,15 @@ public class DriverRegistrationDto {
     public String getName() {
         return name;
     }
-
     public String getSurname() {
         return surname;
     }
-
     public String getPhone() {
         return phone;
     }
-
     public String getAddress() {
         return address;
     }
-
     public VehicleDto getVehicle() {
         return vehicle;
     }

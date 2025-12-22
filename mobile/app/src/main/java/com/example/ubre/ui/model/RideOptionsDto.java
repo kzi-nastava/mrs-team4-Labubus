@@ -17,7 +17,6 @@ public class RideOptionsDto {
     public boolean isBabyFriendly() {
         return babyFriendly;
     }
-
     public boolean isPetFriendly() {
         return petFriendly;
     }

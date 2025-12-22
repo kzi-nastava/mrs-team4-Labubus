@@ -32,7 +32,6 @@ public class UserDto {
     public String getAvatarUrl() {
         return avatarUrl;
     }
-
     public String getEmail() {
         return email;
     }
@@ -40,7 +39,6 @@ public class UserDto {
     public String getName() {
         return name;
     }
-
     public String getSurname() {
         return surname;
     }
