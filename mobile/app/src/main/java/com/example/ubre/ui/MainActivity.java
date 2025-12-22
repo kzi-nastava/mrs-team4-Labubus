@@ -7,8 +7,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.core.view.GravityCompat;
+
 
 import com.example.ubre.R;
+import com.google.android.material.navigation.NavigationView;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -16,9 +20,12 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapController;
 
+enum Role { REGISTERED_USER, GUEST, ADMIN, DRIVER }
+
 public class MainActivity extends AppCompatActivity {
 
     private MapView map;
+    private DrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +45,30 @@ public class MainActivity extends AppCompatActivity {
         map = findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setMultiTouchControls(true);
+        map.getZoomController().setVisibility(
+                org.osmdroid.views.CustomZoomButtonsController.Visibility.NEVER
+        );
+
 
         MapController controller = (MapController) map.getController();
         controller.setZoom(14.0);
-        controller.setCenter(new GeoPoint(44.7866, 20.4489));
+        controller.setCenter(new GeoPoint(45.2671, 19.8335));
+
+        drawer = findViewById(R.id.main);
+
+        findViewById(R.id.btn_menu).setOnClickListener(v ->
+                drawer.openDrawer(GravityCompat.START)
+        );
+
+        // Example role assignment; in a real app, this would come from user authentication
+        Role currentUserRole = Role.REGISTERED_USER;
+        setMenuOptions(currentUserRole);
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(item -> {
+            drawer.closeDrawer(GravityCompat.START);
+            return true;
+        });
     }
 
     @Override
@@ -54,5 +81,20 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         if (map != null) map.onPause();
+    }
+
+    private void setMenuOptions(Role role) {
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.getMenu().clear();
+
+        int menuRes; // Variable to hold the menu resource ID
+        switch (role) {
+            case ADMIN: menuRes = R.menu.drawer_admin; break;
+            //case DRIVER: menuRes = R.menu.drawer_driver; break;
+            case REGISTERED_USER: menuRes = R.menu.drawer_registered_user; break;
+            default: menuRes = R.menu.drawer_registered_user; break;
+        }
+
+        navigationView.inflateMenu(menuRes);
     }
 }

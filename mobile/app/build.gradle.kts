@@ -43,7 +43,8 @@ android {
     }
 }
 
-dependencies {
+dependencies{
+    implementation("com.google.android.material:material:1.12.0")
     implementation("org.osmdroid:osmdroid-android:6.1.18")
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
