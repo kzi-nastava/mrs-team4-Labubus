@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- TVOJ POSTOJEĆI EKRAN SA MAPOM -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -37,5 +36,9 @@
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="start"/>
+        android:background="@color/surface"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/nav_header_account"
+
+        />
 </androidx.drawerlayout.widget.DrawerLayout>

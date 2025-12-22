@@ -1,6 +1,8 @@
 package com.example.ubre.ui;
 
 import android.os.Bundle;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,17 +12,20 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.core.view.GravityCompat;
 
-
 import com.example.ubre.R;
 import com.example.ubre.ui.model.Role;
 import com.example.ubre.ui.model.UserDto;
 import com.google.android.material.navigation.NavigationView;
+import com.bumptech.glide.Glide;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapController;
+
+import java.time.Instant;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         map.setTileSource(TileSourceFactory.MAPNIK);
         map.setMultiTouchControls(true);
         map.getZoomController().setVisibility(
-                org.osmdroid.views.CustomZoomButtonsController.Visibility.NEVER
+                CustomZoomButtonsController.Visibility.NEVER
         );
 
 
@@ -63,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
         // Example role assignment; in a real app, this would come from user authentication
         UserDto currentUser = new UserDto("1", Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
         setMenuOptions(currentUser.getRole());
+        fillDrawerHeader(currentUser);
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(item -> {
@@ -92,9 +98,28 @@ public class MainActivity extends AppCompatActivity {
             case ADMIN: menuRes = R.menu.drawer_admin; break;
             case DRIVER: menuRes = R.menu.drawer_driver; break;
             case REGISTERED_USER: menuRes = R.menu.drawer_registered_user; break;
-            default: menuRes = R.menu.drawer_registered_user; break;
+            default: menuRes = R.menu.drawer_guest; break;
         }
 
         navigationView.inflateMenu(menuRes);
     }
+
+    private void fillDrawerHeader(UserDto user) {
+        NavigationView nav = findViewById(R.id.nav_view);
+
+        ImageView avatar = nav.getHeaderView(0).findViewById(R.id.img_avatar);
+        TextView name = nav.getHeaderView(0).findViewById(R.id.txt_name);
+        TextView phone = nav.getHeaderView(0).findViewById(R.id.txt_phone);
+
+        name.setText(user.getName() + " " + user.getSurname());
+        phone.setText(user.getPhone());
+
+        String url = user.getAvatarUrl();
+        if (url != null && !url.isEmpty()) {
+            Glide.with(this).load(url).circleCrop().into(avatar);
+        } else {
+            avatar.setImageResource(R.drawable.img_default_avatar);
+        }
+    }
+
 }

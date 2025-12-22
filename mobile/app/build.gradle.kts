@@ -44,6 +44,8 @@ android {
 }
 
 dependencies{
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("org.osmdroid:osmdroid-android:6.1.18")
     implementation(libs.androidx.lifecycle.runtime.ktx)

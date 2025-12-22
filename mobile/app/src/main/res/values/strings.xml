@@ -12,4 +12,5 @@
     <string name="panic_notifications">Panic notifications</string>
     <string name="log_in">Log in</string>
     <string name="register">Register</string>
+    <string name="name_surname">Name Surname</string>
 </resources>
