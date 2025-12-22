@@ -1,5 +1,15 @@
 <resources>
     <string name="app_name">Ubre</string>
-    <string name="btn_ok">Nigger</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="ride_history">Ride history</string>
+    <string name="my_favourites">My favourites</string>
+    <string name="account_settings">Account settings</string>
+    <string name="reports">Reports</string>
+    <string name="log_out">Log out</string>
+    <string name="active_rides">Active rides</string>
+    <string name="price_adjustment">Price adjustment</string>
+    <string name="register_a_driver">Register a driver</string>
+    <string name="panic_notifications">Panic notifications</string>
+    <string name="log_in">Log in</string>
+    <string name="register">Register</string>
 </resources>

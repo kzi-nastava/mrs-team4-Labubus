@@ -4,7 +4,6 @@ public class RideOptionsDto {
     private VehicleType vehicleType;
     private boolean babyFriendly;
     private boolean petFriendly;
-
     public RideOptionsDto(VehicleType vehicleType, boolean babyFriendly, boolean petFriendly) {
         this.vehicleType = vehicleType;
         this.babyFriendly = babyFriendly;

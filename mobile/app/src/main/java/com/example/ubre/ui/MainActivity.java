@@ -12,6 +12,7 @@ import androidx.core.view.GravityCompat;
 
 
 import com.example.ubre.R;
+import com.example.ubre.ui.model.Role;
 import com.google.android.material.navigation.NavigationView;
 
 import org.osmdroid.config.Configuration;
@@ -88,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         int menuRes; // Variable to hold the menu resource ID
         switch (role) {
             case ADMIN: menuRes = R.menu.drawer_admin; break;
-            //case DRIVER: menuRes = R.menu.drawer_driver; break;
+            case DRIVER: menuRes = R.menu.drawer_driver; break;
             case REGISTERED_USER: menuRes = R.menu.drawer_registered_user; break;
             default: menuRes = R.menu.drawer_registered_user; break;
         }
