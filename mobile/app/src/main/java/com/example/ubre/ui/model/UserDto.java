@@ -1,6 +1,8 @@
 package com.example.ubre.ui.model;
 
-public class UserDto {
+import java.io.Serializable;
+
+public class UserDto implements Serializable {
     private String id;
     private Role role;
     private String avatarUrl;

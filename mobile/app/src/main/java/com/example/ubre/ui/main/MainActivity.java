@@ -1,6 +1,7 @@
 package com.example.ubre.ui.main;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -11,6 +12,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.core.view.GravityCompat;
+import androidx.fragment.app.Fragment;
 
 import com.example.ubre.R;
 import com.example.ubre.ui.model.Role;
@@ -29,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     private MapView map;
     private DrawerLayout drawer;
+    private UserDto currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,18 @@ public class MainActivity extends AppCompatActivity {
 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            boolean hasFragments = getSupportFragmentManager().getBackStackEntryCount() > 0;
+
+            if (hasFragments) {
+                findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
+                if (map != null) map.setVisibility(View.GONE);
+            } else {
+                findViewById(R.id.fragment_container).setVisibility(View.GONE);
+                if (map != null) map.setVisibility(View.VISIBLE);
+            }
+        });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -65,13 +80,18 @@ public class MainActivity extends AppCompatActivity {
         );
 
         // Example role assignment; in a real app, this would come from user authentication
-        UserDto currentUser = new UserDto("1", Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
+        currentUser = new UserDto("1", Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
         setMenuOptions(currentUser.getRole());
         fillDrawerHeader(currentUser);
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(item -> {
             drawer.closeDrawer(GravityCompat.START);
+
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_account_settings) { showFragment(AccountSettingsFragment.newInstance(currentUser)); return true; }
+
             return true;
         });
     }
@@ -120,5 +140,17 @@ public class MainActivity extends AppCompatActivity {
             avatar.setImageResource(R.drawable.img_default_avatar);
         }
     }
+
+    private void showFragment(Fragment f) {
+        findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
+        map.setVisibility(View.GONE);
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, f)
+                .addToBackStack(null)
+                .commit();
+    }
+
 
 }
