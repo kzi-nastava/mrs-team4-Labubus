@@ -1,0 +1,57 @@
+.route-table {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    column-gap: 12px;
+}
+
+.route-table > div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: fit-content;
+}
+
+.route-table > * {
+    align-self: center;
+    justify-self: center;
+}
+
+.route-table p {
+    margin: 4px 0;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.route-table .start-icon {
+    width: 12px;
+    aspect-ratio: 1/1;
+    background-color: var(--color-primary-dark);
+    border-radius: 50%;
+}
+
+.route-table .dots {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 4px;
+}
+
+.route-table .dots .dot {
+    aspect-ratio: 1/1;
+    width: 2px;
+    background-color: var(--color-primary-dark);
+}
+
+.route-table .waypoint-icon {
+    width: 12px;
+    aspect-ratio: 1/1;
+    background-color: var(--color-primary-light);
+}
+
+.route-table .separator {
+    width: 95%;
+    height: 1px;
+    background-color: var(--color-neutral-dark-gray);
+    margin: 10px 5% 10px 0;
+}

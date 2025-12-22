@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { UserLayout } from './layouts/user-layout/user-layout';
 import { RegisteredUser } from './layouts/registered-user/registered-user';
 import { LoginComponent } from './features/auth/login/login.component';
 import { SignupComponent } from './features/auth/signup/signup.component';

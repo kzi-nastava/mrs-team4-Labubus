@@ -1,0 +1,494 @@
+<div class="screen">
+  <app-map
+    class="map"
+    [waypoints]="waypoints"
+    (mapClick)="addFromMapClick($event.lat, $event.lon)">
+  </app-map>
+
+  <div class="overlay">
+
+    <!-- MAP CHOOSE A DESTINATION OVERLAY -->
+    @if (destOpen) {
+      <div class="dest-card show">
+        <div class="dest-header">
+          <button type="button" class="dest-back" (click)="onDestBack()">
+            <img src="arrow_back_28dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg" alt="back">
+          </button>
+          <div class="dest-title">Choose a destination</div>
+        </div>
+
+        @for (w of waypoints; track w.id) {
+          <div class="wp-row">
+            <img src="waypoint.svg" alt="pin" class="wp-ico">
+            <span class="wp-text">{{ w.label }}</span>
+            <button type="button" class="wp-x" (click)="removeWaypoint(w.id)">
+              <img src="cancel_16dp_999999_FILL0_wght400_GRAD0_opsz20.svg" alt="remove waypoint">
+            </button>
+          </div>
+        }
+
+        <div class="wp-row input">
+          <input
+            class="wp-input"
+            type="text"
+            [(ngModel)]="query"
+            (input)="onQueryChange()"
+            placeholder="Enter destination">
+        </div>
+
+        <div class="suggestions">
+          @for (s of suggestions; track s.place_id) {
+            <button type="button" class="s-item" (click)="addFromSuggestion(s)">
+              <img src="location.svg" alt="pin" class="s-ico">
+              <span class="s-text">{{ s.display_name }}</span>
+            </button>
+          }
+        </div>
+
+        <div class="dest-footer">
+          <app-button (clicked)="onCdProceed()" width="100%">Proceed</app-button>
+        </div>
+      </div>
+    }
+
+
+
+    <!-- RIDE OPTIONS MODAL -->
+    @if (rideOptionsOpen) {
+      <div class="ro-modal show" role="dialog" aria-label="Ride options">
+        <div class="rd-wrap">
+          <div class="ro-header">
+            <button type="button" class="ro-back" (click)="onRideOptionsBack()">
+              <img src="arrow_back_28dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg" alt="back">
+            </button>
+            <div class="ro-title">Ride options</div>
+          </div>
+
+          <div class="rd-pills">
+            <button type="button" class="rd-pill"
+                    [class.active]="rideOptions.rideType === 'Standard'"
+                    (click)="setRideType('Standard')">
+              Standard
+            </button>
+
+            <button type="button" class="rd-pill"
+                    [class.active]="rideOptions.rideType === 'Luxury'"
+                    (click)="setRideType('Luxury')">
+              Luxury
+            </button>
+
+            <button type="button" class="rd-pill"
+                    [class.active]="rideOptions.rideType === 'Van'"
+                    (click)="setRideType('Van')">
+              Van
+            </button>
+          </div>
+
+          <div class="rd-row">
+            <div class="rd-row-label">Baby-friendly</div>
+            <button type="button" class="rd-switch"
+                    [class.on]="rideOptions.babyFriendly"
+                    (click)="toggleRideBaby()">
+              <span class="rd-knob"></span>
+            </button>
+          </div>
+
+          <div class="rd-row">
+            <div class="rd-row-label">Pet-friendly</div>
+            <button type="button" class="rd-switch"
+                    [class.on]="rideOptions.petFriendly"
+                    (click)="toggleRidePet()">
+              <span class="rd-knob"></span>
+            </button>
+          </div>
+
+          <div class="ro-actions">
+            <button type="button" class="ro-btn ro-btn-outline" (click)="onScheduleRide()">
+              Schedule ride
+            </button>
+
+            <button type="button" class="ro-btn ro-btn-filled" (click)="onCheckout()">
+              Checkout
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+
+
+
+    <!-- MAIN OVERLAY CONTENT -->
+
+    @if (cdModalOpen) {
+      <app-modal class="cd-modal show"
+        title="Choose a destination"
+        message="Please select a valid destination"
+        buttonText="Continue"
+        (action)="onCdModalAction()">
+      </app-modal>
+    }
+
+
+    <!-- ICONS -->
+
+    <app-icon-button class="menu-button"
+      iconUrl="side_navigation_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
+      (click)="openMenu()">
+    </app-icon-button>
+
+    <app-icon-button class="chat-button"
+      iconUrl="chat_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
+      (click)="openChat()">
+    </app-icon-button>
+
+    <app-icon-button class="map-button"
+      iconUrl="map_search_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
+      (click)="toggleDest()">
+    </app-icon-button>
+
+    <!-- TOAST NOTIFICATION -->
+    @if (toastOpen) {
+      <app-toast [title]="toastTitle" [message]="toastMessage"></app-toast>
+    }
+
+    <!-- SIDE MENU -->
+    <app-side-menu
+      [open]="menuOpen"
+      title="Account"
+      [role]="user.role"
+      [user]="user"
+      (closed)="closeMenu()"
+      (action)="handleMenuAction($event)">
+    </app-side-menu>
+
+    <!-- CHECKOUT MODAL -->
+    @if (checkoutModalOpen) {
+      <app-modal-container class="checkout-modal" title="Checkout" [showTitleBar]="true" (backPressed)="onCheckoutModalBack()">
+        <app-stat-card value="$12.50" label="Estimated price" variant="dark"></app-stat-card>
+        <app-button width="290px" (click)="onConfirmRide()">Confirm ride</app-button>
+      </app-modal-container>
+    }
+
+    <!-- ACCOUNT SETTINGS SHEET -->
+    <app-sheet
+      [open]="accountSettingsOpen"
+      title="Account settings"
+      (closed)="closeAllSidePanels()"
+      (back)="onAccountSettingsBack()"
+      >
+
+      <div class="as-wrap">
+
+        <div class="as-section-title"><span>Account information</span></div>
+
+        <div class="as-avatar">
+          <img [src]="editing.avatarUrl" alt="avatar">
+        </div>
+
+        <div class="as-field">
+          <div class="as-label">Email</div>
+          <input class="as-input" [(ngModel)]="editing.email" readonly>
+        </div>
+
+        <div class="as-field">
+          <div class="as-label">Password</div>
+
+          <div class="as-input-row">
+            <input class="as-input"
+                  [type]="hidePassword ? 'password' : 'text'"
+                  [value]="editing.passwordMasked"
+                  readonly>
+
+            <button class="as-eye" type="button" (click)="hidePassword = !hidePassword">
+              <img
+                [src]="hidePassword ? 'visibility_off_24dp_B3B3B3_FILL0_wght400_GRAD0_opsz24.svg' : 'visibility_24dp_B3B3B3_FILL0_wght400_GRAD0_opsz24.svg'"
+                alt="toggle password visibility">
+            </button>
+          </div>
+
+          <button class="as-link" type="button" (click)="onChangePassword()">
+            Change password
+          </button>
+        </div>
+
+        @if (editing.role === 'driver') {
+          <div class="as-section-title"><span>Statistics</span></div>
+          <div class="as-stat">
+            <app-stat-card [value]="editing.activeLast24h ?? '0m'"
+                          label="Active in last 24h"
+                          variant="dark"></app-stat-card>
+          </div>
+        }
+
+        <div class="as-section-title"><span>Personal information</span></div>
+
+        <div class="as-field">
+          <div class="as-label">Name</div>
+          <input class="as-input" [(ngModel)]="editing.name">
+        </div>
+
+        <div class="as-field">
+          <div class="as-label">Surname</div>
+          <input class="as-input" [(ngModel)]="editing.surname">
+        </div>
+
+        <div class="as-field">
+          <div class="as-label">Residental address</div>
+          <input class="as-input" [(ngModel)]="editing.address">
+        </div>
+
+        <div class="as-field">
+          <div class="as-label">Phone number</div>
+          <input class="as-input" [(ngModel)]="editing.phone">
+        </div>
+
+        @if (editing.role === 'driver') {
+          <button class="as-link as-link-bottom" type="button" (click)="onViewVehicleInfo()">
+            View vehicle information
+          </button>
+        }
+
+      </div>
+
+
+      <div class="footer-actions" sheetFooter>
+        <app-button (clicked)="saveAccountSettings()">Save</app-button>
+        <app-button variant="outlined"
+                    (clicked)="accountSettingsOpen=false">
+          Cancel
+        </app-button>
+      </div>
+    </app-sheet>
+
+    <!-- CHANGE PASSWORD SHEET -->
+    <app-sheet
+      [open]="changePasswordOpen"
+      title="Change password"
+      (closed)="closeChangePassword()"
+      (back)="onChangePasswordBack()">
+
+      <div class="cp-wrap">
+        <div class="cp-field">
+          <div class="cp-label">New password</div>
+          <input
+            class="cp-input"
+            type="password"
+            [(ngModel)]="newPassword"
+            placeholder="Enter your password">
+        </div>
+
+        <div class="cp-field">
+          <div class="cp-label">Confirm password</div>
+          <input
+            class="cp-input"
+            type="password"
+            [(ngModel)]="confirmPassword"
+            placeholder="Enter your password">
+        </div>
+
+        @if (passwordMismatch) {
+          <div class="cp-error">Passwords do not match</div>
+        }
+      </div>
+
+      <div class="footer-actions" sheetFooter>
+        <app-button (clicked)="savePassword()">Save</app-button>
+        <app-button variant="outlined" (clicked)="closeChangePassword()">Cancel</app-button>
+      </div>
+    </app-sheet>
+
+    <!-- VEHICLE INFORMATION SHEET -->
+    <app-sheet
+      [open]="vehicleInfoOpen"
+      title="Vehicle information"
+      (closed)="closeVehicleInfo()"
+      (back)="onVehicleInfoBack()">
+
+      <div class="vi-wrap">
+        <div class="vi-field">
+          <div class="vi-label">Vehicle model</div>
+          <input class="vi-input" [value]="vehicle.model" readonly>
+        </div>
+
+        <div class="vi-field">
+          <div class="vi-label">Vehicle type</div>
+          <input class="vi-input" [value]="vehicle.type" readonly>
+        </div>
+
+        <div class="vi-field">
+          <div class="vi-label">License plates</div>
+          <input class="vi-input" [value]="vehicle.plates" readonly>
+        </div>
+
+        <div class="vi-field">
+          <div class="vi-label">Number of seats</div>
+          <input class="vi-input" [value]="vehicle.seats" readonly>
+        </div>
+
+        <div class="vi-field">
+          <div class="vi-label">Baby-friendly</div>
+          <input class="vi-input" [value]="vehicle.babyFriendly" readonly>
+        </div>
+
+        <div class="vi-field">
+          <div class="vi-label">Pet-friendly</div>
+          <input class="vi-input" [value]="vehicle.petFriendly" readonly>
+        </div>
+      </div>
+    </app-sheet>
+
+
+    <!-- EXAMPLE OF RIDE CARD USE -->
+    <!-- <app-ride-card [selected]="selectedRide === 1" [iconUrl]="favoriteRides.includes(1) ? 'favorite-red.svg' : 'favorite-grey.svg'" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card> -->
+
+
+    <!-- REGISTER A DRIVER (ADMIN ROLE)-->  
+    @if (user.role === 'admin') {
+      <app-sheet
+        [open]="registerDriverOpen"
+        title="Register a driver"
+        (closed)="closeAllSidePanels()"
+        (back)="onRegisterDriverBack()"
+      >
+        <div class="rd-wrap">
+
+          <div class="rd-section-title"><span>Account information</span></div>
+
+          <div class="rd-avatar">
+            <img [src]="driverRegister.avatarUrl" alt="avatar">
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label">Email</div>
+            <input class="rd-input" [(ngModel)]="driverRegister.email" placeholder="Driver's email">
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label-row">
+              <span>Password</span>
+              @if (driverRegister.passwordError) { <span class="rd-required">Required</span> }
+            </div>
+
+            <input
+              class="rd-input"
+              [class.error]="driverRegister.passwordError"
+              type="password"
+              [(ngModel)]="driverRegister.password"
+              placeholder="Driver's password"
+              (blur)="validateDriverPassword()"
+            >
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label">Confirm password</div>
+            <input class="rd-input" type="password" [(ngModel)]="driverRegister.confirmPassword" placeholder="Driver's password">
+          </div>
+
+
+          <div class="rd-section-title"><span>Personal information</span></div>
+
+          <div class="rd-field">
+            <div class="rd-label">Name</div>
+            <input class="rd-input" [(ngModel)]="driverRegister.name" placeholder="Driver's name">
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label">Surname</div>
+            <input class="rd-input" [(ngModel)]="driverRegister.surname" placeholder="Driver's surname">
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label">Residental address</div>
+            <input class="rd-input" [(ngModel)]="driverRegister.address" placeholder="Driver's residental address">
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label">Phone number</div>
+            <input class="rd-input" [(ngModel)]="driverRegister.phone" placeholder="Driver's phone number">
+          </div>
+
+
+          <div class="rd-section-title"><span>Vehicle information</span></div>
+
+          <div class="rd-field">
+            <div class="rd-label">Vehicle model</div>
+            <input class="rd-input" [(ngModel)]="driverRegister.vehicleModel" placeholder="Driver's vehicle model">
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label">Vehicle type</div>
+
+            <div class="rd-pills">
+              <button class="rd-pill"
+                      type="button"
+                      [class.active]="driverRegister.vehicleType==='Standard'"
+                      (click)="driverRegister.vehicleType='Standard'">
+                Standard
+              </button>
+
+              <button class="rd-pill"
+                      type="button"
+                      [class.active]="driverRegister.vehicleType==='Luxury'"
+                      (click)="driverRegister.vehicleType='Luxury'">
+                Luxury
+              </button>
+
+              <button class="rd-pill"
+                      type="button"
+                      [class.active]="driverRegister.vehicleType==='Van'"
+                      (click)="driverRegister.vehicleType='Van'">
+                Van
+              </button>
+            </div>
+          </div>
+
+          <div class="rd-field">
+            <div class="rd-label">License plates</div>
+            <input class="rd-input" [(ngModel)]="driverRegister.plates" placeholder="Vehicle license plates">
+          </div>
+
+          <div class="rd-row">
+            <div class="rd-row-label">Number of seats</div>
+
+            <div class="rd-stepper">
+              <button class="rd-step" type="button" (click)="decDriverSeats()">−</button>
+              <div class="rd-step-value">{{ driverRegister.seats }}</div>
+              <button class="rd-step" type="button" (click)="incDriverSeats()">+</button>
+            </div>
+          </div>
+
+          <div class="rd-row">
+            <div class="rd-row-label">Baby-friendly</div>
+            <button class="rd-switch"
+                    type="button"
+                    [class.on]="driverRegister.babyFriendly"
+                    (click)="driverRegister.babyFriendly=!driverRegister.babyFriendly">
+              <span class="rd-knob"></span>
+            </button>
+          </div>
+
+          <div class="rd-row">
+            <div class="rd-row-label">Pet-friendly</div>
+            <button class="rd-switch dark"
+                    type="button"
+                    [class.on]="driverRegister.petFriendly"
+                    (click)="driverRegister.petFriendly=!driverRegister.petFriendly">
+              <span class="rd-knob"></span>
+            </button>
+          </div>
+        </div>
+        <div class="footer-actions" sheetFooter>
+          <app-button (clicked)="onRegisterDriver()">Register driver</app-button>
+          <app-button variant="outlined"
+                      (clicked)="closeRegisterDriver()">
+            Cancel
+          </app-button>
+        </div>
+      </app-sheet>
+    }
+
+    <!-- RIDE HISTORY SHEET -->
+    <app-ride-list class="ride-history" (onClose)="onRideHistoryBack()" [open]="showRideHistory" [rides]="rides" [user]="currentUser" title="Ride history"></app-ride-list>
+  </div>
+</div>

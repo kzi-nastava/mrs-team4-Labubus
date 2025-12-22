@@ -1,0 +1,7773 @@
+_type: export
+__export_format: 4
+__export_date: 2025-12-08T18:50:18.080Z
+__export_source: insomnia.desktop.app:v2023.2.2
+resources:
+  - _id: req_2ca3496a7fc24bdeaea3fbeb9f5be992
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1719334741987
+    created: 1719334709721
+    url: https://127.0.0.1:8501/v1/catalog/nodes
+    name: New Request
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1719334709721
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: wrk_584f82820964471ea1d43a16a3b81eb9
+    parentId: null
+    modified: 1673114886768
+    created: 1670097494719
+    name: Inženjerstvo serverskog sloja - projekat 2022 2.0.0
+    description: ""
+    scope: design
+    _type: workspace
+  - _id: req_c3bdd3a0039a4eacbf8c3cd87d5a51e0
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1719340257746
+    created: 1719320048028
+    url: https://localhost:8501/v1/config/http-route/consul
+    name: New Request
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1719320048028
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_5348aa2f4c3943668ea8bce9467dc0fe
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1719411705190
+    created: 1719318447728
+    url: https://localhost:5000/namespace
+    name: New Request
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        "namespace": "doc",
+        "relations": {
+        "owner": {},
+        "editor": {
+        "union": [
+        {"this": {}},
+        {"computed_userset": {"relation": "owner"}}
+        ]
+        },
+        "viewer": {
+        "union": [
+        {"this": {}},
+        {"computed_userset": {"relation": "editor"}}
+        ]
+        }
+        }
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1719318447728
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_1a6a8c61fd9a41ecac7218f3d574076b
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1719348076331
+    created: 1719270582229
+    url: https://localhost:5000/getAll
+    name: get all
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"object":"doc:readme"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1719270582229
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_dbb618ee3253489f9be90f4e97277b8d
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1719347061499
+    created: 1719266279704
+    url: https://localhost:5000/acl/check
+    name: New Request
+    description: ""
+    method: GET
+    body: {}
+    parameters:
+      - id: pair_0f9d0e2850a840b0870f6f18d0f6fa96
+        name: object
+        value: doc:readme
+        description: ""
+      - id: pair_8cc73e422c4b42c1a70f7606c7759ab1
+        name: relation
+        value: editor
+        description: ""
+      - id: pair_273442766b4e410aa963faf2cf285ed2
+        name: user
+        value: user:user300
+        description: ""
+    headers: []
+    authentication: {}
+    metaSortKey: -1719266279704
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_7b1e89a502274fd79c2f1294c1931257
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1719347055653
+    created: 1719163233515
+    url: https://localhost:5000/acl
+    name: New Request
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        "object": "doc:readme",
+        "relation": "editor",
+        "user": "user:user300"
+        }
+    parameters:
+      - id: pair_eeea6e4b2b124a658ea43d5498cd11ca
+        name: object
+        value: doc:readme
+        description: ""
+        disabled: true
+      - id: pair_4b8d8ed043f44ff0bf3d5f4df1f761fc
+        name: relation
+        value: viewer
+        description: ""
+        disabled: true
+      - id: pair_9f883d06772b4e0daec807b195fd6e77
+        name: user
+        value: user:alice
+        description: ""
+        disabled: true
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1719163233515
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_422b20bc8a424e07a06f68a17c52446a
+    parentId: fld_e62364f711684f99af5a129119ce41bd
+    modified: 1718136718859
+    created: 1718128019218
+    url: "{{ _.base_url }}/api/events/bills"
+    name: New Request
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_0e8d3bb7123d405a94198443005df049
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huX2RvZSIsImF1ZCI6IndlYiIsInJvbGUiOlt7Im5hbWUiOiJVU0VSIn1dLCJpZCI6MywiZXhwIjoxNzE4MTI5Nzk5LCJpYXQiOjE3MTgxMjc5OTl9.xCJi-uEybMyDHIpGdiCJ0w1ubS82XRDPmiObPPRXzO3yj5sscN-cWyvVupoJ3cBjMDwJ3Dd7l_Z4Cpy6A0L61A
+        description: ""
+    authentication: {}
+    metaSortKey: -1718128019218
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_e62364f711684f99af5a129119ce41bd
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1716501194086
+    created: 1716501194086
+    name: S B N Z
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1716501194086
+    _type: request_group
+  - _id: req_832b3731a92b4d4ab8bdffeb7fd8348a
+    parentId: fld_e62364f711684f99af5a129119ce41bd
+    modified: 1718128016614
+    created: 1718064259918
+    url: "{{ _.base_url }}/api/findRoommate"
+    name: Roommate forward
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_faff73aa4a574d229944144afb846751
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJqb2huX2RvZSIsImF1ZCI6IndlYiIsInJvbGUiOlt7Im5hbWUiOiJVU0VSIn1dLCJpZCI6MywiZXhwIjoxNzE4MTA0MTE4LCJpYXQiOjE3MTgxMDIzMTh9.VebhUBkMRKzNyfSbBBgL-X9b1i1GUGIkd1G3o1j81MVceCHTkWb2XCuASFFmNI60hP6PVgDIKcrLkeRF7sB6OQ
+        description: ""
+    authentication: {}
+    metaSortKey: -1718064259918
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_f6a54682f3b444f3a26630700dbed6dd
+    parentId: fld_e62364f711684f99af5a129119ce41bd
+    modified: 1717016273012
+    created: 1717016237086
+    url: "{{ _.base_url }}/api/users"
+    name: Get All Users
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1717016237086
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_f068d3cf828e4b048cafb2860e3803bb
+    parentId: fld_e62364f711684f99af5a129119ce41bd
+    modified: 1717016223206
+    created: 1717008221699
+    url: "{{ _.base_url }}/api/accommodations/1"
+    name: Get Accommodation by ID
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1717008221699
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_670161817ed442c690229d6e84f3d8e9
+    parentId: fld_e62364f711684f99af5a129119ce41bd
+    modified: 1718661143713
+    created: 1716579405821
+    url: "{{ _.base_url }}/api/login"
+    name: Log In
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+          "username": "john_doe",
+          "password": "sifra123"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1716579405821
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_4fe2680f7aff4fd5b7402a9816b73f86
+    parentId: fld_e62364f711684f99af5a129119ce41bd
+    modified: 1716924078959
+    created: 1716501187655
+    url: "{{ _.base_url }}/api/accommodations"
+    name: Get All Accomodation
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1716501187655
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_69579740e45c4203b95d27e5a28d430a
+    parentId: fld_7b2e3ddc6ece4c9d88323b1593caee6d
+    modified: 1683922046009
+    created: 1680467330757
+    url: "{{ _.base_url }}/cert"
+    name: See certs
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_15dbfe950b694fff82243784bc4ef304
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ6b2thMTIzQGdtYWlsLmNvbSIsImF1ZCI6IndlYiIsInJvbGUiOiJST0xFX1VTRVIiLCJleHAiOjE2ODM0OTA3NjUsImlhdCI6MTY4MzQ4ODk2NX0.FyjNJN-pNuR1ZgXeEsZzeHeu3qKM4eLgHPlS25BRks8CghCJqwQ1rrktkwK_Vi2x5SQVACqTEfIOicftm83tHA
+        description: ""
+    authentication: {}
+    metaSortKey: -1680467330757
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_7b2e3ddc6ece4c9d88323b1593caee6d
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1683404597697
+    created: 1683404597697
+    name: ib
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1683404597697
+    _type: request_group
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb92736fab2
+    parentId: fld_7b2e3ddc6ece4c9d88323b1593caee6d
+    modified: 1716579401959
+    created: 1670100457550
+    url: "{{ base_url }}/api/user/login"
+    name: Log in
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "email": "zoka123@gmail.com",
+          "password": "sifra123"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+      - id: pair_b0a0fddeaf6a42b3a3619a711707bc8f
+        name: ""
+        value: ""
+        description: ""
+    authentication: {}
+    metaSortKey: -1680467330756.6094
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_8a94ed3d0aeb40e9bcd5835b4ff2ed4b
+    parentId: fld_7b2e3ddc6ece4c9d88323b1593caee6d
+    modified: 1683489206813
+    created: 1683489133871
+    url: "{{ _.base_url }}/cert/validate/-5572885970009269760"
+    name: Validate by serial num
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_35b668a8d7e84c61a5e6262bb97f00d4
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ6b2thMTIzQGdtYWlsLmNvbSIsImF1ZCI6IndlYiIsInJvbGUiOiJST0xFX1VTRVIiLCJleHAiOjE2ODM0OTA3NjUsImlhdCI6MTY4MzQ4ODk2NX0.FyjNJN-pNuR1ZgXeEsZzeHeu3qKM4eLgHPlS25BRks8CghCJqwQ1rrktkwK_Vi2x5SQVACqTEfIOicftm83tHA
+        description: ""
+    authentication: {}
+    metaSortKey: -1680467330756.2188
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_88c5f03e1b2c47f4a13017f24eb59bd1
+    parentId: fld_7b2e3ddc6ece4c9d88323b1593caee6d
+    modified: 1683488780790
+    created: 1683487969061
+    url: "{{ _.base_url }}/api/user/register"
+    name: Register
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"email": "zorica.pesic01@gmail.com",
+          "name": "Pera",
+          "surname": "Perić",
+          "mobile": "38112312300",
+          "password": "NekaSifra123"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1680467330755.4375
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_89bdf647898744be864615ba69312556
+    parentId: fld_7b2e3ddc6ece4c9d88323b1593caee6d
+    modified: 1683490096106
+    created: 1683489636740
+    url: "{{ _.base_url }}/cert/requests"
+    name: See my requests
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_86bfecbf95434393b6bc90dc2c8193f3
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ6b2thMTIzQGdtYWlsLmNvbSIsImF1ZCI6IndlYiIsInJvbGUiOiJST0xFX1VTRVIiLCJleHAiOjE2ODM0OTA3NjUsImlhdCI6MTY4MzQ4ODk2NX0.FyjNJN-pNuR1ZgXeEsZzeHeu3qKM4eLgHPlS25BRks8CghCJqwQ1rrktkwK_Vi2x5SQVACqTEfIOicftm83tHA
+        description: ""
+    authentication: {}
+    metaSortKey: -1680467330753.0938
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_9bef9a334c48477cb908bbc94a7616c8
+    parentId: fld_7b2e3ddc6ece4c9d88323b1593caee6d
+    modified: 1683489902887
+    created: 1683410855977
+    url: "{{ _.base_url }}/cert/admin/requests"
+    name: Get all requests
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_3fee6d9137fe4846bcba56f92fd6206e
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ6b2thMTIzQGdtYWlsLmNvbSIsImF1ZCI6IndlYiIsInJvbGUiOiJST0xFX1VTRVIiLCJleHAiOjE2ODM0OTA3NjUsImlhdCI6MTY4MzQ4ODk2NX0.FyjNJN-pNuR1ZgXeEsZzeHeu3qKM4eLgHPlS25BRks8CghCJqwQ1rrktkwK_Vi2x5SQVACqTEfIOicftm83tHA
+        description: ""
+    authentication: {}
+    metaSortKey: -1680467330750.75
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_8e0b758c16484e6a976167f3cc2c0c26
+    parentId: fld_7b2e3ddc6ece4c9d88323b1593caee6d
+    modified: 1683832378665
+    created: 1683408393896
+    url: "{{ _.base_url }}/cert/download/-6813135836346586407"
+    name: Download
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_675cb051b65744bcb1c9f63a765741d8
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwZXJhMTIzQGdtYWlsLmNvbSIsImF1ZCI6IndlYiIsInJvbGUiOiJST0xFX0FETUlOIiwiZXhwIjoxNjgzODM0MTY0LCJpYXQiOjE2ODM4MzIzNjR9.GJChy6s4jaZsvN_9kkY6F3kZsd99WYwNMRKOqRIXHM2O50bNejOlU5vl3UflF19XFJaiufQ7eFJsZIF4Et_w7A
+        description: ""
+    authentication: {}
+    metaSortKey: -1680467330744.5
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_95a0b09b04c046569342d3f79867d700
+    parentId: fld_7b2e3ddc6ece4c9d88323b1593caee6d
+    modified: 1683489406700
+    created: 1683411950855
+    url: "{{ _.base_url }}/cert/upload"
+    name: Upload
+    description: ""
+    method: POST
+    body:
+      mimeType: multipart/form-data
+      params:
+        - id: pair_3e3f69354f1341b39e83ae74cd7d99df
+          name: image
+          value: ""
+          description: ""
+          type: file
+          fileName: C:\Users\suput\Documents\GitHub\IB_Projekat\certificates_project\certificates_project\src\certscertificate.crt
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: multipart/form-data
+        id: pair_7fde4a3b983643e18d6aa6892c644703
+      - id: pair_a233cfa4b96e46478876cf6a3e9d09e5
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ6b2thMTIzQGdtYWlsLmNvbSIsImF1ZCI6IndlYiIsInJvbGUiOiJST0xFX1VTRVIiLCJleHAiOjE2ODM0OTA3NjUsImlhdCI6MTY4MzQ4ODk2NX0.FyjNJN-pNuR1ZgXeEsZzeHeu3qKM4eLgHPlS25BRks8CghCJqwQ1rrktkwK_Vi2x5SQVACqTEfIOicftm83tHA
+        description: ""
+    authentication: {}
+    metaSortKey: -1680467330738.25
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_51b9b8b28ef54de58bad1a6628986e5e
+    parentId: fld_7b2e3ddc6ece4c9d88323b1593caee6d
+    modified: 1683977654733
+    created: 1683404767497
+    url: "{{ _.base_url }}/cert/request"
+    name: Make a request
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"type":"1",
+        	"username":"zoka123@gmail.com",
+        	"serialNumber":"-5714942525703735773",
+        	"date":"2023-06-05"
+        }
+    parameters: []
+    headers:
+      - id: pair_f31f9589aa7c4949ad94017d7c7ce6bd
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ6b2thMTIzQGdtYWlsLmNvbSIsImF1ZCI6IndlYiIsInJvbGUiOiJST0xFX1VTRVIiLCJleHAiOjE2ODM5Nzk0NDAsImlhdCI6MTY4Mzk3NzY0MH0.kvFmYqyOpcwxlODKJyEiVKRjz61J5HGyhNqWpqNsOVa43zd5Y-HhxsEjjKQabSzQDN7MuUTBq6UKLPQSGeZIgA
+        description: ""
+      - name: Content-Type
+        value: application/json
+        id: pair_fdbc5b352cc94caf9a0cdbb3001d4101
+    authentication: {}
+    metaSortKey: -1680467330732
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_468d879568fd4284ab77d3add5b51138
+    parentId: fld_7b2e3ddc6ece4c9d88323b1593caee6d
+    modified: 1683409034108
+    created: 1683405266706
+    url: "{{ _.base_url }}/cert/acceptCertificate/6456b92d502f72247a33ef55"
+    name: Accept request
+    description: ""
+    method: PUT
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_a8729aa3dcd84703a00655d7283789fa
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ6b2thMTIzQGdtYWlsLmNvbSIsImF1ZCI6IndlYiIsInJvbGUiOiJST0xFX1VTRVIiLCJleHAiOjE2ODM0MTA4MjIsImlhdCI6MTY4MzQwOTAyMn0.YdgSWb8OuuR411aQ-OqxIEuNfqP-iBUYUC0PmLDDe7UeRb9RX6xTiYVMfIcgwqRaIwCQ9Eg53xmpw7D7YGuD9Q
+        description: ""
+    authentication: {}
+    metaSortKey: -1680467330657
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_8d11cc73ddca4ebe9f99b257d0a314fa
+    parentId: fld_7b2e3ddc6ece4c9d88323b1593caee6d
+    modified: 1683490226609
+    created: 1683490022223
+    url: "{{ _.base_url }}/cert/deny/6456b92d502f72247a33ef55"
+    name: Deny request
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"type":"1",
+        	"username":"zoka123@gmail.com",
+        	"serialNumber":"1",
+        	"accepted":false,
+        	"reason":"ne dam moj sertifikat",
+        	"date":"2023-06-05"
+        }
+    parameters: []
+    headers:
+      - id: pair_829787b732af44ccac66769be1cda779
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ6b2thMTIzQGdtYWlsLmNvbSIsImF1ZCI6IndlYiIsInJvbGUiOiJST0xFX1VTRVIiLCJleHAiOjE2ODM0OTA3NjUsImlhdCI6MTY4MzQ4ODk2NX0.FyjNJN-pNuR1ZgXeEsZzeHeu3qKM4eLgHPlS25BRks8CghCJqwQ1rrktkwK_Vi2x5SQVACqTEfIOicftm83tHA
+        description: ""
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1680467330644.5
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_1f0b615a2fd44c13822280fa3894ace5
+    parentId: fld_6d37d4851b0340189caa2610e54dacc9
+    modified: 1684327976553
+    created: 1683062222474
+    url: https://1f414q2rnh.execute-api.eu-north-1.amazonaws.com/prod/login_user
+    name: Login
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+            "username": "markic",
+            "password": "NekaSifra123!"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1683779018276
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_6d37d4851b0340189caa2610e54dacc9
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1683404584210
+    created: 1683404584210
+    name: CC
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1683404584210
+    _type: request_group
+  - _id: req_dc63cec4c936421787827da8ed72cbd7
+    parentId: fld_6d37d4851b0340189caa2610e54dacc9
+    modified: 1684507072437
+    created: 1682890698846
+    url: https://1f414q2rnh.execute-api.eu-north-1.amazonaws.com/prod/upload
+    name: Upload file
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+            "content":"NjUg9WfkC9jVVcJd6zdTqw==",
+            "fileName":"/more/2022/januar/slika3.png",
+            "fileType":"png",
+            "fileSize":"10KB",
+            "desc":"slika",
+            "tags":"slika"
+        }
+    parameters: []
+    headers:
+      - id: pair_1930c8cbfcc34f62ad891068b2fe9dfd
+        name: Authorization
+        value: Bearer
+          eyJraWQiOiJHaGF5VHFsS2t0cCtNNlBoSFhueitpNmpqYVRzTk9WaE5EemFLVXdXR3M0PSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI5MzUwMWQyNy1kNDkxLTQ1ZTAtODkwZS1kODYyMmE2MGJiMGYiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYmlydGhkYXRlIjoiMjAwMVwvMTBcLzEwIiwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmV1LW5vcnRoLTEuYW1hem9uYXdzLmNvbVwvZXUtbm9ydGgtMV9lWFFVS0Y2ZDUiLCJjb2duaXRvOnVzZXJuYW1lIjoibWFya2ljIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibWFya2ljIiwiZ2l2ZW5fbmFtZSI6Ik1hcmtvIiwib3JpZ2luX2p0aSI6IjYzYTk0MGEwLTk5YTQtNDFmYy1hNmQ5LTEwZjJmMjAwNTA1ZCIsImF1ZCI6IjRuZWxsdGozaWxoYXI4NTR2azE2cmppaW05IiwiZXZlbnRfaWQiOiJlYTlmM2Q2ZC1kMmJiLTQ0NWMtYWU0NC05NTBmYzY5YjIwM2MiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTY4NDUwNTEwNiwiZXhwIjoxNjg0NTA4NzA2LCJpYXQiOjE2ODQ1MDUxMDYsImZhbWlseV9uYW1lIjoiUGVyacSHIiwianRpIjoiYjUwNzVkNTEtYmQ3MC00ZGFjLWFlN2YtMmUxMmY5NGJkZmZjIiwiZW1haWwiOiJraWthcG9wb3YxMjNAZ21haWwuY29tIn0.d00fCXEhT8xyxLVqNSwRmm6HV80ioAuV8w0XEABYlDx1M_c_ctNvtluCQx8z_76v7ikfCgTJHiVGIyNJUk1iw34cJRo3b2omiLLmbeSmI4oq0TfczVUrYbqRyLasqYsdHwCUsUCgk7bpEox80QHhGwPhoyBQULSzTovJDNjLH0Ucui1TzIiWmTSbPS7cx8DvjGC0rFXYmyRL_q4KjF1V55jyfSlp5fqCqgIUuwNfiZZ9cxdrPzOKinOfU-3JKLRPqyyAQVLX3zFLP1tRi0S5507h81OzfpnkS-A7Md8HyPmGRMvdecwFbATugHfVx-uQ0MTDSAr1fbRNOSx0YKFQ1Q
+        description: ""
+      - name: Content-Type
+        value: application/json
+        id: pair_54aba76edffe41009cb8f472296dfa4e
+    authentication: {}
+    metaSortKey: -1683642614530
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_aa130de50ca0473b8e54cd36a9a07972
+    parentId: fld_6d37d4851b0340189caa2610e54dacc9
+    modified: 1684343639308
+    created: 1684324633210
+    url: "
+      https://1f414q2rnh.execute-api.eu-north-1.amazonaws.com/prod/gallery/slik\
+      e"
+    name: Album content
+    description: ""
+    method: GET
+    body:
+      mimeType: application/json
+      text: ""
+    parameters: []
+    headers:
+      - id: pair_5ec58baf1e6f4b699b65437e20b1e216
+        name: Authorization
+        value: Bearer
+          eyJraWQiOiJHaGF5VHFsS2t0cCtNNlBoSFhueitpNmpqYVRzTk9WaE5EemFLVXdXR3M0PSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI5MzUwMWQyNy1kNDkxLTQ1ZTAtODkwZS1kODYyMmE2MGJiMGYiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYmlydGhkYXRlIjoiMjAwMVwvMTBcLzEwIiwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmV1LW5vcnRoLTEuYW1hem9uYXdzLmNvbVwvZXUtbm9ydGgtMV9lWFFVS0Y2ZDUiLCJjb2duaXRvOnVzZXJuYW1lIjoibWFya2ljIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibWFya2ljIiwiZ2l2ZW5fbmFtZSI6Ik1hcmtvIiwib3JpZ2luX2p0aSI6ImY1ZjU1YzA2LWY4MTgtNDgwNi1hODQ1LWI3ODhhMjJlYjRhNSIsImF1ZCI6IjRuZWxsdGozaWxoYXI4NTR2azE2cmppaW05IiwiZXZlbnRfaWQiOiIwZjMyOWNkOC1kZTE1LTQxZjEtOWEwYy1iNGY0NjQ1NzQxOGIiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTY4NDM0MzYzMCwiZXhwIjoxNjg0MzQ3MjMwLCJpYXQiOjE2ODQzNDM2MzAsImZhbWlseV9uYW1lIjoiUGVyacSHIiwianRpIjoiNmQzNzQ0YjktZTA1Ni00YzdjLWIwM2ItYzNhMjM0Y2MxNWY5IiwiZW1haWwiOiJraWthcG9wb3YxMjNAZ21haWwuY29tIn0.Y7TSCeR6M8-w-BwHfD0itPkJZybwVLAAtf_dBz6rerH7zknw-mEtr4W7WSaDeI8jh-yL9KynyUxSPNU8e-aeuKuuqg0ifi0m7gd-EIdBo5ejmsXhWM992QDKnXBztBViOOlCyIzHoM2ZvwlxQpDhD99VeBoAbkrTzjxB_TvDaK0yfEg5GTllHpYDzzruOlogJjRHHQPf_5iaPRcZoWe7kSO0KkewyLlGMM-SLXN6j9l6_CZrnYsr1-RdLOK1SDKkWDMmKxZbcJU5fC5y6DLqIJ2O60UEUrmqXvLzQoyPcWWil_yW0fDhWpFaaFlc_3bD6oB_U5t569yLLEObogDRUA
+        description: ""
+      - name: Content-Type
+        value: application/json
+        id: pair_436dbe7ffcc544389cf8142687661132
+    authentication: {}
+    metaSortKey: -1683506210784
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_239146431bfb47a28c9b028c4ab03268
+    parentId: fld_6d37d4851b0340189caa2610e54dacc9
+    modified: 1684339801339
+    created: 1684281858973
+    url: https://1f414q2rnh.execute-api.eu-north-1.amazonaws.com/prod/gallery
+    name: Get user gallery
+    description: ""
+    method: GET
+    body:
+      mimeType: application/json
+      text: ""
+    parameters: []
+    headers:
+      - id: pair_443e96ceaae14e54ad20809e47ab2996
+        name: Authorization
+        value: Bearer
+          eyJraWQiOiJHaGF5VHFsS2t0cCtNNlBoSFhueitpNmpqYVRzTk9WaE5EemFLVXdXR3M0PSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI5MzUwMWQyNy1kNDkxLTQ1ZTAtODkwZS1kODYyMmE2MGJiMGYiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYmlydGhkYXRlIjoiMjAwMVwvMTBcLzEwIiwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmV1LW5vcnRoLTEuYW1hem9uYXdzLmNvbVwvZXUtbm9ydGgtMV9lWFFVS0Y2ZDUiLCJjb2duaXRvOnVzZXJuYW1lIjoibWFya2ljIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibWFya2ljIiwiZ2l2ZW5fbmFtZSI6Ik1hcmtvIiwib3JpZ2luX2p0aSI6ImVlMzRhM2Q1LTQ1MTAtNGVhZi05MzkyLWY5MWEyZGZmYzMxYyIsImF1ZCI6IjRuZWxsdGozaWxoYXI4NTR2azE2cmppaW05IiwiZXZlbnRfaWQiOiJmNDk0OTY4Ny0yZjU1LTRkMGEtOWU5Yy1iZmRmNDJlNTBiOGYiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTY4NDMzOTc5MSwiZXhwIjoxNjg0MzQzMzkxLCJpYXQiOjE2ODQzMzk3OTEsImZhbWlseV9uYW1lIjoiUGVyacSHIiwianRpIjoiZGRlYjVjNjEtNmExNy00YjQxLTg4YWYtYmQ3MGE5ZmQzY2Y4IiwiZW1haWwiOiJraWthcG9wb3YxMjNAZ21haWwuY29tIn0.QtcT2rzEXLUblIG09VVMotv3wR2wSb37WtJhX2kp3rPMltqtcFnqY_BPLnhng5jewwPcqV-w4bYkyVRuBmS7G7BmG-KRn6zspuMr2a80gblbQEKz4sO2TTe82bIaGr76YJWhNbhvhw1qMxPkRLEV3pV2Fs9q31bwDhqjntFCHSyrDVHP8gdutePKmP_dyc1JrO5iNpJm9P2v3QDZ8s33uUxZ6TtmRHNNP3H5FosUrAjfjEZLFbKPkjwcnSuQcS6VtfsQioU0LgjpHPLuoLeR5yjyOmIM1rEM6DlZ0q2IiCZ3Brsk9rcLcUuKTvCge55zcV0RZkSLkC2fp65o_5p_gA
+        description: ""
+      - name: Content-Type
+        value: application/json
+        id: pair_cbf439c09e094447bb5379c5658d4b08
+    authentication: {}
+    metaSortKey: -1683233403242
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb926ee2449
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb955fc4ba8
+    modified: 1673901458441
+    created: 1670100457896
+    url: "{{ base_url }}/api/passenger"
+    name: Create passenger
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+                    "name": "Pera",
+                    "surname": "Perić",
+                    "profilePicture": "U3dhZ2dlciByb2Nrcw==",
+                    "telephoneNumber": "381123123",
+                    "email": "pera.peric@email.com",
+                    "address": "Bulevar Oslobodjenja 74",
+                    "password": "NekaSifra123"
+                }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1670100457896
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_wrk_584f82820964471ea1d43a16a3b81eb955fc4ba8
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1673114886720
+    created: 1670100457970
+    name: passenger
+    description: Passenger functionalities
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1670100457970
+    _type: request_group
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb99b5962b2
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb955fc4ba8
+    modified: 1673904979067
+    created: 1670100457887
+    url: "{{ base_url }}/api/passenger?page=0&size=3"
+    name: Getting passengers
+    description: ""
+    method: GET
+    body: {}
+    parameters:
+      - name: page
+        disabled: true
+        value: "0"
+      - name: size
+        disabled: true
+        value: "0"
+    headers:
+      - id: pair_2dd5f325a38c4c05a4ae1053bc3877ba
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkcjFAZ21haWwuY29tIiwiYXVkIjoid2ViIiwicm9sZSI6W3sibmFtZSI6IlJPTEVfRFJJVkVSIn1dLCJpZCI6MSwiZXhwIjoxNjczOTA2NzU1LCJpYXQiOjE2NzM5MDQ5NTV9.bCSXnBJCFXAP_t0F9WkC-GaHOQXUHGxp6FstI9DiqDqSCHvfEWYrzHdNOEtp_t6UOk_D4R7d3RiKEMAIqYnQAg
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457887
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb91f4f210a
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb955fc4ba8
+    modified: 1673909581269
+    created: 1670100457878
+    url: "{{ base_url }}/api/passenger/activate/2"
+    name: Activate passenger account
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1670100457878
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb92ff7797c
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb955fc4ba8
+    modified: 1673911021703
+    created: 1670100457869
+    url: "{{ base_url }}/api/passenger/7"
+    name: Passenger details
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_06943d8723304c658b1ac7a1745a4741
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwYTJAZ21haWwuY29tIiwiYXVkIjoid2ViIiwicm9sZSI6W3sibmFtZSI6IlJPTEVfVVNFUiJ9XSwiaWQiOjcsImV4cCI6MTY3MzkxMTgwMywiaWF0IjoxNjczOTEwMDAzfQ.C_YVnpiOozYPPrajbIedtS_dLrIl0ghnuh_OVpK2YG5axBwl0wAImTWVX7JNZ_CWgxCV2CorTMLh8pu54C8itQ
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457869
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9ca93418a
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb955fc4ba8
+    modified: 1673114886575
+    created: 1670100457860
+    url: "{{ base_url }}/api/passenger/{{ id }}"
+    name: Update existing passenger
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: "null"
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1670100457860
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9d505ccbc
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb955fc4ba8
+    modified: 1673911240219
+    created: 1670100457850
+    url: "{{ base_url }}/api/passenger/7/ride?page=0&size=3&sort"
+    name: Passenger rides
+    description: ""
+    method: GET
+    body: {}
+    parameters:
+      - name: page
+        disabled: true
+        value: "0"
+      - name: size
+        disabled: true
+        value: "0"
+      - name: sort
+        disabled: true
+        value: firstName
+      - name: from
+        disabled: true
+        value: 2023-01-07T18:08:06.104Z
+      - name: to
+        disabled: true
+        value: 2023-01-07T18:08:06.104Z
+    headers:
+      - id: pair_9882074d082348c8b7bb1cb1cc76650a
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwYTJAZ21haWwuY29tIiwiYXVkIjoid2ViIiwicm9sZSI6W3sibmFtZSI6IlJPTEVfVVNFUiJ9XSwiaWQiOjcsImV4cCI6MTY3MzkxMjk4OCwiaWF0IjoxNjczOTExMTg4fQ.TlBa36ApWUDw-5qYs8U7FJ3xwUS5Dl-9Jg0DYLrQZibRF4PLmTjbtRXzYu5-nTtrtvQEgSV3CEguaZt4czHyKA
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457850
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9babcc045
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673114886547
+    created: 1670586420520
+    url: "{{ base_url }}/api/driver/document/{{ document-id }}"
+    name: Delete driver's document by id
+    description: ""
+    method: DELETE
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1670586420520
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1673114886715
+    created: 1670100457962
+    name: driver
+    description: Driver functionalities
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1670100457962
+    _type: request_group
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb947545c11
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673114886568
+    created: 1670100457841
+    url: "{{ base_url }}/api/driver"
+    name: Create driver
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: "null"
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1670100457841
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9a5fd0091
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673114886564
+    created: 1670100457832
+    url: "{{ base_url }}/api/driver"
+    name: Getting paginated driver data
+    description: ""
+    method: GET
+    body: {}
+    parameters:
+      - name: page
+        disabled: true
+        value: "0"
+      - name: size
+        disabled: true
+        value: "0"
+    headers: []
+    authentication: {}
+    metaSortKey: -1670100457832
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9c35c97c9
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673114886561
+    created: 1670100457820
+    url: "{{ base_url }}/api/driver/{{ id }}"
+    name: Driver details
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1670100457820
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb923c1856e
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673114886557
+    created: 1670100457809
+    url: "{{ base_url }}/api/driver/{{ id }}"
+    name: Update existing driver
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: "null"
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1670100457809
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb95bad96e5
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673114886554
+    created: 1670100457800
+    url: "{{ base_url }}/api/driver/{{ id }}/documents"
+    name: Driver documents
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1670100457800
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb93f063a7f
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1670587533259
+    created: 1670100457790
+    url: "{{ base_url }}/api/driver/1/documents"
+    name: Deleting drivers documents
+    description: ""
+    method: DELETE
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1670100457790
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb97672c303
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673114886551
+    created: 1670100457781
+    url: "{{ base_url }}/api/driver/{{ id }}/documents"
+    name: Adding new driver documents
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "name": "Vozačka dozvola",
+          "documentImage": "U3dhZ2dlciByb2Nrcw="
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1670100457781
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9b6402f4d
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673114886543
+    created: 1670100457773
+    url: "{{ base_url }}/api/driver/{{ id }}/vehicle"
+    name: Vehicle of the driver
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1670100457773
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb99050abd2
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673114886540
+    created: 1670100457765
+    url: "{{ base_url }}/api/driver/{{ id }}/vehicle"
+    name: Add vehicle to the driver
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: "null"
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1670100457765
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb900859869
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673114886536
+    created: 1670100457754
+    url: "{{ base_url }}/api/driver/{{ id }}/vehicle"
+    name: Change the vehicle of the driver
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: "null"
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1670100457754
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9b40efaf7
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673114886531
+    created: 1670100457745
+    url: "{{ base_url }}/api/driver/{{ id }}/working-hour"
+    name: Working hours of the driver
+    description: ""
+    method: GET
+    body: {}
+    parameters:
+      - name: page
+        disabled: true
+        value: "0"
+      - name: size
+        disabled: true
+        value: "0"
+      - name: from
+        disabled: true
+        value: 2023-01-07T18:08:06.105Z
+      - name: to
+        disabled: true
+        value: 2023-01-07T18:08:06.105Z
+    headers: []
+    authentication: {}
+    metaSortKey: -1670100457745
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb948b462ab
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673114886527
+    created: 1670100457737
+    url: "{{ base_url }}/api/driver/{{ id }}/working-hour"
+    name: Creating informations about the drivers working hours
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "start": "2023-01-07T18:08:06.105Z"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1670100457737
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9955bddf4
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673843378576
+    created: 1670100457728
+    url: "{{ base_url
+      }}/api/driver/1/ride?page=0&size=3&sort=totalCost&from=2020-10-10
+      09:15:10&to=2020-12-12 10:10:10"
+    name: Rides of the specific driver
+    description: ""
+    method: GET
+    body: {}
+    parameters:
+      - name: page
+        disabled: true
+        value: "2"
+      - name: size
+        disabled: true
+        value: "10"
+      - name: sort
+        disabled: true
+        value: startTime
+      - name: from
+        disabled: true
+        value: 2023-01-07T18:08:06.105Z
+      - name: to
+        disabled: true
+        value: 2023-01-07T18:08:06.105Z
+    headers:
+      - id: pair_ab7401da437847c398c6e0cf50ff1e39
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbWFpbDFAZ21haWwuY29tIiwiYXVkIjoid2ViIiwicm9sZSI6W3sibmFtZSI6IlJPTEVfRFJJVkVSIn1dLCJpZCI6MSwiZXhwIjoxNjczODQ1MTI3LCJpYXQiOjE2NzM4NDMzMjd9.zq1iNGahGlVCoSTgq8XEcw9_IEC0A04K3cNrPNC3rDVCeBvjGAOAvMRyOVJi4bw2qQ6WwseJ7hLgrg0FQkBq-Q
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457728
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb92f80d32d
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673114886497
+    created: 1670100457717
+    url: "{{ base_url }}/api/driver/working-hour/{{ working-hour-id }}"
+    name: Detais about the working hours of the driver
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1670100457717
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9417f6e2a
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9fdda0c46
+    modified: 1673114886458
+    created: 1670100457707
+    url: "{{ base_url }}/api/driver/working-hour/{{ working-hour-id }}"
+    name: Changing the working hours
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "end": "2023-01-07T18:08:06.105Z"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1670100457707
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9c479ff18
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9320ef6a3
+    modified: 1674608594761
+    created: 1673114886283
+    url: "{{ base_url }}/api/ride/3/start"
+    name: Start ride
+    description: ""
+    method: PUT
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_938d810e39e5452eb540aba4272ba53f
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkcjFAZ21haWwuY29tIiwiYXVkIjoid2ViIiwicm9sZSI6W3sibmFtZSI6IlJPTEVfRFJJVkVSIn1dLCJpZCI6MSwiZXhwIjoxNjc0NjEwMzE1LCJpYXQiOjE2NzQ2MDg1MTV9.0dFgA-wy44K_4AM3d9IfyTWxoYQeKUp9yoqiNRBUaNomLY1ZqL4Dr9L75s7PH9qLvmM-IQmd2I6O3YD_YiZvyw
+        description: ""
+    authentication: {}
+    metaSortKey: -1673114886283
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_wrk_584f82820964471ea1d43a16a3b81eb9320ef6a3
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1673114886704
+    created: 1670100457952
+    name: ride
+    description: Ride functionalities
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1670100457952
+    _type: request_group
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9578d12d4
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9320ef6a3
+    modified: 1673114886196
+    created: 1673114886196
+    url: "{{ base_url }}/api/ride/favorites"
+    name: Create favorite locations for quick selection
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: "null"
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1673114886196
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb95dce8deb
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9320ef6a3
+    modified: 1673114886193
+    created: 1673114886193
+    url: "{{ base_url }}/api/ride/favorites"
+    name: Get favorite locations
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1673114886193
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9a10b432b
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9320ef6a3
+    modified: 1673114886190
+    created: 1673114886190
+    url: "{{ base_url }}/api/ride/favorites/{{ id }}"
+    name: Delete existing favorite ride
+    description: ""
+    method: DELETE
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1673114886190
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb90b689fde
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9320ef6a3
+    modified: 1674364299878
+    created: 1670100457697
+    url: "{{ base_url }}/api/ride"
+    name: Creating a ride
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |
+        {
+        	"scheduleTime":"2023-01-22T04:12:55",
+          "locations": [
+            {
+              "departure": {
+                "address": "Promenada",
+                "latitude": 45.243715,
+                "longitude": 19.841343
+              },
+              "destination": {
+                "address": "Kolo srpskih sestara 23",
+                "latitude": 45.240952,
+                "longitude": 19.827441
+              }
+            }
+          ],
+          "passengers": [
+            {
+              "id": 7,
+              "email": "user@example.com"
+            }
+          ],
+          "vehicleType": "STANDARD",
+          "babyTransport": true,
+          "petTransport": true
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_acd8065428e94a95a905e57510a2e522
+      - id: pair_835023a42f134cdb9ca29a3ad9da6c39
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwYTFAZ21haWwuY29tIiwiYXVkIjoid2ViIiwicm9sZSI6W3sibmFtZSI6IlJPTEVfVVNFUiJ9XSwiaWQiOjYsImV4cCI6MTY3NDM1ODk1MywiaWF0IjoxNjc0MzU3MTUzfQ.gptAkJ324BX0BkpsPeiZ-PttI7oCKRl0-HLK71UwCjfORnEz_7c2u2EXy-MChsordJtT64t75x91d_fYJBaYyQ
+        description: ""
+      - id: pair_72799e16512d4f8985e64e62a16ddf13
+        name: ""
+        value: ""
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457697
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9598b119d
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9320ef6a3
+    modified: 1674608541435
+    created: 1670100457685
+    url: "{{ base_url }}/api/ride/driver/1/active"
+    name: Active ride for driver
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_111e95f425434e529215db64f9515e48
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkcjFAZ21haWwuY29tIiwiYXVkIjoid2ViIiwicm9sZSI6W3sibmFtZSI6IlJPTEVfRFJJVkVSIn1dLCJpZCI6MSwiZXhwIjoxNjc0NjEwMzE1LCJpYXQiOjE2NzQ2MDg1MTV9.0dFgA-wy44K_4AM3d9IfyTWxoYQeKUp9yoqiNRBUaNomLY1ZqL4Dr9L75s7PH9qLvmM-IQmd2I6O3YD_YiZvyw
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457685
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb977007e4a
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9320ef6a3
+    modified: 1673456743735
+    created: 1670100457675
+    url: "{{ base_url }}/api/ride/passenger/1/active"
+    name: Active ride for passenger
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_378e739a5bd14c03aeae39d61bc45474
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwZXJhMUBlbWFpbC5jb20iLCJhdWQiOiJ3ZWIiLCJyb2xlIjpbeyJuYW1lIjoiUk9MRV9VU0VSIn1dLCJpZCI6MSwiZXhwIjoxNjczNDU4NDkwLCJpYXQiOjE2NzM0NTY2OTB9.NwQ9raH7ESaZBkoy82hqllpJsYaeJYkru-HKMFPAH4hYCs1sGftcpY1yhDvSsj4xEBj839IiewhlSzI9Zoj3zg
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457675
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb93c41fc2e
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9320ef6a3
+    modified: 1674000521361
+    created: 1670100457665
+    url: "{{ base_url }}/api/ride/4"
+    name: Ride details
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_cf6240a9b7104d0ba268c1d294c4cd7c
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZCI6IndlYiIsInJvbGUiOlt7Im5hbWUiOiJST0xFX0FETUlOIn1dLCJpZCI6MSwiZXhwIjoxNjc0MDAyMjk3LCJpYXQiOjE2NzQwMDA0OTd9.7JX3-ewJm6eEbv8lNC1bCTe94UFpTq_Ec-_w2ujjJOsgZqC1rKAOWtqaxKbkMixKN-DmXSLXRujfSau8rGfvtA
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457665
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb93f06400b
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9320ef6a3
+    modified: 1673191142985
+    created: 1670100457653
+    url: "{{ base_url }}/api/ride/3/withdraw"
+    name: Cancel existing ride
+    description: ""
+    method: PUT
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_a4f6ce00a403439792e714893a7287c2
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwZXJhLnBlcmljQGVtYWlsLmNvbSIsImF1ZCI6IndlYiIsInJvbGUiOlt7Im5hbWUiOiJST0xFX1VTRVIifV0sImlkIjoxLCJleHAiOjE2NzMxOTE2NjQsImlhdCI6MTY3MzE4OTg2NH0.OgYbEtDFMF-ZM8pc-mGZFOCkO7Unlk4NQenvpBlMlo5uhAbb69BOJQma2JCI61eg3ZX139VYMK9pz2mTecEIww
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457653
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9febababb
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9320ef6a3
+    modified: 1673190426332
+    created: 1670100457643
+    url: "{{ base_url }}/api/ride/12/panic"
+    name: Panic procedure for the ride
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "reason": "Driver is constantly listeting to bad music."
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_1a88d47f0e564817bf6b73945939227b
+      - id: pair_f0123b1348f54e2196ec22444c42df3d
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbWFpbCIsImF1ZCI6IndlYiIsInJvbGUiOlt7Im5hbWUiOiJST0xFX0RSSVZFUiJ9XSwiaWQiOjIsImV4cCI6MTY3MzE5MTc4MywiaWF0IjoxNjczMTg5OTgzfQ.iTZro-a5yUDtwx9n5GQUQURc91M_i5w3QhQknvSfh8xixhASu5hHEA4PXeAJVSN79Lh0rWU4vq8Qe67bPSbDwQ
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457643
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9899b0698
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9320ef6a3
+    modified: 1673190477134
+    created: 1670100457628
+    url: "{{ base_url }}/api/ride/3/accept"
+    name: Accept ride
+    description: ""
+    method: PUT
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_0e6f381f838342b9b7066600cd5cb141
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbWFpbCIsImF1ZCI6IndlYiIsInJvbGUiOlt7Im5hbWUiOiJST0xFX0RSSVZFUiJ9XSwiaWQiOjIsImV4cCI6MTY3MzE5MTc4MywiaWF0IjoxNjczMTg5OTgzfQ.iTZro-a5yUDtwx9n5GQUQURc91M_i5w3QhQknvSfh8xixhASu5hHEA4PXeAJVSN79Lh0rWU4vq8Qe67bPSbDwQ
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457628
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9a136436d
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9320ef6a3
+    modified: 1674608573886
+    created: 1670100457611
+    url: "{{ base_url }}/api/ride/3/end"
+    name: End the ride
+    description: ""
+    method: PUT
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_c9d1b0c27c094ce68d29874f245d375c
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkcjFAZ21haWwuY29tIiwiYXVkIjoid2ViIiwicm9sZSI6W3sibmFtZSI6IlJPTEVfRFJJVkVSIn1dLCJpZCI6MSwiZXhwIjoxNjc0NjEwMzE1LCJpYXQiOjE2NzQ2MDg1MTV9.0dFgA-wy44K_4AM3d9IfyTWxoYQeKUp9yoqiNRBUaNomLY1ZqL4Dr9L75s7PH9qLvmM-IQmd2I6O3YD_YiZvyw
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457611
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9a2da6706
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9320ef6a3
+    modified: 1673985400090
+    created: 1670100457597
+    url: "{{ base_url }}/api/ride/2/cancel"
+    name: Cancel the ride with an explanation
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "reason": "No passengers were at the destination"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_30a77aebc1f646349658ab1a079b667e
+      - id: pair_7268664b9e62403fbc6a2e51d54056b3
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkcjFAZ21haWwuY29tIiwiYXVkIjoid2ViIiwicm9sZSI6W3sibmFtZSI6IlJPTEVfRFJJVkVSIn1dLCJpZCI6MSwiZXhwIjoxNjczOTg3MTY2LCJpYXQiOjE2NzM5ODUzNjZ9.tgTOmQEe-rZ07uJMrsbDlAlWD7dJH5YEh7rXlRw3i8veAeIs-M8uEekJdTcifkfLxJCMPTZr9ihsqJMVZcoWgg
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457597
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb90c3c5f18
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb961e62b21
+    modified: 1673114886135
+    created: 1670100457503
+    url: "{{ base_url }}/api/review/{{ rideId }}/vehicle"
+    name: Leave review for the vehicle
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "rating": 3,
+          "comment": "The vehicle was bad and dirty"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1670100457503
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_wrk_584f82820964471ea1d43a16a3b81eb961e62b21
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1673114886692
+    created: 1670100457944
+    name: review
+    description: Review functionalities
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1670100457945
+    _type: request_group
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb92f367fa4
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb961e62b21
+    modified: 1673114886130
+    created: 1670100457498
+    url: "{{ base_url }}/api/review/vehicle/{{ id }}"
+    name: Getting the reviews for the vehicle
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1670100457498
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb965bd25c3
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb961e62b21
+    modified: 1673114886127
+    created: 1670100457492
+    url: "{{ base_url }}/api/review/{{ rideId }}/driver"
+    name: Leave review for the driver
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "rating": 3,
+          "comment": "The driver was driving really fast"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1670100457492
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9aa5c35da
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb961e62b21
+    modified: 1673114886122
+    created: 1670100457483
+    url: "{{ base_url }}/api/review/driver/{{ id }}"
+    name: Getting the reviews for the driver
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1670100457483
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9edbcdcaa
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb961e62b21
+    modified: 1673114886118
+    created: 1670100457424
+    url: "{{ base_url }}/api/review/{{ rideId }}"
+    name: Getting all reviews for the specific ride
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1670100457425
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb917a2c60d
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9c1ab1b73
+    modified: 1673114886186
+    created: 1670100457580
+    url: "{{ base_url }}/api/panic"
+    name: Overview of all panic notifications
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1670100457581
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_wrk_584f82820964471ea1d43a16a3b81eb9c1ab1b73
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1673114886680
+    created: 1670100457935
+    name: panic
+    description: Panic functionalities
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1670100457935
+    _type: request_group
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb96e3b2bb5
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb90b059106
+    modified: 1673114886183
+    created: 1670100457566
+    url: "{{ base_url }}/api/vehicle/{{ id }}/location"
+    name: Change location of the vehicle
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "address": "Bulevar oslobodjenja 46",
+          "latitude": 45.267136,
+          "longitude": 19.833549
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1670100457566
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_wrk_584f82820964471ea1d43a16a3b81eb90b059106
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1673114886670
+    created: 1670100457927
+    name: vehicle
+    description: Vehicle functionalities
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1670100457927
+    _type: request_group
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb90148f589
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb912dea96f
+    modified: 1673114886180
+    created: 1673114886180
+    url: "{{ base_url }}/api/user/{{ id }}/changePassword"
+    name: Change password of a user
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "new_password": "string",
+          "old_password": "string"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1673114886180
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_wrk_584f82820964471ea1d43a16a3b81eb912dea96f
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1673114886658
+    created: 1670100457916
+    name: user
+    description: User functionalities
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1670100457916
+    _type: request_group
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9051cf8c0
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb912dea96f
+    modified: 1673114886177
+    created: 1673114886177
+    url: "{{ base_url }}/api/user/{{ id }}/resetPassword"
+    name: Reset password of user
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1673114886177
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb93376b2a7
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb912dea96f
+    modified: 1673114886174
+    created: 1673114886174
+    url: "{{ base_url }}/api/user/{{ id }}/resetPassword"
+    name: Change password of a user with the reset code
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "new_password": "string",
+          "code": "string"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1673114886174
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9390b33d8
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb912dea96f
+    modified: 1673114886170
+    created: 1670100457560
+    url: "{{ base_url }}/api/user/{{ id }}/ride"
+    name: Rides of the user
+    description: ""
+    method: GET
+    body: {}
+    parameters:
+      - name: page
+        disabled: true
+        value: "2"
+      - name: size
+        disabled: true
+        value: "2"
+      - name: sort
+        disabled: true
+        value: startTime
+      - name: from
+        disabled: true
+        value: 2023-01-07T18:08:06.106Z
+      - name: to
+        disabled: true
+        value: 2023-01-07T18:08:06.106Z
+    headers: []
+    authentication: {}
+    metaSortKey: -1670100457560
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb98492e6b0
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb912dea96f
+    modified: 1673114886167
+    created: 1670100457555
+    url: "{{ base_url }}/api/user"
+    name: Getting user details
+    description: ""
+    method: GET
+    body: {}
+    parameters:
+      - name: page
+        disabled: true
+        value: "0"
+      - name: size
+        disabled: true
+        value: "0"
+    headers: []
+    authentication: {}
+    metaSortKey: -1670100457555
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb93b52624b
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb912dea96f
+    modified: 1673995696037
+    created: 1670100457544
+    url: "{{ base_url }}/api/user/6/message"
+    name: User messages
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_5a0a9760d5854e01b2fdbfcd46653042
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwYTFAZ21haWwuY29tIiwiYXVkIjoid2ViIiwicm9sZSI6W3sibmFtZSI6IlJPTEVfVVNFUiJ9XSwiaWQiOjYsImV4cCI6MTY3Mzk5NzMzOCwiaWF0IjoxNjczOTk1NTM4fQ.i1tbQFg5Csbsp2nmgjVN2Ytg4GYZ_7RUYghYin3ryS28AhneItXTV9pEQvCcV4Pah0HhB6EsyG_cg4Pp7PoqkQ
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457544
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9d8d24e78
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb912dea96f
+    modified: 1673859560336
+    created: 1670100457537
+    url: "{{ base_url }}/api/user/1/message"
+    name: Send a message to the user
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "receiverId": 2,
+          "message": "The driver is going on a longer route on purpose",
+          "type": "RIDE",
+          "rideId": 1
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_eb3b3f79a7dc4814853244fd09742fcd
+      - id: pair_0ebd03059c31445ab226f553d8443826
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJlbWFpbDFAZ21haWwuY29tIiwiYXVkIjoid2ViIiwicm9sZSI6W3sibmFtZSI6IlJPTEVfRFJJVkVSIn1dLCJpZCI6MSwiZXhwIjoxNjczODYxMTM3LCJpYXQiOjE2NzM4NTkzMzd9.iymgvKNRD6SuL7ykqwFGssgsR7BdbGa2jB7tIX_YJEAaXSrFsqm8uPa1kMPtsoInOUx5guKPgMFkTenC9T71MA
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457537
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9f5cb247f
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb912dea96f
+    modified: 1673189715662
+    created: 1670100457532
+    url: "{{ base_url }}/api/user/1/block"
+    name: Blocking of the user
+    description: ""
+    method: PUT
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_676cb724d56847ccaa7668efa7bbd7ee
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZCI6IndlYiIsInJvbGUiOlt7Im5hbWUiOiJST0xFX0FETUlOIn1dLCJpZCI6MSwiZXhwIjoxNjczMTkxNDg5LCJpYXQiOjE2NzMxODk2ODl9.H_GAdXYMKq6nOhuFeOZeVIzdzM1th8jx3TjAseC_41pvUtfpAjYrhOvEU8flbsaln1ndJnjm1416MO3IQc9C4A
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457533
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb908691ae5
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb912dea96f
+    modified: 1673189742613
+    created: 1670100457527
+    url: "{{ base_url }}/api/user/12/unblock"
+    name: Unblocking user
+    description: ""
+    method: PUT
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_e4eb8bdf22a14211a8678b5569b67fb3
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZCI6IndlYiIsInJvbGUiOlt7Im5hbWUiOiJST0xFX0FETUlOIn1dLCJpZCI6MSwiZXhwIjoxNjczMTkxNDg5LCJpYXQiOjE2NzMxODk2ODl9.H_GAdXYMKq6nOhuFeOZeVIzdzM1th8jx3TjAseC_41pvUtfpAjYrhOvEU8flbsaln1ndJnjm1416MO3IQc9C4A
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457527
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb9b59804b2
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb912dea96f
+    modified: 1673213789514
+    created: 1670100457521
+    url: "{{ base_url }}/api/user/1/note"
+    name: Note creating
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "message": ""
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+        id: pair_215813ac91994399a461e0249e8c5f98
+      - id: pair_23029bf1ca8a42f9a359b77a99175d8f
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZCI6IndlYiIsInJvbGUiOlt7Im5hbWUiOiJST0xFX0FETUlOIn1dLCJpZCI6MSwiZXhwIjoxNjczMjE1NTU0LCJpYXQiOjE2NzMyMTM3NTR9.HXMx-R86db9v_YHpMQH_8Yn8YnwEaQdyv9lJZrFzjr6PNTV2gzZ9uRzPHYN-5FP2Asi3n4bUZA2768iXE9J5HA
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457521
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb95cb34129
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb912dea96f
+    modified: 1673189784117
+    created: 1670100457515
+    url: "{{ base_url }}/api/user/12/note?page=0&size=3"
+    name: Getting notes for the user
+    description: ""
+    method: GET
+    body: {}
+    parameters:
+      - name: page
+        disabled: true
+        value: "0"
+      - name: size
+        disabled: true
+        value: "0"
+    headers:
+      - id: pair_b9aec72af0b947a8976ea6613007f955
+        name: Authorization
+        value: Bearer
+          eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZCI6IndlYiIsInJvbGUiOlt7Im5hbWUiOiJST0xFX0FETUlOIn1dLCJpZCI6MSwiZXhwIjoxNjczMTkxNDg5LCJpYXQiOjE2NzMxODk2ODl9.H_GAdXYMKq6nOhuFeOZeVIzdzM1th8jx3TjAseC_41pvUtfpAjYrhOvEU8flbsaln1ndJnjm1416MO3IQc9C4A
+        description: ""
+    authentication: {}
+    metaSortKey: -1670100457515
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_wrk_584f82820964471ea1d43a16a3b81eb98569a4e9
+    parentId: fld_wrk_584f82820964471ea1d43a16a3b81eb9b91788c4
+    modified: 1673213092751
+    created: 1670100457510
+    url: "{{ base_url }}/api/unregisteredUser/"
+    name: Getting the assumption about the time and cost of the ride
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+          "locations": [
+            {
+              "departure": {
+                "address": "Bulevar oslobodjenja 46",
+                "latitude": 45.267136,
+                "longitude": 19.833549
+              },
+              "destination": {
+                "address": "Bulevar oslobodjenja 46",
+                "latitude": 45.267136,
+                "longitude": 19.833549
+              }
+            }
+          ],
+          "vehicleType": "STANDARD",
+          "babyTransport": true,
+          "petTransport": true
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1670100457510
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_wrk_584f82820964471ea1d43a16a3b81eb9b91788c4
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1673114886646
+    created: 1670100457906
+    name: unregistered user
+    description: Unregistered user functionalities
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1670100457906
+    _type: request_group
+  - _id: env_8f356df3ee6dae11900aa4b56079fcf43f11c57a
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1673114886756
+    created: 1670097494740
+    name: Base environment
+    data:
+      base_url: "{{ scheme }}://{{ host }}{{ base_path }}"
+    dataPropertyOrder: {}
+    color: null
+    isPrivate: false
+    metaSortKey: 1670097494740
+    _type: environment
+  - _id: jar_8f356df3ee6dae11900aa4b56079fcf43f11c57a
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1716924082603
+    created: 1670097494743
+    name: Default Jar
+    cookies:
+      - key: JSESSIONID
+        value: FA752FF4A325453868433C13FF47C628
+        domain: localhost
+        path: /
+        httpOnly: true
+        hostOnly: true
+        creation: 2024-05-28T19:21:22.603Z
+        lastAccessed: 2024-05-28T19:21:22.603Z
+        id: "5513366786395015"
+    _type: cookie_jar
+  - _id: spc_adc758b64ae141be9d812fc6b67a80b7
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1673114886778
+    created: 1670097494734
+    fileName: Inženjerstvo serverskog sloja - projekat 2022 1.1.1
+    contents: "openapi: 3.0.3\r
+
+      info:\r
+
+      \  title: Inženjerstvo serverskog sloja - projekat 2022\r
+
+      \  version: 2.0.0\r
+
+      tags:\r
+
+      \  - name: passenger\r
+
+      \    description: Passenger functionalities\r
+
+      \  - name: driver\r
+
+      \    description: Driver functionalities\r
+
+      \  - name: ride\r
+
+      \    description: Ride functionalities\r
+
+      \  - name: review\r
+
+      \    description: Review functionalities\r
+
+      \  - name: panic\r
+
+      \    description: Panic functionalities\r
+
+      \  - name: vehicle\r
+
+      \    description: Vehicle functionalities\r
+
+      \  - name: user\r
+
+      \    description: User functionalities\r
+
+      \  - name: unregistered user\r
+
+      \    description: Unregistered user functionalities\r
+
+      paths:\r
+
+      \  /api/passenger:\r
+
+      \    post:\r
+
+      \      tags:\r
+
+      \        - passenger\r
+
+      \      summary: Create passenger\r
+
+      \      description: Create new passenger\r
+
+      \      operationId: createPassenger\r
+
+      \      requestBody:\r
+
+      \        $ref: \"#/components/requestBodies/CreateUser\"\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      id:\r
+
+      \                        type: integer\r
+
+      \                        format: integer\r
+
+      \                        example: 123\r
+
+      \                  - $ref: \"#/components/schemas/User\"\r
+
+      \        \"400\":\r
+
+      \          description: User with that email already exists!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - passenger\r
+
+      \      summary: Getting passengers\r
+
+      \      description: Getting multiple passengers for the need of
+      showing a list\r
+
+      \      operationId: gettingPassengers\r
+
+      \      parameters:\r
+
+      \        - in: query\r
+
+      \          name: page\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \          description: Which page\r
+
+      \        - in: query\r
+
+      \          name: size\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \          description: How many elements on page\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref:
+      \"#/components/schemas/PaginatedResponse\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      results:\r
+
+      \                        type: array\r
+
+      \                        items:\r
+
+      \                          allOf:\r
+
+      \                            - type: object\r
+
+      \                              properties:\r
+
+      \                                id:\r
+
+      \                                  type: integer\r
+
+      \                                  format: integer\r
+
+      \                                  example: 10\r
+
+      \                            - $ref: \"#/components/schemas/User\"\r
+
+      \  /api/passenger/activate/{activationId}:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - passenger\r
+
+      \      summary: Activate passenger account\r
+
+      \      description: Activating passenger with the activation email\r
+
+      \      operationId: activatePassenger\r
+
+      \      parameters:\r
+
+      \        - name: activationId\r
+
+      \          in: path\r
+
+      \          description: Id of the passenger\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: Successful account activation!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Success\"\r
+
+      \        \"400\":\r
+
+      \          description: Activation expired. Register again!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: Activation with entered id does not exist!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \  /api/passenger/{id}:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - passenger\r
+
+      \      summary: Passenger details\r
+
+      \      description: Returns passenger details, where the password
+      field is always empty\r
+
+      \      operationId: passengerDetails\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the passenger\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          $ref: \"#/components/requestBodies/UserDetails\"\r
+
+      \        \"404\":\r
+
+      \          description: Passenger does not exist!\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - passenger\r
+
+      \      summary: Update existing passenger\r
+
+      \      description: Update existing passenger non required fields
+      send only if they change\r
+
+      \      operationId: updatePassenger\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the passenger\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        content:\r
+
+      \          application/json:\r
+
+      \            schema:\r
+
+      \              allOf:\r
+
+      \                - $ref: \"#/components/schemas/User\"\r
+
+      \                - type: object\r
+
+      \                  required:\r
+
+      \                    - name\r
+
+      \                    - surname\r
+
+      \                    - email\r
+
+      \                    - address\r
+
+      \        required: true\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          $ref: \"#/components/requestBodies/UserDetails\"\r
+
+      \        \"404\":\r
+
+      \          description: Passenger does not exist!\r
+
+      \  /api/passenger/{id}/ride:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - passenger\r
+
+      \      summary: Passenger rides\r
+
+      \      description: Returns paginated rides that can be sorted on
+      specific field\r
+
+      \      operationId: voznjePutnika\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: ID putnika\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \        - in: query\r
+
+      \          name: page\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \            format: integer\r
+
+      \          description: Which page\r
+
+      \        - in: query\r
+
+      \          name: size\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \            format: integer\r
+
+      \          description: how many elements on page\r
+
+      \        - in: query\r
+
+      \          name: sort\r
+
+      \          schema:\r
+
+      \            type: string\r
+
+      \            format: string\r
+
+      \            example: firstName\r
+
+      \        - in: query\r
+
+      \          name: from\r
+
+      \          schema:\r
+
+      \            type: string\r
+
+      \            format: date-time\r
+
+      \          description: Početak intervala\r
+
+      \        - in: query\r
+
+      \          name: to\r
+
+      \          schema:\r
+
+      \            type: string\r
+
+      \            format: date-time\r
+
+      \          description: Kraj intervala\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref:
+      \"#/components/schemas/PaginatedResponse\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      results:\r
+
+      \                        type: array\r
+
+      \                        items:\r
+
+      \                          $ref: \"#/components/schemas/Ride\"\r
+
+      \        \"404\":\r
+
+      \          description: Passenger does not exist!\r
+
+      \  /api/driver:\r
+
+      \    post:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Create driver\r
+
+      \      description: Create new driver\r
+
+      \      operationId: createDriver\r
+
+      \      requestBody:\r
+
+      \        $ref: \"#/components/requestBodies/CreateUser\"\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      id:\r
+
+      \                        type: integer\r
+
+      \                        format: integer\r
+
+      \                        example: 123\r
+
+      \                  - $ref: \"#/components/schemas/User\"\r
+
+      \        \"400\":\r
+
+      \          description: User with that email already exists!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Getting paginated driver data\r
+
+      \      description: Returns paginated drivers\r
+
+      \      operationId: gettingDrivers\r
+
+      \      parameters:\r
+
+      \        - in: query\r
+
+      \          name: page\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \          description: Which page\r
+
+      \        - in: query\r
+
+      \          name: size\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \          description: How meni elements from it\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref:
+      \"#/components/schemas/PaginatedResponse\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      results:\r
+
+      \                        type: array\r
+
+      \                        items:\r
+
+      \                          allOf:\r
+
+      \                            - type: object\r
+
+      \                              properties:\r
+
+      \                                id:\r
+
+      \                                  type: integer\r
+
+      \                                  format: integer\r
+
+      \                                  example: 10\r
+
+      \                            - $ref: \"#/components/schemas/User\"\r
+
+      \  /api/driver/{id}:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Driver details\r
+
+      \      description: Returns details about the driver\r
+
+      \      operationId: driverDetails\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: ID of the driver\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          $ref: \"#/components/requestBodies/UserDetails\"\r
+
+      \        \"404\":\r
+
+      \          description: Driver does not exist!\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Update existing driver\r
+
+      \      description: Update the existing driver based on his id\r
+
+      \      operationId: updateDriver\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: ID vozača\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        content:\r
+
+      \          application/json:\r
+
+      \            schema:\r
+
+      \              allOf:\r
+
+      \                - $ref: \"#/components/schemas/User\"\r
+
+      \                - type: object\r
+
+      \                  required:\r
+
+      \                    - name\r
+
+      \                    - surname\r
+
+      \                    - email\r
+
+      \                    - address\r
+
+      \        required: true\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          $ref: \"#/components/requestBodies/UserDetails\"\r
+
+      \        \"400\":\r
+
+      \          description: Invalid data. For example bad email
+      format.\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: Driver does not exist!\r
+
+      \  /api/driver/{id}/documents:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Driver documents\r
+
+      \      description: Returns all documents with the specific id\r
+
+      \      operationId: driverDocuments\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the driver\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                type: array\r
+
+      \                items:\r
+
+      \                  allOf:\r
+
+      \                    - type: object\r
+
+      \                      properties:\r
+
+      \                        id:\r
+
+      \                          type: integer\r
+
+      \                          format: integer\r
+
+      \                          example: 123\r
+
+      \                    - $ref:
+      \"#/components/schemas/DriverDocument\"\r
+
+      \        \"404\":\r
+
+      \          description: Driver does not exist!\r
+
+      \    post:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Adding new driver documents\r
+
+      \      description: Adding new driver document (for example a
+      picture)\r
+
+      \      operationId: addDriverDocument\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the driver\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        content:\r
+
+      \          application/json:\r
+
+      \            schema:\r
+
+      \              type: object\r
+
+      \              required:\r
+
+      \                - name\r
+
+      \                - documentImage\r
+
+      \              properties:\r
+
+      \                name:\r
+
+      \                  type: string\r
+
+      \                  example: Vozačka dozvola\r
+
+      \                  maxLength: 100\r
+
+      \                documentImage:\r
+
+      \                  type: string\r
+
+      \                  format: byte\r
+
+      \                  example: U3dhZ2dlciByb2Nrcw=\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      id:\r
+
+      \                        type: integer\r
+
+      \                        format: integer\r
+
+      \                        example: 123\r
+
+      \                  - $ref: \"#/components/schemas/DriverDocument\"\r
+
+      \        \"400\":\r
+
+      \          description: File is bigger than 5mb!//File is not an
+      image!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: Driver does not exist!\r
+
+      \  /api/driver/document/{document-id}:\r
+
+      \    delete:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Delete driver's document by id\r
+
+      \      description: Delete driver's document by id\r
+
+      \      operationId: deleteDriverDocument\r
+
+      \      parameters:\r
+
+      \        - name: document-id\r
+
+      \          in: path\r
+
+      \          description: Id of the document\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"204\":\r
+
+      \          description: Driver document deleted successfully\r
+
+      \        \"404\":\r
+
+      \          description: Document does not exist!\r
+
+      \  /api/driver/{id}/vehicle:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Vehicle of the driver\r
+
+      \      description: Returns vehicle for the driver\r
+
+      \      operationId: driversVehicle\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the driver\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      id:\r
+
+      \                        type: integer\r
+
+      \                        format: integer\r
+
+      \                        example: 123\r
+
+      \                      driverId:\r
+
+      \                        type: integer\r
+
+      \                        format: integer\r
+
+      \                        example: 123\r
+
+      \                  - $ref: \"#/components/schemas/Vehicle\"\r
+
+      \        \"400\":\r
+
+      \          description: Vehicle is not assigned!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: Driver does not exist!\r
+
+      \    post:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Add vehicle to the driver\r
+
+      \      description: Creating a new vehicle to the driver while
+      creating one if it does not exist\r
+
+      \      operationId: createVehicle\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the driver\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        content:\r
+
+      \          application/json:\r
+
+      \            schema:\r
+
+      \              allOf:\r
+
+      \                - $ref: \"#/components/schemas/Vehicle\"\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      id:\r
+
+      \                        type: integer\r
+
+      \                        format: integer\r
+
+      \                        example: 123\r
+
+      \                      driverId:\r
+
+      \                        type: integer\r
+
+      \                        format: integer\r
+
+      \                        example: 123\r
+
+      \                  - $ref: \"#/components/schemas/Vehicle\"\r
+
+      \        \"404\":\r
+
+      \          description: Driver does not exist!\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Change the vehicle of the driver\r
+
+      \      description: Change the vehicle of the driver\r
+
+      \      operationId: changeVehicle\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the driver\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        content:\r
+
+      \          application/json:\r
+
+      \            schema:\r
+
+      \              allOf:\r
+
+      \                - $ref: \"#/components/schemas/Vehicle\"\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      id:\r
+
+      \                        type: integer\r
+
+      \                        format: integer\r
+
+      \                        example: 123\r
+
+      \                      driverId:\r
+
+      \                        type: integer\r
+
+      \                        format: integer\r
+
+      \                        example: 123\r
+
+      \                  - $ref: \"#/components/schemas/Vehicle\"\r
+
+      \        \"404\":\r
+
+      \          description: Driver does not exist!\r
+
+      \r
+
+      \  /api/driver/{id}/working-hour:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Working hours of the driver\r
+
+      \      description: Returns history of the drivers working hours
+      where it can be filtered by date\r
+
+      \      operationId: workingHoursOverview\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the driver\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \        - in: query\r
+
+      \          name: page\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \            format: integer\r
+
+      \          description: Which page to retrieve\r
+
+      \        - in: query\r
+
+      \          name: size\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \            format: integer\r
+
+      \          description: How many items to retrieve\r
+
+      \        - in: query\r
+
+      \          name: from\r
+
+      \          schema:\r
+
+      \            type: string\r
+
+      \            format: date-time\r
+
+      \          description: Start of the interval\r
+
+      \        - in: query\r
+
+      \          name: to\r
+
+      \          schema:\r
+
+      \            type: string\r
+
+      \            format: date-time\r
+
+      \          description: End of the interval\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref:
+      \"#/components/schemas/PaginatedResponse\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      results:\r
+
+      \                        type: array\r
+
+      \                        items:\r
+
+      \                          $ref:
+      \"#/components/schemas/WorkingHour\"\r
+
+      \        \"404\":\r
+
+      \          description: Driver does not exist!\r
+
+      \    post:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Creating informations about the drivers working
+      hours\r
+
+      \      description: Creating informations about the drivers working
+      hours\r
+
+      \      operationId: createWorkingHours\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the driver\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        $ref: \"#/components/requestBodies/WorkingHourStart\"\r
+
+      \        required: true\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/WorkingHour\"\r
+
+      \        \"400\":\r
+
+      \          description: Cannot start shift because you exceeded the
+      8 hours limit in last 24 hours!//Cannot start shift because the vehicle is
+      not defined!//Shifth already ongoing!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: Driver does not exist!\r
+
+      \r
+
+      \  /api/driver/{id}/ride:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Rides of the specific driver\r
+
+      \      description: Returning rides for the driver that can be
+      sorted by specific fields\r
+
+      \      operationId: driversRides\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the driver\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \        - in: query\r
+
+      \          name: page\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \            format: integer\r
+
+      \            example: 2\r
+
+      \        - in: query\r
+
+      \          name: size\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \            format: integer\r
+
+      \            example: 10\r
+
+      \        - in: query\r
+
+      \          name: sort\r
+
+      \          schema:\r
+
+      \            type: string\r
+
+      \            format: string\r
+
+      \            example: startTime\r
+
+      \        - in: query\r
+
+      \          name: from\r
+
+      \          schema:\r
+
+      \            type: string\r
+
+      \            format: date-time\r
+
+      \          description: Start of the interval\r
+
+      \        - in: query\r
+
+      \          name: to\r
+
+      \          schema:\r
+
+      \            type: string\r
+
+      \            format: date-time\r
+
+      \          description: End of the interval\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref:
+      \"#/components/schemas/PaginatedResponse\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      results:\r
+
+      \                        type: array\r
+
+      \                        items:\r
+
+      \                          $ref: \"#/components/schemas/Ride\"\r
+
+      \        \"404\":\r
+
+      \          description: Driver does not exist!\r
+
+      \r
+
+      \  /api/driver/working-hour/{working-hour-id}:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Detais about the working hours of the driver\r
+
+      \      description: Returns details about the individual working
+      hours of the driver\r
+
+      \      operationId: workingHourDetails\r
+
+      \      parameters:\r
+
+      \        - name: working-hour-id\r
+
+      \          in: path\r
+
+      \          description: Id of the working hour\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/WorkingHour\"\r
+
+      \        \"404\":\r
+
+      \          description: Working hour does not exist!\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - driver\r
+
+      \      summary: Changing the working hours\r
+
+      \      description: Changing individual working hours of the
+      driver\r
+
+      \      operationId: changingWorkingHours\r
+
+      \      parameters:\r
+
+      \        - name: working-hour-id\r
+
+      \          in: path\r
+
+      \          description: Id of the working hour\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        $ref: \"#/components/requestBodies/WorkingHourEnd\"\r
+
+      \        required: true\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/WorkingHour\"\r
+
+      \        \"400\":\r
+
+      \          description: Cannot end shift because the vehicle is not
+      defined!//No shift is ongoing!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: Working hour does not exist!\r
+
+      \r
+
+      \  /api/ride:\r
+
+      \    post:\r
+
+      \      tags:\r
+
+      \        - ride\r
+
+      \      summary: Creating a ride\r
+
+      \      description: Creating a ride\r
+
+      \      operationId: creatingRide\r
+
+      \      requestBody:\r
+
+      \        $ref: \"#/components/requestBodies/RideCreation\"\r
+
+      \        required: true\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref: \"#/components/schemas/Ride\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      status:\r
+
+      \                        type: string\r
+
+      \                        format: string\r
+
+      \                        example: PENDING\r
+
+      \        \"400\":\r
+
+      \          description: Cannot create a ride while you have one
+      already pending!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \  /api/ride/driver/{driverId}/active:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - ride\r
+
+      \      summary: Active ride for driver\r
+
+      \      description: Return active ride details for the driver\r
+
+      \      operationId: activeRideDriverDetails\r
+
+      \      parameters:\r
+
+      \        - name: driverId\r
+
+      \          in: path\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \          description: Which driver\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref: \"#/components/schemas/Ride\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      status:\r
+
+      \                        type: string\r
+
+      \                        format: string\r
+
+      \                        example: PENDING\r
+
+      \        \"404\":\r
+
+      \          description: Active ride does not exist!\r
+
+      \  /api/ride/passenger/{passengerId}/active:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - ride\r
+
+      \      summary: Active ride for passenger\r
+
+      \      description: Return active ride details for the passenger\r
+
+      \      operationId: activeRidePassengerDetails\r
+
+      \      parameters:\r
+
+      \        - name: passengerId\r
+
+      \          in: path\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \          description: Which driver\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref: \"#/components/schemas/Ride\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      status:\r
+
+      \                        type: string\r
+
+      \                        format: string\r
+
+      \                        example: PENDING\r
+
+      \        \"404\":\r
+
+      \          description: Active ride does not exist!\r
+
+      \  /api/ride/{id}:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - ride\r
+
+      \      summary: Ride details\r
+
+      \      description: Return ride details with the specific id\r
+
+      \      operationId: rideDetails\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the ride\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref: \"#/components/schemas/Ride\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      status:\r
+
+      \                        type: string\r
+
+      \                        format: string\r
+
+      \                        example: PENDING\r
+
+      \        \"400\":\r
+
+      \          description: Invalid data. For example bad Id format.\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: Ride does not exist!\r
+
+      \  /api/ride/{id}/withdraw:\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - ride\r
+
+      \      summary: Cancel existing ride\r
+
+      \      description: The passenger should have the possibility to
+      cancel an existing ride if he changed his mind before the driver has
+      arrived at the destination\r
+
+      \      operationId: cancelRide\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the ride\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref: \"#/components/schemas/Ride\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      status:\r
+
+      \                        type: string\r
+
+      \                        format: string\r
+
+      \                        example: CANCELED\r
+
+      \        \"400\":\r
+
+      \          description: Cannot cancel a ride that is not in status
+      PENDING or STARTED!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: Ride does not exist!\r
+
+      \r
+
+      \  /api/ride/{id}/panic:\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - ride\r
+
+      \      summary: Panic procedure for the ride\r
+
+      \      description: Panic procedure for the ride by id. The user
+      will be used from the token (later when we get to security)\r
+
+      \      operationId: ridePanic\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the ride\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        $ref: \"#/components/requestBodies/PanicCreate\"\r
+
+      \        required: true\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/PanicDetails\"\r
+
+      \        \"404\":\r
+
+      \          description: Ride does not exist!\r
+
+      \r
+
+      \  /api/ride/{id}/start:\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - ride\r
+
+      \      summary: Start ride\r
+
+      \      description: Start ride\r
+
+      \      operationId: rideStart\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the ride\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref: \"#/components/schemas/Ride\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      status:\r
+
+      \                        type: string\r
+
+      \                        format: string\r
+
+      \                        example: STARTED\r
+
+      \        \"400\":\r
+
+      \          description: Cannot start a ride that is not in status
+      ACCEPTED!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: Ride does not exist!\r
+
+      \r
+
+      \  /api/ride/{id}/accept:\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - ride\r
+
+      \      summary: Accept ride\r
+
+      \      description: Accept ride\r
+
+      \      operationId: rideAccept\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the ride\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref: \"#/components/schemas/Ride\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      status:\r
+
+      \                        type: string\r
+
+      \                        format: string\r
+
+      \                        example: ACCEPTED\r
+
+      \        \"400\":\r
+
+      \          description: Cannot accept a ride that is not in status
+      PENDING!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: Ride does not exist!\r
+
+      \r
+
+      \  /api/ride/{id}/end:\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - ride\r
+
+      \      summary: End the ride\r
+
+      \      description: End the ride\r
+
+      \      operationId: rideEnd\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the ride\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref: \"#/components/schemas/Ride\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      status:\r
+
+      \                        type: string\r
+
+      \                        format: string\r
+
+      \                        example: FINISHED\r
+
+      \        \"400\":\r
+
+      \          description: Cannot end a ride that is not in status
+      FINISHED!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: Ride does not exist!\r
+
+      \r
+
+      \  /api/ride/{id}/cancel:\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - ride\r
+
+      \      summary: Cancel the ride with an explanation\r
+
+      \      description: Cancel the ride with an explanation\r
+
+      \      operationId: rideCancel\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the ride\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        content:\r
+
+      \          application/json:\r
+
+      \            schema:\r
+
+      \              type: object\r
+
+      \              required:\r
+
+      \                - reason\r
+
+      \              properties:\r
+
+      \                reason:\r
+
+      \                  type: string\r
+
+      \                  format: string\r
+
+      \                  example: No passengers were at the destination\r
+
+      \                  maxLength: 500\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref: \"#/components/schemas/Ride\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      status:\r
+
+      \                        type: string\r
+
+      \                        format: string\r
+
+      \                        example: REJECTED\r
+
+      \        \"400\":\r
+
+      \          description: Cannot cancel a ride that is not in status
+      PENDING!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: Ride does not exist!\r
+
+      \r
+
+      \  /api/ride/favorites:\r
+
+      \    post:\r
+
+      \      tags:\r
+
+      \        - ride\r
+
+      \      summary: Create favorite locations for quick selection\r
+
+      \      description: Favorite locations\r
+
+      \      operationId: favoriteLocationsCreate\r
+
+      \      requestBody:\r
+
+      \        content:\r
+
+      \          application/json:\r
+
+      \            schema:\r
+
+      \              allOf:\r
+
+      \                - type: object\r
+
+      \                  required:\r
+
+      \                    - favoriteName\r
+
+      \                  properties:\r
+
+      \                    favoriteName:\r
+
+      \                      type: string\r
+
+      \                      format: string\r
+
+      \                      example: Home - to - Work\r
+
+      \                      maxLength: 100\r
+
+      \                - $ref: \"#/components/schemas/RideCreation\"\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - type: object\r
+
+      \r
+
+      \                    properties:\r
+
+      \                      id:\r
+
+      \                        type: integer\r
+
+      \                        format: integer\r
+
+      \                        example: 123\r
+
+      \                      favoriteName:\r
+
+      \                        type: string\r
+
+      \                        format: string\r
+
+      \                        example: Home - to - Work\r
+
+      \                  - $ref: \"#/components/schemas/RideCreation\"\r
+
+      \        \"400\":\r
+
+      \          description: Number of favorite rides cannot exceed 10!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - ride\r
+
+      \      summary: Get favorite locations\r
+
+      \      description: Favorite locations\r
+
+      \      operationId: favoriteLocationsGet\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                type: array\r
+
+      \                items:\r
+
+      \                  allOf:\r
+
+      \                    - type: object\r
+
+      \                      properties:\r
+
+      \                        id:\r
+
+      \                          type: integer\r
+
+      \                          format: integer\r
+
+      \                          example: 123\r
+
+      \                        favoriteName:\r
+
+      \                          type: string\r
+
+      \                          format: string\r
+
+      \                          example: Home - to - Work\r
+
+      \                    - $ref: \"#/components/schemas/RideCreation\"\r
+
+      \r
+
+      \  /api/ride/favorites/{id}:\r
+
+      \    delete:\r
+
+      \      tags:\r
+
+      \        - ride\r
+
+      \      summary: Delete existing favorite ride\r
+
+      \      description: Favorite locations\r
+
+      \      operationId: rideDelete\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the ride\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"204\":\r
+
+      \          description: Successful deletion of favorite location!\r
+
+      \        \"404\":\r
+
+      \          description: Favorite location does not exist!\r
+
+      \r
+
+      \  /api/panic:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - panic\r
+
+      \      summary: Overview of all panic notifications\r
+
+      \      description: Overview of all panic notifications\r
+
+      \      operationId: overviewPanic\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref:
+      \"#/components/schemas/PaginatedResponse\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      results:\r
+
+      \                        type: array\r
+
+      \                        items:\r
+
+      \                          type: object\r
+
+      \                          properties:\r
+
+      \                            id:\r
+
+      \                              type: integer\r
+
+      \                              format: integer\r
+
+      \                              example: 10\r
+
+      \                            user:\r
+
+      \                              $ref: \"#/components/schemas/User\"\r
+
+      \                            ride:\r
+
+      \                              $ref: \"#/components/schemas/Ride\"\r
+
+      \                            time:\r
+
+      \                              type: string\r
+
+      \                              format: date-time\r
+
+      \                            reason:\r
+
+      \                              type: string\r
+
+      \                              example: Driver is drinking while
+      driving\r
+
+      \r
+
+      \  /api/vehicle/{id}/location:\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - vehicle\r
+
+      \      summary: Change location of the vehicle\r
+
+      \      description: Change the location of the vehicle. It is
+      different from the main change as it updates only the location at the idea
+      is that if works for frequent changes\r
+
+      \      operationId: changeLocationVehicle\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the vehicle\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        $ref: \"#/components/requestBodies/GeoCoordinate\"\r
+
+      \        required: true\r
+
+      \      responses:\r
+
+      \        \"204\":\r
+
+      \          description: Coordinates successfully updated\r
+
+      \        \"400\":\r
+
+      \          description: Vehicle is not assigned to the specific
+      driver!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: Vehicle does not exist!\r
+
+      \r
+
+      \  /api/user/{id}/changePassword:\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - user\r
+
+      \      summary: Change password of a user\r
+
+      \      description: When user wants to cahnge his password he must
+      enter old and new password\r
+
+      \      operationId: changePassword\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of user\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        content:\r
+
+      \          application/json:\r
+
+      \            schema:\r
+
+      \              type: object\r
+
+      \              required:\r
+
+      \                - new_password\r
+
+      \                - old_password\r
+
+      \              properties:\r
+
+      \                new_password:\r
+
+      \                  type: string\r
+
+      \                  pattern:
+      /^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$/\r
+
+      \                old_password:\r
+
+      \                  type: string\r
+
+      \                  pattern:
+      /^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$/\r
+
+      \      responses:\r
+
+      \        \"204\":\r
+
+      \          description: Password successfully changed!\r
+
+      \        \"400\":\r
+
+      \          description: Current password is not matching!\r
+
+      \        \"404\":\r
+
+      \          description: User does not exist!\r
+
+      \r
+
+      \  /api/user/{id}/resetPassword:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - user\r
+
+      \      summary: Reset password of user\r
+
+      \      description: When user wants to reset his password, a email
+      will be sent with a code that should allow him the change\r
+
+      \      operationId: resetPassword\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of user\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"204\":\r
+
+      \          description: Email with reset code has been sent!\r
+
+      \        \"404\":\r
+
+      \          description: User does not exist!\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - user\r
+
+      \      summary: Change password of a user with the reset code\r
+
+      \      description: Similary to changing password, this one does not
+      require old_password, just new_password with code from the email\r
+
+      \      operationId: resetPasswordChange\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of user\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        content:\r
+
+      \          application/json:\r
+
+      \            schema:\r
+
+      \              type: object\r
+
+      \              required:\r
+
+      \                - new_password\r
+
+      \                - code\r
+
+      \              properties:\r
+
+      \                new_password:\r
+
+      \                  type: string\r
+
+      \                  pattern:
+      /^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$/\r
+
+      \                code:\r
+
+      \                  type: string\r
+
+      \                  pattern: /^[0-9]{1,6}$/\r
+
+      \      responses:\r
+
+      \        \"204\":\r
+
+      \          description: Password successfully changed!\r
+
+      \        \"400\":\r
+
+      \          description: Code is expired or not correct!\r
+
+      \        \"404\":\r
+
+      \          description: User does not exist!\r
+
+      \r
+
+      \  /api/user/{id}/ride:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - user\r
+
+      \      summary: Rides of the user\r
+
+      \      description: Returns paginated response of rides for a user
+      that can be sorted by a specific field\r
+
+      \      operationId: voznjeKorisnika\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of user\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \        - in: query\r
+
+      \          name: page\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \            format: integer\r
+
+      \            example: 2\r
+
+      \        - in: query\r
+
+      \          name: size\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \            format: integer\r
+
+      \            example: 2\r
+
+      \        - in: query\r
+
+      \          name: sort\r
+
+      \          schema:\r
+
+      \            type: string\r
+
+      \            format: string\r
+
+      \            example: startTime\r
+
+      \        - in: query\r
+
+      \          name: from\r
+
+      \          schema:\r
+
+      \            type: string\r
+
+      \            format: date-time\r
+
+      \          description: Start of the interval\r
+
+      \        - in: query\r
+
+      \          name: to\r
+
+      \          schema:\r
+
+      \            type: string\r
+
+      \            format: date-time\r
+
+      \          description: End of the interval\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref:
+      \"#/components/schemas/PaginatedResponse\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      results:\r
+
+      \                        type: array\r
+
+      \                        items:\r
+
+      \                          $ref: \"#/components/schemas/Ride\"\r
+
+      \        \"404\":\r
+
+      \          description: User does not exist!\r
+
+      \  /api/user:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - user\r
+
+      \      summary: Getting user details\r
+
+      \      description: Getting multiple of them for the reason of
+      showing a list\r
+
+      \      operationId: gettingUsers\r
+
+      \      parameters:\r
+
+      \        - in: query\r
+
+      \          name: page\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \          description: Which exact page\r
+
+      \        - in: query\r
+
+      \          name: size\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \          description: How many elements\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref:
+      \"#/components/schemas/PaginatedResponse\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      results:\r
+
+      \                        type: array\r
+
+      \                        items:\r
+
+      \                          allOf:\r
+
+      \                            - type: object\r
+
+      \                              properties:\r
+
+      \                                id:\r
+
+      \                                  type: integer\r
+
+      \                                  format: integer\r
+
+      \                                  example: 10\r
+
+      \                            - $ref: \"#/components/schemas/User\"\r
+
+      \  /api/user/login:\r
+
+      \    post:\r
+
+      \      tags:\r
+
+      \        - user\r
+
+      \      summary: Log in\r
+
+      \      description: Login\r
+
+      \      operationId: login\r
+
+      \      requestBody:\r
+
+      \        $ref: \"#/components/requestBodies/Login\"\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/TokenResponse\"\r
+
+      \        \"400\":\r
+
+      \          description: Wrong username or password!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \  /api/user/{id}/message:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - user\r
+
+      \      summary: User messages\r
+
+      \      description: Returns a list of user messages\r
+
+      \      operationId: listaPoruka\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the user\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref:
+      \"#/components/schemas/PaginatedResponse\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      results:\r
+
+      \                        type: array\r
+
+      \                        items:\r
+
+      \                          allOf:\r
+
+      \                            - type: object\r
+
+      \                              properties:\r
+
+      \                                id:\r
+
+      \                                  type: integer\r
+
+      \                                  format: integer\r
+
+      \                                  example: 10\r
+
+      \                                timeOfSending:\r
+
+      \                                  type: string\r
+
+      \                                  format: date-time\r
+
+      \                                  example: 2022-11-25T17:32:28Z\r
+
+      \                                senderId:\r
+
+      \                                  type: number\r
+
+      \                                  format: number\r
+
+      \                                  example: 123\r
+
+      \                            - $ref:
+      \"#/components/schemas/Message\"\r
+
+      \        \"404\":\r
+
+      \          description: User does not exist!\r
+
+      \    post:\r
+
+      \      tags:\r
+
+      \        - user\r
+
+      \      summary: Send a message to the user\r
+
+      \      description: Send a message to the user. The sender is taken
+      from the user that sent the request (from the token)\r
+
+      \      operationId: newMessage\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the user\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        $ref: \"#/components/requestBodies/Message\"\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      id:\r
+
+      \                        type: integer\r
+
+      \                        example: 123\r
+
+      \                      timeOfSending:\r
+
+      \                        type: string\r
+
+      \                        format: date-time\r
+
+      \                        example: 2022-11-25T17:32:28Z\r
+
+      \                      senderId:\r
+
+      \                        type: number\r
+
+      \                        format: number\r
+
+      \                        example: 123\r
+
+      \                  - $ref: \"#/components/schemas/Message\"\r
+
+      \        \"404\":\r
+
+      \          description: User does not exist!//Receiver does not
+      exist!//Ride does not exist!\r
+
+      \  /api/user/{id}/block:\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - user\r
+
+      \      summary: Blocking of the user\r
+
+      \      description: Blocking the user from the part of the
+      administrator\r
+
+      \      operationId: userBlocking\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the user\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"204\":\r
+
+      \          description: User is successfully blocked\r
+
+      \        \"400\":\r
+
+      \          description: User already blocked!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: User does not exist!\r
+
+      \  /api/user/{id}/unblock:\r
+
+      \    put:\r
+
+      \      tags:\r
+
+      \        - user\r
+
+      \      summary: Unblocking user\r
+
+      \      description: Unblocking user from the administrator\r
+
+      \      operationId: userUnblocking\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the user\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"204\":\r
+
+      \          description: User is successfully unblocked\r
+
+      \        \"400\":\r
+
+      \          description: User is not blocked!\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                $ref: \"#/components/schemas/Error\"\r
+
+      \        \"404\":\r
+
+      \          description: User does not exist!\r
+
+      \  /api/user/{id}/note:\r
+
+      \    post:\r
+
+      \      tags:\r
+
+      \        - user\r
+
+      \      summary: Note creating\r
+
+      \      description: Creaiting note form the part of the
+      administrator, where they can help about ban decisions\r
+
+      \      operationId: noteCreating\r
+
+      \      requestBody:\r
+
+      \        $ref: \"#/components/requestBodies/Note\"\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the user\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      id:\r
+
+      \                        type: integer\r
+
+      \                        format: integer\r
+
+      \                        example: 10\r
+
+      \                      date:\r
+
+      \                        type: string\r
+
+      \                        format: date-time\r
+
+      \                        example: 2022-11-25T17:32:28Z\r
+
+      \                  - $ref: \"#/components/schemas/Note\"\r
+
+      \        \"404\":\r
+
+      \          description: User does not exist!\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - user\r
+
+      \      summary: Getting notes for the user\r
+
+      \      description: For a specific user get the paginated response
+      that will return the coresponding notes\r
+
+      \      operationId: gettingNotes\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id from the user\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \        - in: query\r
+
+      \          name: page\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \          description: Which exact page\r
+
+      \        - in: query\r
+
+      \          name: size\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \          description: How many elements on it\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref:
+      \"#/components/schemas/PaginatedResponse\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      results:\r
+
+      \                        type: array\r
+
+      \                        items:\r
+
+      \                          allOf:\r
+
+      \                            - type: object\r
+
+      \                              properties:\r
+
+      \                                id:\r
+
+      \                                  type: integer\r
+
+      \                                  format: integer\r
+
+      \                                  example: 10\r
+
+      \                                date:\r
+
+      \                                  type: string\r
+
+      \                                  format: date-time\r
+
+      \                                  example: 2022-11-25T17:32:28Z\r
+
+      \                            - $ref: \"#/components/schemas/Note\"\r
+
+      \        \"404\":\r
+
+      \          description: User does not exist!\r
+
+      \  /api/unregisteredUser/:\r
+
+      \    post:\r
+
+      \      tags:\r
+
+      \        - unregistered user\r
+
+      \      summary: Getting the assumption about the time and cost of
+      the ride\r
+
+      \      description: Getting the assumption about the time and cost
+      of the ride\r
+
+      \      operationId: timeAndCostAssumption\r
+
+      \      requestBody:\r
+
+      \        content:\r
+
+      \          application/json:\r
+
+      \            schema:\r
+
+      \              $ref: \"#/components/schemas/DrivingAssessment\"\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                type: object\r
+
+      \                properties:\r
+
+      \                  estimatedTimeInMinutes:\r
+
+      \                    type: integer\r
+
+      \                    format: integer\r
+
+      \                    example: 10\r
+
+      \                  estimatedCost:\r
+
+      \                    type: integer\r
+
+      \                    format: integer\r
+
+      \                    example: 450\r
+
+      \r
+
+      \  /api/review/{rideId}/vehicle:\r
+
+      \    post:\r
+
+      \      tags:\r
+
+      \        - review\r
+
+      \      summary: Leave review for the vehicle\r
+
+      \      description: Creating a review about the vehicle\r
+
+      \      operationId: reviewCreationForVehicle\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the vehicle\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \        - name: rideId\r
+
+      \          in: path\r
+
+      \          description: Id of the of the ride\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        content:\r
+
+      \          application/json:\r
+
+      \            schema:\r
+
+      \              type: object\r
+
+      \              required:\r
+
+      \                - rating\r
+
+      \                - comment\r
+
+      \              properties:\r
+
+      \                rating:\r
+
+      \                  type: integer\r
+
+      \                  format: integer\r
+
+      \                  example: 3\r
+
+      \                  minimum: 1\r
+
+      \                  maximum: 10\r
+
+      \                comment:\r
+
+      \                  type: string\r
+
+      \                  format: string\r
+
+      \                  example: The vehicle was bad and dirty\r
+
+      \                  maxLength: 500\r
+
+      \r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                type: object\r
+
+      \                properties:\r
+
+      \                  id:\r
+
+      \                    type: integer\r
+
+      \                    format: integer\r
+
+      \                    example: 123\r
+
+      \                  rating:\r
+
+      \                    type: integer\r
+
+      \                    format: integer\r
+
+      \                    example: 3\r
+
+      \                    minimum: 1\r
+
+      \                    maximum: 10\r
+
+      \                  comment:\r
+
+      \                    type: string\r
+
+      \                    format: string\r
+
+      \                    example: The driver was driving really fast\r
+
+      \                    maxLength: 500\r
+
+      \                  passenger:\r
+
+      \                    $ref: \"#/components/schemas/UserRef\"\r
+
+      \        \"404\":\r
+
+      \          description: Ride does not exist!//Vehicle does not
+      exist!\r
+
+      \r
+
+      \  /api/review/vehicle/{id}:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - review\r
+
+      \      summary: Getting the reviews for the vehicle\r
+
+      \      description: Get the reviews for the specific vehicle\r
+
+      \      operationId: gettingTheReviewForVehicle\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the vehicle\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref:
+      \"#/components/schemas/PaginatedResponse\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      results:\r
+
+      \                        type: array\r
+
+      \                        items:\r
+
+      \                          type: object\r
+
+      \                          properties:\r
+
+      \                            id:\r
+
+      \                              type: integer\r
+
+      \                              format: integer\r
+
+      \                              example: 123\r
+
+      \                            rating:\r
+
+      \                              type: integer\r
+
+      \                              format: integer\r
+
+      \                              example: 3\r
+
+      \                              minimum: 1\r
+
+      \                              maximum: 10\r
+
+      \                            comment:\r
+
+      \                              type: string\r
+
+      \                              format: string\r
+
+      \                              example: The driver was driving too
+      fast\r
+
+      \                              maxLength: 500\r
+
+      \                            passenger:\r
+
+      \                              $ref:
+      \"#/components/schemas/UserRef\"\r
+
+      \        \"404\":\r
+
+      \          description: Vehicle does not exist!\r
+
+      \r
+
+      \  /api/review/{rideId}/driver:\r
+
+      \    post:\r
+
+      \      tags:\r
+
+      \        - review\r
+
+      \      summary: Leave review for the driver\r
+
+      \      description: Creating a review about the driver\r
+
+      \      operationId: reviewCreation\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the driver\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \        - name: rideId\r
+
+      \          in: path\r
+
+      \          description: Id of the of the ride\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      requestBody:\r
+
+      \        content:\r
+
+      \          application/json:\r
+
+      \            schema:\r
+
+      \              type: object\r
+
+      \              required:\r
+
+      \                - rating\r
+
+      \                - comment\r
+
+      \              properties:\r
+
+      \                rating:\r
+
+      \                  type: integer\r
+
+      \                  format: integer\r
+
+      \                  example: 3\r
+
+      \                  minimum: 1\r
+
+      \                  maximum: 10\r
+
+      \                comment:\r
+
+      \                  type: string\r
+
+      \                  format: string\r
+
+      \                  example: The driver was driving really fast\r
+
+      \                  maxLength: 500\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                type: object\r
+
+      \                properties:\r
+
+      \                  id:\r
+
+      \                    type: integer\r
+
+      \                    format: integer\r
+
+      \                    example: 123\r
+
+      \                  rating:\r
+
+      \                    type: integer\r
+
+      \                    format: integer\r
+
+      \                    example: 3\r
+
+      \                    minimum: 1\r
+
+      \                    maximum: 10\r
+
+      \                  comment:\r
+
+      \                    type: string\r
+
+      \                    format: string\r
+
+      \                    example: The driver was driving really fast\r
+
+      \                    maxLength: 500\r
+
+      \                  passenger:\r
+
+      \                    $ref: \"#/components/schemas/UserRef\"\r
+
+      \        \"404\":\r
+
+      \          description: Ride does not exist!\r
+
+      \r
+
+      \  /api/review/driver/{id}:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - review\r
+
+      \      summary: Getting the reviews for the driver\r
+
+      \      description: Get the reviews for the specific driver\r
+
+      \      operationId: gettingTheReview\r
+
+      \      parameters:\r
+
+      \        - name: id\r
+
+      \          in: path\r
+
+      \          description: Id of the ride\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                allOf:\r
+
+      \                  - $ref:
+      \"#/components/schemas/PaginatedResponse\"\r
+
+      \                  - type: object\r
+
+      \                    properties:\r
+
+      \                      results:\r
+
+      \                        type: array\r
+
+      \                        items:\r
+
+      \                          type: object\r
+
+      \                          properties:\r
+
+      \                            id:\r
+
+      \                              type: integer\r
+
+      \                              format: integer\r
+
+      \                              example: 123\r
+
+      \                            rating:\r
+
+      \                              type: integer\r
+
+      \                              format: integer\r
+
+      \                              example: 3\r
+
+      \                              minimum: 1\r
+
+      \                              maximum: 10\r
+
+      \                            comment:\r
+
+      \                              type: string\r
+
+      \                              format: string\r
+
+      \                              example: The driver was driving too
+      fast\r
+
+      \                              maxLength: 500\r
+
+      \                            passenger:\r
+
+      \                              $ref:
+      \"#/components/schemas/UserRef\"\r
+
+      \        \"404\":\r
+
+      \          description: Driver does not exist!\r
+
+      \r
+
+      \  /api/review/{rideId}:\r
+
+      \    get:\r
+
+      \      tags:\r
+
+      \        - review\r
+
+      \      summary: Getting all reviews for the specific ride\r
+
+      \      description: Overview of both reviews for the specific ride
+      (driver and vehicle)\r
+
+      \      operationId: gettingReviewsForRide\r
+
+      \      parameters:\r
+
+      \        - in: path\r
+
+      \          name: rideId\r
+
+      \          description: Id of the ride\r
+
+      \          required: true\r
+
+      \          schema:\r
+
+      \            type: integer\r
+
+      \      responses:\r
+
+      \        \"200\":\r
+
+      \          description: \"\"\r
+
+      \          content:\r
+
+      \            application/json:\r
+
+      \              schema:\r
+
+      \                type: array\r
+
+      \                items:\r
+
+      \                  type: object\r
+
+      \                  properties:\r
+
+      \                    vehicleReview:\r
+
+      \                      type: object\r
+
+      \                      properties:\r
+
+      \                        id:\r
+
+      \                          type: integer\r
+
+      \                          format: integer\r
+
+      \                          example: 123\r
+
+      \                        rating:\r
+
+      \                          type: integer\r
+
+      \                          format: integer\r
+
+      \                          example: 3\r
+
+      \                          minimum: 1\r
+
+      \                          maximum: 10\r
+
+      \                        comment:\r
+
+      \                          type: string\r
+
+      \                          format: string\r
+
+      \                          example: The vehicle was bad and dirty\r
+
+      \                          maxLength: 500\r
+
+      \                        passenger:\r
+
+      \                          $ref: \"#/components/schemas/UserRef\"\r
+
+      \                    driverReview:\r
+
+      \                      type: object\r
+
+      \                      properties:\r
+
+      \                        id:\r
+
+      \                          type: integer\r
+
+      \                          format: integer\r
+
+      \                          example: 123\r
+
+      \                        rating:\r
+
+      \                          type: integer\r
+
+      \                          format: integer\r
+
+      \                          example: 3\r
+
+      \                          minimum: 1\r
+
+      \                          maximum: 10\r
+
+      \                        comment:\r
+
+      \                          type: string\r
+
+      \                          format: string\r
+
+      \                          example: The driver was driving too
+      fast\r
+
+      \                          maxLength: 500\r
+
+      \                        passenger:\r
+
+      \                          $ref: \"#/components/schemas/UserRef\"\r
+
+      \        \"404\":\r
+
+      \          description: Ride does not exist!\r
+
+      \r
+
+      components:\r
+
+      \  schemas:\r
+
+      \    TokenResponse:\r
+
+      \      type: object\r
+
+      \      properties:\r
+
+      \        accessToken:\r
+
+      \          type: string\r
+
+      \          example:
+      eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6\
+      IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV\
+      _adQssw5c\r
+
+      \        refreshToken:\r
+
+      \          type: string\r
+
+      \          example:
+      eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6\
+      IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV\
+      _adQssw5c\r
+
+      \    PaginatedResponse:\r
+
+      \      type: object\r
+
+      \      properties:\r
+
+      \        totalCount:\r
+
+      \          type: integer\r
+
+      \          format: integer\r
+
+      \          example: 243\r
+
+      \    UserRef:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - id\r
+
+      \        - email\r
+
+      \      properties:\r
+
+      \        id:\r
+
+      \          type: integer\r
+
+      \          format: integer\r
+
+      \          example: 123\r
+
+      \        email:\r
+
+      \          type: string\r
+
+      \          format: email\r
+
+      \          maxLength: 100\r
+
+      \    Error:\r
+
+      \      type: object\r
+
+      \      properties:\r
+
+      \        message:\r
+
+      \          type: string\r
+
+      \          example: Message placeholder (Concrete messages are in
+      description)\r
+
+      \    Success:\r
+
+      \      type: object\r
+
+      \      properties:\r
+
+      \        message:\r
+
+      \          type: string\r
+
+      \          example: Message placeholder (Concrete messages are in
+      description)\r
+
+      \    User:\r
+
+      \      type: object\r
+
+      \      properties:\r
+
+      \        name:\r
+
+      \          type: string\r
+
+      \          example: Pera\r
+
+      \          maxLength: 100\r
+
+      \        surname:\r
+
+      \          type: string\r
+
+      \          example: Perić\r
+
+      \          maxLength: 100\r
+
+      \        profilePicture:\r
+
+      \          type: string\r
+
+      \          format: byte\r
+
+      \          example: U3dhZ2dlciByb2Nrcw==\r
+
+      \        telephoneNumber:\r
+
+      \          type: string\r
+
+      \          example: \"+381123123\"\r
+
+      \          maxLength: 18\r
+
+      \        email:\r
+
+      \          type: string\r
+
+      \          format: email\r
+
+      \          example: pera.peric@email.com\r
+
+      \          maxLength: 100\r
+
+      \        address:\r
+
+      \          type: string\r
+
+      \          example: Bulevar Oslobodjenja 74\r
+
+      \          maxLength: 100\r
+
+      \    DriverDocument:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - name\r
+
+      \        - documentImage\r
+
+      \        - driverId\r
+
+      \      properties:\r
+
+      \        name:\r
+
+      \          type: string\r
+
+      \          example: Vozačka dozvola\r
+
+      \          maxLength: 100\r
+
+      \        documentImage:\r
+
+      \          type: string\r
+
+      \          format: byte\r
+
+      \          example: U3dhZ2dlciByb2Nrcw=\r
+
+      \        driverId:\r
+
+      \          type: integer\r
+
+      \          format: integer\r
+
+      \          example: 10\r
+
+      \    DrivingAssessment:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - locations\r
+
+      \        - vehicleType\r
+
+      \        - babyTransport\r
+
+      \        - petTransport\r
+
+      \      properties:\r
+
+      \        locations:\r
+
+      \          type: array\r
+
+      \          description: List of locations which defines the order of
+      the ride\r
+
+      \          items:\r
+
+      \            $ref: \"#/components/schemas/LocationsForRide\"\r
+
+      \        vehicleType:\r
+
+      \          type: string\r
+
+      \          example: STANDARD\r
+
+      \        babyTransport:\r
+
+      \          type: boolean\r
+
+      \        petTransport:\r
+
+      \          type: boolean\r
+
+      \    RideCreation:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - locations\r
+
+      \        - passengers\r
+
+      \        - vehicleType\r
+
+      \        - babyTransport\r
+
+      \        - petTransport\r
+
+      \      properties:\r
+
+      \        locations:\r
+
+      \          type: array\r
+
+      \          description: List of locations which defines the order of
+      the ride\r
+
+      \          items:\r
+
+      \            $ref: \"#/components/schemas/LocationsForRide\"\r
+
+      \        passengers:\r
+
+      \          type: array\r
+
+      \          description: List of users which are attached to the
+      ride\r
+
+      \          items:\r
+
+      \            $ref: \"#/components/schemas/UserRef\"\r
+
+      \        vehicleType:\r
+
+      \          type: string\r
+
+      \          example: STANDARD\r
+
+      \          maxLength: 50\r
+
+      \        babyTransport:\r
+
+      \          type: boolean\r
+
+      \        petTransport:\r
+
+      \          type: boolean\r
+
+      \    LocationsForRide:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - departure\r
+
+      \        - destination\r
+
+      \      properties:\r
+
+      \        departure:\r
+
+      \          $ref: \"#/components/schemas/GeoCoordinate\"\r
+
+      \        destination:\r
+
+      \          $ref: \"#/components/schemas/GeoCoordinate\"\r
+
+      \    Ride:\r
+
+      \      type: object\r
+
+      \      properties:\r
+
+      \        id:\r
+
+      \          type: integer\r
+
+      \          format: integer\r
+
+      \          example: 123\r
+
+      \        startTime:\r
+
+      \          type: string\r
+
+      \          format: date-time\r
+
+      \          example: 2017-07-21T17:32:28Z\r
+
+      \        endTime:\r
+
+      \          type: string\r
+
+      \          format: date-time\r
+
+      \          example: 2017-07-21T17:45:14Z\r
+
+      \        totalCost:\r
+
+      \          type: number\r
+
+      \          example: 1235.0\r
+
+      \        driver:\r
+
+      \          $ref: \"#/components/schemas/UserRef\"\r
+
+      \        passengers:\r
+
+      \          type: array\r
+
+      \          items:\r
+
+      \            $ref: \"#/components/schemas/UserRef\"\r
+
+      \        estimatedTimeInMinutes:\r
+
+      \          type: integer\r
+
+      \          example: 5\r
+
+      \        vehicleType:\r
+
+      \          type: string\r
+
+      \          example: STANDARD\r
+
+      \        babyTransport:\r
+
+      \          type: boolean\r
+
+      \        petTransport:\r
+
+      \          type: boolean\r
+
+      \        rejection:\r
+
+      \          type: object\r
+
+      \          properties:\r
+
+      \            reason:\r
+
+      \              type: string\r
+
+      \              format: string\r
+
+      \              example: Ride is canceled due to previous problems
+      with the passenger\r
+
+      \            timeOfRejection:\r
+
+      \              type: string\r
+
+      \              format: date-time\r
+
+      \              example: 2022-11-25T17:32:28Z\r
+
+      \        locations:\r
+
+      \          type: array\r
+
+      \          description: List of locations which defines the order of
+      the ride\r
+
+      \          items:\r
+
+      \            $ref: \"#/components/schemas/LocationsForRide\"\r
+
+      \    Review:\r
+
+      \      type: object\r
+
+      \      properties:\r
+
+      \        id:\r
+
+      \          type: integer\r
+
+      \          format: integer\r
+
+      \          example: 10\r
+
+      \        rating:\r
+
+      \          type: integer\r
+
+      \          format: integer\r
+
+      \          example: 5\r
+
+      \        comment:\r
+
+      \          type: string\r
+
+      \          example: Odlična vožnja\r
+
+      \        ride:\r
+
+      \          $ref: \"#/components/schemas/UserRef\"\r
+
+      \        passenger:\r
+
+      \          $ref: \"#/components/schemas/UserRef\"\r
+
+      \    GeoCoordinate:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - latitude\r
+
+      \        - longitude\r
+
+      \      properties:\r
+
+      \        address:\r
+
+      \          type: string\r
+
+      \          format: string\r
+
+      \          example: Bulevar oslobodjenja 46\r
+
+      \        latitude:\r
+
+      \          type: number\r
+
+      \          example: 45.267136\r
+
+      \          minimum: -90\r
+
+      \          maximum: 90\r
+
+      \        longitude:\r
+
+      \          type: number\r
+
+      \          example: 19.833549\r
+
+      \          minimum: -180\r
+
+      \          maximum: 180\r
+
+      \    Vehicle:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - vehicleType\r
+
+      \        - model\r
+
+      \        - licenseNumber\r
+
+      \        - passengerSeats\r
+
+      \      properties:\r
+
+      \        vehicleType:\r
+
+      \          type: string\r
+
+      \          example: STANDARD\r
+
+      \        model:\r
+
+      \          type: string\r
+
+      \          example: VW Golf 2\r
+
+      \          maxLength: 100\r
+
+      \        licenseNumber:\r
+
+      \          type: string\r
+
+      \          example: NS 123-AB\r
+
+      \          maxLength: 20\r
+
+      \        currentLocation:\r
+
+      \          $ref: \"#/components/schemas/GeoCoordinate\"\r
+
+      \        passengerSeats:\r
+
+      \          type: integer\r
+
+      \          format: integer\r
+
+      \          example: 4\r
+
+      \          minimum: 1\r
+
+      \          maximum: 20\r
+
+      \        babyTransport:\r
+
+      \          type: boolean\r
+
+      \        petTransport:\r
+
+      \          type: boolean\r
+
+      \    WorkingHour:\r
+
+      \      type: object\r
+
+      \      properties:\r
+
+      \        id:\r
+
+      \          type: integer\r
+
+      \          format: integer\r
+
+      \          example: 10\r
+
+      \        start:\r
+
+      \          type: string\r
+
+      \          format: date-time\r
+
+      \        end:\r
+
+      \          type: string\r
+
+      \          format: date-time\r
+
+      \    WorkingHourStart:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - start\r
+
+      \      properties:\r
+
+      \        start:\r
+
+      \          type: string\r
+
+      \          format: date-time\r
+
+      \    WorkingHourEnd:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - end\r
+
+      \      properties:\r
+
+      \        end:\r
+
+      \          type: string\r
+
+      \          format: date-time\r
+
+      \    PanicCreate:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - reason\r
+
+      \      properties:\r
+
+      \        reason:\r
+
+      \          type: string\r
+
+      \          example: Driver is constantly listeting to bad music.\r
+
+      \          maxLength: 500\r
+
+      \    PanicDetails:\r
+
+      \      type: object\r
+
+      \      properties:\r
+
+      \        id:\r
+
+      \          type: integer\r
+
+      \          format: integer\r
+
+      \          example: 10\r
+
+      \        user:\r
+
+      \          $ref: \"#/components/schemas/User\"\r
+
+      \        ride:\r
+
+      \          $ref: \"#/components/schemas/Ride\"\r
+
+      \        time:\r
+
+      \          type: string\r
+
+      \          format: date-time\r
+
+      \        reason:\r
+
+      \          type: string\r
+
+      \          example: Driver is drinking while he drives\r
+
+      \    AcceptRide:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - time\r
+
+      \      properties:\r
+
+      \        time:\r
+
+      \          type: string\r
+
+      \          format: date-time\r
+
+      \    RejectRide:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - time\r
+
+      \        - reason\r
+
+      \      properties:\r
+
+      \        time:\r
+
+      \          type: string\r
+
+      \          format: date-time\r
+
+      \        reason:\r
+
+      \          type: string\r
+
+      \          example: Passenger is an old customer and he behvaed
+      really badly last time.\r
+
+      \    Login:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - email\r
+
+      \        - password\r
+
+      \      properties:\r
+
+      \        email:\r
+
+      \          type: string\r
+
+      \          format: email\r
+
+      \          example: pera.peric@email.com\r
+
+      \        password:\r
+
+      \          type: string\r
+
+      \          format: password\r
+
+      \          example: sifra123\r
+
+      \    Message:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - receiverId\r
+
+      \        - message\r
+
+      \        - type\r
+
+      \        - rideId\r
+
+      \      properties:\r
+
+      \        receiverId:\r
+
+      \          type: integer\r
+
+      \          format: integer\r
+
+      \          example: 123\r
+
+      \        message:\r
+
+      \          type: string\r
+
+      \          example: The driver is going on a longer route on
+      purpose\r
+
+      \          maxLength: 500\r
+
+      \        type:\r
+
+      \          type: string\r
+
+      \          example: RIDE\r
+
+      \        rideId:\r
+
+      \          type: integer\r
+
+      \          format: integer\r
+
+      \          example: 123\r
+
+      \    Note:\r
+
+      \      type: object\r
+
+      \      required:\r
+
+      \        - message\r
+
+      \      properties:\r
+
+      \        message:\r
+
+      \          type: string\r
+
+      \          example: The passenger has requested and after that
+      aborted the ride\r
+
+      \          maxLength: 500\r
+
+      \r
+
+      \  requestBodies:\r
+
+      \    CreateUser:\r
+
+      \      description: Contains informations about the user\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            allOf:\r
+
+      \              - $ref: \"#/components/schemas/User\"\r
+
+      \              - type: object\r
+
+      \                required:\r
+
+      \                  - name\r
+
+      \                  - surname\r
+
+      \                  - email\r
+
+      \                  - address\r
+
+      \                  - password\r
+
+      \                properties:\r
+
+      \                  password:\r
+
+      \                    type: string\r
+
+      \                    pattern:
+      /^(?=.*\\d)(?=.*[A-Z])(?!.*[^a-zA-Z0-9@#$^+=])(.{8,15})$/\r
+
+      \                    example: NekaSifra123\r
+
+      \r
+
+      \    Note:\r
+
+      \      description: Contains informations about the Note\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            allOf:\r
+
+      \              - $ref: \"#/components/schemas/Note\"\r
+
+      \r
+
+      \    UserDetails:\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            allOf:\r
+
+      \              - type: object\r
+
+      \                properties:\r
+
+      \                  id:\r
+
+      \                    type: integer\r
+
+      \                    format: integer\r
+
+      \                    example: 123\r
+
+      \              - $ref: \"#/components/schemas/User\"\r
+
+      \r
+
+      \    RideCreation:\r
+
+      \      description: Data required for rider creation by user\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            allOf:\r
+
+      \              - $ref: \"#/components/schemas/RideCreation\"\r
+
+      \    DriverDocument:\r
+
+      \      description: Data about the document for the driver\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            allOf:\r
+
+      \              - $ref: \"#/components/schemas/DriverDocument\"\r
+
+      \    Vehicle:\r
+
+      \      description: Contains the information about the vehicle.\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            $ref: \"#/components/schemas/Vehicle\"\r
+
+      \    WorkingHour:\r
+
+      \      description: Contains the information about the working hours
+      of the driver\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            $ref: \"#/components/schemas/WorkingHour\"\r
+
+      \    WorkingHourStart:\r
+
+      \      description: Contains the information about the working hours
+      of the driver\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            $ref: \"#/components/schemas/WorkingHourStart\"\r
+
+      \    WorkingHourEnd:\r
+
+      \      description: Contains the information about the working hours
+      of the driver\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            $ref: \"#/components/schemas/WorkingHourEnd\"\r
+
+      \    Ride:\r
+
+      \      description: Contains the information about the ride\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            $ref: \"#/components/schemas/Ride\"\r
+
+      \    RideList:\r
+
+      \      description: Lista vožnji.\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            type: array\r
+
+      \            items:\r
+
+      \              $ref: \"#/components/schemas/Ride\"\r
+
+      \    PanicCreate:\r
+
+      \      description: Creating panic report\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            $ref: \"#/components/schemas/PanicCreate\"\r
+
+      \    PanicCreateList:\r
+
+      \      description: Panic reports overview\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            type: array\r
+
+      \            items:\r
+
+      \              $ref: \"#/components/schemas/PanicDetails\"\r
+
+      \    AcceptRide:\r
+
+      \      description: Informations about accepting the ride\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            $ref: \"#/components/schemas/AcceptRide\"\r
+
+      \    RejectRide:\r
+
+      \      description: Informations about rejecting the ride\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            $ref: \"#/components/schemas/RejectRide\"\r
+
+      \    GeoCoordinate:\r
+
+      \      description: Informations about location with latitude and
+      longitude coordinates\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            $ref: \"#/components/schemas/GeoCoordinate\"\r
+
+      \    Login:\r
+
+      \      description: User login credentials\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            $ref: \"#/components/schemas/Login\"\r
+
+      \    Message:\r
+
+      \      description: Contains data about the message from one user to
+      another\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            $ref: \"#/components/schemas/Message\"\r
+
+      \    MessageList:\r
+
+      \      description: Contains list of data about the message from one
+      user to another\r
+
+      \      content:\r
+
+      \        application/json:\r
+
+      \          schema:\r
+
+      \            type: array\r
+
+      \            items:\r
+
+      \              $ref: \"#/components/schemas/Message\""
+    contentType: yaml
+    _type: api_spec
+  - _id: uts_f7d872795fcc4d9abdf438c2d229028e
+    parentId: wrk_584f82820964471ea1d43a16a3b81eb9
+    modified: 1670097494751
+    created: 1670097494751
+    name: Example Test Suite
+    _type: unit_test_suite
+  - _id: env_env_8f356df3ee6dae11900aa4b56079fcf43f11c57a_sub
+    parentId: env_8f356df3ee6dae11900aa4b56079fcf43f11c57a
+    modified: 1683412937737
+    created: 1670100457984
+    name: OpenAPI env
+    data:
+      scheme: http
+      base_path: ""
+      base_url: localhost:8080
+      host: localhost:8080
+    dataPropertyOrder:
+      "&":
+        - scheme
+        - base_path
+        - base_url
+        - host
+    color: null
+    isPrivate: false
+    metaSortKey: 1670100457984
+    _type: environment
+  - _id: env_env_8f356df3ee6dae11900aa4b56079fcf43f11c57a_sub__9c17e047
+    parentId: env_8f356df3ee6dae11900aa4b56079fcf43f11c57a
+    modified: 1673114886744
+    created: 1673114886744
+    name: OpenAPI env example.com
+    data:
+      scheme: http
+      base_path: ""
+      host: example.com
+    dataPropertyOrder: null
+    color: null
+    isPrivate: false
+    metaSortKey: 1673114886744
+    _type: environment

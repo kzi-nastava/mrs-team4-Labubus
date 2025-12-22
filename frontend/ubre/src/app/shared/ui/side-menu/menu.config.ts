@@ -15,19 +15,23 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
     { label: 'Log Out',           icon: 'logout_24dp_E53935_FILL0_wght400_GRAD0_opsz24.svg',     action: 'logout' },
   ],
   driver: [
-    { label: 'My rides',          icon: 'icons/history.svg',   action: 'driver-rides' },
-    { label: 'Earnings',          icon: 'icons/money.svg',     action: 'earnings' },
-    { label: 'Settings',          icon: 'icons/settings.svg',  action: 'settings' },
-    { label: 'Log off',           icon: 'icons/power.svg',     action: 'logout' },
+    { label: 'Ride history',          icon: 'directions_car_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',   action: 'ride-history' },
+    { label: 'Account settings',  icon: 'settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',  action: 'account-settings' },
+    { label: 'Reports',           icon: 'analytics_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',    action: 'reports' },
+    { label: 'Log out',           icon: 'logout_24dp_E53935_FILL0_wght400_GRAD0_opsz24.svg',     action: 'logout' },
   ],
   admin: [
-    { label: 'Dashboard',         icon: 'icons/dashboard.svg', action: 'admin-dashboard' },
-    { label: 'Users',             icon: 'icons/users.svg',     action: 'admin-users' },
-    { label: 'Reports',           icon: 'icons/report.svg',    action: 'reports' },
-    { label: 'Log off',           icon: 'icons/power.svg',     action: 'logout' },
+    { label: 'Ride history',         icon: 'directions_car_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg', action: 'ride-history' }, //admin-dashboard
+    { label: 'Active rides',             icon: 'active-rides-primary-text.svg',     action: 'admin-users' },
+    { label: 'Account settings',             icon: 'settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',     action: 'account-settings' },
+    { label: 'Price adjustment',             icon: 'price-adjustment-primary-text.svg',     action: 'admin-users' },
+    { label: 'Register a driver',             icon: 'person_add_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',     action: 'register-driver' },
+    { label: 'Panic notifications',             icon: 'warning-primary-text.svg',     action: 'admin-users' },
+    { label: 'Reports',           icon: 'analytics_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',    action: 'reports' },
+    { label: 'Log out',           icon: 'logout_24dp_E53935_FILL0_wght400_GRAD0_opsz24.svg',     action: 'logout' },
   ],
   guest: [
-    { label: 'Sign in',           icon: 'icons/login.svg',     action: 'login' },
-    { label: 'Register',          icon: 'icons/user-plus.svg', action: 'register' },
+    { label: 'Log in',           icon: '',     action: 'login' },
+    { label: 'Register',          icon: '', action: 'register' },
   ],
 };
