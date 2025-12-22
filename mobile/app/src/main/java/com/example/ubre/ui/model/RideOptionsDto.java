@@ -9,4 +9,16 @@ public class RideOptionsDto {
         this.babyFriendly = babyFriendly;
         this.petFriendly = petFriendly;
     }
+
+    public VehicleType getVehicleType() {
+        return vehicleType;
+    }
+
+    public boolean isBabyFriendly() {
+        return babyFriendly;
+    }
+
+    public boolean isPetFriendly() {
+        return petFriendly;
+    }
 }

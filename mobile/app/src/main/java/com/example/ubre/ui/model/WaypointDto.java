@@ -11,4 +11,20 @@ public class WaypointDto {
         this.latitude = latitude;
         this.longitude = longitude;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
 }

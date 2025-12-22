@@ -13,6 +13,7 @@ import androidx.core.view.GravityCompat;
 
 import com.example.ubre.R;
 import com.example.ubre.ui.model.Role;
+import com.example.ubre.ui.model.UserDto;
 import com.google.android.material.navigation.NavigationView;
 
 import org.osmdroid.config.Configuration;
@@ -60,8 +61,8 @@ public class MainActivity extends AppCompatActivity {
         );
 
         // Example role assignment; in a real app, this would come from user authentication
-        Role currentUserRole = Role.REGISTERED_USER;
-        setMenuOptions(currentUserRole);
+        UserDto currentUser = new UserDto("1", Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
+        setMenuOptions(currentUser.getRole());
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(item -> {

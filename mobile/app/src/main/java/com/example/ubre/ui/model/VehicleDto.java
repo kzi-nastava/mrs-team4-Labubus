@@ -19,4 +19,32 @@ public class VehicleDto {
         this.petFriendly = petFriendly;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getPlates() {
+        return plates;
+    }
+
+    public int getSeats() {
+        return seats;
+    }
+
+    public boolean isBabyFriendly() {
+        return babyFriendly;
+    }
+
+    public boolean isPetFriendly() {
+        return petFriendly;
+    }
+
 }
