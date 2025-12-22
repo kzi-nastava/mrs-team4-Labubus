@@ -40,6 +40,11 @@ public class ChangePasswordFragment extends Fragment {
             if (p1.isEmpty()) { tilNew.setError("Required"); ok = false; } else tilNew.setError(null);
             if (p2.isEmpty()) { tilConfirm.setError("Required"); ok = false; } else tilConfirm.setError(null);
 
+            if (!ok) {
+                txtError.setVisibility(View.GONE);
+                return;
+            }
+
             if (ok && !p1.equals(p2)) {
                 // crveno + tekst
                 tilConfirm.setError(" ");
@@ -48,6 +53,7 @@ public class ChangePasswordFragment extends Fragment {
             }
 
             txtError.setVisibility(View.GONE);
+            tilNew.setError(null);
             tilConfirm.setError(null);
 
             // TODO: poziv API za promenu lozinke

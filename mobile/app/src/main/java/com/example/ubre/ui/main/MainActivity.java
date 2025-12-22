@@ -30,6 +30,7 @@ import org.osmdroid.views.MapController;
 public class MainActivity extends AppCompatActivity {
 
     private MapView map;
+    private View btnMenu;
     private DrawerLayout drawer;
     private UserDto currentUser;
 
@@ -49,9 +50,11 @@ public class MainActivity extends AppCompatActivity {
             if (hasFragments) {
                 findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
                 if (map != null) map.setVisibility(View.GONE);
+                if (btnMenu != null) btnMenu.setVisibility(View.GONE);
             } else {
                 findViewById(R.id.fragment_container).setVisibility(View.GONE);
                 if (map != null) map.setVisibility(View.VISIBLE);
+                if (btnMenu != null) btnMenu.setVisibility(View.VISIBLE);
             }
         });
 
@@ -94,6 +97,9 @@ public class MainActivity extends AppCompatActivity {
 
             return true;
         });
+
+        btnMenu = findViewById(R.id.btn_menu);
+
     }
 
     @Override
@@ -144,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
     private void showFragment(Fragment f) {
         findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
         map.setVisibility(View.GONE);
+        if (btnMenu != null) btnMenu.setVisibility(View.GONE);
 
         getSupportFragmentManager()
                 .beginTransaction()
