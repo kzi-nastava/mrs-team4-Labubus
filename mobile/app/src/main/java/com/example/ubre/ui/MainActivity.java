@@ -20,8 +20,6 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapController;
 
-enum Role { REGISTERED_USER, GUEST, ADMIN, DRIVER }
-
 public class MainActivity extends AppCompatActivity {
 
     private MapView map;
