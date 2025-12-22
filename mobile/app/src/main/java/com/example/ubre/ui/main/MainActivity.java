@@ -1,4 +1,4 @@
-package com.example.ubre.ui;
+package com.example.ubre.ui.main;
 
 import android.os.Bundle;
 import android.widget.ImageView;
@@ -25,8 +25,6 @@ import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapController;
 
-import java.time.Instant;
-
 public class MainActivity extends AppCompatActivity {
 
     private MapView map;
@@ -35,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setDecorFitsSystemWindows(false);
 
         Configuration.getInstance().setUserAgentValue(getPackageName());
 
