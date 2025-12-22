@@ -15,5 +15,13 @@
         <item name="android:fontFamily">@font/poppins_medium</item>
     </style>
 
+    <style name="Avatar">
+        <item name="android:scaleType">centerCrop</item>
+        <item name="android:clipToOutline">true</item>
+        <item name="android:outlineProvider">background</item>
+        <item name="android:background">@drawable/bg_avatar</item>
+    </style>
+
+
 </resources>
 
