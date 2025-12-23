@@ -51,15 +51,24 @@
             android:src="@drawable/img_default_avatar" />
 
         <!-- Email (readonly) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Email"
+            style="@style/InputBoxLabel"/>
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/til_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            style="@style/InputBoxLayout"
             android:layout_marginTop="16dp"
-            android:hint="Email">
+            android:hint="Enter your email">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_email"
+                style="@style/InputBoxEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:enabled="false" />
@@ -163,7 +172,7 @@
             android:layout_marginTop="18dp"
             android:text="Save"
             android:textAllCaps="false"
-            android:background="@drawable/btn_filled" />
+            style="@style/BtnFilled" />
 
         <Button
             android:id="@+id/btn_discard"
@@ -172,7 +181,7 @@
             android:layout_marginTop="10dp"
             android:text="Discard"
             android:textAllCaps="false"
-            android:background="@drawable/btn_outlined" />
+            style="@style/BtnOutlined"/>
 
     </LinearLayout>
 </ScrollView>
