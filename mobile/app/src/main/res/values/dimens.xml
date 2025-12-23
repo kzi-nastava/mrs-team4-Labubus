@@ -16,7 +16,7 @@
     <dimen name="radius_button_small">12dp</dimen>
 
     <!-- ICON SIZES -->
-    <dimen name="icon_regular">84dp</dimen>
+    <dimen name="icon_regular">56dp</dimen>
     <dimen name="icon_small">60dp</dimen>
     <dimen name="icon_tiny">28dp</dimen>
 
