@@ -1,5 +1,6 @@
 package com.example.ubre.ui.main;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -129,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
         navigationView.inflateMenu(menuRes);
     }
 
+    @SuppressLint("SetTextI18n")
     private void fillDrawerHeader(UserDto user) {
         NavigationView nav = findViewById(R.id.nav_view);
 
@@ -143,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
         if (url != null && !url.isEmpty()) {
             Glide.with(this).load(url).circleCrop().into(avatar);
         } else {
-            avatar.setImageResource(R.drawable.img_default_avatar);
+            Glide.with(this).load(R.drawable.img_default_avatar).circleCrop().into(avatar);
         }
     }
 

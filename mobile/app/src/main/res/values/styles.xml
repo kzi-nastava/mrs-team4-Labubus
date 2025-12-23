@@ -40,9 +40,9 @@
     </style>
 
     <style name="Avatar">
-        <item name="android:scaleType">centerCrop</item>
-        <item name="android:outlineProvider">background</item>
         <item name="android:background">@drawable/bg_avatar</item>
+        <item name="android:outlineProvider">background</item>
+        <item name="android:scaleType">centerCrop</item>
     </style>
 
     <style name="InputBoxLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">

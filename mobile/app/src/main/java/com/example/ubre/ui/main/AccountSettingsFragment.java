@@ -60,7 +60,7 @@ public class AccountSettingsFragment extends Fragment {
             if (url != null && !url.isEmpty()) {
                 Glide.with(this).load(url).circleCrop().into(avatar);
             } else {
-                avatar.setImageResource(R.drawable.img_default_avatar);
+                Glide.with(this).load(R.drawable.img_default_avatar).circleCrop().into(avatar);
             }
         }
 
