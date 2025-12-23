@@ -1,13 +1,19 @@
 package com.example.ubre.ui.main;
 
 import android.annotation.SuppressLint;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.view.View;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -27,6 +33,8 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapController;
+
+import java.time.Instant;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -84,11 +92,12 @@ public class MainActivity extends AppCompatActivity {
         );
 
         // Example role assignment; in a real app, this would come from user authentication
-        currentUser = new UserDto("1", Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
+        UserDto currentUser = new UserDto("1", Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
         setMenuOptions(currentUser.getRole());
         fillDrawerHeader(currentUser);
 
         NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(item -> {
             drawer.closeDrawer(GravityCompat.START);
 
@@ -128,6 +137,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
         navigationView.inflateMenu(menuRes);
+
+        MenuItem logout = navigationView.getMenu().findItem(R.id.nav_log_out);
+        if (logout != null) {
+            SpannableString logoutText = new SpannableString(logout.getTitle());
+            logoutText.setSpan(new ForegroundColorSpan(ContextCompat.getColor(this, R.color.error)), 0, logoutText.length(), 0);
+            logout.setTitle(logoutText);
+        }
+
+        View header = navigationView.getHeaderView(0);
+        ImageView backIcon = header.findViewById(R.id.nav_back);
+
+        backIcon.setOnClickListener(v ->
+                drawer.closeDrawer(GravityCompat.START)
+        );
     }
 
     @SuppressLint("SetTextI18n")
@@ -145,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
         if (url != null && !url.isEmpty()) {
             Glide.with(this).load(url).circleCrop().into(avatar);
         } else {
-            Glide.with(this).load(R.drawable.img_default_avatar).circleCrop().into(avatar);
+            avatar.setImageResource(R.drawable.img_default_avatar);
         }
     }
 

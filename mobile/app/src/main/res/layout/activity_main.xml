@@ -50,6 +50,10 @@
         android:layout_height="match_parent"
         android:background="@color/surface"
         android:layout_gravity="start"
+        app:itemIconTint="@null"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="20dp"
         app:headerLayout="@layout/nav_header_account"
         />
 
