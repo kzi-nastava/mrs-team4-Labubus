@@ -13,4 +13,16 @@
     <string name="log_in">Log in</string>
     <string name="register">Register</string>
     <string name="name_surname">Name Surname</string>
+    <string name="password">Password</string>
+    <string name="change_password">Change password</string>
+    <string name="personal_information">Personal information</string>
+    <string name="name">Name</string>
+    <string name="surname">Surname</string>
+    <string name="residential_address">Residential address</string>
+    <string name="phone_number">Phone number</string>
+    <string name="save">Save</string>
+    <string name="discard">Discard</string>
+    <string name="account_information">Account information</string>
+    <string name="email">Email</string>
+    <string name="mock_password">********</string>
 </resources>
