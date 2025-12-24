@@ -25,4 +25,7 @@
     <string name="account_information">Account information</string>
     <string name="email">Email</string>
     <string name="mock_password">********</string>
+    <string name="new_password">New password\n</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="password_mismatch_error">Passwords do not match</string>
 </resources>
