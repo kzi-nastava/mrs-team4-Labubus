@@ -1,13 +1,11 @@
 package com.example.ubre.ui.main;
 
 import android.annotation.SuppressLint;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.View;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,6 +22,7 @@ import androidx.fragment.app.Fragment;
 import com.example.ubre.R;
 import com.example.ubre.ui.model.Role;
 import com.example.ubre.ui.model.UserDto;
+import com.example.ubre.ui.model.VehicleDto;
 import com.google.android.material.navigation.NavigationView;
 import com.bumptech.glide.Glide;
 
@@ -34,14 +33,13 @@ import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapController;
 
-import java.time.Instant;
-
 public class MainActivity extends AppCompatActivity {
 
     private MapView map;
     private View btnMenu;
     private DrawerLayout drawer;
     private UserDto currentUser;
+    private VehicleDto currentVehicle; // If role is DRIVER, that is drivers vehicle
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (hasFragments) {
                 findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
-                if (map != null) map.setVisibility(View.GONE);
+                if (map != null) map.setVisibility(View.INVISIBLE);
                 if (btnMenu != null) btnMenu.setVisibility(View.GONE);
             } else {
                 findViewById(R.id.fragment_container).setVisibility(View.GONE);
@@ -92,7 +90,9 @@ public class MainActivity extends AppCompatActivity {
         );
 
         // Example role assignment; in a real app, this would come from user authentication
-        UserDto currentUser = new UserDto("1", Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
+        currentUser = new UserDto("1", Role.REGISTERED_USER, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
+        currentVehicle = new VehicleDto("v1", "Toyota Prius", "Sedan", "ABC-123", 4, true, false);
+
         setMenuOptions(currentUser.getRole());
         fillDrawerHeader(currentUser);
 
@@ -103,7 +103,12 @@ public class MainActivity extends AppCompatActivity {
 
             int itemId = item.getItemId();
 
-            if (itemId == R.id.nav_account_settings) { showFragment(AccountSettingsFragment.newInstance(currentUser)); return true; }
+            if (itemId == R.id.nav_account_settings && currentUser.getRole() == Role.REGISTERED_USER) {
+                showFragment(AccountSettingsFragment.newInstance(currentUser, null)); return true;
+            }
+            else if (itemId == R.id.nav_account_settings && currentUser.getRole() == Role.DRIVER) {
+                showFragment(AccountSettingsFragment.newInstance(currentUser, currentVehicle)); return true;
+            }
 
             return true;
         });
@@ -174,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showFragment(Fragment f) {
         findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
-        map.setVisibility(View.GONE);
+        map.setVisibility(View.INVISIBLE);
         if (btnMenu != null) btnMenu.setVisibility(View.GONE);
 
         getSupportFragmentManager()

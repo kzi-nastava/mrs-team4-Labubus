@@ -28,4 +28,12 @@
     <string name="new_password">New password\n</string>
     <string name="confirm_password">Confirm password</string>
     <string name="password_mismatch_error">Passwords do not match</string>
+    <string name="view_vehicle_information">View vehicle information</string>
+    <string name="vehicle_information">Vehicle information</string>
+    <string name="vehicle_model">Vehicle model</string>
+    <string name="vehicle_type">Vehicle type\n</string>
+    <string name="license_plates">License plates</string>
+    <string name="number_of_seats">Number of seats</string>
+    <string name="baby_friendly">Baby friendly\n</string>
+    <string name="pet_friendly">Pet friendly\n</string>
 </resources>
