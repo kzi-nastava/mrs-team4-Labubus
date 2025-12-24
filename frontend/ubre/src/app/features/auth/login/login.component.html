@@ -55,7 +55,9 @@
         <span>Or</span>
       </div>
 
-      <app-button variant="outlined" width="250px"> Continue as Guest </app-button>
+      <app-button variant="outlined" width="250px" (clicked)="continueAsGuest()">
+        Continue as Guest
+      </app-button>
 
       <p class="footer-text">Don't have an account? <a href="/signup">Sign Up</a></p>
     </form>
