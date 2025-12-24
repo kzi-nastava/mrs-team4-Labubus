@@ -1,7 +1,9 @@
 package com.example.ubre.ui.main;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -9,23 +11,38 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.ubre.R;
+import com.example.ubre.ui.model.Role;
 import com.example.ubre.ui.model.UserDto;
+import com.example.ubre.ui.model.VehicleDto;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 public class AccountSettingsFragment extends Fragment {
 
     private static final String ARG_USER = "arg_user";
+    private static final String ARG_VEHICLE = "arg_vehicle";
 
-    public static AccountSettingsFragment newInstance(UserDto user) {
+    public static AccountSettingsFragment newInstance(UserDto user, VehicleDto vehicle) {
         AccountSettingsFragment f = new AccountSettingsFragment();
         Bundle b = new Bundle();
         b.putSerializable(ARG_USER, user); // ako UserDto nije Serializable, reci
+        b.putSerializable(ARG_VEHICLE, vehicle);
         f.setArguments(b);
         return f;
     }
 
-    public AccountSettingsFragment() { super(R.layout.account_settings); }
+    public AccountSettingsFragment() { super(); }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Bundle args = getArguments();
+        UserDto user = (args != null) ? (UserDto) args.getSerializable(ARG_USER) : null;
+
+        boolean isDriver = user != null && user.getRole() != null && user.getRole() == Role.DRIVER;
+
+        int layout = isDriver ? R.layout.account_settings_driver : R.layout.account_settings;
+        return inflater.inflate(layout, container, false);
+    }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
@@ -72,6 +89,27 @@ public class AccountSettingsFragment extends Fragment {
                         .addToBackStack(null)
                         .commit()
         );
+
+        // View vehicle inforamtion -> fragment (only for drivers)
+        Bundle args = getArguments();
+
+        final VehicleDto vehicle = (VehicleDto) (args != null ? args.getSerializable(ARG_VEHICLE) : null);
+
+        View btnVehicle = view.findViewById(R.id.btn_view_vehicle_information);
+
+        if (btnVehicle != null) {
+            if (vehicle != null) {
+                btnVehicle.setOnClickListener(v ->
+                        requireActivity().getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.fragment_container, VehicleInformationFragment.newInstance(vehicle))
+                                .addToBackStack(null)
+                                .commit()
+                );
+            } else {
+                btnVehicle.setVisibility(View.GONE);
+            }
+        }
 
         // Clear error čim krene da kuca
         clearErrorOnType(etName, tilName);

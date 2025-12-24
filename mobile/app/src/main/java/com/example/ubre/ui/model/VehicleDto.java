@@ -1,6 +1,6 @@
 package com.example.ubre.ui.model;
 
-public class VehicleDto {
+public class VehicleDto implements java.io.Serializable {
     private String id;
     private String model;
     private String type;
