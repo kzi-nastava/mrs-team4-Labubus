@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         // Example role assignment; in a real app, this would come from user authentication
-        currentUser = new UserDto("1", Role.REGISTERED_USER, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
+        currentUser = new UserDto("1", Role.DRIVER, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
         currentVehicle = new VehicleDto("v1", "Toyota Prius", "Sedan", "ABC-123", 4, true, false);
 
         setMenuOptions(currentUser.getRole());

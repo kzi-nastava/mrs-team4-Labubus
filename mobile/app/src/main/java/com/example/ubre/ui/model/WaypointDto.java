@@ -16,15 +16,7 @@ public class WaypointDto {
         return id;
     }
 
-    public String getLabel() {
-        return label;
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
+    public void setId(String id) {
+        this.id = id;
     }
 }
