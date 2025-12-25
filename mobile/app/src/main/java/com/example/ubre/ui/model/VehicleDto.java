@@ -23,28 +23,55 @@ public class VehicleDto implements java.io.Serializable {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getModel() {
         return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
     }
 
     public String getType() {
         return type;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public String getPlates() {
         return plates;
+    }
+
+    public void setPlates(String plates) {
+        this.plates = plates;
     }
 
     public int getSeats() {
         return seats;
     }
 
+    public void setSeats(int seats) {
+        this.seats = seats;
+    }
+
     public boolean isBabyFriendly() {
         return babyFriendly;
+    }
+
+    public void setBabyFriendly(boolean babyFriendly) {
+        this.babyFriendly = babyFriendly;
     }
 
     public boolean isPetFriendly() {
         return petFriendly;
     }
 
+    public void setPetFriendly(boolean petFriendly) {
+        this.petFriendly = petFriendly;
+    }
 }
