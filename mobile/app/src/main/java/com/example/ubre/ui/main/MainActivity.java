@@ -104,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
             int itemId = item.getItemId();
 
             if (itemId == R.id.nav_account_settings) { showFragment(AccountSettingsFragment.newInstance(currentUser)); return true; }
+            else if (itemId == R.id.nav_ride_history) { showFragment(RideHistoryFragment.newInstance(currentUser)); return true; }
 
             return true;
         });

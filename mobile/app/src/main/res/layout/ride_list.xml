@@ -1,21 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:paddingTop="20dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+    </ScrollView>
 
     <LinearLayout
+        android:id="@+id/ride_list_options"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_alignParentTop="true"
-        android:layout_above="true"
-        android:padding="16dp">
+        >
 
         <!-- TOP -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
+            android:layout_marginVertical="20dp"
             android:orientation="horizontal">
 
             <ImageView
@@ -33,13 +44,76 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
+        <!-- DATE FILTER -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/date_filter_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Date created"
+            android:gravity="left|center_vertical"
+            app:icon="@drawable/ic_calendar"
+            app:iconGravity="end"
+            style="@style/InputField"
+            app:backgroundTint="@null"
+            android:textColor="@color/text_primary"
+            app:iconTint="@color/text_primary"
+            android:onClick="showDatePicker"
+            />
+
+        <!-- DRIVER FILTER -->
+        <EditText
+            android:id="@+id/driver_filter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="Driver"
+            android:padding="16dp"
+            style="@style/InputField"/>
+
+        <!-- SORT -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            >
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/sort_field"
+                android:layout_weight="1"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Sort by"
+                android:gravity="left|center_vertical"
+                app:icon="@drawable/ic_arrow_down"
+                app:iconGravity="end"
+                style="@style/InputField"
+                app:backgroundTint="@null"
+                android:textColor="@color/text_primary"
+                app:iconTint="@color/text_primary"
+                />
+
+            <ImageView
+                android:id="@+id/sort_direction"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginLeft="5dp"
+                android:src="@drawable/ic_sort_direction"
+                />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/sorting_options"
+            style="@style/InputField"
+            android:visibility="gone"
+            android:divider="@null"
+            android:dividerHeight="0dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_marginRight="53dp"
+            android:layout_height="wrap_content">
+
+        </ListView>
+
     </LinearLayout>
 
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-
-    </ScrollView>
-
-</RelativeLayout>
+</FrameLayout>

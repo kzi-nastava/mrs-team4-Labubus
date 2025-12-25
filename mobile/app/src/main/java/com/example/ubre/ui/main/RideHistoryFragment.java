@@ -1,5 +1,6 @@
 package com.example.ubre.ui.main;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,34 +8,129 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.ListView;
 
 import com.example.ubre.R;
+import com.example.ubre.ui.model.RideDto;
+import com.example.ubre.ui.model.Role;
+import com.example.ubre.ui.model.UserDto;
+import com.google.android.material.button.MaterialButton;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link RideHistoryFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Calendar;
+
 public class RideHistoryFragment extends Fragment {
+    private  UserDto currentUser;
+    private DatePickerDialog datePickerDialog;
+    private Button dateFilterButton;
+    private ListView sortList;
+    private MaterialButton sortSpinner;
+    private LocalDate filterDate;
+    private boolean sortAscending = false;
 
     public RideHistoryFragment() {
-        // Required empty public constructor
+
     }
 
-    public static RideHistoryFragment newInstance() {
-        return new RideHistoryFragment();
+    public static RideHistoryFragment newInstance(UserDto user) {
+        RideHistoryFragment rideHistory = new RideHistoryFragment();
+        Bundle args = new Bundle();
+        args.putSerializable("USER", user);
+        rideHistory.setArguments(args);
+        return rideHistory;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (getArguments() != null)
+            currentUser = (UserDto)getArguments().getSerializable("USER");
+
+        Calendar calendar = Calendar.getInstance();
+        DatePickerDialog.OnDateSetListener eventHandler = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                filterDate = LocalDate.of(year, month, dayOfMonth);
+                dateFilterButton.setText(filterDate.format(DateTimeFormatter.ofPattern("d MMM yyyy")));
+            }
+        };
+
+        datePickerDialog = new DatePickerDialog(getActivity(), eventHandler, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        dateFilterButton = this.getView().findViewById(R.id.date_filter_button);
+        dateFilterButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                datePickerDialog.show();
+            }
+        });
+
+        View driverFilter = this.getView().findViewById(R.id.driver_filter);
+        driverFilter.setVisibility(currentUser.getRole() == Role.ADMIN ? View.VISIBLE : View.GONE);
+
+        sortSpinner = this.getView().findViewById(R.id.sort_field);
+        sortList = this.getView().findViewById(R.id.sorting_options);
+        sortList.setAdapter(new ArrayAdapter<String>(this.getActivity(), android.R.layout.simple_list_item_1,
+                Arrays.stream(RideDto.class.getDeclaredFields()).map(Field::getName).toArray(String[]::new)));
+        sortList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                sortSpinner.setText((String)parent.getItemAtPosition(position));
+                sortSpinner.callOnClick();
+            }
+        });
+
+        sortSpinner.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (View.VISIBLE == sortList.getVisibility()) {
+                    sortList.setVisibility(View.GONE);
+                    sortSpinner.setIconResource(R.drawable.ic_arrow_down);
+                }
+                else {
+                    sortList.setVisibility(View.VISIBLE);
+                    sortSpinner.setIconResource(R.drawable.ic_arrow_up);
+                }
+            }
+        });
+
+        this.getView().findViewById(R.id.sort_direction).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sortAscending = !sortAscending;
+                rotate(v, sortAscending ? 180 : 360);
+            }
+        });
+
+        this.getView().findViewById(R.id.btn_back).setOnClickListener(v ->
+                requireActivity().getSupportFragmentManager().popBackStack()
+        );
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.ride_list, container, false);
+    }
+
+    public void rotate(View view, float amount) {
+        view.animate().rotation(amount)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .setDuration(200)
+                .start();
     }
 }
