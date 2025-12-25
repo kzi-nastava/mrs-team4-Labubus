@@ -8,6 +8,7 @@
         <item android:id="@+id/nav_register_driver" android:title="@string/register_a_driver" android:icon="@drawable/ic_person_add"/>
         <item android:id="@+id/nav_panic_notifications" android:title="@string/panic_notifications" android:icon="@drawable/ic_warning"/>
         <item android:id="@+id/nav_reports" android:title="@string/reports" android:icon="@drawable/ic_reports"/>
+        <item android:id="@+id/nav_profile_edit_requests" android:title="@string/profile_changes" android:icon="@drawable/ic_person_edit"/>
     </group>
 
     <group android:id="@+id/exit_options">

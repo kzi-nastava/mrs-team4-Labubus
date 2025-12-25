@@ -37,4 +37,5 @@
     <string name="baby_friendly">Baby friendly\n</string>
     <string name="pet_friendly">Pet friendly\n</string>
     <string name="statistics">Statistics</string>
+    <string name="profile_changes">Profile changes</string>
 </resources>
