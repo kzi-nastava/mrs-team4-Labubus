@@ -55,7 +55,8 @@
         android:paddingRight="10dp"
         android:paddingTop="20dp"
         app:headerLayout="@layout/nav_header_account"
-        />
+        app:itemTextAppearance="@style/DrawerTextAppearance"
+      />
 
 </androidx.drawerlayout.widget.DrawerLayout>
 

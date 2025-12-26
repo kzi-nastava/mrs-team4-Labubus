@@ -2,5 +2,6 @@
 <resources>
     <style name="Theme.Ubre" parent="Theme.Material3.Light.NoActionBar">
         <item name="colorPrimary">@color/primary_light</item>
+        <item name="colorOutline">@color/neutral_light_gray</item>
     </style>
 </resources>
