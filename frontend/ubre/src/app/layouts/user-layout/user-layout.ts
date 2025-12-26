@@ -14,9 +14,6 @@ import { ConfettiService } from '../../services/confetti';
 import { inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { RideList } from '../../shared/ui/ride-list/ride-list';
-import { User } from '../../dtos/user';
-import { Vehicle } from '../../dtos/vehicle';
-import { RideDto } from '../../dtos/ride-dto';
 import { RideCard } from '../../shared/ui/ride-card/ride-card';
 import { Router } from '@angular/router';
 

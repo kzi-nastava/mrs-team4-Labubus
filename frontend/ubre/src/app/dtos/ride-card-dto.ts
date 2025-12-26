@@ -1,12 +1,12 @@
 import { WaypointDto } from "./waypoint-dto";
 
 export class RideCardDto {
-    public id : number;
+    public rideId : number;
     public startTime : Date;
     public waypoints : WaypointDto[];
   
-    constructor(id : number, startTime : Date, waypoints : WaypointDto[]) {
-        this.id = id;
+    constructor(rideId : number, startTime : Date, waypoints : WaypointDto[]) {
+        this.rideId = rideId;
         this.startTime = startTime;
         this.waypoints = waypoints;
     }

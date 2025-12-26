@@ -1,4 +1,3 @@
-import { Vehicle } from "./vehicle";
 import { VehicleDto } from "./vehicle-dto";
 
 export class DriverRegistrationDto {
