@@ -20,9 +20,9 @@ import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.ubre.R;
-import com.example.ubre.ui.model.Role;
-import com.example.ubre.ui.model.UserDto;
-import com.example.ubre.ui.model.VehicleDto;
+import com.example.ubre.ui.enums.Role;
+import com.example.ubre.ui.dtos.UserDto;
+import com.example.ubre.ui.dtos.VehicleDto;
 import com.google.android.material.navigation.NavigationView;
 import com.bumptech.glide.Glide;
 
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         // Example role assignment; in a real app, this would come from user authentication
-        currentUser = new UserDto("1", Role.DRIVER, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
+        currentUser = new UserDto("1", Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
         currentVehicle = new VehicleDto("v1", "Toyota Prius", "Sedan", "ABC-123", 4, true, false);
 
         setMenuOptions(currentUser.getRole());
@@ -103,13 +103,18 @@ public class MainActivity extends AppCompatActivity {
 
             int itemId = item.getItemId();
 
-            if (itemId == R.id.nav_account_settings && currentUser.getRole() == Role.REGISTERED_USER) {
-                showFragment(AccountSettingsFragment.newInstance(currentUser, null)); return true;
+            if (itemId == R.id.nav_account_settings) {
+                if (currentUser.getRole() == Role.DRIVER) {
+                    showFragment(AccountSettingsFragment.newInstance(currentUser, currentVehicle));
+                    return true;
+                } else {
+                    showFragment(AccountSettingsFragment.newInstance(currentUser, null));
+                    return true;
+                }
+            } else if (itemId == R.id.nav_profile_changes) {
+                showFragment(ProfileChangesFragment.newInstance());
+                return true;
             }
-            else if (itemId == R.id.nav_account_settings && currentUser.getRole() == Role.DRIVER) {
-                showFragment(AccountSettingsFragment.newInstance(currentUser, currentVehicle)); return true;
-            }
-            else
 
             return true;
         });

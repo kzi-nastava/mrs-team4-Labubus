@@ -1,4 +1,4 @@
-package com.example.ubre.ui.model;
+package com.example.ubre.ui.dtos;
 
 public class UserStatsDto { // extend later with other attributes
     private int activePast24Hours; // should be in minutes

@@ -1,4 +1,4 @@
-package com.example.ubre.ui.model;
+package com.example.ubre.ui.enums;
 
 public enum Role {
     ADMIN,

@@ -1,4 +1,4 @@
-package com.example.ubre.ui.model;
+package com.example.ubre.ui.dtos;
 
 public class VehicleDto implements java.io.Serializable {
     private String id;
