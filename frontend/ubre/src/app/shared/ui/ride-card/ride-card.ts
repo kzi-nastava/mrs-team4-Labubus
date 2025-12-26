@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { Ride } from '../../../models/ride';
+import { Ride } from '../../../dtos/ride';
 
 @Component({
   selector: 'app-ride-card',

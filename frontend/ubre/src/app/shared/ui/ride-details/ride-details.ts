@@ -5,9 +5,9 @@ import { VehicleCard } from '../vehicle-card/vehicle-card';
 import { RouteTable } from '../route-table/route-table';
 import { StatCard } from '../stat-card/stat-card';
 import { Button } from '../button/button';
-import { Ride } from '../../../models/ride';
+import { Ride } from '../../../dtos/ride';
 import { DatePipe } from '@angular/common';
-import { User } from '../../../models/user';
+import { User } from '../../../dtos/user';
 
 @Component({
   selector: 'app-ride-details',

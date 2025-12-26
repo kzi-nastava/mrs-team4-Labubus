@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Vehicle } from '../../../models/vehicle';
+import { Vehicle } from '../../../dtos/vehicle';
 
 @Component({
   selector: 'app-vehicle-card',

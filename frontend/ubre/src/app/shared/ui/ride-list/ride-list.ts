@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RideCard } from '../ride-card/ride-card';
 import { ModalContainer } from '../modal-container/modal-container';
 import { RideDetails } from '../ride-details/ride-details';
-import { Ride } from '../../../models/ride';
-import { User } from '../../../models/user';
+import { Ride } from '../../../dtos/ride';
+import { User } from '../../../dtos/user';
 
 
 @Component({

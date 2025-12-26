@@ -26,7 +26,6 @@ public class DriverRegistrationDto {
     public String getId() {
         return id;
     }
-
     public String getAvatarUrl() {
         return avatarUrl;
     }
@@ -36,7 +35,6 @@ public class DriverRegistrationDto {
     public String getPassword() {
         return password;
     }
-
     public String getName() {
         return name;
     }
