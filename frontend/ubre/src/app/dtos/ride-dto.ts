@@ -1,3 +1,4 @@
+import { RideStatus } from "../enums/ride-status";
 import { UserDto } from "./user-dto";
 import { VehicleDto } from "./vehicle-dto";
 import { WaypointDto } from "./waypoint-dto";
@@ -14,8 +15,9 @@ export class RideDto {
     public distance : number = 0;
     public panic : boolean = false;
     public canceledBy : number | null = null;
+    public status : RideStatus;
 
-    constructor(id : number, startTime : Date, endTime : Date, waypoints : WaypointDto[], driver : UserDto, vehicle : VehicleDto, passengers : UserDto[], distance : number = 0, price : number, panic : boolean = false, canceledBy : number | null = null) {
+    constructor(id : number, startTime : Date, endTime : Date, waypoints : WaypointDto[], driver : UserDto, vehicle : VehicleDto, passengers : UserDto[], distance : number = 0, price : number, panic : boolean = false, canceledBy : number | null = null, status : RideStatus) {
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -27,5 +29,6 @@ export class RideDto {
         this.distance = distance;
         this.panic = panic;
         this.canceledBy = canceledBy;
+        this.status = status;
     }
 }

@@ -1,5 +1,7 @@
 package com.example.ubre.ui.dtos;
 
+// For sending request via email to join a ride
+
 public class PassengerRequestDto {
     private int rideId;
     private String email;

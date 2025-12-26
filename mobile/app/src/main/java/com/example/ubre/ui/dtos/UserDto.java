@@ -4,6 +4,8 @@ import com.example.ubre.ui.enums.Role;
 
 import java.io.Serializable;
 
+// User...
+
 public class UserDto implements Serializable {
     private String id;
     private Role role;

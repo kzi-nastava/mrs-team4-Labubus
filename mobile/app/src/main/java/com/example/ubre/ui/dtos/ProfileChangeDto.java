@@ -1,5 +1,8 @@
 package com.example.ubre.ui.dtos;
 
+// Made by driver ---> and then is sent to admin for approval
+// For changing profile data: name, surname, address, phone, avatarUrl
+
 public class ProfileChangeDto {
     public String requestId;
     public String userId;

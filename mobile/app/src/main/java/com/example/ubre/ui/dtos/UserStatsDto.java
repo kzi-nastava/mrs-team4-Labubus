@@ -1,14 +1,16 @@
 package com.example.ubre.ui.dtos;
 
+// User statistics object to be displayed in user profile (only necessary attributes for now are extracted)
+
 public class UserStatsDto { // extend later with other attributes
     private int activePast24Hours; // should be in minutes
     private int numberOfRides;
-    private int distanceTraveled;
-    private int moneySpent;
-    private int moneyEarned;
+    private double distanceTraveled;
+    private double moneySpent;
+    private double moneyEarned;
 
 
-    public UserStatsDto(int activePast24Hours, int numberOfRides, int distanceTraveled, int moneySpent, int moneyEarned) {
+    public UserStatsDto(int activePast24Hours, int numberOfRides, double distanceTraveled, double moneySpent, double moneyEarned) {
         this.activePast24Hours = activePast24Hours;
         this.numberOfRides = numberOfRides;
         this.distanceTraveled = distanceTraveled;
@@ -23,20 +25,20 @@ public class UserStatsDto { // extend later with other attributes
     public void setActivePast24Hours(int activePast24Hours) {
         this.activePast24Hours = activePast24Hours;
     }
-    public int getDistanceTraveled() {
+    public double getDistanceTraveled() {
         return distanceTraveled;
     }
     public void setDistanceTraveled(int distanceTraveled) {
         this.distanceTraveled = distanceTraveled;
     }
-    public int getMoneySpent() {
+    public double getMoneySpent() {
         return moneySpent;
     }
     public void setMoneySpent(int moneySpent) {
         this.moneySpent = moneySpent;
     }
 
-    public int getMoneyEarned() {
+    public double getMoneyEarned() {
         return moneyEarned;
     }
 

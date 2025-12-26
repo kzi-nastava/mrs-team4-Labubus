@@ -1,5 +1,7 @@
 package com.example.ubre.ui.dtos;
 
+// After driver registration for changing password and for every user to change password
+
 public class PasswordChangeDto {
     public int userId;
     public String newPassword;

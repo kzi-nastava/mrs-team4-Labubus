@@ -2,6 +2,8 @@ package com.example.ubre.ui.dtos;
 
 import com.example.ubre.ui.enums.VehicleType;
 
+// When ordering a ride, this DTO carries the selected ride options.
+
 public class RideOptionsDto {
     private VehicleType vehicleType;
     private boolean babyFriendly;

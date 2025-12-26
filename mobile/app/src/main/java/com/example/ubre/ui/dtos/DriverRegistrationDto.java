@@ -1,5 +1,7 @@
 package com.example.ubre.ui.dtos;
 
+// DTO for driver registration data
+
 public class DriverRegistrationDto {
     private String id;
     private String avatarUrl;

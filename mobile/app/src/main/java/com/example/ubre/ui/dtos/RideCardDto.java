@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 
+// Ride history, active rides, my favourites
+
 public class RideCardDto {
     private int id;
     private LocalDateTime startTime;
