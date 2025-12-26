@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RideCard } from '../ride-card/ride-card';
 import { ModalContainer } from '../modal-container/modal-container';
 import { RideDetails } from '../ride-details/ride-details';
-import { Ride } from '../../../dtos/ride';
+import { RideDto } from '../../../dtos/ride-dto';
 import { User } from '../../../dtos/user';
 
 
@@ -15,13 +15,13 @@ import { User } from '../../../dtos/user';
   styleUrl: './ride-list.css',
 })
 export class RideList {
-  @Input() rides : Ride[] = [];
+  @Input() rides : RideDto[] = [];
   @Input() title : string = "";
   @Input() open : boolean = false;
   @Input() user : User = {email: '', firstName: '', lastName: '', profilePicture: '', role: 'guest'}
   @Output() onClose = new EventEmitter<void>();
 
-  selectedRide : Ride | undefined = undefined;
+  selectedRide : RideDto | undefined = undefined;
   favoriteRides : Number[] = [];
 
   filterDate : Date = new Date();
@@ -30,14 +30,14 @@ export class RideList {
   selectedField : string = "";
   ascending : boolean = false;
 
-  onRideSelected(ride : Ride) {
+  onRideSelected(ride : RideDto) {
     if (this.selectedRide !== undefined && this.selectedRide.id == ride.id)
       this.selectedRide = undefined;
     else
       this.selectedRide = ride;
   }
 
-  onRideAction(ride : Ride) {
+  onRideAction(ride : RideDto) {
     if (this.favoriteRides.includes(ride.id))
       this.favoriteRides = this.favoriteRides.filter(id => id != ride.id)
     else

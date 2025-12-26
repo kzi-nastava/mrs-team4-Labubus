@@ -2,11 +2,11 @@ package com.example.ubre.ui.dtos;
 
 // this represents a single statistic item for user statistics, that is injected
 // into stat card
-public class StatItem {
+public class StatItemDto {
     private String value;
     private String label;
 
-    public StatItem(String value, String label) {
+    public StatItemDto(String value, String label) {
         this.value = value;
         this.label = label;
     }
