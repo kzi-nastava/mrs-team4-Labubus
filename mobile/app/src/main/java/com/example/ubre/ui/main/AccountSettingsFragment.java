@@ -13,11 +13,11 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.ubre.R;
-import com.example.ubre.ui.model.Role;
-import com.example.ubre.ui.model.StatItem;
-import com.example.ubre.ui.model.UserDto;
-import com.example.ubre.ui.model.UserStatsDto;
-import com.example.ubre.ui.model.VehicleDto;
+import com.example.ubre.ui.enums.Role;
+import com.example.ubre.ui.dtos.StatItem;
+import com.example.ubre.ui.dtos.UserDto;
+import com.example.ubre.ui.dtos.UserStatsDto;
+import com.example.ubre.ui.dtos.VehicleDto;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -58,14 +58,12 @@ public class AccountSettingsFragment extends Fragment {
 
         LinearLayout statsContainer = view.findViewById(R.id.stats_container);
 
-        // test data (promeniti kasnije)
-
-        UserStatsDto stats = new UserStatsDto(0, 0, 0);
-        stats.setActivePast24Hours(450);
-        stats.setDistanceTraveled(1920);
-
-        renderStats(statsContainer, stats);
-
+        if (statsContainer != null) {
+            UserStatsDto stats = new UserStatsDto(0, 0, 0);
+            stats.setActivePast24Hours(450);
+            stats.setDistanceTraveled(1920);
+            renderStats(statsContainer, stats);
+        }
 
         TextInputLayout tilName = view.findViewById(R.id.til_name);
         TextInputLayout tilSurname = view.findViewById(R.id.til_surname);

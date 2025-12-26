@@ -1,4 +1,6 @@
-package com.example.ubre.ui.model;
+package com.example.ubre.ui.dtos;
+
+import com.example.ubre.ui.enums.VehicleType;
 
 public class RideOptionsDto {
     private VehicleType vehicleType;

@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.example.ubre.R;
-import com.example.ubre.ui.model.VehicleDto;
+import com.example.ubre.ui.dtos.VehicleDto;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class VehicleInformationFragment extends Fragment {
