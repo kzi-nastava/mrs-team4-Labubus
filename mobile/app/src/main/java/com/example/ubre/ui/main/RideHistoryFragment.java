@@ -3,7 +3,10 @@ package com.example.ubre.ui.main;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +19,7 @@ import android.widget.DatePicker;
 import android.widget.ListView;
 
 import com.example.ubre.R;
+import com.example.ubre.ui.adapter.RideListAdapter;
 import com.example.ubre.ui.model.RideDto;
 import com.example.ubre.ui.model.Role;
 import com.example.ubre.ui.model.UserDto;
@@ -23,6 +27,7 @@ import com.google.android.material.button.MaterialButton;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -119,6 +124,20 @@ public class RideHistoryFragment extends Fragment {
         this.getView().findViewById(R.id.btn_back).setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager().popBackStack()
         );
+
+        RideDto[] rides = {
+                new RideDto(1, LocalDateTime.now(), LocalDateTime.now(), new String[]{"Bulevar despota stefana", "Bulevar oslobodjenja"}, currentUser, new UserDto[]{currentUser, currentUser}, false, "", 19.3, 7.4),
+                new RideDto(2, LocalDateTime.now(), LocalDateTime.now(), new String[]{"Bulevar cara Lazara", "Trg maldenaca"}, currentUser, new UserDto[]{currentUser, currentUser}, false, "", 2.3, 1.2),
+                new RideDto(3, LocalDateTime.now(), LocalDateTime.now(), new String[]{"Most slobode", "Jevrejska"}, currentUser, new UserDto[]{currentUser, currentUser}, false, "", 13.5, 4.1),
+                new RideDto(4, LocalDateTime.now(), LocalDateTime.now(), new String[]{"Limanski park", "Temerinski put"}, currentUser, new UserDto[]{currentUser, currentUser}, false, "", 20.9, 11.7),
+                new RideDto(5, LocalDateTime.now(), LocalDateTime.now(), new String[]{"Bulevar despota stefana", "Bulevar oslobodjenja"}, currentUser, new UserDto[]{currentUser, currentUser}, false, "", 19.3, 7.4),
+                new RideDto(6, LocalDateTime.now(), LocalDateTime.now(), new String[]{"Bulevar cara Lazara", "Trg maldenaca"}, currentUser, new UserDto[]{currentUser, currentUser}, false, "", 2.3, 1.2),
+                new RideDto(7, LocalDateTime.now(), LocalDateTime.now(), new String[]{"Most slobode", "Jevrejska"}, currentUser, new UserDto[]{currentUser, currentUser}, false, "", 13.5, 4.1),
+                new RideDto(8, LocalDateTime.now(), LocalDateTime.now(), new String[]{"Limanski park", "Temerinski put"}, currentUser, new UserDto[]{currentUser, currentUser}, false, "", 20.9, 11.7),
+        };
+        RecyclerView cards = this.getView().findViewById(R.id.ride_list_cards);
+        cards.setLayoutManager(new LinearLayoutManager(this.getActivity()));
+        cards.setAdapter(new RideListAdapter(rides));
     }
 
     @Override
