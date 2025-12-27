@@ -1,5 +1,7 @@
 package com.example.ubre.ui.dtos;
 
+// Driver and this object go together basically
+
 public class VehicleDto implements java.io.Serializable {
     private String id;
     private String model;

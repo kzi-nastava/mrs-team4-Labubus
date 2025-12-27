@@ -1,0 +1,15 @@
+package com.example.ubre.ui.enums;
+
+public enum NotificationType {
+    RIDE_ACCEPTED,
+    RIDE_REJECTED,
+    RIDE_ASSIGNED,
+    RIDE_COMPLETED,
+    RIDE_CANCELLED,
+    RIDE_REMINDER,
+    PANIC_ALERT,
+    PASSENGER_LINKED,
+    PROFILE_CHANGE_APPROVED,
+    PROFILE_CHANGE_REJECTED
+}
+

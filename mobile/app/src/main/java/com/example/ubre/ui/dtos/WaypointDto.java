@@ -1,5 +1,8 @@
 package com.example.ubre.ui.dtos;
 
+// Waypoint Data Transfer Object
+// Used to represent a geographical waypoint with an ID, label, latitude, and longitude
+
 public class WaypointDto {
     private String id;
     private String label;

@@ -14,7 +14,7 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.ubre.R;
 import com.example.ubre.ui.enums.Role;
-import com.example.ubre.ui.dtos.StatItem;
+import com.example.ubre.ui.dtos.StatItemDto;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.UserStatsDto;
 import com.example.ubre.ui.dtos.VehicleDto;
@@ -59,7 +59,7 @@ public class AccountSettingsFragment extends Fragment {
         LinearLayout statsContainer = view.findViewById(R.id.stats_container);
 
         if (statsContainer != null) {
-            UserStatsDto stats = new UserStatsDto(0, 0, 0);
+            UserStatsDto stats = new UserStatsDto(0, 0, 0, 0, 0);
             stats.setActivePast24Hours(450);
             stats.setDistanceTraveled(1920);
             renderStats(statsContainer, stats);
@@ -156,12 +156,12 @@ public class AccountSettingsFragment extends Fragment {
     private void renderStats(LinearLayout container, UserStatsDto stats) {
         container.removeAllViews();
 
-        List<StatItem> items = new ArrayList<>();
-        items.add(new StatItem(formatMinutes(stats.getActivePast24Hours()), "Active in last 24h"));
+        List<StatItemDto> items = new ArrayList<>();
+        items.add(new StatItemDto(formatMinutes(stats.getActivePast24Hours()), "Active in last 24h"));
 
         LayoutInflater inflater = LayoutInflater.from(container.getContext());
 
-        for (StatItem item : items) {
+        for (StatItemDto item : items) {
             View card = inflater.inflate(R.layout.stat_card, container, false);
 
             TextView tvValue = card.findViewById(R.id.stat_value);
