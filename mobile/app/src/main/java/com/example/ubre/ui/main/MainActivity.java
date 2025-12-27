@@ -1,6 +1,7 @@
 package com.example.ubre.ui.main;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.text.SpannableString;
@@ -114,6 +115,9 @@ public class MainActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_profile_changes) {
                 showFragment(ProfileChangesFragment.newInstance());
                 return true;
+            } else if (itemId == R.id.nav_log_out) {
+                logout();
+                return true;
             }
 
             return true;
@@ -193,6 +197,12 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.fragment_container, f)
                 .addToBackStack(null)
                 .commit();
+    }
+
+    private void logout() {
+        Intent intent = new Intent(this, LoginSignupActivity.class);
+        startActivity(intent);
+        finish();
     }
 
 
