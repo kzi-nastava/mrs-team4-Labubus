@@ -1,13 +1,14 @@
 package com.ubre.backend.dto;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 // By providing ride estimations when or before ordering (guest can see it too)
 
 public class RideEstimationsDto {
-    private ArrayList<WaypointDto> waypoints;
-    private double price;
-    private int duration; // in minutes
+    private Collection<WaypointDto> waypoints;
+    private Double price;
+    private Integer duration; // in minutes
 
     public RideEstimationsDto() {
     }
@@ -16,22 +17,22 @@ public class RideEstimationsDto {
         this.price = price;
         this.duration = duration;
     }
-    public ArrayList<WaypointDto> getWaypoints() {
+    public Collection<WaypointDto> getWaypoints() {
         return waypoints;
     }
     public void setWaypoints(ArrayList<WaypointDto> waypoints) {
         this.waypoints = waypoints;
     }
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
-    public int getDuration() {
+    public Integer getDuration() {
         return duration;
     }
-    public void setDuration(int duration) {
+    public void setDuration(Integer duration) {
         this.duration = duration;
     }
 }

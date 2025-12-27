@@ -7,7 +7,7 @@ import com.ubre.backend.enums.Role;
 // User...
 
 public class UserDto implements Serializable {
-    private String id;
+    private Long id;
     private Role role;
     private String avatarUrl;
     private String email;
@@ -16,7 +16,7 @@ public class UserDto implements Serializable {
     private String phone;
     private String address;
 
-    public UserDto(String id, Role role, String avatarUrl, String email, String name, String surname, String phone, String address) {
+    public UserDto(Long id, Role role, String avatarUrl, String email, String name, String surname, String phone, String address) {
         this.id = id;
         this.role = role;
         this.avatarUrl = avatarUrl;
@@ -28,7 +28,7 @@ public class UserDto implements Serializable {
     }
 
     // getters
-    public String getId() {
+    public Long getId() {
         return id;
     }
     public Role getRole() {
@@ -55,7 +55,7 @@ public class UserDto implements Serializable {
 
     // setters
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

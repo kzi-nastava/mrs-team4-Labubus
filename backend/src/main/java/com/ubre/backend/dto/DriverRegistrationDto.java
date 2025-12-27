@@ -3,7 +3,7 @@ package com.ubre.backend.dto;
 // DTO for driver registration data
 
 public class DriverRegistrationDto {
-    private String id;
+    private Long id;
     private String avatarUrl;
     private String email;
     private String password; // only temporary (this is going to be hashed and stored securely)
@@ -13,7 +13,7 @@ public class DriverRegistrationDto {
     private String address;
     private VehicleDto vehicle;
 
-    public DriverRegistrationDto(String id, String avatarUrl, String email, String password, String name, String surname, String phone, String address, VehicleDto vehicle) {
+    public DriverRegistrationDto(Long id, String avatarUrl, String email, String password, String name, String surname, String phone, String address, VehicleDto vehicle) {
         this.id = id;
         this.avatarUrl = avatarUrl;
         this.email = email;
@@ -25,7 +25,7 @@ public class DriverRegistrationDto {
         this.vehicle = vehicle;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
     public String getAvatarUrl() {

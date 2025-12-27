@@ -5,16 +5,16 @@ import com.ubre.backend.enums.NotificationType;
 // For system notifications
 
 public class NotificationDto {
-    private int id;
-    private int userId;
+    private Long id;
+    private Long userId;
     private String title;
     private String message;
-    private boolean read;
+    private Boolean read;
     private NotificationType type;
 
     public NotificationDto() {
     }
-    public NotificationDto(int id, int userId, String title, String message, boolean read, NotificationType type) {
+    public NotificationDto(Long id, Long userId, String title, String message, boolean read, NotificationType type) {
         this.id = id;
         this.userId = userId;
         this.title = title;
@@ -22,17 +22,17 @@ public class NotificationDto {
         this.read = read;
         this.type = type;
     }
-    public int getId() {
+    public Long getId() {
         return id;
     }
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
-    public int getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
@@ -52,11 +52,11 @@ public class NotificationDto {
         this.message = message;
     }
 
-    public boolean isRead() {
+    public Boolean isRead() {
         return read;
     }
 
-    public void setRead(boolean read) {
+    public void setRead(Boolean read) {
         this.read = read;
     }
 

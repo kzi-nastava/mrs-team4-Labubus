@@ -3,11 +3,11 @@ package com.ubre.backend.dto;
 // User statistics object to be displayed in user profile (only necessary attributes for now are extracted)
 
 public class UserStatsDto { // extend later with other attributes
-    private int activePast24Hours; // should be in minutes
-    private int numberOfRides;
-    private double distanceTraveled;
-    private double moneySpent;
-    private double moneyEarned;
+    private Integer activePast24Hours; // should be in minutes
+    private Integer numberOfRides;
+    private Double distanceTraveled;
+    private Double moneySpent;
+    private Double moneyEarned;
 
 
     public UserStatsDto(int activePast24Hours, int numberOfRides, double distanceTraveled, double moneySpent, double moneyEarned) {
@@ -18,39 +18,39 @@ public class UserStatsDto { // extend later with other attributes
         this.moneyEarned = moneyEarned;
     }
 
-    public int getActivePast24Hours() {
+    public Integer getActivePast24Hours() {
         return activePast24Hours;
     }
 
-    public void setActivePast24Hours(int activePast24Hours) {
+    public void setActivePast24Hours(Integer activePast24Hours) {
         this.activePast24Hours = activePast24Hours;
     }
-    public double getDistanceTraveled() {
+    public Double getDistanceTraveled() {
         return distanceTraveled;
     }
-    public void setDistanceTraveled(int distanceTraveled) {
+    public void setDistanceTraveled(Double distanceTraveled) {
         this.distanceTraveled = distanceTraveled;
     }
-    public double getMoneySpent() {
+    public Double getMoneySpent() {
         return moneySpent;
     }
-    public void setMoneySpent(int moneySpent) {
+    public void setMoneySpent(Double moneySpent) {
         this.moneySpent = moneySpent;
     }
 
-    public double getMoneyEarned() {
+    public Double getMoneyEarned() {
         return moneyEarned;
     }
 
-    public void setMoneyEarned(int moneyEarned) {
+    public void setMoneyEarned(Double moneyEarned) {
         this.moneyEarned = moneyEarned;
     }
 
-    public int getNumberOfRides() {
+    public Integer getNumberOfRides() {
         return numberOfRides;
     }
 
-    public void setNumberOfRides(int numberOfRides) {
+    public void setNumberOfRides(Integer numberOfRides) {
         this.numberOfRides = numberOfRides;
     }
 }

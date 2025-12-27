@@ -3,21 +3,21 @@ package com.ubre.backend.dto;
 // Ride progress updates, including current location and estimated time of arrival to destination
 
 public class RideProgressDto {
-    private int rideId;
+    private Long rideId;
     private WaypointDto location;
-    private int estimatedTime;
+    private Integer estimatedTime;
 
     public RideProgressDto() {
     }
-    public RideProgressDto(int rideId, WaypointDto location, int estimatedTime) {
+    public RideProgressDto(Long rideId, WaypointDto location, int estimatedTime) {
         this.rideId = rideId;
         this.location = location;
         this.estimatedTime = estimatedTime;
     }
-    public int getRideId() {
+    public Long getRideId() {
         return rideId;
     }
-    public void setRideId(int rideId) {
+    public void setRideId(Long rideId) {
         this.rideId = rideId;
     }
     public WaypointDto getLocation() {
@@ -28,11 +28,11 @@ public class RideProgressDto {
         this.location = location;
     }
 
-    public int getEstimatedTime() {
+    public Integer getEstimatedTime() {
         return estimatedTime;
     }
 
-    public void setEstimatedTime(int estimatedTime) {
+    public void setEstimatedTime(Integer estimatedTime) {
         this.estimatedTime = estimatedTime;
     }
 }

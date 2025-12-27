@@ -2,20 +2,21 @@ package com.ubre.backend.dto;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Collection;
 
 public class RideDto implements Serializable {
-    private int id;
+    private Long id;
     private LocalDateTime start;
     private LocalDateTime end;
     private WaypointDto[] waypoints;
     private UserDto driver;
-    private UserDto[] passengers;
-    private boolean panic;
+    private Collection<UserDto> passengers;
+    private Boolean panic;
     private String canceledBy;
-    private double price;
-    private double distance;
+    private Double price;
+    private Double distance;
 
-    public RideDto(int id, LocalDateTime start, LocalDateTime end, WaypointDto[] waypoints, UserDto driver, UserDto[] passengers, boolean panic, String canceledBy, double price, double distance) {
+    public RideDto(Long id, LocalDateTime start, LocalDateTime end, WaypointDto[] waypoints, UserDto driver, Collection<UserDto> passengers, boolean panic, String canceledBy, double price, double distance) {
         this.id = id;
         this.start = start;
         this.end = end;
@@ -28,7 +29,7 @@ public class RideDto implements Serializable {
         this.distance = distance;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
@@ -48,11 +49,11 @@ public class RideDto implements Serializable {
         return driver;
     }
 
-    public UserDto[] getPassengers() {
+    public Collection<UserDto> getPassengers() {
         return passengers;
     }
 
-    public boolean isPanic() {
+    public Boolean isPanic() {
         return panic;
     }
 
@@ -60,11 +61,11 @@ public class RideDto implements Serializable {
         return canceledBy;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public double getDistance() {
+    public Double getDistance() {
         return distance;
     }
 }

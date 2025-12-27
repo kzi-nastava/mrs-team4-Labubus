@@ -3,20 +3,20 @@ package com.ubre.backend.dto;
 // After driver registration for changing password and for every user to change password
 
 public class PasswordChangeDto {
-    public int userId;
+    public Long userId;
     public String newPassword;
 
     public PasswordChangeDto() {
     }
-    public PasswordChangeDto(int userId, String newPassword) {
+    public PasswordChangeDto(Long userId, String newPassword) {
         this.userId = userId;
         this.newPassword = newPassword;
     }
 
-    public int getUserId() {
+    public Long getUserId() {
         return userId;
     }
-    public void setUserId(int userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
     public String getNewPassword() {

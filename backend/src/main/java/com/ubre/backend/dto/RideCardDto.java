@@ -2,32 +2,32 @@ package com.ubre.backend.dto;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collection;
 
 // Ride history, active rides, my favourites
 
 public class RideCardDto {
-    private int id;
+    private Long id;
     private LocalDateTime startTime;
-    public ArrayList<WaypointDto> waypoints;
+    public Collection<WaypointDto> waypoints;
 
-    public RideCardDto(int id, LocalDateTime startTime, ArrayList<WaypointDto> waypoints) {
+    public RideCardDto(Long id, LocalDateTime startTime, ArrayList<WaypointDto> waypoints) {
         this.id = id;
         this.startTime = startTime;
         this.waypoints = waypoints;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
     public LocalDateTime getStartTime() {
         return startTime;
     }
-    public ArrayList<WaypointDto> getWaypoints() {
+    public Collection<WaypointDto> getWaypoints() {
         return waypoints;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
     public void setStartTime(LocalDateTime startTime) {

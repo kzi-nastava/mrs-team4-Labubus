@@ -3,43 +3,43 @@ package com.ubre.backend.dto;
 // For leaving a review after a ride
 
 public class ReviewDto {
-    private int id;
-    private int driverId;
-    private int userId;
-    private int rating; // e.g., 1 to 5
+    private Long id;
+    private Long driverId;
+    private Long userId;
+    private Long rating; // e.g., 1 to 5
     private String text;
 
     public ReviewDto() {
     }
-    public ReviewDto(int id, int driverId, int userId, int rating, String text) {
+    public ReviewDto(Long id, Long driverId, Long userId, Long rating, String text) {
         this.id = id;
         this.driverId = driverId;
         this.userId = userId;
         this.rating = rating;
         this.text = text;
     }
-    public int getId() {
+    public Long getId() {
         return id;
     }
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
-    public int getDriverId() {
+    public Long getDriverId() {
         return driverId;
     }
-    public void setDriverId(int driverId) {
+    public void setDriverId(Long driverId) {
         this.driverId = driverId;
     }
-    public int getUserId() {
+    public Long getUserId() {
         return userId;
     }
-    public void setUserId(int userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
-    public int getRating() {
+    public Long getRating() {
         return rating;
     }
-    public void setRating(int rating) {
+    public void setRating(Long rating) {
         this.rating = rating;
     }
     public String getText() {
