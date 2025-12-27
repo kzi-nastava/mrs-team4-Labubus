@@ -1,6 +1,6 @@
-package com.example.ubre.ui.dtos;
+package com.ubre.backend.dto;
 
-import com.example.ubre.ui.enums.DriverStatus;
+import com.ubre.backend.enums.DriverStatus;
 
 // Every vehicle that is visible on the map has some indicator info
 

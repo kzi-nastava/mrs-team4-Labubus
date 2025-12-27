@@ -1,8 +1,8 @@
-package com.example.ubre.ui.dtos;
+package com.ubre.backend.dto;
+
+import com.ubre.backend.enums.NotificationType;
 
 // For system notifications
-
-import com.example.ubre.ui.enums.NotificationType;
 
 public class NotificationDto {
     private int id;

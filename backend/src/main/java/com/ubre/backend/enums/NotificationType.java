@@ -4,7 +4,6 @@ public enum NotificationType {
     RIDE_ACCEPTED,
     RIDE_REJECTED,
     RIDE_ASSIGNED,
-    RIDE_STARTED,
     RIDE_COMPLETED,
     RIDE_CANCELLED,
     RIDE_REMINDER,
@@ -13,3 +12,4 @@ public enum NotificationType {
     PROFILE_CHANGE_APPROVED,
     PROFILE_CHANGE_REJECTED
 }
+

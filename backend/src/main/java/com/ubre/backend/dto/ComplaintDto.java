@@ -1,4 +1,4 @@
-package com.example.ubre.ui.dtos;
+package com.ubre.backend.dto;
 
 // For handling complaints made by users against drivers
 

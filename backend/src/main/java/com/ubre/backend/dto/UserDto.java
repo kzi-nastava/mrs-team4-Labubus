@@ -1,8 +1,8 @@
-package com.example.ubre.ui.dtos;
-
-import com.example.ubre.ui.enums.Role;
+package com.ubre.backend.dto;
 
 import java.io.Serializable;
+
+import com.ubre.backend.enums.Role;
 
 // User...
 

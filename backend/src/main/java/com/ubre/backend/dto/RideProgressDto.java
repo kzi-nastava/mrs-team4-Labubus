@@ -1,4 +1,4 @@
-package com.example.ubre.ui.dtos;
+package com.ubre.backend.dto;
 
 // Ride progress updates, including current location and estimated time of arrival to destination
 

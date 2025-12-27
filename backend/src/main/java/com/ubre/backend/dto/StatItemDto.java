@@ -1,4 +1,4 @@
-package com.example.ubre.ui.dtos;
+package com.ubre.backend.dto;
 
 // this represents a single statistic item for user statistics, that is injected
 // into stat card

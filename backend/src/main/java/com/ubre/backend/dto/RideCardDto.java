@@ -1,4 +1,4 @@
-package com.example.ubre.ui.dtos;
+package com.ubre.backend.dto;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

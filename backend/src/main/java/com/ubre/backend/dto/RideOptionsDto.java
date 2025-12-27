@@ -1,6 +1,6 @@
-package com.example.ubre.ui.dtos;
+package com.ubre.backend.dto;
 
-import com.example.ubre.ui.enums.VehicleType;
+import com.ubre.backend.enums.VehicleType;
 
 // When ordering a ride, this DTO carries the selected ride options.
 

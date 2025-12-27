@@ -1,4 +1,4 @@
-package com.example.ubre.ui.dtos;
+package com.ubre.backend.dto;
 
 // Waypoint Data Transfer Object
 // Used to represent a geographical waypoint with an ID, label, latitude, and longitude

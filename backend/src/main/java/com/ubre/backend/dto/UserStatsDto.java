@@ -1,4 +1,4 @@
-package com.example.ubre.ui.dtos;
+package com.ubre.backend.dto;
 
 // User statistics object to be displayed in user profile (only necessary attributes for now are extracted)
 
