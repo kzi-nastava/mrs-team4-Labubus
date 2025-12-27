@@ -28,7 +28,7 @@ Kompleksno (ceo modul, sistem) → 8-13 SP
 - **Akcija:** Maksimum 6-7 SP/dan, poštovanje praznika
 
 ### 3. Nedostaci u procesima
-- **Problem:** Nema testova, Figma design nije definisan, Burndown chart nije pra ćen
+- **Problem:** Nema testova, Burndown chart nije praćen
 - **Impact:** Tehnički dug, moguće nekonzistentnosti u UI-u
 - **Akcija:** Setup testing framework, definisati design sistem, daily tracking
 
