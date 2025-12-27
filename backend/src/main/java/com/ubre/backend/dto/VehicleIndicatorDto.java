@@ -13,7 +13,7 @@ public class VehicleIndicatorDto {
     public VehicleIndicatorDto() {
     }
 
-    public VehicleIndicatorDto(Long driverId, WaypointDto location, DriverStatus status, boolean panic) {
+    public VehicleIndicatorDto(Long driverId, WaypointDto location, DriverStatus status, Boolean panic) {
         this.driverId = driverId;
         this.location = location;
         this.status = status;

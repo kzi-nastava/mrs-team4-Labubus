@@ -1,12 +1,15 @@
 package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.VehicleDto;
+import com.ubre.backend.dto.VehicleIndicatorDto;
 import com.ubre.backend.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/api/vehicles")
@@ -61,10 +64,30 @@ public class VehicleController {
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
+    public ResponseEntity<VehicleDto> deleteVehicle(@PathVariable Long id) {
         try {
-            vehicleService.deleteVehicle(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            VehicleDto vehicle = vehicleService.deleteVehicle(id);
+            return new ResponseEntity<VehicleDto>(vehicle, HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<VehicleDto>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping(value = "/locations", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Collection<VehicleIndicatorDto>> getVehicleIndicators() {
+        try {
+            Collection<VehicleIndicatorDto> locations = vehicleService.getVehicleIndicators();
+            return new ResponseEntity<>(locations, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping(value = "/{id}/location", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<VehicleIndicatorDto> getVehicleIndicator(@PathVariable Long id) {
+        try {
+            VehicleIndicatorDto location = vehicleService.getVehicleIndicator(id);
+            return new ResponseEntity<>(location, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

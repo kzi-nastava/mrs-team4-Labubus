@@ -1,6 +1,7 @@
 package com.ubre.backend.model;
 
-import com.ubre.backend.enums.UserType;
+import com.ubre.backend.enums.Role;
+import com.ubre.backend.enums.Role;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -46,7 +47,7 @@ public abstract class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "user_type", insertable = false, updatable = false)
-    private UserType userType;
+    private Role Role;
 
     // Constructors
     public User() {
@@ -152,11 +153,11 @@ public abstract class User {
         this.createdAt = createdAt;
     }
 
-    public UserType getUserType() {
-        return userType;
+    public Role getRole() {
+        return Role;
     }
 
-    public void setUserType(UserType userType) {
-        this.userType = userType;
+    public void setRole(Role role) {
+        this.Role = Role;
     }
 }
