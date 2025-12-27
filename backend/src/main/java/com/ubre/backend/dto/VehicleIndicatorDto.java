@@ -1,19 +1,19 @@
 package com.ubre.backend.dto;
 
-import com.ubre.backend.enums.DriverStatus;
+import com.ubre.backend.enums.UserStatus;
 
 // Every vehicle that is visible on the map has some indicator info
 
 public class VehicleIndicatorDto {
     private Long driverId;
     private WaypointDto location;
-    private DriverStatus status;
+    private UserStatus status;
     private Boolean panic;
 
     public VehicleIndicatorDto() {
     }
 
-    public VehicleIndicatorDto(Long driverId, WaypointDto location, DriverStatus status, boolean panic) {
+    public VehicleIndicatorDto(Long driverId, WaypointDto location, UserStatus status, boolean panic) {
         this.driverId = driverId;
         this.location = location;
         this.status = status;
@@ -34,10 +34,10 @@ public class VehicleIndicatorDto {
         this.location = location;
     }
 
-    public DriverStatus getStatus() {
+    public UserStatus getStatus() {
         return status;
     }
-    public void setStatus(DriverStatus status) {
+    public void setStatus(UserStatus status) {
         this.status = status;
     }
 
