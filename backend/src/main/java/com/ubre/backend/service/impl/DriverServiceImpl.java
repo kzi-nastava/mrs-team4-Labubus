@@ -4,20 +4,19 @@ import com.ubre.backend.dto.DriverRegistrationDto;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
-import com.ubre.backend.model.User;
 import com.ubre.backend.service.DriverService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 @Service
 public class DriverServiceImpl implements DriverService {
 
-    // Mock collection only for testing purposes
-    private final Collection<UserDto> drivers = new ArrayList<UserDto>();
+    // Mock List only for testing purposes
+    private final List<UserDto> drivers = new ArrayList<UserDto>();
 
     public DriverServiceImpl() {
         drivers.add(new UserDto(1L, Role.DRIVER, "avatarUrl1", "driver1@ubre.com", "John", "Wick", "0123456789", "Crazy street 1", UserStatus.ACTIVE));
@@ -26,12 +25,12 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
-    public Collection<UserDto> getAllDrivers() {
+    public List<UserDto> getAllDrivers() {
         return drivers;
     }
 
     @Override
-    public Collection<UserDto> getAvailableDrivers() {
+    public List<UserDto> getAvailableDrivers() {
         return drivers; // In a real implementation, filter by availability
     }
 
