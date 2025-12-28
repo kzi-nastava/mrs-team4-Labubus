@@ -3,7 +3,9 @@ package com.ubre.backend.dto;
 // Waypoint Data Transfer Object
 // Used to represent a geographical waypoint with an ID, label, latitude, and longitude
 
-public class WaypointDto {
+import java.io.Serializable;
+
+public class WaypointDto implements Serializable {
     private Long id;
     private String label;
     private Double latitude;
@@ -21,5 +23,29 @@ public class WaypointDto {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 }

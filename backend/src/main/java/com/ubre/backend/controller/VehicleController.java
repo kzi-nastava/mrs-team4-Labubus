@@ -21,13 +21,12 @@ public class VehicleController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VehicleDto> createVehicle(
-            @RequestParam Long driverId,
             @RequestBody VehicleDto createVehicleDto) {
         try {
-            VehicleDto vehicle = vehicleService.createVehicle(driverId, createVehicleDto);
+            VehicleDto vehicle = vehicleService.createVehicle(createVehicleDto);
             return new ResponseEntity<>(vehicle, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -35,9 +34,11 @@ public class VehicleController {
     public ResponseEntity<VehicleDto> getVehicleById(@PathVariable Long id) {
         try {
             VehicleDto vehicle = vehicleService.getVehicleById(id);
+            if (vehicle == null)
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             return new ResponseEntity<>(vehicle, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -45,9 +46,11 @@ public class VehicleController {
     public ResponseEntity<VehicleDto> getVehicleByDriver(@PathVariable Long driverId) {
         try {
             VehicleDto vehicle = vehicleService.getVehicleByDriver(driverId);
+            if (vehicle == null)
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             return new ResponseEntity<>(vehicle, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -59,7 +62,7 @@ public class VehicleController {
             VehicleDto vehicle = vehicleService.updateVehicle(id, updateVehicleDto);
             return new ResponseEntity<>(vehicle, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -67,9 +70,9 @@ public class VehicleController {
     public ResponseEntity<VehicleDto> deleteVehicle(@PathVariable Long id) {
         try {
             VehicleDto vehicle = vehicleService.deleteVehicle(id);
-            return new ResponseEntity<VehicleDto>(vehicle, HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(vehicle, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<VehicleDto>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -79,7 +82,7 @@ public class VehicleController {
             Collection<VehicleIndicatorDto> locations = vehicleService.getVehicleIndicators();
             return new ResponseEntity<>(locations, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -87,9 +90,11 @@ public class VehicleController {
     public ResponseEntity<VehicleIndicatorDto> getVehicleIndicator(@PathVariable Long id) {
         try {
             VehicleIndicatorDto location = vehicleService.getVehicleIndicator(id);
+            if (location == null)
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             return new ResponseEntity<>(location, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

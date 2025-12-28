@@ -1,7 +1,10 @@
 package com.ubre.backend.service.impl;
 
 import com.ubre.backend.dto.RideDto;
+import com.ubre.backend.dto.RideQueryDto;
 import com.ubre.backend.dto.UserDto;
+import com.ubre.backend.dto.WaypointDto;
+import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.service.RideService;
 import org.springframework.http.HttpStatus;
@@ -10,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -80,8 +84,19 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    public void endRide(Long rideId) {
+    public RideDto endRide(Long rideId) {
+        UserDto driver = new UserDto(1L, Role.DRIVER, "", "driver@ubre.com", "Driver", "Driver", "1231234132", "Adress 123", UserStatus.ACTIVE);
+        WaypointDto[] waypoints = new WaypointDto[] {
+                new WaypointDto(1L, "Bulevar oslobodjenja", 48.83, 19.32),
+                new WaypointDto(2L, "Trg mladenaca", 48.83, 19.32),
+                new WaypointDto(3L, "Bulevar despota Stefana", 48.83, 19.32)
+        };
+        UserDto[] passengers = {
+                new UserDto(2L, Role.REGISTERED_USER, "", "passenger1@ubre.com", "Passenger1", "Passenger1", "1231234132", "Adress 123", UserStatus.ACTIVE),
+                new UserDto(3L, Role.REGISTERED_USER, "", "passenger2@ubre.com", "Passenger2", "Passenger2", "1231234132", "Adress 123", UserStatus.ACTIVE)
+        };
 
+        return new RideDto(1L, LocalDateTime.now(), LocalDateTime.now(), waypoints, driver, Arrays.stream(passengers).toList(), true, null, 12.34, 7.3);
     }
 
     @Override
@@ -165,5 +180,31 @@ public class RideServiceImpl implements RideService {
         rideDto.setId((long) (rides.size() + 1));
         rides.add(rideDto);
         return rideDto;
+    public List<RideDto> getRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query) {
+        UserDto driver = new UserDto(1L, Role.DRIVER, "", "driver@ubre.com", "Driver", "Driver", "1231234132", "Adress 123", UserStatus.ACTIVE);
+        WaypointDto[] waypoints = new WaypointDto[] {
+                new WaypointDto(1L, "Bulevar oslobodjenja", 48.83, 19.32),
+                new WaypointDto(2L, "Trg mladenaca", 48.83, 19.32),
+                new WaypointDto(3L, "Bulevar despota Stefana", 48.83, 19.32)
+        };
+        UserDto[] passengers = {
+                new UserDto(2L, Role.REGISTERED_USER, "", "passenger1@ubre.com", "Passenger1", "Passenger1", "1231234132", "Adress 123", UserStatus.ACTIVE),
+                new UserDto(3L, Role.REGISTERED_USER, "", "passenger2@ubre.com", "Passenger2", "Passenger2", "1231234132", "Adress 123", UserStatus.ACTIVE)
+        };
+
+        return List.of(
+                new RideDto(1L, LocalDateTime.now(), LocalDateTime.now(), waypoints, driver, Arrays.stream(passengers).toList(), true, null, 12.34, 7.3),
+                new RideDto(2L, LocalDateTime.now(), LocalDateTime.now(), waypoints, driver, Arrays.stream(passengers).toList(), false, null, 20.14, 12.1)
+        );
+    }
+
+    @Override
+    public List<RideDto> getScheduledRides(Long driverId, Integer skip, Integer count, RideQueryDto query) {
+        return getRideHistory(driverId, skip, count, query);
+    }
+
+    @Override
+    public void trackRide(Long id) {
+
     }
 }

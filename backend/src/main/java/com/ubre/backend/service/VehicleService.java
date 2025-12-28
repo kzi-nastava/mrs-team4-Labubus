@@ -6,7 +6,7 @@ import com.ubre.backend.dto.VehicleIndicatorDto;
 import java.util.Collection;
 
 public interface VehicleService {
-    VehicleDto createVehicle(Long driverId, VehicleDto createVehicleDto);
+    VehicleDto createVehicle(VehicleDto createVehicleDto);
     VehicleDto getVehicleById(Long id);
     VehicleDto getVehicleByDriver(Long driverId);
     VehicleDto updateVehicle(Long id, VehicleDto updateVehicleDto);
