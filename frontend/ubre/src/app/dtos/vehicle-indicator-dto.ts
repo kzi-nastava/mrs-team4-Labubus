@@ -1,4 +1,4 @@
-import { DriverStatus } from "../enums/driver-status";
+import { DriverStatus } from "../enums/user-status";
 import { WaypointDto } from "./waypoint-dto";
 
 export class VehicleIndicatorDto {
