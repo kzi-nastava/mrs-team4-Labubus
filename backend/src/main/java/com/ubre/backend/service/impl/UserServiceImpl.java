@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePassword(PasswordChangeDto passwordChangeDto) {
-        UserDto user = getUserById(passwordChangeDto.getUserId());
+        UserDto user = getUserById(passwordChangeDto.getUserId()); // takodje radimo sa pravim objektom koji je model ustvari, nema šta sde se primeti sada
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
@@ -106,7 +106,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void activateUser(Long id) {
-        UserDto user = getUserById(id);
+        UserDto user = getUserById(id); // here working later with concrete model
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
