@@ -2,16 +2,18 @@ package com.ubre.backend.dto;
 
 // Driver and this object go together basically
 
+import com.ubre.backend.enums.VehicleType;
+
 public class VehicleDto implements java.io.Serializable {
     private Long id;
     private String model;
-    private String type;
+    private VehicleType type;
     private String plates;
     private Integer seats;
     private Boolean babyFriendly;
     private Boolean petFriendly;
 
-    public VehicleDto(Long id, String model, String type, String plates, int seats, boolean babyFriendly, boolean petFriendly) {
+    public VehicleDto(Long id, String model, VehicleType type, String plates, Integer seats, Boolean babyFriendly, Boolean petFriendly) {
         this.id = id;
         this.model = model;
         this.type = type;
@@ -37,11 +39,11 @@ public class VehicleDto implements java.io.Serializable {
         this.model = model;
     }
 
-    public String getType() {
+    public VehicleType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(VehicleType type) {
         this.type = type;
     }
 

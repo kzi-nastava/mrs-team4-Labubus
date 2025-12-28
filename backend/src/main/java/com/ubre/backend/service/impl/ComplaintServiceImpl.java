@@ -1,6 +1,7 @@
-package com.ubre.backend.service;
+package com.ubre.backend.service.impl;
 
 import com.ubre.backend.dto.ComplaintDto;
+import com.ubre.backend.service.ComplaintService;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;

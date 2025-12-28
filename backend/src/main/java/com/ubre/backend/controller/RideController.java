@@ -47,7 +47,7 @@ public class RideController {
     }
 
     // ukloni vožnju iz omiljenih
-    @PutMapping(
+    @DeleteMapping(
             value = "/{userId}/favorites/{rideId}"
     )
     public ResponseEntity<Void> removeRideFromFavorites(
