@@ -1,10 +1,11 @@
-package com.ubre.backend.service;
+package com.ubre.backend.service.impl;
 
 import com.ubre.backend.dto.VehicleDto;
 import com.ubre.backend.dto.VehicleIndicatorDto;
 import com.ubre.backend.dto.WaypointDto;
 import com.ubre.backend.enums.DriverStatus;
 import com.ubre.backend.enums.VehicleType;
+import com.ubre.backend.service.VehicleService;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
