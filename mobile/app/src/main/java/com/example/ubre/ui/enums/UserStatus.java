@@ -1,6 +1,6 @@
 package com.example.ubre.ui.enums;
 
-public enum DriverStatus {
+public enum UserStatus {
     ACTIVE,
     INACTIVE,
     ON_RIDE

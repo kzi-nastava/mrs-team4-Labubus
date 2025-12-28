@@ -1,37 +1,49 @@
 package com.ubre.backend.controller;
 
+import com.ubre.backend.dto.DriverRegistrationDto;
+import com.ubre.backend.dto.UserDto;
+import com.ubre.backend.service.DriverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Collection;
 
 @RestController
-@RequestMapping("/api/drivers")
+@RequestMapping("/api/driver")
 @CrossOrigin(origins = "*")
 public class DriverController {
-//
-//    @Autowired
-//    private DriverService driverService;
-//
+
+    @Autowired
+    private DriverService driverService;
+
+    @PostMapping(
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<UserDto> createDriver(@RequestBody DriverRegistrationDto driverRegistrationDto) {
+        UserDto createdDriver = driverService.createDriver(driverRegistrationDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdDriver);
+    }
+
 //    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<DriverDTO>> getAllDrivers() {
-//        List<DriverDTO> drivers = driverService.getAllDrivers();
+//    public ResponseEntity<Collection<UserDto>> getAllDrivers() {
+//        Collection<UserDto> drivers = driverService.getAllDrivers();
 //        return new ResponseEntity<>(drivers, HttpStatus.OK);
 //    }
 //
 //    @GetMapping(value = "/available", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<DriverDTO>> getAvailableDrivers() {
-//        List<DriverDTO> drivers = driverService.getAvailableDrivers();
+//    public ResponseEntity<Collection<UserDto>> getAvailableDrivers() {
+//        Collection<UserDto> drivers = driverService.getAvailableDrivers();
 //        return new ResponseEntity<>(drivers, HttpStatus.OK);
 //    }
 //
 //    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<DriverDTO> getDriverById(@PathVariable Long id) {
+//    public ResponseEntity<UserDto> getDriverById(@PathVariable Long id) {
 //        try {
-//            DriverDTO driver = driverService.getDriverById(id);
+//            UserDto driver = driverService.getDriverById(id);
 //            return new ResponseEntity<>(driver, HttpStatus.OK);
 //        } catch (Exception e) {
 //            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
