@@ -1,6 +1,7 @@
 package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.RideDto;
+import com.ubre.backend.dto.RideQueryDto;
 import com.ubre.backend.service.RideService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -69,6 +70,41 @@ public class RideController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdRide);
     }
 
+    @GetMapping(
+            value = "/history/{userId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<List<RideDto>> getRideHistory(
+            @PathVariable Long userId,
+            @RequestParam(required = false) Integer skip,
+            @RequestParam(required = false) Integer count,
+            @RequestParam(required = false) RideQueryDto query) {
+        List<RideDto> createdRide = rideService.getRideHistory(userId, skip, count, query);
+        return ResponseEntity.status(HttpStatus.OK).body(createdRide);
+    }
+
+    @GetMapping(
+            value = "/scheduled/{driverId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<List<RideDto>> getScheduledRides(
+            @PathVariable Long driverId,
+            @RequestParam(required = false) Integer skip,
+            @RequestParam(required = false) Integer count,
+            @RequestParam(required = false) RideQueryDto query) {
+        List<RideDto> createdRide = rideService.getScheduledRides(driverId, skip, count, query);
+        return ResponseEntity.status(HttpStatus.OK).body(createdRide);
+    }
+
+    @PostMapping(
+            value = "/{id}/track",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Void> getScheduledRides(@PathVariable Long id) {
+        rideService.trackRide(id);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
 //    @Autowired
 //    private RideService rideService;
 //
@@ -124,15 +160,13 @@ public class RideController {
 //        }
 //    }
 //
-//    @PutMapping(value = "/{id}/end")
-//    public ResponseEntity<Void> endRide(@PathVariable Long id) {
-//        try {
-//            rideService.endRide(id);
-//            return new ResponseEntity<>(HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//        }
-//    }
+    @PutMapping(value = "/{id}/end")
+    public ResponseEntity<RideDto> endRide(
+            @PathVariable Long id
+    ) {
+        RideDto ride = rideService.endRide(id);
+        return new ResponseEntity<>(ride, HttpStatus.OK);
+    }
 //
 //    @DeleteMapping(value = "/{id}")
 //    public ResponseEntity<Void> cancelRide(

@@ -23,17 +23,19 @@ public class ComplaintController {
             ComplaintDto Complaint = ComplaintService.createComplaint(createComplaintDto);
             return new ResponseEntity<>(Complaint, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ComplaintDto> getComplaintById(@PathVariable Long id) {
         try {
-            ComplaintDto Complaint = ComplaintService.getComplaint(id);
-            return new ResponseEntity<>(Complaint, HttpStatus.OK);
+            ComplaintDto complaint = ComplaintService.getComplaint(id);
+            if (complaint == null)
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(complaint, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -43,7 +45,7 @@ public class ComplaintController {
             Collection<ComplaintDto> complaints = ComplaintService.getDriverComplaints(driverId);
             return new ResponseEntity<>(complaints, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -53,7 +55,7 @@ public class ComplaintController {
             Collection<ComplaintDto> complaints = ComplaintService.getUserComplaints(userId);
             return new ResponseEntity<>(complaints, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -62,20 +64,20 @@ public class ComplaintController {
             @PathVariable Long id,
             @RequestBody ComplaintDto updateComplaintDto) {
         try {
-            ComplaintDto Complaint = ComplaintService.updateComplaint(id, updateComplaintDto);
-            return new ResponseEntity<>(Complaint, HttpStatus.OK);
+            ComplaintDto complaint = ComplaintService.updateComplaint(id, updateComplaintDto);
+            return new ResponseEntity<>(complaint, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> deleteComplaint(@PathVariable Long id) {
+    public ResponseEntity<ComplaintDto> deleteComplaint(@PathVariable Long id) {
         try {
-            ComplaintService.deleteComplaint(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            ComplaintDto complaint = ComplaintService.deleteComplaint(id);
+            return new ResponseEntity<>(complaint, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

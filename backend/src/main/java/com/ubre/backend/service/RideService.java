@@ -1,6 +1,8 @@
 package com.ubre.backend.service;
 
 import com.ubre.backend.dto.RideDto;
+import com.ubre.backend.dto.RideQueryDto;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,7 +14,7 @@ public interface RideService {
     void acceptRide(Long rideId, Long driverId);
     void rejectRide(Long rideId, String reason);
     void startRide(Long rideId);
-    void endRide(Long rideId);
+    RideDto endRide(Long rideId);
     void cancelRide(Long rideId, String reason);
     void stopRideInProgress(Long rideId);
     double estimateRidePrice(RideDto rideDto);
@@ -20,4 +22,7 @@ public interface RideService {
     List<RideDto> getFavoriteRides(Long userId);
     void addRideToFavorites(Long userId, Long rideId);
     void removeRideFromFavorites(Long userId, Long rideId);
+    List<RideDto> getRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query);
+    List<RideDto> getScheduledRides(Long driverId, Integer skip, Integer count, RideQueryDto query);
+    void trackRide(Long id);
 }

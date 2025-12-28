@@ -30,8 +30,8 @@ public class VehicleServiceImpl implements VehicleService {
     );
 
     @Override
-    public VehicleDto createVehicle(Long driverId, VehicleDto createVehicleDto) {
-        createVehicleDto.setId(vehicles.stream().mapToLong(VehicleDto::getId).max().getAsLong() + 1L);
+    public VehicleDto createVehicle(VehicleDto createVehicleDto) {
+        createVehicleDto.setId(vehicles.stream().mapToLong(VehicleDto::getId).max().orElse(0) + 1L);
         vehicles.add(createVehicleDto);
         return createVehicleDto;
     }

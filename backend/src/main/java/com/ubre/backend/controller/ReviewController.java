@@ -21,40 +21,42 @@ public class ReviewController {
     public ResponseEntity<ReviewDto> createReview(
             @RequestBody ReviewDto createReviewDto) {
         try {
-            ReviewDto Review = ReviewService.createReview(createReviewDto);
-            return new ResponseEntity<>(Review, HttpStatus.CREATED);
+            ReviewDto review = ReviewService.createReview(createReviewDto);
+            return new ResponseEntity<>(review, HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReviewDto> getReview(@PathVariable Long id) {
         try {
-            ReviewDto Review = ReviewService.getReview(id);
-            return new ResponseEntity<>(Review, HttpStatus.OK);
+            ReviewDto review = ReviewService.getReview(id);
+            if (review == null)
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(review, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping(value = "/driver/{driverId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Collection<ReviewDto>> getDriverReviews(@PathVariable Long driverId) {
         try {
-            Collection<ReviewDto> Review = ReviewService.getDriverReviews(driverId);
-            return new ResponseEntity<>(Review, HttpStatus.OK);
+            Collection<ReviewDto> reviews = ReviewService.getDriverReviews(driverId);
+            return new ResponseEntity<>(reviews, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping(value = "/user/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Collection<ReviewDto>> getUserReviews(@PathVariable Long userId) {
         try {
-            Collection<ReviewDto> Review = ReviewService.getDriverReviews(userId);
-            return new ResponseEntity<>(Review, HttpStatus.OK);
+            Collection<ReviewDto> reviews = ReviewService.getDriverReviews(userId);
+            return new ResponseEntity<>(reviews, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -66,7 +68,7 @@ public class ReviewController {
             ReviewDto Review = ReviewService.updateReview(id, updateReviewDto);
             return new ResponseEntity<>(Review, HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -76,7 +78,7 @@ public class ReviewController {
             ReviewService.deleteReview(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
