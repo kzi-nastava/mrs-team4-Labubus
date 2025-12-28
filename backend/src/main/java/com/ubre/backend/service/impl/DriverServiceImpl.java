@@ -1,11 +1,14 @@
 package com.ubre.backend.service.impl;
 
+import com.ubre.backend.dto.DriverRegistrationDto;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.User;
 import com.ubre.backend.service.DriverService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,32 +40,66 @@ public class DriverServiceImpl implements DriverService {
         return drivers.stream()
                 .filter(driver -> driver.getId().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Driver not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found"));
     }
 
     @Override
     public void toggleAvailability(Long id) {
-        // Mock implementation: In a real scenario, update the driver's availability status in the database
-        // Switch UserStatus between ACTIVE and INACTIVE for demonstration
         UserDto driver = getDriverById(id);
-        if (driver.getStatus() == UserStatus.ACTIVE) {
-            driver.setStatus(UserStatus.INACTIVE);
-        } else {
-            driver.setStatus(UserStatus.ACTIVE);
+
+        if (driver.getStatus() == UserStatus.ON_RIDE) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot change availability while on a ride");
         }
+
+        driver.setStatus(driver.getStatus() == UserStatus.ACTIVE ? UserStatus.INACTIVE : UserStatus.ACTIVE);
     }
 
     @Override
     public void approveProfileChanges(Long id) {
-        // Mock implementation: In a real scenario, update the driver's profile change approval status in the database
-        // For demonstration, we can just print a message
         System.out.println("Profile changes for driver with ID " + id + " have been approved.");
     }
 
     @Override
     public void rejectProfileChanges(Long id) {
-        // Mock implementation: In a real scenario, update the driver's profile change approval status in the database
-        // For demonstration, we can just print a message
         System.out.println("Profile changes for driver with ID " + id + " have been rejected.");
     }
+
+    @Override
+    public UserDto createDriver(DriverRegistrationDto dto) {
+
+        if (dto.getEmail() == null || dto.getEmail().isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Email is required"
+            );
+        }
+
+        boolean emailExists = drivers.stream()
+                .anyMatch(d -> d.getEmail().equalsIgnoreCase(dto.getEmail()));
+
+        if (emailExists) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Email already exists"
+            );
+        }
+
+        Long newId = (long) (drivers.size() + 1);
+
+        UserDto newDriver = new UserDto(
+                newId,
+                Role.DRIVER,
+                dto.getAvatarUrl(),
+                dto.getEmail(),
+                dto.getName(),
+                dto.getSurname(),
+                dto.getPhone(),
+                dto.getAddress(),
+                UserStatus.INACTIVE
+        );
+
+        drivers.add(newDriver);
+        return newDriver;
+    }
+
 }

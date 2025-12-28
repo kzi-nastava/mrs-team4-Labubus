@@ -23,14 +23,11 @@ public class DriverController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<?> createDriver(@RequestBody DriverRegistrationDto driverRegistrationDto) {
-
-
-
-
-
-
+    public ResponseEntity<UserDto> createDriver(@RequestBody DriverRegistrationDto driverRegistrationDto) {
+        UserDto createdDriver = driverService.createDriver(driverRegistrationDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdDriver);
     }
+
 //    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 //    public ResponseEntity<Collection<UserDto>> getAllDrivers() {
 //        Collection<UserDto> drivers = driverService.getAllDrivers();
