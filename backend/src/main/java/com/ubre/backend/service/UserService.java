@@ -1,9 +1,9 @@
 package com.ubre.backend.service;
 
-import com.ubre.backend.model.User;
+import com.ubre.backend.dto.PasswordChangeDto;
+import com.ubre.backend.dto.UserStatsDto;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.dto.ProfileChangeDto;
-import org.springframework.context.annotation.Profile;
 
 import java.util.List;
 
@@ -15,4 +15,6 @@ public interface UserService {
     void deleteUser(Long id);
     void blockUser(Long id);
     void unblockUser(Long id);
+    UserStatsDto getUserStats(Long id);
+    void changePassword(PasswordChangeDto passwordChangeDto);
 }

@@ -1,5 +1,8 @@
 package com.ubre.backend.controller;
 
+import com.ubre.backend.dto.PasswordChangeDto;
+import com.ubre.backend.dto.UserDto;
+import com.ubre.backend.dto.UserStatsDto;
 import com.ubre.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +17,38 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class UserController {
 
+    @Autowired
+    private UserService userService;
 
+    //getting user details by id
+    @GetMapping(
+            value = "/{id}",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
+        UserDto user = userService.getUserById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
+    }
+
+    // getting user stats by id
+    @GetMapping(
+            value = "/{id}/stats",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<UserStatsDto> getUserStats(@PathVariable Long id) {
+        UserStatsDto userStats = userService.getUserStats(id);
+        return ResponseEntity.status(HttpStatus.OK).body(userStats);
+    }
+
+    // password change endpoint
+    @PutMapping(
+            value = "/{id}/change-password",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Void> changePassword(@PathVariable Long id, @RequestBody PasswordChangeDto passwordChangeDto) {
+        userService.changePassword(passwordChangeDto);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
 
 //    @Autowired
 //    private UserService userService;
