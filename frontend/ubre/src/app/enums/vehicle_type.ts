@@ -1,5 +1,5 @@
 export enum VehicleType {
-    Standard = 'standard',
-    Luxury = 'luxury',
-    Van = 'van'
+  STANDARD = 'STANDARD',
+  LUXURY = 'LUXURY',
+  VAN = 'VAN'
 }

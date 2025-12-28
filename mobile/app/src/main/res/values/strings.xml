@@ -39,4 +39,22 @@
     <string name="statistics">Statistics</string>
     <string name="profile_changes">Profile changes</string>
     <string name="account">Account</string>
+    <string name="sign_up">Sign up</string>
+    <string name="continue_as_guest">Continue as Guest</string>
+    <string name="email_placeholder">Enter your email</string>
+    <string name="password_placeholder">Enter your password</string>
+    <string name="profile_picture">Profile picture</string>
+    <string name="first_name">First name</string>
+    <string name="first_name_placeholder">Enter your first name</string>
+    <string name="last_name">Last name\t</string>
+    <string name="last_name_placeholder">Enter your last name</string>
+    <string name="address_placeholder">Enter your residential address</string>
+    <string name="phone_placeholder">Enter your phone number</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="enter_your_email_address_and_we_will_send_you_a_link_to_reset_your_password">Enter your email address and we will send you a link to reset your password.</string>
+    <string name="send_reset_link">Send Reset Link</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="remember_me">Remember me</string>
+    <string name="don_t_have_an_account">Don\'t have an account?</string>
 </resources>

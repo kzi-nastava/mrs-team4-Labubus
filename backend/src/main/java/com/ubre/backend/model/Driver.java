@@ -1,6 +1,6 @@
 package com.ubre.backend.model;
 
-import com.ubre.backend.enums.DriverStatus;
+import com.ubre.backend.enums.UserStatus;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class Driver extends User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "current_status")
-    private DriverStatus currentStatus = DriverStatus.INACTIVE;
+    private UserStatus currentStatus = UserStatus.INACTIVE;
 
     @Column(name = "activation_token")
     private String activationToken;
@@ -81,11 +81,11 @@ public class Driver extends User {
         isAvailable = available;
     }
 
-    public DriverStatus getCurrentStatus() {
+    public UserStatus getCurrentStatus() {
         return currentStatus;
     }
 
-    public void setCurrentStatus(DriverStatus currentStatus) {
+    public void setCurrentStatus(UserStatus currentStatus) {
         this.currentStatus = currentStatus;
     }
 

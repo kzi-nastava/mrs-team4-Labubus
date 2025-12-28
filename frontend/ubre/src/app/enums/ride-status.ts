@@ -1,8 +1,8 @@
 export enum RideStatus {
-  Pending = 'pending',
-  Accepted = 'accepted',
-  InProgress = 'in-progress',
-  Completed = 'completed',
-  Cancelled = 'cancelled',
-  Rejected = 'rejected'
+  PENDING = 'PENDING',
+  ACCEPTED = 'ACCEPTED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+  REJECTED = 'REJECTED'
 }

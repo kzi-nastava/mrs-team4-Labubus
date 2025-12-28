@@ -1,7 +1,7 @@
 package com.ubre.backend.repository;
 
 import com.ubre.backend.model.Driver;
-import com.ubre.backend.enums.DriverStatus;
+import com.ubre.backend.enums.UserStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -14,7 +14,7 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
     Optional<Driver> findByActivationToken(String token);
     
     @Query("SELECT d FROM Driver d WHERE d.isAvailable = true AND d.currentStatus = :status AND d.activeHoursLast24h < 8")
-    List<Driver> findAvailableDrivers(DriverStatus status);
+    List<Driver> findAvailableDrivers(UserStatus status);
     
     List<Driver> findByIsAvailableTrue();
 }
