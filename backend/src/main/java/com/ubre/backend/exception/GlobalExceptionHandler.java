@@ -1,15 +1,16 @@
 package com.ubre.backend.exception;
 
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<String> handle(BadRequestException e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<String> handle(ResponseStatusException e) {
+        return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
     }
 }
+

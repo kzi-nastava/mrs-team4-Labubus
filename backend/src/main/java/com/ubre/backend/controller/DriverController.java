@@ -24,12 +24,7 @@ public class DriverController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<?> createDriver(@RequestBody DriverRegistrationDto driverRegistrationDto) {
-        try {
-            UserDto driver = driverService.registerDriver(driverRegistrationDto);
-            return ResponseEntity.ok(driver);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
+
 
 
 
