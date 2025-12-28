@@ -88,8 +88,14 @@ public class RideServiceImpl implements RideService {
 
     @Override
     public List<RideDto> getFavoriteRides(Long userId) {
-        // pretaržujemo vožnje po atributu da li su omiljene ili nisu
-        return List.of();
+        // prolazimo kroz listu vožnji koje pripadaju kosirniku i uzimamo samo one koju su favorite boolean
+        List<RideDto> temp = new ArrayList<>();
+        for (RideDto ride : rides) {
+            if (true) { // ovde ide provera da li je ride omiljena i da li je do ursera tačno
+                temp.add(ride);
+            }
+        }
+        return temp;
     }
 
     @Override
