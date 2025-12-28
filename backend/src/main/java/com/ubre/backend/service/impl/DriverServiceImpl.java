@@ -99,6 +99,7 @@ public class DriverServiceImpl implements DriverService {
         );
 
         drivers.add(newDriver);
+        System.out.println("New driver created: " + newDriver.getEmail());
         return newDriver;
     }
 
