@@ -54,11 +54,19 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    public void startRide(Long rideId) {
-        // povučemo ride iz baze
-        // todo: izvući bitne podatke iz ride i napraviti objekat
-        // postaviti ride status na true
-        // ako je error baci exception
+    public RideDto startRide(Long rideId) {
+        // prolazimo kroz vožnje (koje su inicijalno modeli i onda startujemo vožnju
+        boolean found = false;
+        if (!found) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
+        }
+        boolean accepted = false;
+        if (!accepted) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride not accepted");
+        }
+        RideDto startedRide = new RideDto();
+
+        return startedRide;
     }
 
     @Override

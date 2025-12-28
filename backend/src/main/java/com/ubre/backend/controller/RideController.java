@@ -19,10 +19,13 @@ public class RideController {
     private RideService rideService;
 
     // start a ride
-    @PutMapping(value = "/{id}/start")
-    public ResponseEntity<Void> startRide(@PathVariable Long id) {
-        rideService.startRide(id);
+    @PostMapping(value = "/{id}/start",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<RideDto> startRide(@PathVariable Long id) {
+        RideDto ride = rideService.startRide(id);
         return ResponseEntity.status(HttpStatus.OK).body(null);
+        // verovatno ćemo morati da pošaljemo mnogo više podataka nazad sem riddto
     }
 
     // dobijanje omiljenih voznji korisnika

@@ -16,6 +16,9 @@ public class RideDto implements Serializable {
     private Double price;
     private Double distance;
 
+    public RideDto() {
+    }
+
     public RideDto(Long id, LocalDateTime start, LocalDateTime end, WaypointDto[] waypoints, UserDto driver, Collection<UserDto> passengers, boolean panic, String canceledBy, double price, double distance) {
         this.id = id;
         this.start = start;
