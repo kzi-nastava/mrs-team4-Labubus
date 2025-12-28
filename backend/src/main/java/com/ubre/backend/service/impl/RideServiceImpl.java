@@ -180,6 +180,7 @@ public class RideServiceImpl implements RideService {
         rideDto.setId((long) (rides.size() + 1));
         rides.add(rideDto);
         return rideDto;
+    }
     public List<RideDto> getRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query) {
         UserDto driver = new UserDto(1L, Role.DRIVER, "", "driver@ubre.com", "Driver", "Driver", "1231234132", "Adress 123", UserStatus.ACTIVE);
         WaypointDto[] waypoints = new WaypointDto[] {

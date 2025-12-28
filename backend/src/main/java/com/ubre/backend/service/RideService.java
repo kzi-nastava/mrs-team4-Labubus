@@ -15,7 +15,7 @@ public interface RideService {
     void acceptRide(Long rideId, Long driverId);
     void rejectRide(Long rideId, String reason);
     RideDto startRide(Long rideId);
-    void endRide(Long rideId);
+    RideDto endRide(Long rideId);
     void cancelRide(Long rideId, String reason);
     void stopRideInProgress(Long rideId);
     double estimateRidePrice(RideDto rideDto);
