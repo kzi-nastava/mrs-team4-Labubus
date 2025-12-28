@@ -3,7 +3,7 @@ package com.ubre.backend.service.impl;
 import com.ubre.backend.dto.VehicleDto;
 import com.ubre.backend.dto.VehicleIndicatorDto;
 import com.ubre.backend.dto.WaypointDto;
-import com.ubre.backend.enums.DriverStatus;
+import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.enums.VehicleType;
 import com.ubre.backend.service.VehicleService;
 import org.springframework.stereotype.Service;
@@ -23,10 +23,10 @@ public class VehicleServiceImpl implements VehicleService {
     );
 
     private final Collection<VehicleIndicatorDto> locations = List.of(
-            new VehicleIndicatorDto(1L, new WaypointDto(1L, "Pera", 45.17, 19.49), DriverStatus.ACTIVE, false),
-            new VehicleIndicatorDto(2L, new WaypointDto(2L, "Mika", 45.51, 19.12), DriverStatus.ACTIVE, true),
-            new VehicleIndicatorDto(3L, new WaypointDto(3L, "Djura", 45.87, 19.74), DriverStatus.ON_RIDE, false),
-            new VehicleIndicatorDto(4L, new WaypointDto(4L, "Marko", 45.96, 19.73), DriverStatus.ON_RIDE, false)
+            new VehicleIndicatorDto(1L, new WaypointDto(1L, "Pera", 45.17, 19.49), UserStatus.ACTIVE, false),
+            new VehicleIndicatorDto(2L, new WaypointDto(2L, "Mika", 45.51, 19.12), UserStatus.ACTIVE, true),
+            new VehicleIndicatorDto(3L, new WaypointDto(3L, "Djura", 45.87, 19.74), UserStatus.ON_RIDE, false),
+            new VehicleIndicatorDto(4L, new WaypointDto(4L, "Marko", 45.96, 19.73), UserStatus.ON_RIDE, false)
     );
 
     @Override

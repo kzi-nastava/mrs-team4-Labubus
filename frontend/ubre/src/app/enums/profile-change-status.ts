@@ -1,5 +1,5 @@
 export enum ProfileChangeStatus {
-    Pending = 'pending',
-    Approved = 'approved',
-    Rejected = 'rejected'
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED'
 }

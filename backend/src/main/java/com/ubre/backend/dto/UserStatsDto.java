@@ -3,6 +3,7 @@ package com.ubre.backend.dto;
 // User statistics object to be displayed in user profile (only necessary attributes for now are extracted)
 
 public class UserStatsDto { // extend later with other attributes
+    private Long userId;
     private Integer activePast24Hours; // should be in minutes
     private Integer numberOfRides;
     private Double distanceTraveled;
@@ -10,7 +11,8 @@ public class UserStatsDto { // extend later with other attributes
     private Double moneyEarned;
 
 
-    public UserStatsDto(int activePast24Hours, int numberOfRides, double distanceTraveled, double moneySpent, double moneyEarned) {
+    public UserStatsDto(Long userId, int activePast24Hours, int numberOfRides, double distanceTraveled, double moneySpent, double moneyEarned) {
+        this.userId = userId;
         this.activePast24Hours = activePast24Hours;
         this.numberOfRides = numberOfRides;
         this.distanceTraveled = distanceTraveled;
@@ -52,5 +54,11 @@ public class UserStatsDto { // extend later with other attributes
 
     public void setNumberOfRides(Integer numberOfRides) {
         this.numberOfRides = numberOfRides;
+    }
+    public Long getUserId() {
+        return userId;
+    }
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

@@ -6,12 +6,12 @@ public class ReviewDto {
     private Long id;
     private Long driverId;
     private Long userId;
-    private Long rating; // e.g., 1 to 5
+    private Integer rating; // e.g., 1 to 5
     private String text;
 
     public ReviewDto() {
     }
-    public ReviewDto(Long id, Long driverId, Long userId, Long rating, String text) {
+    public ReviewDto(Long id, Long driverId, Long userId, Integer rating, String text) {
         this.id = id;
         this.driverId = driverId;
         this.userId = userId;
@@ -36,10 +36,10 @@ public class ReviewDto {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
-    public Long getRating() {
+    public Integer getRating() {
         return rating;
     }
-    public void setRating(Long rating) {
+    public void setRating(Integer rating) {
         this.rating = rating;
     }
     public String getText() {

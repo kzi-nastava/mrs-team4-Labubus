@@ -1,7 +1,6 @@
 package com.ubre.backend.model;
 
 import com.ubre.backend.enums.Role;
-import com.ubre.backend.enums.Role;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -157,7 +156,7 @@ public abstract class User {
         return Role;
     }
 
-    public void setRole(Role role) {
+    public void setRole(Role Role) {
         this.Role = Role;
     }
 }
