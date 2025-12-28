@@ -1,6 +1,7 @@
 package com.ubre.backend.service.impl;
 
 import com.ubre.backend.dto.DriverRegistrationDto;
+import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
@@ -100,6 +101,13 @@ public class DriverServiceImpl implements DriverService {
         drivers.add(newDriver);
         System.out.println("New driver created: " + newDriver.getEmail());
         return newDriver;
+    }
+
+    @Override
+    public RideDto notifyDriver(Long rideId, Long driverId) {
+        // Mock implementation of notifying a driver about a ride
+        System.out.println("Notifying driver with ID " + driverId + " about ride with ID " + rideId);
+        return new RideDto();
     }
 
 }

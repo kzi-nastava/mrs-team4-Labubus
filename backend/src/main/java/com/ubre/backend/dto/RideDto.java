@@ -16,6 +16,9 @@ public class RideDto implements Serializable {
     private Double price;
     private Double distance;
 
+    public RideDto() {
+    }
+
     public RideDto(Long id, LocalDateTime start, LocalDateTime end, WaypointDto[] waypoints, UserDto driver, Collection<UserDto> passengers, boolean panic, String canceledBy, double price, double distance) {
         this.id = id;
         this.start = start;
@@ -67,5 +70,42 @@ public class RideDto implements Serializable {
 
     public Double getDistance() {
         return distance;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public void setStart(LocalDateTime start) {
+        this.start = start;
+    }
+    public void setEnd(LocalDateTime end) {
+        this.end = end;
+    }
+    public void setWaypoints(WaypointDto[] waypoints) {
+        this.waypoints = waypoints;
+    }
+
+    public void setDriver(UserDto driver) {
+        this.driver = driver;
+    }
+
+    public void setPassengers(Collection<UserDto> passengers) {
+        this.passengers = passengers;
+    }
+
+    public void setPanic(Boolean panic) {
+        this.panic = panic;
+    }
+
+    public void setCanceledBy(String canceledBy) {
+        this.canceledBy = canceledBy;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
     }
 }

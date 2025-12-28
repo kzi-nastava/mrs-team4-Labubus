@@ -1,6 +1,7 @@
 package com.ubre.backend.service;
 
 import com.ubre.backend.dto.DriverRegistrationDto;
+import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.dto.UserDto;
 
 import java.util.Collection;
@@ -13,4 +14,5 @@ public interface DriverService {
     void rejectProfileChanges(Long id);
     void toggleAvailability(Long id);
     UserDto createDriver(DriverRegistrationDto driverRegistrationDto);
+    RideDto notifyDriver(Long rideId, Long driverId);
 }

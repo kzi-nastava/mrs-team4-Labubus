@@ -24,7 +24,15 @@ public class RideServiceImpl implements RideService {
 
     @Override
     public RideDto createRide(Long userId, RideDto rideDto) {
-        return null;
+        // postavljanje id-ja vožnje, može se koristiti neki generator id-jeva ili inkrementalni brojač
+        // provera da li je korisnik već na nekoj vožnji, onda ne može
+        UserDto foundUser = null;
+        if (foundUser.getStatus() == UserStatus.ON_RIDE) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already on a ride");
+        }
+        rideDto.setId((long) (rides.size() + 1));
+        rides.add(rideDto);
+        return rideDto; // i druge informacije po potrebi
     }
 
     @Override
@@ -60,11 +68,19 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    public void startRide(Long rideId) {
-        // povučemo ride iz baze
-        // todo: izvući bitne podatke iz ride i napraviti objekat
-        // postaviti ride status na true
-        // ako je error baci exception
+    public RideDto startRide(Long rideId) {
+        // prolazimo kroz vožnje (koje su inicijalno modeli i onda startujemo vožnju
+        boolean found = false;
+        if (!found) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
+        }
+        boolean accepted = false;
+        if (!accepted) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride not accepted");
+        }
+        RideDto startedRide = new RideDto();
+
+        return startedRide;
     }
 
     @Override
@@ -105,8 +121,14 @@ public class RideServiceImpl implements RideService {
 
     @Override
     public List<RideDto> getFavoriteRides(Long userId) {
-        // pretaržujemo vožnje po atributu da li su omiljene ili nisu
-        return List.of();
+        // prolazimo kroz listu vožnji koje pripadaju kosirniku i uzimamo samo one koju su favorite boolean
+        List<RideDto> temp = new ArrayList<>();
+        for (RideDto ride : rides) {
+            if (true) { // ovde ide provera da li je ride omiljena i da li je do ursera tačno
+                temp.add(ride);
+            }
+        }
+        return temp;
     }
 
     @Override
@@ -128,6 +150,36 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
+    public List<UserDto> getAvailableDrivers(RideDto rideDto) {
+        // do a scan by availabilty and a suitable vehicle
+        // if ride does not exist
+        boolean rideExists = true;
+        if (!rideExists) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
+        }
+
+        boolean driversAvailable = false;
+        if (!driversAvailable) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No available drivers found for the ride");
+        }
+
+        boolean allBusy = false;
+        if (allBusy) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "All drivers are currently busy");
+        }
+        return List.of();
+    }
+
+    @Override
+    public RideDto scheduleRide(Long userId, RideDto rideDto) {
+        // provera da li korisnik već ima zakazanu vožnju u to vreme
+        boolean hasScheduledRide = false;
+        if (hasScheduledRide) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already has a scheduled ride at this time");
+        }
+        rideDto.setId((long) (rides.size() + 1));
+        rides.add(rideDto);
+        return rideDto;
     public List<RideDto> getRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query) {
         UserDto driver = new UserDto(1L, Role.DRIVER, "", "driver@ubre.com", "Driver", "Driver", "1231234132", "Adress 123", UserStatus.ACTIVE);
         WaypointDto[] waypoints = new WaypointDto[] {

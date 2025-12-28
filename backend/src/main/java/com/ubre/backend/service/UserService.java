@@ -18,4 +18,7 @@ public interface UserService {
     UserStatsDto getUserStats(Long id);
     void changePassword(PasswordChangeDto passwordChangeDto);
     void activateUser(Long id);
+    void requestProfileChange(ProfileChangeDto profileChangeDto);
+    List<ProfileChangeDto> getAllProfileChangeRequests();
+    void sendPassengerRequest(Long userId, String passengerEmail);
 }
