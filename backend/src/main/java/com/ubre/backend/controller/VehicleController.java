@@ -1,18 +1,18 @@
-package com.ubre.backend.controller;
-
-import com.ubre.backend.dto.VehicleDto;
-import com.ubre.backend.service.VehicleService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-@RestController
-@RequestMapping("/api/vehicles")
-@CrossOrigin(origins = "*")
-public class VehicleController {
-
+//package com.ubre.backend.controller;
+//
+//import com.ubre.backend.dto.VehicleDto;
+//import com.ubre.backend.service.VehicleService;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.http.HttpStatus;
+//import org.springframework.http.MediaType;
+//import org.springframework.http.ResponseEntity;
+//import org.springframework.web.bind.annotation.*;
+//
+//@RestController
+//@RequestMapping("/api/vehicles")
+//@CrossOrigin(origins = "*")
+//public class VehicleController {
+//
 //    @Autowired
 //    private VehicleService vehicleService;
 //
@@ -69,4 +69,4 @@ public class VehicleController {
 //            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 //        }
 //    }
-}
+//}

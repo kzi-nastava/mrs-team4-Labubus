@@ -17,4 +17,7 @@ public interface RideService {
     void stopRideInProgress(Long rideId);
     double estimateRidePrice(RideDto rideDto);
     List<RideDto> getRidesBetween(LocalDateTime start, LocalDateTime end);
+    List<RideDto> getFavoriteRides(Long userId);
+    void addRideToFavorites(Long userId, Long rideId);
+    void removeRideFromFavorites(Long userId, Long rideId);
 }

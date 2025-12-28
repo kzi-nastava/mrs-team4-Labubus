@@ -3,6 +3,7 @@ package com.ubre.backend.dto;
 import java.io.Serializable;
 
 import com.ubre.backend.enums.Role;
+import com.ubre.backend.enums.UserStatus;
 
 // User...
 
@@ -15,8 +16,9 @@ public class UserDto implements Serializable {
     private String surname;
     private String phone;
     private String address;
+    private UserStatus status;
 
-    public UserDto(Long id, Role role, String avatarUrl, String email, String name, String surname, String phone, String address) {
+    public UserDto(Long id, Role role, String avatarUrl, String email, String name, String surname, String phone, String address, UserStatus status) {
         this.id = id;
         this.role = role;
         this.avatarUrl = avatarUrl;
@@ -25,6 +27,7 @@ public class UserDto implements Serializable {
         this.surname = surname;
         this.phone = phone;
         this.address = address;
+        this.status = status;
     }
 
     // getters
@@ -52,6 +55,7 @@ public class UserDto implements Serializable {
     public String getAddress() {
         return address;
     }
+    public UserStatus getStatus() { return status; }
 
     // setters
 
@@ -80,4 +84,5 @@ public class UserDto implements Serializable {
     public void setSurname(String surname) {
         this.surname = surname;
     }
+    public void setStatus(UserStatus status) { this.status = status; }
 }
