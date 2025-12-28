@@ -13,60 +13,60 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class VehicleController {
 
-    @Autowired
-    private VehicleService vehicleService;
-
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<VehicleDto> createVehicle(
-            @RequestParam Long driverId,
-            @RequestBody VehicleDto createVehicleDto) {
-        try {
-            VehicleDto vehicle = vehicleService.createVehicle(driverId, createVehicleDto);
-            return new ResponseEntity<>(vehicle, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<VehicleDto> getVehicleById(@PathVariable Long id) {
-        try {
-            VehicleDto vehicle = vehicleService.getVehicleById(id);
-            return new ResponseEntity<>(vehicle, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @GetMapping(value = "/driver/{driverId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<VehicleDto> getVehicleByDriver(@PathVariable Long driverId) {
-        try {
-            VehicleDto vehicle = vehicleService.getVehicleByDriver(driverId);
-            return new ResponseEntity<>(vehicle, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<VehicleDto> updateVehicle(
-            @PathVariable Long id,
-            @RequestBody VehicleDto updateVehicleDto) {
-        try {
-            VehicleDto vehicle = vehicleService.updateVehicle(id, updateVehicleDto);
-            return new ResponseEntity<>(vehicle, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
-        try {
-            vehicleService.deleteVehicle(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
+//    @Autowired
+//    private VehicleService vehicleService;
+//
+//    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<VehicleDto> createVehicle(
+//            @RequestParam Long driverId,
+//            @RequestBody VehicleDto createVehicleDto) {
+//        try {
+//            VehicleDto vehicle = vehicleService.createVehicle(driverId, createVehicleDto);
+//            return new ResponseEntity<>(vehicle, HttpStatus.CREATED);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//    }
+//
+//    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<VehicleDto> getVehicleById(@PathVariable Long id) {
+//        try {
+//            VehicleDto vehicle = vehicleService.getVehicleById(id);
+//            return new ResponseEntity<>(vehicle, HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//    }
+//
+//    @GetMapping(value = "/driver/{driverId}", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<VehicleDto> getVehicleByDriver(@PathVariable Long driverId) {
+//        try {
+//            VehicleDto vehicle = vehicleService.getVehicleByDriver(driverId);
+//            return new ResponseEntity<>(vehicle, HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//    }
+//
+//    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<VehicleDto> updateVehicle(
+//            @PathVariable Long id,
+//            @RequestBody VehicleDto updateVehicleDto) {
+//        try {
+//            VehicleDto vehicle = vehicleService.updateVehicle(id, updateVehicleDto);
+//            return new ResponseEntity<>(vehicle, HttpStatus.OK);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//    }
+//
+//    @DeleteMapping(value = "/{id}")
+//    public ResponseEntity<Void> deleteVehicle(@PathVariable Long id) {
+//        try {
+//            vehicleService.deleteVehicle(id);
+//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//    }
 }
