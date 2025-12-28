@@ -20,4 +20,5 @@ public interface UserService {
     void activateUser(Long id);
     void requestProfileChange(ProfileChangeDto profileChangeDto);
     List<ProfileChangeDto> getAllProfileChangeRequests();
+    void sendPassengerRequest(Long userId, String passengerEmail);
 }

@@ -1,6 +1,7 @@
 package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.DriverRegistrationDto;
+import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.service.DriverService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,22 @@ public class DriverController {
         UserDto createdDriver = driverService.createDriver(driverRegistrationDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDriver);
     }
+
+    // send notification to a driver about a new ride request
+    @PostMapping(
+            value = "/{id}/notify-ride-request", // id represents driver id
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<RideDto> noitifyDriver(
+            @PathVariable Long id,
+            @RequestBody Long rideId
+    ) {
+        RideDto rideDto = driverService.notifyDriver(id, rideId);
+        return ResponseEntity.status(HttpStatus.OK).body(rideDto);
+    }
+
+
+
 
 //    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 //    public ResponseEntity<Collection<UserDto>> getAllDrivers() {

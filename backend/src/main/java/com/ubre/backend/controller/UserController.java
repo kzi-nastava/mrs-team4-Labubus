@@ -91,6 +91,23 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(requests);
     }
 
+    // send a passenger request
+    @PostMapping(
+            value="/{id}/passenger-request", // id is user id that sends the request
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Void> sendPassengerRequest(@PathVariable Long id, @RequestBody String email) {
+        userService.sendPassengerRequest(id, email);
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+    }
+
+    // accept a passenger request via email link
+    // not sure how to implement this endpoint yet? (questtion for later)
+
+
+
+
+
 //    @Autowired
 //    private UserService userService;
 //

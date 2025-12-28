@@ -1,6 +1,8 @@
 package com.ubre.backend.service.impl;
 
 import com.ubre.backend.dto.RideDto;
+import com.ubre.backend.dto.UserDto;
+import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.service.RideService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,15 @@ public class RideServiceImpl implements RideService {
 
     @Override
     public RideDto createRide(Long userId, RideDto rideDto) {
-        return null;
+        // postavljanje id-ja vožnje, može se koristiti neki generator id-jeva ili inkrementalni brojač
+        // provera da li je korisnik već na nekoj vožnji, onda ne može
+        UserDto foundUser = null;
+        if (foundUser.getStatus() == UserStatus.ON_RIDE) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already on a ride");
+        }
+        rideDto.setId((long) (rides.size() + 1));
+        rides.add(rideDto);
+        return rideDto; // i druge informacije po potrebi
     }
 
     @Override
@@ -122,5 +132,38 @@ public class RideServiceImpl implements RideService {
         if (!found) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
         }
+    }
+
+    @Override
+    public List<UserDto> getAvailableDrivers(RideDto rideDto) {
+        // do a scan by availabilty and a suitable vehicle
+        // if ride does not exist
+        boolean rideExists = true;
+        if (!rideExists) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
+        }
+
+        boolean driversAvailable = false;
+        if (!driversAvailable) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No available drivers found for the ride");
+        }
+
+        boolean allBusy = false;
+        if (allBusy) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "All drivers are currently busy");
+        }
+        return List.of();
+    }
+
+    @Override
+    public RideDto scheduleRide(Long userId, RideDto rideDto) {
+        // provera da li korisnik već ima zakazanu vožnju u to vreme
+        boolean hasScheduledRide = false;
+        if (hasScheduledRide) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already has a scheduled ride at this time");
+        }
+        rideDto.setId((long) (rides.size() + 1));
+        rides.add(rideDto);
+        return rideDto;
     }
 }

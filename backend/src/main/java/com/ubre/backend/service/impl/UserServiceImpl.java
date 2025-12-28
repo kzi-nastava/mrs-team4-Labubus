@@ -20,6 +20,7 @@ public class UserServiceImpl implements UserService {
     // Mock data for demonstration purposes
     private static List<UserDto> users = new ArrayList<UserDto>();
     private static List<ProfileChangeDto> profileChangeRequests = new ArrayList<>();
+    private static List<String> passengerRequests = new ArrayList<>();
 
     public UserServiceImpl() {
         users.add(new UserDto(1L, Role.DRIVER, "avatar1.png", "john@doe.com", "John", "Doe", "1234567890", "123 Main St", UserStatus.ACTIVE));
@@ -125,5 +126,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<ProfileChangeDto> getAllProfileChangeRequests() {
         return profileChangeRequests;
+    }
+
+    @Override
+    public void sendPassengerRequest(Long id, String passengerEmail) {
+        UserDto user = getUserById(id);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        // todo: implement send passenger request logic via email
     }
 }

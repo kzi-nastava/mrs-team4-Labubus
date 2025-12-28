@@ -1,6 +1,7 @@
 package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.RideDto;
+import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.service.RideService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -50,7 +51,7 @@ public class RideController {
     }
 
     // ukloni vožnju iz omiljenih
-    @PutMapping(
+    @DeleteMapping(
             value = "/{userId}/favorites/{rideId}"
     )
     public ResponseEntity<Void> removeRideFromFavorites(
@@ -63,7 +64,8 @@ public class RideController {
     // kreiranje voznje
     @PostMapping(
             value = "/{userId}",
-            consumes = MediaType.APPLICATION_JSON_VALUE
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<RideDto> createRide(
             @PathVariable Long userId,
@@ -71,6 +73,30 @@ public class RideController {
         RideDto createdRide = rideService.createRide(userId, rideDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdRide);
     }
+
+    // check wether there are drivers available for a ride
+    @GetMapping(
+            value = "/drivers-available",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<List<UserDto>> getAvailableDrivres(@RequestBody RideDto rideDto) {
+        List<UserDto> availableDrivers = rideService.getAvailableDrivers(rideDto);
+        return ResponseEntity.status(HttpStatus.OK).body(availableDrivers);
+    }
+
+    // schedule a ride for later
+    @PostMapping(
+            value = "/{userId}/schedule",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<RideDto> scheduleRide(
+            @PathVariable Long userId,
+            @RequestBody RideDto rideDto) {
+        RideDto scheduledRide = rideService.scheduleRide(userId, rideDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(scheduledRide);
+    }
+
 
 //    @Autowired
 //    private RideService rideService;
