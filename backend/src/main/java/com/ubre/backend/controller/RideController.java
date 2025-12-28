@@ -57,6 +57,18 @@ public class RideController {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
+    // kreiranje voznje
+    @PostMapping(
+            value = "/{userId}",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<RideDto> createRide(
+            @PathVariable Long userId,
+            @RequestBody RideDto rideDto) {
+        RideDto createdRide = rideService.createRide(userId, rideDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdRide);
+    }
+
 //    @Autowired
 //    private RideService rideService;
 //
