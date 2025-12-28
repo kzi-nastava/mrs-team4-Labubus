@@ -1,5 +1,6 @@
 package com.ubre.backend.controller;
 
+import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.service.RideService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,48 @@ import java.util.List;
 @RequestMapping("/api/ride")
 @CrossOrigin(origins = "*")
 public class RideController {
+
+    @Autowired
+    private RideService rideService;
+
+    // start a ride
+    @PutMapping(value = "/{id}/start")
+    public ResponseEntity<Void> startRide(@PathVariable Long id) {
+        rideService.startRide(id);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
+    // dobijanje omiljenih voznji korisnika
+    @GetMapping(
+            value = "/{userId}/favorites",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<List<RideDto>> getFavoriteRides(@PathVariable Long userId) {
+        List<RideDto> favoriteRides = rideService.getFavoriteRides(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(favoriteRides);
+    }
+
+    // dodaj vožnju u omiljene (samo manje više promenimo flag da je favorite)
+    @PutMapping(
+            value = "/{userId}/favorites/{rideId}"
+    )
+    public ResponseEntity<Void> addRideToFavorites(
+            @PathVariable Long userId,
+            @PathVariable Long rideId) {
+        rideService.addRideToFavorites(userId, rideId);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
+    // ukloni vožnju iz omiljenih
+    @PutMapping(
+            value = "/{userId}/favorites/{rideId}"
+    )
+    public ResponseEntity<Void> removeRideFromFavorites(
+            @PathVariable Long userId,
+            @PathVariable Long rideId) {
+        rideService.removeRideFromFavorites(userId, rideId);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
 
 //    @Autowired
 //    private RideService rideService;
