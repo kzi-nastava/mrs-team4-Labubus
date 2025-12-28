@@ -103,4 +103,13 @@ public class UserServiceImpl implements UserService {
         }
         // todo: implement password change logic
     }
+
+    @Override
+    public void activateUser(Long id) {
+        UserDto user = getUserById(id);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+        // todo: implement activate user logic
+    }
 }

@@ -50,6 +50,15 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
+    // activate user account
+    @PutMapping(
+            value = "/{id}/activate"
+    )
+    public ResponseEntity<Void> activateUser(@PathVariable Long id) {
+        userService.activateUser(id);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
 //    @Autowired
 //    private UserService userService;
 //

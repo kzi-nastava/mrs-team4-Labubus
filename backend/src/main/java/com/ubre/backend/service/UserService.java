@@ -17,4 +17,5 @@ public interface UserService {
     void unblockUser(Long id);
     UserStatsDto getUserStats(Long id);
     void changePassword(PasswordChangeDto passwordChangeDto);
+    void activateUser(Long id);
 }
