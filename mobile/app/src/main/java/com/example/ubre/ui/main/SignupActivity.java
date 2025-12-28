@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.ubre.R;
 
 public class SignupActivity extends AppCompatActivity {
@@ -24,6 +25,7 @@ public class SignupActivity extends AppCompatActivity {
 
         ImageView btnBack = findViewById(R.id.btn_back);
         TextView btnLogin = findViewById(R.id.tvLogin);
+        ImageView ivProfilePic = findViewById(R.id.ivProfilePic);
 
         btnBack.setOnClickListener(v -> finish());
 
@@ -31,6 +33,11 @@ public class SignupActivity extends AppCompatActivity {
             Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
             startActivity(intent);
         });
+
+        Glide.with(this)
+                .load(R.drawable.img_default_avatar)
+                .circleCrop()
+                .into(ivProfilePic);
 
     }
 

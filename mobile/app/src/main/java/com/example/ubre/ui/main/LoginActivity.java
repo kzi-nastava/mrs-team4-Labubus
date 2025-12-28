@@ -24,6 +24,7 @@ public class LoginActivity extends AppCompatActivity {
         Button btnLoginSubmit = findViewById(R.id.btnLoginSubmit);
         Button btnContinueGuest = findViewById(R.id.btnContinueGuest);
         TextView tvRegister = findViewById(R.id.tvRegister);
+        TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
 
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,6 +70,11 @@ public class LoginActivity extends AppCompatActivity {
                 Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
                 startActivity(intent);
             }
+        });
+
+        tvForgotPassword.setOnClickListener(v -> {
+            ForgotPasswordFragment fragment = new ForgotPasswordFragment();
+            fragment.show(getSupportFragmentManager(), "ForgotPasswordDialog");
         });
     }
 }

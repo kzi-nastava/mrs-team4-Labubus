@@ -86,16 +86,17 @@
             android:id="@+id/cbRememberMe"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Remember me"
+            android:text="@string/remember_me"
             android:fontFamily="@font/poppins_regular"
             android:textSize="14sp" />
 
         <TextView
+            android:id="@+id/tvForgotPassword"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:text="Forgot password?"
+            android:text="@string/forgot_password"
             android:textColor="@color/primary_light"
             android:textSize="14sp" />
     </RelativeLayout>
@@ -153,7 +154,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Don't have an account? "
+            android:text="@string/don_t_have_an_account"
             android:textColor="@color/text_primary" />
 
         <TextView
