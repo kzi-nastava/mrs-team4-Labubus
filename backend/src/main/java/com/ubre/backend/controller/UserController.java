@@ -1,6 +1,7 @@
 package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.PasswordChangeDto;
+import com.ubre.backend.dto.ProfileChangeDto;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.dto.UserStatsDto;
 import com.ubre.backend.service.UserService;
@@ -57,6 +58,37 @@ public class UserController {
     public ResponseEntity<Void> activateUser(@PathVariable Long id) {
         userService.activateUser(id);
         return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
+    // user profile changes request endpoint
+    @PostMapping(
+            value="/profile-change",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<UserDto> updateUser(@RequestBody ProfileChangeDto profileChangeDto) {
+        UserDto updatedUser = userService.updateUser(profileChangeDto);
+        return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
+    }
+
+    // driver sends request and admin approves or rejects it
+    @PostMapping(
+            value="/profile-change/request",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Void> requestProfileChange(@RequestBody ProfileChangeDto profileChangeDto) {
+        userService.requestProfileChange(profileChangeDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+    }
+
+    // get all profile change requests - for admin
+    @GetMapping(
+            value="/profile-change/requests",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<List<ProfileChangeDto>> getAllProfileChangeRequests() {
+        List<ProfileChangeDto> requests = userService.getAllProfileChangeRequests();
+        return ResponseEntity.status(HttpStatus.OK).body(requests);
     }
 
 //    @Autowired

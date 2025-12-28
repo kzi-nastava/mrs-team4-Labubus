@@ -19,6 +19,7 @@ public class UserServiceImpl implements UserService {
 
     // Mock data for demonstration purposes
     private static List<UserDto> users = new ArrayList<UserDto>();
+    private static List<ProfileChangeDto> profileChangeRequests = new ArrayList<>();
 
     public UserServiceImpl() {
         users.add(new UserDto(1L, Role.DRIVER, "avatar1.png", "john@doe.com", "John", "Doe", "1234567890", "123 Main St", UserStatus.ACTIVE));
@@ -50,6 +51,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(ProfileChangeDto profileChangeDto) {
         UserDto user = getUserById(profileChangeDto.getUserId());
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
         users.remove(user);
         UserDto updatedUser = new UserDto(
                 user.getId(),
@@ -111,5 +115,15 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
         // todo: implement activate user logic
+    }
+
+    @Override
+    public void requestProfileChange(ProfileChangeDto profileChangeDto) {
+        profileChangeRequests.add(profileChangeDto);
+    }
+
+    @Override
+    public List<ProfileChangeDto> getAllProfileChangeRequests() {
+        return profileChangeRequests;
     }
 }
