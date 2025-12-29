@@ -1,4 +1,5 @@
 package com.example.ubre.ui.main;
+import android.graphics.Color;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
@@ -49,12 +51,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // getWindow().setDecorFitsSystemWindows(false);
+        getWindow().setNavigationBarColor(Color.TRANSPARENT);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
         Configuration.getInstance().setUserAgentValue(getPackageName());
 
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.primary_light));
+
+        new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView())
+                .setAppearanceLightStatusBars(false); // bele ikonice
 
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
             boolean hasFragments = getSupportFragmentManager().getBackStackEntryCount() > 0;
@@ -73,10 +81,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            Insets statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+            v.setPadding(statusBars.left, statusBars.top, statusBars.right, 0);
             return insets;
         });
+
 
         map = findViewById(R.id.map);
         map.setTileSource(TileSourceFactory.MAPNIK);
