@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- TOP -->
+        <LinearLayout
+            style="@style/HeaderRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/btn_back"
+                style="@style/HeaderBackIcon"
+                android:layout_marginEnd="12dp"
+                android:src="@drawable/ic_back" />
+
+            <TextView
+                style="@style/HeaderTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:text="@string/vehicle_information" />
+        </LinearLayout>
+
+        <!-- Vehicle model -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_vehicle_model"
+            style="@style/InputBoxLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="@string/vehicle_model">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_vehicle_model"
+                style="@style/InputBoxEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Vehicle type -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_vehicle_type"
+            style="@style/InputBoxLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/vehicle_type">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_vehicle_type"
+                style="@style/InputBoxEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- License plates -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_license_plates"
+            style="@style/InputBoxLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/license_plates">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_license_plates"
+                style="@style/InputBoxEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Number of seats -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_seats"
+            style="@style/InputBoxLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/number_of_seats">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_seats"
+                style="@style/InputBoxEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Baby-friendly -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_baby_friendly"
+            style="@style/InputBoxLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/baby_friendly">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_baby_friendly"
+                style="@style/InputBoxEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Pet-friendly -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_pet_friendly"
+            style="@style/InputBoxLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/pet_friendly">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_pet_friendly"
+                style="@style/InputBoxEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+</ScrollView>

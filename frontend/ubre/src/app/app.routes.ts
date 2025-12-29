@@ -4,7 +4,7 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { SignupComponent } from './features/auth/signup/signup.component';
 import { ForgotPassword } from './features/auth/forgot-password/forgot-password';
 import { ResetPassword } from './features/auth/reset-password/reset-password';
-import { User } from './models/user';
+import { User } from './dtos/user';
 
 export const routes: Routes = [
   { path: '', component: UserLayout },

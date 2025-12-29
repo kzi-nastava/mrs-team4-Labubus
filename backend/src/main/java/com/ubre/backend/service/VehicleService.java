@@ -1,12 +1,16 @@
 package com.ubre.backend.service;
 
-import com.ubre.backend.dto.vehicle.VehicleDTO;
-import com.ubre.backend.dto.vehicle.CreateVehicleDTO;
+import com.ubre.backend.dto.VehicleDto;
+import com.ubre.backend.dto.VehicleIndicatorDto;
+
+import java.util.Collection;
 
 public interface VehicleService {
-    VehicleDTO createVehicle(Long driverId, CreateVehicleDTO createVehicleDTO);
-    VehicleDTO getVehicleById(Long id);
-    VehicleDTO getVehicleByDriver(Long driverId);
-    VehicleDTO updateVehicle(Long id, CreateVehicleDTO updateVehicleDTO);
-    void deleteVehicle(Long id);
+    VehicleDto createVehicle(VehicleDto createVehicleDto);
+    VehicleDto getVehicleById(Long id);
+    VehicleDto getVehicleByDriver(Long driverId);
+    VehicleDto updateVehicle(Long id, VehicleDto updateVehicleDto);
+    VehicleDto deleteVehicle(Long id);
+    Collection<VehicleIndicatorDto> getVehicleIndicators();
+    VehicleIndicatorDto getVehicleIndicator(Long id);
 }

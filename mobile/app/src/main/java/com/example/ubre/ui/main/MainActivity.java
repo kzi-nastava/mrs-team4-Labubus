@@ -1,13 +1,12 @@
 package com.example.ubre.ui.main;
 
 import android.annotation.SuppressLint;
-import android.graphics.PorterDuff;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.core.view.GravityCompat;
@@ -23,7 +23,9 @@ import androidx.fragment.app.Fragment;
 
 import com.example.ubre.R;
 import com.example.ubre.ui.enums.Role;
+import com.example.ubre.ui.enums.VehicleType;
 import com.example.ubre.ui.dtos.UserDto;
+import com.example.ubre.ui.dtos.VehicleDto;
 import com.google.android.material.navigation.NavigationView;
 import com.bumptech.glide.Glide;
 
@@ -34,19 +36,19 @@ import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapController;
 
-import java.time.Instant;
-
 public class MainActivity extends AppCompatActivity {
 
     private MapView map;
     private View btnMenu;
     private DrawerLayout drawer;
     private UserDto currentUser;
+    private VehicleDto currentVehicle; // If role is DRIVER, that is drivers vehicle
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setDecorFitsSystemWindows(false);
+        // getWindow().setDecorFitsSystemWindows(false);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
 
         Configuration.getInstance().setUserAgentValue(getPackageName());
 
@@ -58,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (hasFragments) {
                 findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
-                if (map != null) map.setVisibility(View.GONE);
+                if (map != null) map.setVisibility(View.INVISIBLE);
                 if (btnMenu != null) btnMenu.setVisibility(View.GONE);
             } else {
                 findViewById(R.id.fragment_container).setVisibility(View.GONE);
@@ -93,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Example role assignment; in a real app, this would come from user authentication
         UserDto currentUser = new UserDto(1L, Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
+        currentVehicle = new VehicleDto(1L, "Toyota Prius", VehicleType.STANDARD, "ABC-123", 4, true, false);
+
         setMenuOptions(currentUser.getRole());
         fillDrawerHeader(currentUser);
 
@@ -103,8 +107,22 @@ public class MainActivity extends AppCompatActivity {
 
             int itemId = item.getItemId();
 
-            if (itemId == R.id.nav_account_settings) { showFragment(AccountSettingsFragment.newInstance(currentUser)); return true; }
-            else if (itemId == R.id.nav_ride_history) { showFragment(RideHistoryFragment.newInstance(currentUser)); return true; }
+            if (itemId == R.id.nav_account_settings) {
+                if (currentUser.getRole() == Role.DRIVER) {
+                    showFragment(AccountSettingsFragment.newInstance(currentUser, currentVehicle));
+                    return true;
+                } else {
+                    showFragment(AccountSettingsFragment.newInstance(currentUser, null));
+                    return true;
+                }
+              else if (itemId == R.id.nav_ride_history) { showFragment(RideHistoryFragment.newInstance(currentUser)); return true; }
+            } else if (itemId == R.id.nav_profile_changes) {
+                showFragment(ProfileChangesFragment.newInstance());
+                return true;
+            } else if (itemId == R.id.nav_log_out) {
+                logout();
+                return true;
+            }
 
             return true;
         });
@@ -175,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void showFragment(Fragment f) {
         findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
-        map.setVisibility(View.GONE);
+        map.setVisibility(View.INVISIBLE);
         if (btnMenu != null) btnMenu.setVisibility(View.GONE);
 
         getSupportFragmentManager()
@@ -183,6 +201,12 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.fragment_container, f)
                 .addToBackStack(null)
                 .commit();
+    }
+
+    private void logout() {
+        Intent intent = new Intent(this, LoginSignupActivity.class);
+        startActivity(intent);
+        finish();
     }
 
 

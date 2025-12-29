@@ -5,9 +5,9 @@ import { VehicleCard } from '../vehicle-card/vehicle-card';
 import { RouteTable } from '../route-table/route-table';
 import { StatCard } from '../stat-card/stat-card';
 import { Button } from '../button/button';
-import { Ride } from '../../../models/ride';
+import { RideDto } from '../../../dtos/ride-dto';
 import { DatePipe } from '@angular/common';
-import { User } from '../../../models/user';
+import { User } from '../../../dtos/user';
 
 @Component({
   selector: 'app-ride-details',
@@ -16,6 +16,6 @@ import { User } from '../../../models/user';
   styleUrl: './ride-details.css',
 })
 export class RideDetails {
-  @Input({required: true}) ride! : Ride;
+  @Input({required: true}) ride! : RideDto;
   @Input() user : User = {email: '', firstName: '', lastName: '', profilePicture: '', role: 'guest'}
 }

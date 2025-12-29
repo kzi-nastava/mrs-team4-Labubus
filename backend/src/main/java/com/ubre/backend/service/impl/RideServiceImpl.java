@@ -1,248 +1,211 @@
 package com.ubre.backend.service.impl;
 
+import com.ubre.backend.dto.RideDto;
+import com.ubre.backend.dto.RideQueryDto;
+import com.ubre.backend.dto.UserDto;
+import com.ubre.backend.dto.WaypointDto;
+import com.ubre.backend.enums.Role;
+import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.service.RideService;
-import com.ubre.backend.dto.ride.CreateRideDTO;
-import com.ubre.backend.dto.ride.RideDTO;
-import com.ubre.backend.model.*;
-import com.ubre.backend.repository.*;
-import com.ubre.backend.enums.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class RideServiceImpl implements RideService {
 
-    @Autowired
-    private RideRepository rideRepository;
-
-    @Autowired
-    private RegisteredUserRepository userRepository;
-
-    @Autowired
-    private DriverRepository driverRepository;
-
-    @Autowired
-    private LocationRepository locationRepository;
-
-    @Autowired
-    private VehicleTypePricingRepository pricingRepository;
+    // Mock data for rides
+    List<RideDto> rides = new ArrayList<RideDto>();
 
     @Override
-    public RideDTO createRide(Long userId, CreateRideDTO createRideDTO) {
-        RegisteredUser user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Location startLocation = new Location(
-                createRideDTO.getStartAddress(),
-                createRideDTO.getStartLatitude(),
-                createRideDTO.getStartLongitude()
-        );
-        Location endLocation = new Location(
-                createRideDTO.getEndAddress(),
-                createRideDTO.getEndLatitude(),
-                createRideDTO.getEndLongitude()
-        );
-
-        locationRepository.save(startLocation);
-        locationRepository.save(endLocation);
-
-        Ride ride = new Ride();
-        ride.setCreator(user);
-        ride.setStartLocation(startLocation);
-        ride.setEndLocation(endLocation);
-        ride.setVehicleType(VehicleType.valueOf(createRideDTO.getVehicleType()));
-        ride.setAllowsBabies(createRideDTO.isAllowsBabies());
-        ride.setAllowsPets(createRideDTO.isAllowsPets());
-        ride.setScheduledTime(createRideDTO.getScheduledTime());
-        ride.setRideStatus(RideStatus.PENDING);
-
-        double distance = calculateDistance(startLocation, endLocation);
-        VehicleTypePricing pricing = pricingRepository
-                .findByVehicleType(VehicleType.valueOf(createRideDTO.getVehicleType()))
-                .orElseThrow(() -> new RuntimeException("Pricing not found"));
-        
-        double totalPrice = pricing.getBasePrice() + (distance * pricing.getPricePerKm());
-        ride.setEstimatedDistance(distance);
-        ride.setTotalPrice(totalPrice);
-        ride.setBasePrice(pricing.getBasePrice());
-        ride.setPricePerKm(pricing.getPricePerKm());
-
-        Driver driver = findBestAvailableDriver(ride);
-        if (driver != null) {
-            ride.setDriver(driver);
-            ride.setRideStatus(RideStatus.DRIVER_ASSIGNED);
-        } else {
-            ride.setRideStatus(RideStatus.REJECTED);
+    public RideDto createRide(Long userId, RideDto rideDto) {
+        // postavljanje id-ja vožnje, može se koristiti neki generator id-jeva ili inkrementalni brojač
+        // provera da li je korisnik već na nekoj vožnji, onda ne može
+        UserDto foundUser = null;
+        if (foundUser.getStatus() == UserStatus.ON_RIDE) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already on a ride");
         }
-
-        rideRepository.save(ride);
-        return convertToDTO(ride);
+        rideDto.setId((long) (rides.size() + 1));
+        rides.add(rideDto);
+        return rideDto; // i druge informacije po potrebi
     }
 
     @Override
-    public RideDTO getRideById(Long id) {
-        Ride ride = rideRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ride not found"));
-        return convertToDTO(ride);
+    public RideDto getRideById(Long id) {
+        RideDto ride = rides.stream()
+                .filter(r -> r.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
+
+        // neophodno je proveriti takodje da li je ride prihvaćen, onda može da se startuje
+        // tada vraćamo kod 400
+        return ride;
     }
 
     @Override
-    public List<RideDTO> getUserRides(Long userId) {
-        RegisteredUser user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        List<Ride> rides = rideRepository.findByCreatorOrderByStartTimeDesc(user);
-        return rides.stream().map(this::convertToDTO).collect(Collectors.toList());
+    public List<RideDto> getUserRides(Long userId) {
+        return List.of();
     }
 
     @Override
-    public List<RideDTO> getDriverRides(Long driverId) {
-        Driver driver = driverRepository.findById(driverId)
-                .orElseThrow(() -> new RuntimeException("Driver not found"));
-        List<Ride> rides = rideRepository.findByDriverOrderByStartTimeDesc(driver);
-        return rides.stream().map(this::convertToDTO).collect(Collectors.toList());
+    public List<RideDto> getDriverRides(Long driverId) {
+        return List.of();
     }
 
     @Override
     public void acceptRide(Long rideId, Long driverId) {
-        Ride ride = rideRepository.findById(rideId)
-                .orElseThrow(() -> new RuntimeException("Ride not found"));
-        Driver driver = driverRepository.findById(driverId)
-                .orElseThrow(() -> new RuntimeException("Driver not found"));
 
-        ride.setDriver(driver);
-        ride.setRideStatus(RideStatus.ACCEPTED);
-        rideRepository.save(ride);
     }
 
     @Override
     public void rejectRide(Long rideId, String reason) {
-        Ride ride = rideRepository.findById(rideId)
-                .orElseThrow(() -> new RuntimeException("Ride not found"));
-        ride.setRideStatus(RideStatus.REJECTED);
-        ride.setCancellationReason(reason);
-        rideRepository.save(ride);
+
     }
 
     @Override
-    public void startRide(Long rideId) {
-        Ride ride = rideRepository.findById(rideId)
-                .orElseThrow(() -> new RuntimeException("Ride not found"));
-        ride.setStartTime(LocalDateTime.now());
-        ride.setRideStatus(RideStatus.IN_PROGRESS);
-        rideRepository.save(ride);
+    public RideDto startRide(Long rideId) {
+        // prolazimo kroz vožnje (koje su inicijalno modeli i onda startujemo vožnju
+        boolean found = false;
+        if (!found) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
+        }
+        boolean accepted = false;
+        if (!accepted) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride not accepted");
+        }
+        RideDto startedRide = new RideDto();
+
+        return startedRide;
     }
 
     @Override
-    public void endRide(Long rideId) {
-        Ride ride = rideRepository.findById(rideId)
-                .orElseThrow(() -> new RuntimeException("Ride not found"));
-        ride.setEndTime(LocalDateTime.now());
-        ride.setRideStatus(RideStatus.COMPLETED);
-        rideRepository.save(ride);
+    public RideDto endRide(Long rideId) {
+        UserDto driver = new UserDto(1L, Role.DRIVER, "", "driver@ubre.com", "Driver", "Driver", "1231234132", "Adress 123", UserStatus.ACTIVE);
+        WaypointDto[] waypoints = new WaypointDto[] {
+                new WaypointDto(1L, "Bulevar oslobodjenja", 48.83, 19.32),
+                new WaypointDto(2L, "Trg mladenaca", 48.83, 19.32),
+                new WaypointDto(3L, "Bulevar despota Stefana", 48.83, 19.32)
+        };
+        UserDto[] passengers = {
+                new UserDto(2L, Role.REGISTERED_USER, "", "passenger1@ubre.com", "Passenger1", "Passenger1", "1231234132", "Adress 123", UserStatus.ACTIVE),
+                new UserDto(3L, Role.REGISTERED_USER, "", "passenger2@ubre.com", "Passenger2", "Passenger2", "1231234132", "Adress 123", UserStatus.ACTIVE)
+        };
+
+        return new RideDto(1L, LocalDateTime.now(), LocalDateTime.now(), waypoints, driver, Arrays.stream(passengers).toList(), true, null, 12.34, 7.3);
     }
 
     @Override
     public void cancelRide(Long rideId, String reason) {
-        Ride ride = rideRepository.findById(rideId)
-                .orElseThrow(() -> new RuntimeException("Ride not found"));
-        ride.setRideStatus(RideStatus.CANCELLED);
-        ride.setCancellationReason(reason);
-        rideRepository.save(ride);
+
     }
 
     @Override
     public void stopRideInProgress(Long rideId) {
-        Ride ride = rideRepository.findById(rideId)
-                .orElseThrow(() -> new RuntimeException("Ride not found"));
-        ride.setEndTime(LocalDateTime.now());
-        ride.setRideStatus(RideStatus.COMPLETED);
-        // update end location and recalculate price
-        rideRepository.save(ride);
+
     }
 
     @Override
-    public double estimateRidePrice(CreateRideDTO createRideDTO) {
-        Location start = new Location(
-                createRideDTO.getStartAddress(),
-                createRideDTO.getStartLatitude(),
-                createRideDTO.getStartLongitude()
-        );
-        Location end = new Location(
-                createRideDTO.getEndAddress(),
-                createRideDTO.getEndLatitude(),
-                createRideDTO.getEndLongitude()
-        );
-
-        double distance = calculateDistance(start, end);
-        VehicleTypePricing pricing = pricingRepository
-                .findByVehicleType(VehicleType.valueOf(createRideDTO.getVehicleType()))
-                .orElseThrow(() -> new RuntimeException("Pricing not found"));
-
-        return pricing.getBasePrice() + (distance * pricing.getPricePerKm());
+    public double estimateRidePrice(RideDto rideDto) {
+        return 0;
     }
 
     @Override
-    public List<RideDTO> getRidesBetween(LocalDateTime start, LocalDateTime end) {
-        List<Ride> rides = rideRepository.findRidesBetween(start, end);
-        return rides.stream().map(this::convertToDTO).collect(Collectors.toList());
+    public List<RideDto> getRidesBetween(LocalDateTime start, LocalDateTime end) {
+        return List.of();
     }
 
-    private Driver findBestAvailableDriver(Ride ride) {
-        List<Driver> availableDrivers = driverRepository.findAvailableDrivers(DriverStatus.ACTIVE);
-        
-        availableDrivers = availableDrivers.stream()
-                .filter(d -> d.getVehicle() != null)
-                .filter(d -> d.getVehicle().getVehicleType() == ride.getVehicleType())
-                .filter(d -> !ride.isAllowsBabies() || d.getVehicle().isAllowsBabies())
-                .filter(d -> !ride.isAllowsPets() || d.getVehicle().isAllowsPets())
-                .filter(d -> d.getActiveHoursLast24h() < 8)
-                .collect(Collectors.toList());
+    @Override
+    public List<RideDto> getFavoriteRides(Long userId) {
+        // prolazimo kroz listu vožnji koje pripadaju kosirniku i uzimamo samo one koju su favorite boolean
+        List<RideDto> temp = new ArrayList<>();
+        for (RideDto ride : rides) {
+            if (true) { // ovde ide provera da li je ride omiljena i da li je do ursera tačno
+                temp.add(ride);
+            }
+        }
+        return temp;
+    }
 
-        if (availableDrivers.isEmpty()) {
-            return null;
+    @Override
+    public void addRideToFavorites(Long userId, Long rideId) {
+        // pronaći vožnju i postaviti atribut omiljene na true
+        boolean found = false;
+        if (!found) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
+        }
+    }
+
+    @Override
+    public void removeRideFromFavorites(Long userId, Long rideId) {
+        // pronaći vožnju i postaviti atribut omiljene na false
+        boolean found = false;
+        if (!found) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
+        }
+    }
+
+    @Override
+    public List<UserDto> getAvailableDrivers(RideDto rideDto) {
+        // do a scan by availabilty and a suitable vehicle
+        // if ride does not exist
+        boolean rideExists = true;
+        if (!rideExists) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
         }
 
-        // closest driver based on location
-        return availableDrivers.get(0);
+        boolean driversAvailable = false;
+        if (!driversAvailable) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No available drivers found for the ride");
+        }
+
+        boolean allBusy = false;
+        if (allBusy) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "All drivers are currently busy");
+        }
+        return List.of();
     }
 
-    private double calculateDistance(Location start, Location end) {
-        final int EARTH_RADIUS = 6371; 
+    @Override
+    public RideDto scheduleRide(Long userId, RideDto rideDto) {
+        // provera da li korisnik već ima zakazanu vožnju u to vreme
+        boolean hasScheduledRide = false;
+        if (hasScheduledRide) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already has a scheduled ride at this time");
+        }
+        rideDto.setId((long) (rides.size() + 1));
+        rides.add(rideDto);
+        return rideDto;
+    }
+    public List<RideDto> getRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query) {
+        UserDto driver = new UserDto(1L, Role.DRIVER, "", "driver@ubre.com", "Driver", "Driver", "1231234132", "Adress 123", UserStatus.ACTIVE);
+        WaypointDto[] waypoints = new WaypointDto[] {
+                new WaypointDto(1L, "Bulevar oslobodjenja", 48.83, 19.32),
+                new WaypointDto(2L, "Trg mladenaca", 48.83, 19.32),
+                new WaypointDto(3L, "Bulevar despota Stefana", 48.83, 19.32)
+        };
+        UserDto[] passengers = {
+                new UserDto(2L, Role.REGISTERED_USER, "", "passenger1@ubre.com", "Passenger1", "Passenger1", "1231234132", "Adress 123", UserStatus.ACTIVE),
+                new UserDto(3L, Role.REGISTERED_USER, "", "passenger2@ubre.com", "Passenger2", "Passenger2", "1231234132", "Adress 123", UserStatus.ACTIVE)
+        };
 
-        double latDistance = Math.toRadians(end.getLatitude() - start.getLatitude());
-        double lonDistance = Math.toRadians(end.getLongitude() - start.getLongitude());
-        
-        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-                + Math.cos(Math.toRadians(start.getLatitude())) 
-                * Math.cos(Math.toRadians(end.getLatitude()))
-                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
-        
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        
-        return EARTH_RADIUS * c;
+        return List.of(
+                new RideDto(1L, LocalDateTime.now(), LocalDateTime.now(), waypoints, driver, Arrays.stream(passengers).toList(), true, null, 12.34, 7.3),
+                new RideDto(2L, LocalDateTime.now(), LocalDateTime.now(), waypoints, driver, Arrays.stream(passengers).toList(), false, null, 20.14, 12.1)
+        );
     }
 
-    private RideDTO convertToDTO(Ride ride) {
-        RideDTO dto = new RideDTO();
-        dto.setId(ride.getId());
-        dto.setStartAddress(ride.getStartLocation().getAddress());
-        dto.setEndAddress(ride.getEndLocation().getAddress());
-        dto.setScheduledTime(ride.getScheduledTime());
-        dto.setStartTime(ride.getStartTime());
-        dto.setEndTime(ride.getEndTime());
-        dto.setEstimatedDistance(ride.getEstimatedDistance());
-        dto.setActualDistance(ride.getActualDistance());
-        dto.setTotalPrice(ride.getTotalPrice());
-        dto.setRideStatus(ride.getRideStatus().name());
-        dto.setVehicleType(ride.getVehicleType().name());
-        dto.setAllowsBabies(ride.isAllowsBabies());
-        dto.setAllowsPets(ride.isAllowsPets());
-        return dto;
+    @Override
+    public List<RideDto> getScheduledRides(Long driverId, Integer skip, Integer count, RideQueryDto query) {
+        return getRideHistory(driverId, skip, count, query);
+    }
+
+    @Override
+    public void trackRide(Long id) {
+
     }
 }
