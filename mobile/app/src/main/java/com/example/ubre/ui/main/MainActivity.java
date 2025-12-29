@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showFragment(Fragment f) {
+    public void showFragment(Fragment f) {
         findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
         map.setVisibility(View.GONE);
         if (btnMenu != null) btnMenu.setVisibility(View.GONE);

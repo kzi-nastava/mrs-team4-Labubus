@@ -9,7 +9,7 @@
         android:id="@+id/ride_list_cards"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="310dp"
+        android:paddingTop="325dp"
         android:paddingHorizontal="30dp"
         android:paddingBottom="42dp"
         >
@@ -26,7 +26,8 @@
         android:layout_alignParentTop="true"
         android:background="@drawable/bg_modal"
         android:paddingHorizontal="30dp"
-        android:paddingVertical="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="30dp"
         >
 
         <!-- TOP -->
