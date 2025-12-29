@@ -35,11 +35,25 @@
 
         <ImageButton
             android:id="@+id/btn_menu"
-            android:layout_margin="16dp"
-            android:src="@android:drawable/ic_menu_sort_by_size"
+            android:src="@drawable/ic_menu"
             style="@style/IconButtonWhite"
+            android:layout_marginTop="32dp"
+            android:layout_marginStart="16dp"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <!-- chat menu icon bottom right -->
+        <ImageButton
+            android:id="@+id/btn_chat"
+            android:src="@drawable/ic_chat"
+            style="@style/IconButtonWhite"
+            android:layout_marginBottom="32dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.navigation.NavigationView

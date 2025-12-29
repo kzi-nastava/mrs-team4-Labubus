@@ -81,6 +81,7 @@
         <item name="android:scaleType">fitCenter</item>
         <item name="android:layout_width">@dimen/icon_regular</item>
         <item name="android:layout_height">@dimen/icon_regular</item>
+        <item name="android:elevation">4dp</item>
     </style>
 
 

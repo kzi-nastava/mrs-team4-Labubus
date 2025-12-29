@@ -9,12 +9,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import com.example.ubre.ui.dtos.StatItemDto;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.ubre.R;
 import com.example.ubre.ui.enums.Role;
-import com.example.ubre.ui.dtos.StatItemDto;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.UserStatsDto;
 import com.example.ubre.ui.dtos.VehicleDto;
