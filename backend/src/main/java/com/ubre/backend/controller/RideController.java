@@ -1,8 +1,10 @@
 package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.RideDto;
+import com.ubre.backend.dto.RideEstimationsDto;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.dto.RideQueryDto;
+import com.ubre.backend.dto.CancellationDto;
 import com.ubre.backend.service.RideService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -131,6 +134,41 @@ public class RideController {
     public ResponseEntity<Void> getScheduledRides(@PathVariable Long id) {
         rideService.trackRide(id);
         return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
+    // guest or registered user can estimate ride details based on provided waypoints and options
+    @PostMapping(
+            value = "/estimate",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<RideEstimationsDto> estimateRide(@RequestBody RideDto rideDto) {
+        double estimatedPrice = rideService.estimateRidePrice(rideDto);
+        RideEstimationsDto estimationsDto = new RideEstimationsDto(
+                new ArrayList<>(List.of(rideDto.getWaypoints())),
+                estimatedPrice,
+                15
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(estimationsDto);
+    }
+
+    // cancel an already scheduled ride with optional reason
+    @PutMapping(
+            value = "/{id}/cancel",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Void> cancelRide(@PathVariable Long id, @RequestBody CancellationDto cancellationDto) {
+        rideService.cancelRide(id, cancellationDto.getReason());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    // stop a ride that is currently in progress
+    @PutMapping(
+            value = "/{id}/stop"
+    )
+    public ResponseEntity<Void> stopRideInProgress(@PathVariable Long id) {
+        rideService.stopRideInProgress(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 //    @Autowired
