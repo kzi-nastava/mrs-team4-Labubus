@@ -8,9 +8,9 @@ import java.io.Serializable;
 public class WaypointDto implements Serializable {
     private Long id;
     private String label;
-    private double latitude;
-    private double longitude;
-    public WaypointDto(Long id, String label, double latitude, double longitude) {
+    private Double latitude;
+    private Double longitude;
+    public WaypointDto(Long id, String label, Double latitude, Double longitude) {
         this.id = id;
         this.label = label;
         this.latitude = latitude;
@@ -29,11 +29,11 @@ public class WaypointDto implements Serializable {
         return label;
     }
 
-    public double getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public double getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 }

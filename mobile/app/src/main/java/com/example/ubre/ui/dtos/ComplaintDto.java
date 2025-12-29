@@ -3,37 +3,37 @@ package com.example.ubre.ui.dtos;
 // For handling complaints made by users against drivers
 
 public class ComplaintDto {
-    private int id;
-    private int driverId;
-    private int userId;
+    private Long id;
+    private Long driverId;
+    private Long userId;
     private String text;
 
     public ComplaintDto() {
     }
 
-    public ComplaintDto(int id, int driverId, int userId, String text) {
+    public ComplaintDto(Long id, Long driverId, Long userId, String text) {
         this.id = id;
         this.driverId = driverId;
         this.userId = userId;
         this.text = text;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
-    public int getDriverId() {
+    public Long getDriverId() {
         return driverId;
     }
-    public void setDriverId(int driverId) {
+    public void setDriverId(Long driverId) {
         this.driverId = driverId;
     }
-    public int getUserId() {
+    public Long getUserId() {
         return userId;
     }
-    public void setUserId(int userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
     public String getText() {

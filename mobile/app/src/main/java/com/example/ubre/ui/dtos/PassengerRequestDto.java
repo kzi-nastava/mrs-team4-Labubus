@@ -3,19 +3,19 @@ package com.example.ubre.ui.dtos;
 // For sending request via email to join a ride
 
 public class PassengerRequestDto {
-    private int rideId;
+    private Long rideId;
     private String email;
 
     public PassengerRequestDto() {
     }
-    public PassengerRequestDto(int rideId, String email) {
+    public PassengerRequestDto(Long rideId, String email) {
         this.rideId = rideId;
         this.email = email;
     }
-    public int getRideId() {
+    public Long getRideId() {
         return rideId;
     }
-    public void setRideId(int rideId) {
+    public void setRideId(Long rideId) {
         this.rideId = rideId;
     }
     public String getEmail() {

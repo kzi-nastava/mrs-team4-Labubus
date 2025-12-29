@@ -37,7 +37,7 @@ public class ProfileChangesAdapter extends RecyclerView.Adapter<ProfileChangesAd
         notifyDataSetChanged();
     }
 
-    public void removeById(String requestId) {
+    public void removeById(Long requestId) {
         if (requestId == null) return;
         for (int i = 0; i < items.size(); i++) {
             ProfileChangeDto it = items.get(i);

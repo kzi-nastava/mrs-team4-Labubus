@@ -6,9 +6,9 @@ import com.example.ubre.ui.enums.VehicleType;
 
 public class RideOptionsDto {
     private VehicleType vehicleType;
-    private boolean babyFriendly;
-    private boolean petFriendly;
-    public RideOptionsDto(VehicleType vehicleType, boolean babyFriendly, boolean petFriendly) {
+    private Boolean babyFriendly;
+    private Boolean petFriendly;
+    public RideOptionsDto(VehicleType vehicleType, Boolean babyFriendly, Boolean petFriendly) {
         this.vehicleType = vehicleType;
         this.babyFriendly = babyFriendly;
         this.petFriendly = petFriendly;
@@ -19,10 +19,10 @@ public class RideOptionsDto {
     public VehicleType getVehicleType() {
         return vehicleType;
     }
-    public boolean isBabyFriendly() {
+    public Boolean isBabyFriendly() {
         return babyFriendly;
     }
-    public boolean isPetFriendly() {
+    public Boolean isPetFriendly() {
         return petFriendly;
     }
 
@@ -31,10 +31,10 @@ public class RideOptionsDto {
     public void setVehicleType(VehicleType vehicleType) {
         this.vehicleType = vehicleType;
     }
-    public void setBabyFriendly(boolean babyFriendly) {
+    public void setBabyFriendly(Boolean babyFriendly) {
         this.babyFriendly = babyFriendly;
     }
-    public void setPetFriendly(boolean petFriendly) {
+    public void setPetFriendly(Boolean petFriendly) {
         this.petFriendly = petFriendly;
     }
 }

@@ -6,12 +6,12 @@ import java.util.ArrayList;
 
 public class RideEstimationsDto {
     private ArrayList<WaypointDto> waypoints;
-    private double price;
-    private int duration; // in minutes
+    private Double price;
+    private Integer duration; // in minutes
 
     public RideEstimationsDto() {
     }
-    public RideEstimationsDto(ArrayList<WaypointDto> waypoints, double price, int duration) {
+    public RideEstimationsDto(ArrayList<WaypointDto> waypoints, Double price, Integer duration) {
         this.waypoints = waypoints;
         this.price = price;
         this.duration = duration;
@@ -22,16 +22,16 @@ public class RideEstimationsDto {
     public void setWaypoints(ArrayList<WaypointDto> waypoints) {
         this.waypoints = waypoints;
     }
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
-    public int getDuration() {
+    public Integer getDuration() {
         return duration;
     }
-    public void setDuration(int duration) {
+    public void setDuration(Integer duration) {
         this.duration = duration;
     }
 }

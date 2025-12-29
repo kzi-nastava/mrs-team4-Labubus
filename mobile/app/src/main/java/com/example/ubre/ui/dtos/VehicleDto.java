@@ -9,11 +9,11 @@ public class VehicleDto implements java.io.Serializable {
     private String model;
     private VehicleType type;
     private String plates;
-    private int seats;
-    private boolean babyFriendly;
-    private boolean petFriendly;
+    private Integer seats;
+    private Boolean babyFriendly;
+    private Boolean petFriendly;
 
-    public VehicleDto(Long id, String model, VehicleType type, String plates, int seats, boolean babyFriendly, boolean petFriendly) {
+    public VehicleDto(Long id, String model, VehicleType type, String plates, Integer seats, Boolean babyFriendly, Boolean petFriendly) {
         this.id = id;
         this.model = model;
         this.type = type;
@@ -55,27 +55,27 @@ public class VehicleDto implements java.io.Serializable {
         this.plates = plates;
     }
 
-    public int getSeats() {
+    public Integer getSeats() {
         return seats;
     }
 
-    public void setSeats(int seats) {
+    public void setSeats(Integer seats) {
         this.seats = seats;
     }
 
-    public boolean isBabyFriendly() {
+    public Boolean isBabyFriendly() {
         return babyFriendly;
     }
 
-    public void setBabyFriendly(boolean babyFriendly) {
+    public void setBabyFriendly(Boolean babyFriendly) {
         this.babyFriendly = babyFriendly;
     }
 
-    public boolean isPetFriendly() {
+    public Boolean isPetFriendly() {
         return petFriendly;
     }
 
-    public void setPetFriendly(boolean petFriendly) {
+    public void setPetFriendly(Boolean petFriendly) {
         this.petFriendly = petFriendly;
     }
 }

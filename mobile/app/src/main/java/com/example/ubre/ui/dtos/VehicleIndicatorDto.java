@@ -5,25 +5,25 @@ import com.example.ubre.ui.enums.UserStatus;
 // Every vehicle that is visible on the map has some indicator info
 
 public class VehicleIndicatorDto {
-    private int driverId;
+    private Long driverId;
     private WaypointDto location;
     private UserStatus status;
-    private boolean panic;
+    private Boolean panic;
 
     public VehicleIndicatorDto() {
     }
 
-    public VehicleIndicatorDto(int driverId, WaypointDto location, UserStatus status, boolean panic) {
+    public VehicleIndicatorDto(Long driverId, WaypointDto location, UserStatus status, Boolean panic) {
         this.driverId = driverId;
         this.location = location;
         this.status = status;
         this.panic = panic;
     }
 
-    public int getDriverId() {
+    public Long getDriverId() {
         return driverId;
     }
-    public void setDriverId(int driverId) {
+    public void setDriverId(Long driverId) {
         this.driverId = driverId;
     }
 
@@ -41,10 +41,10 @@ public class VehicleIndicatorDto {
         this.status = status;
     }
 
-    public boolean isPanic() {
+    public Boolean isPanic() {
         return panic;
     }
-    public void setPanic(boolean panic) {
+    public void setPanic(Boolean panic) {
         this.panic = panic;
     }
 

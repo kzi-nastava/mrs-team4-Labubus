@@ -5,23 +5,23 @@ import java.time.LocalDateTime;
 // DTO for querying rides with sorting and filtering options
 
 public class RideQueryDto {
-    private int userId;
+    private Long userId;
     private String sortBy;
-    private boolean ascending;
+    private Boolean ascending;
     private LocalDateTime date;
 
     public RideQueryDto() {
     }
-    public RideQueryDto(int userId, String sortBy, boolean ascending, LocalDateTime date) {
+    public RideQueryDto(Long userId, String sortBy, Boolean ascending, LocalDateTime date) {
         this.userId = userId;
         this.sortBy = sortBy;
         this.ascending = ascending;
         this.date = date;
     }
-    public int getUserId() {
+    public Long getUserId() {
         return userId;
     }
-    public void setUserId(int userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
@@ -33,11 +33,11 @@ public class RideQueryDto {
         this.sortBy = sortBy;
     }
 
-    public boolean isAscending() {
+    public Boolean isAscending() {
         return ascending;
     }
 
-    public void setAscending(boolean ascending) {
+    public void setAscending(Boolean ascending) {
         this.ascending = ascending;
     }
 
