@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.ubre.R;
 import com.example.ubre.ui.enums.Role;
+import com.example.ubre.ui.enums.VehicleType;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.google.android.material.navigation.NavigationView;
@@ -93,8 +94,8 @@ public class MainActivity extends AppCompatActivity {
         );
 
         // Example role assignment; in a real app, this would come from user authentication
-        currentUser = new UserDto("1", Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
-        currentVehicle = new VehicleDto("v1", "Toyota Prius", "Sedan", "ABC-123", 4, true, false);
+        UserDto currentUser = new UserDto(1L, Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
+        currentVehicle = new VehicleDto(1L, "Toyota Prius", VehicleType.STANDARD, "ABC-123", 4, true, false);
 
         setMenuOptions(currentUser.getRole());
         fillDrawerHeader(currentUser);
@@ -114,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
                     showFragment(AccountSettingsFragment.newInstance(currentUser, null));
                     return true;
                 }
+              else if (itemId == R.id.nav_ride_history) { showFragment(RideHistoryFragment.newInstance(currentUser)); return true; }
             } else if (itemId == R.id.nav_profile_changes) {
                 showFragment(ProfileChangesFragment.newInstance());
                 return true;
@@ -189,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showFragment(Fragment f) {
+    public void showFragment(Fragment f) {
         findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
         map.setVisibility(View.INVISIBLE);
         if (btnMenu != null) btnMenu.setVisibility(View.GONE);
