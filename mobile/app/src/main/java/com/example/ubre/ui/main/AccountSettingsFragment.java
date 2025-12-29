@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.ubre.R;
-import com.example.ubre.ui.model.UserDto;
+import com.example.ubre.ui.dtos.UserDto;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 

@@ -22,8 +22,8 @@ import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.ubre.R;
-import com.example.ubre.ui.model.Role;
-import com.example.ubre.ui.model.UserDto;
+import com.example.ubre.ui.enums.Role;
+import com.example.ubre.ui.dtos.UserDto;
 import com.google.android.material.navigation.NavigationView;
 import com.bumptech.glide.Glide;
 
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         // Example role assignment; in a real app, this would come from user authentication
-        UserDto currentUser = new UserDto("1", Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
+        UserDto currentUser = new UserDto(1L, Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
         setMenuOptions(currentUser.getRole());
         fillDrawerHeader(currentUser);
 

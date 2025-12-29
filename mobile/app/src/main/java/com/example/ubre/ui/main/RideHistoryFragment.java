@@ -23,8 +23,8 @@ import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.dtos.WaypointDto;
 import com.example.ubre.ui.enums.VehicleType;
-import com.example.ubre.ui.model.Role;
-import com.example.ubre.ui.model.UserDto;
+import com.example.ubre.ui.enums.Role;
+import com.example.ubre.ui.dtos.UserDto;
 import com.google.android.material.button.MaterialButton;
 
 import java.lang.reflect.Field;
@@ -47,7 +47,7 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
 
     }
 
-    public static RideHistoryFragment newInstance(com.example.ubre.ui.model.UserDto user) {
+    public static RideHistoryFragment newInstance(UserDto user) {
         RideHistoryFragment rideHistory = new RideHistoryFragment();
         Bundle args = new Bundle();
         args.putSerializable("USER", user);
@@ -60,7 +60,7 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null)
-            currentUser = (com.example.ubre.ui.model.UserDto)getArguments().getSerializable("USER");
+            currentUser = (UserDto)getArguments().getSerializable("USER");
 
         Calendar calendar = Calendar.getInstance();
         DatePickerDialog.OnDateSetListener eventHandler = new DatePickerDialog.OnDateSetListener() {
@@ -87,7 +87,7 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
         });
 
         View driverFilter = this.getView().findViewById(R.id.driver_filter);
-        driverFilter.setVisibility(currentUser.getRole() == com.example.ubre.ui.model.Role.ADMIN ? View.VISIBLE : View.GONE);
+        driverFilter.setVisibility(currentUser.getRole() == Role.ADMIN ? View.VISIBLE : View.GONE);
 
         sortSpinner = this.getView().findViewById(R.id.sort_field);
         sortList = this.getView().findViewById(R.id.sorting_options);
@@ -207,7 +207,7 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
     @Override
     public void onItemClicked(RideDto ride) {
         MainActivity activity = (MainActivity) this.getActivity();
-        Fragment f = RideDetailsFragment.newInstance(ride, new com.example.ubre.ui.dtos.UserDto(1L, com.example.ubre.ui.enums.Role.ADMIN, "", "mail@mail.com", "Pera", "Peric", "0124120412041", "Adresa 123" ));
+        Fragment f = RideDetailsFragment.newInstance(ride, new UserDto(1L, Role.ADMIN, "", "mail@mail.com", "Pera", "Peric", "0124120412041", "Adresa 123" ));
         activity.showFragment(f);
     }
 }
