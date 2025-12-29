@@ -1,0 +1,102 @@
+.ride-card {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    border: 1px solid var(--color-text-primary);
+    border-radius: var(--border-radius-medium);
+    padding: 24px;
+    column-gap: 12px;
+    position: relative;
+    font-family: var(--font-family);
+    font-size: var(--font-size-regular);
+    font-weight: var(--font-weight-regular);
+    color: var(--color-text-primary);
+    pointer-events: auto;
+    background-color: var(--color-surface);
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.1s ease-in;
+}
+
+.ride-card > div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ride-card p {
+    margin: 4px 0;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ride-card .icon-column {
+    align-items: center;
+}
+
+.ride-card .icon {
+    aspect-ratio: 1/1;
+}
+
+.ride-card .time-icon {
+    width: 20px;
+}
+
+.ride-card .action-icon {
+    width: 24px;
+}
+
+.ride-card .start-icon {
+    width: 14px;
+    background-color: var(--color-primary-light);
+    border-radius: 50%;
+}
+
+.ride-card .dots {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 4px;
+}
+
+.ride-card .dots .dot {
+    aspect-ratio: 1/1;
+    width: 2px;
+    background-color: var(--color-neutral-dark-gray);
+}
+
+.ride-card .destination-icon {
+    width: 28px;
+}
+
+.ride-card .separator {
+    width: 95%;
+    height: 1px;
+    background-color: var(--color-neutral-dark-gray);
+    margin: 10px 5% 10px 0;
+}
+
+.ride-card .action-icon {
+    width: 24px;
+    position: absolute;
+    top: 25px;
+    right: 25px;
+}
+
+.ride-card.selected {
+    background-color: var(--color-primary);
+    color: var(--color-surface);
+}
+
+.ride-card.selected  .separator {
+    background-color: var(--color-surface);
+}
+
+.ride-card.selected .start-icon {
+    background-color: var(--color-surface);
+}
+
+.ride-card.selected  .dots .dot {
+    background-color: var(--color-surface);
+}

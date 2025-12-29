@@ -1,0 +1,20 @@
+<div class="route-table">
+    @if (waypoints.length > 0) {
+        <div class="start-icon icon"></div>
+        <p class="start">{{ waypoints[0] }}</p>
+
+        @for (waypoint of waypoints.slice(1, waypoints.length); track waypoint) {
+            <div class="dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <div class="separator"></div>
+            
+            <div class="waypoint-icon icon"></div>
+            <p class="waypoint">{{ waypoint }}</p>
+        }
+    }
+</div>

@@ -1,0 +1,47 @@
+.modal-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--conatainer-gap);
+    background-color: var(--color-surface);
+    padding: calc(var(--padding-modal) * 0.65) var(--padding-modal) var(--padding-modal) var(--padding-modal);
+    font-family: var(--font-family);
+    box-shadow: var(--drop-shadow);
+    z-index: 2100;
+    pointer-events: auto;
+    transition: transform 0.3s ease-in;
+    max-height: 100%;
+    box-sizing: border-box;
+}
+
+.modal-container > *:first-child:not(.title-bar) {
+    margin-top: calc(var(--padding-modal)  * 0.35);
+}
+
+.modal-container > .title-bar {
+    display: flex;
+    flex-direction: row;
+    gap: var(--conatainer-gap);
+    position: sticky;
+}
+
+.modal-container > .content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--conatainer-gap);
+    flex: 1;
+    overflow: auto;
+    scrollbar-width: none;
+}
+
+.modal-container > .title-bar > .title {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-medium);
+}
+
+.modal-container > .title-bar > .back {
+    aspect-ratio: 1/1;
+    width: var(--icon-width-tiny);
+    cursor: pointer;
+}

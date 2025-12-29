@@ -1,0 +1,34 @@
+.stat {
+    padding: var(--padding-card) calc(var(--padding-card) * 1.7);
+    border-radius: var(--border-radius-icons);
+    font: var(--font-family);
+    box-shadow: var(--drop-shadow);
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    min-height: calc(var(--font-size-card) * 2);
+}
+
+.stat.light {
+    background-color: var(--color-surface);
+    color: var(--color-primary-dark);
+}
+
+.stat.dark {
+    background: linear-gradient(90deg, var(--color-primary-dark), var(--color-primary-light));
+    color: var(--color-surface);
+}
+
+.stat .value {
+    margin: 0;
+    font-size: var(--font-size-card);
+    font-weight: var(--font-weight-medium);
+}
+
+.stat .label {
+    margin: 0;
+    margin-top: calc(0px - calc(var(--font-size-card)*0.15));
+    font-size: var(--font-size-placeholder);
+    font-weight: var(--font-weight-medium);
+}

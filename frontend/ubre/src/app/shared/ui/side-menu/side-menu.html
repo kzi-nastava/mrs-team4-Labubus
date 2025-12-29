@@ -1,0 +1,35 @@
+@if (open) {
+  <div class="backdrop" (click)="close()"></div>
+}
+
+<aside class="panel" [class.open]="open">
+  <div class="header">
+    <button class="back" (click)="close()">
+      <img src="arrow_back_28dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg" alt="back">
+    </button>
+    <div class="title">{{ title }}</div>
+  </div>
+
+  <div class="profile">
+    <img class="avatar"
+         [src]="user?.avatarUrl ?? 'default-avatar.jpg'"
+         alt="avatar">
+    <div class="meta">
+      <div class="name">{{ user ? (user.name + ' ' + user.surname).trim() : 'Guest' }}</div>
+      @if (user?.phone) { <div class="phone">{{ user?.phone }}</div> }
+    </div>
+  </div>
+
+  <div class="list">
+    @for (it of items; track it.action) {
+      @if (it.action === 'logout') { <div class="separator"></div> }
+
+      <button class="item"
+              [class.danger]="it.action === 'logout'"
+              (click)="onItem(it.action)">
+        <img [src]="it.icon" alt="">
+        <span>{{ it.label }}</span>
+      </button>
+    }
+  </div>
+</aside>

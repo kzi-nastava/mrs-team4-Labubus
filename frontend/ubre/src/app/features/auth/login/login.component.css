@@ -1,0 +1,127 @@
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-family: var(--font-family);
+}
+
+.login-card {
+  background: var(--color-surface);
+  padding: 30px 40px;
+  width: 100%;
+  max-width: 350px; 
+  margin: 0 auto;
+  text-align: center;
+}
+
+.brand-logo {
+  font-size: var(--font-size-card); 
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+  margin-bottom: 40px;
+}
+
+.form-group {
+  text-align: left;
+  margin-bottom: var(--conatainer-gap);
+
+  label {
+    display: block;
+    font-size: 15px;
+    color: var(--color-text-primary);
+    margin-bottom: 8px;
+  }
+
+  input {
+    width: 95%;
+    padding: var(--padding-regular);
+    border: 1px solid var(--color-neutral-light-gray);
+    border-radius: var(--border-radius-buttons-small);
+    font-size: var(--font-size-placeholder);
+    outline: none;
+
+    &:focus {
+      border-color: var(--color-primary);
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  font-size: var(--font-size-small);
+
+  .remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    
+    input { width: auto; }
+  }
+
+  .forgot-link {
+    color: var(--color-neutral-dark-gray);
+    text-decoration: none;
+  }
+}
+
+.divider {
+  margin: 25px 0;
+  position: relative;
+  border-bottom: 1px solid var(--color-neutral-light-gray);
+  
+  span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--color-surface);
+    padding: 0 15px;
+    color: var(--color-neutral-dark-gray);
+    font-size: var(--font-size-small);
+  }
+}
+
+.footer-text {
+  margin-top: 25px;
+  font-size: var(--font-size-placeholder);
+  color: var(--color-neutral-dark-gray);
+
+  a {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+  }
+}
+
+input[type="checkbox"] {
+  accent-color: var(--color-primary);
+}
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  width: 95%;
+}
+
+.eye-btn {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-neutral-dark-gray);
+}
+
+.eye-btn:focus {
+  outline: none;
+}

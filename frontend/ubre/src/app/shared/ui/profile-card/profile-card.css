@@ -1,0 +1,45 @@
+.profile-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--color-background);
+    border-radius: var(--font-size-large);
+    padding: 10px;
+    font-family: var(--font-family);
+}
+
+.profile-card .picture {
+    width: 45px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+}
+
+.profile-card .info {
+    flex-grow: 1;
+}
+
+.profile-card .info .name {
+    font-size: var(--font-size-regular);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-regular);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-card .info .subtext {
+    font-size: var(--font-size-small);
+    color: var(--color-neutral-dark-gray);
+    font-weight: var(--font-weight-regular);
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    align-items: center;
+}
+
+.profile-card .action-icon {
+    width: 30px;
+    aspect-ratio: 1/1;
+    cursor: pointer;
+}

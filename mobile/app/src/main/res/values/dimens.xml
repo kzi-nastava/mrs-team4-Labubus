@@ -1,0 +1,31 @@
+<resources>
+
+    <!-- FONT SIZES (px → sp) -->
+    <dimen name="text_regular">16sp</dimen>
+    <dimen name="text_small">12sp</dimen>
+    <dimen name="text_medium">20sp</dimen>
+    <dimen name="text_large">24sp</dimen>
+    <dimen name="text_placeholder">14sp</dimen>
+    <dimen name="text_card">45sp</dimen>
+
+    <!-- BORDER RADIUS (px → dp) -->
+    <dimen name="radius_regular">24dp</dimen>
+    <dimen name="radius_icons">20dp</dimen>
+    <dimen name="radius_medium">32dp</dimen>
+    <dimen name="radius_button_large">100dp</dimen>
+    <dimen name="radius_button_small">12dp</dimen>
+
+    <!-- ICON SIZES -->
+    <dimen name="icon_regular">56dp</dimen>
+    <dimen name="icon_small">60dp</dimen>
+    <dimen name="icon_tiny">28dp</dimen>
+
+    <!-- PADDING -->
+    <dimen name="padding_regular">12dp</dimen>
+    <dimen name="padding_card">20dp</dimen>
+    <dimen name="padding_modal">35dp</dimen>
+
+    <!-- GAP -->
+    <dimen name="container_gap">20dp</dimen>
+
+</resources>

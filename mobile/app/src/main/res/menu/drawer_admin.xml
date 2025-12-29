@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:id="@+id/role_options">
+        <item android:id="@+id/nav_ride_history" android:title="@string/ride_history" android:icon="@drawable/ic_ride_history"/>
+        <item android:id="@+id/nav_active_rides" android:title="@string/active_rides" android:icon="@drawable/ic_active_rides"/>
+        <item android:id="@+id/nav_account_settings" android:title="@string/account_settings" android:icon="@drawable/ic_settings"/>
+        <item android:id="@+id/nav_price_adjustment" android:title="@string/price_adjustment" android:icon="@drawable/ic_price_adjustment"/>
+        <item android:id="@+id/nav_register_driver" android:title="@string/register_a_driver" android:icon="@drawable/ic_person_add"/>
+        <item android:id="@+id/nav_panic_notifications" android:title="@string/panic_notifications" android:icon="@drawable/ic_warning"/>
+        <item android:id="@+id/nav_reports" android:title="@string/reports" android:icon="@drawable/ic_reports"/>
+        <item android:id="@+id/nav_profile_changes" android:title="@string/profile_changes" android:icon="@drawable/ic_person_edit"/>
+    </group>
+
+    <group android:id="@+id/exit_options">
+        <item android:id="@+id/nav_log_out" android:title="@string/log_out" android:icon="@drawable/ic_log_out">@color/error</item>
+    </group>
+</menu>

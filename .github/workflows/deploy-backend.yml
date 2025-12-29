@@ -1,0 +1,52 @@
+name: deploy-backend
+
+on:
+  push:
+    branches: [ "development" ]
+    paths:
+      - "backend/**"
+  workflow_dispatch:
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Build backend
+        working-directory: backend
+        run: |
+          chmod +x mvnw
+          ./mvnw -DskipTests clean package
+
+      - name: Upload jar
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          source: "backend/target/*.jar"
+          target: "/opt/myapp/"
+          strip_components: 2
+
+      - name: Restart service
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            cd /opt/myapp
+            ls -la
+            rm -f app.jar
+            JAR=$(ls *.jar | head -n 1)
+            mv "$JAR" app.jar
+            sudo systemctl restart myapp
+            sudo systemctl status myapp --no-pager
