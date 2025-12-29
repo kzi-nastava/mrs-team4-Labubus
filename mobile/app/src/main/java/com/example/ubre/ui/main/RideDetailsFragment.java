@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.example.ubre.R;
 import com.example.ubre.ui.dtos.RideDto;
+import com.example.ubre.ui.dtos.StatItemDto;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.dtos.WaypointDto;
@@ -136,7 +137,7 @@ public class RideDetailsFragment extends Fragment {
                 panicIndicator.setLayoutParams(params);
                 panicIndicator.setBackgroundResource(R.drawable.bg_icon_red);
                 panicIndicator.setImageResource(R.drawable.ic_warning_surface);
-                panicIndicator.setPadding(4, 4, 4, 4);
+                panicIndicator.setPadding(toDP(4), toDP(4), toDP(4), toDP(4));
                 markers.addView(panicIndicator);
             }
             if (!ride.getCanceledBy().isEmpty()) {
@@ -146,7 +147,7 @@ public class RideDetailsFragment extends Fragment {
                 cancelIndicator.setLayoutParams(params);
                 cancelIndicator.setBackgroundResource(ride.getCanceledBy().equals(ride.getDriver().getEmail()) ? R.drawable.bg_icon_yellow : R.drawable.bg_icon_red);
                 cancelIndicator.setImageResource(R.drawable.ic_cancel);
-                cancelIndicator.setPadding(4, 4, 4, 4);
+                cancelIndicator.setPadding(toDP(4), toDP(4), toDP(4), toDP(4));
                 markers.addView(cancelIndicator);
             }
 
@@ -173,6 +174,14 @@ public class RideDetailsFragment extends Fragment {
                 root.findViewById(R.id.ride_details_vehicle).setVisibility(View.GONE);
                 root.findViewById(R.id.ride_details_driver).setVisibility(View.GONE);
             }
+
+            LinearLayout priceCard = root.findViewById(R.id.ride_details_price);
+            View card = inflater.inflate(R.layout.stat_card, priceCard, false);
+            TextView tvValue = card.findViewById(R.id.stat_value);
+            TextView tvLabel = card.findViewById(R.id.stat_label);
+            tvValue.setText(String.format("$%.2f", ride.getPrice()));
+            tvLabel.setText("Final price");
+            priceCard.addView(card);
 
             if (!user.getEmail().equals(ride.getPassengers()[0].getEmail()))
                 root.findViewById(R.id.ride_details_reorder).setVisibility(View.GONE);

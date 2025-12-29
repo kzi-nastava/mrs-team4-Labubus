@@ -45,7 +45,7 @@ public class VehicleInformationFragment extends Fragment {
         if (vehicle == null) return;
 
         etModel.setText(s(vehicle.getModel()));
-        etType.setText(s(vehicle.getType()));
+        etType.setText(s(vehicle.getType().name()));
         etPlates.setText(s(vehicle.getPlates()));
         etSeats.setText(String.valueOf(vehicle.getSeats()));
         etBaby.setText(vehicle.isBabyFriendly() ? "Yes" : "No");

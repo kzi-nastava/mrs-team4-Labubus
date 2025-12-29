@@ -115,8 +115,9 @@ public class MainActivity extends AppCompatActivity {
                     showFragment(AccountSettingsFragment.newInstance(currentUser, null));
                     return true;
                 }
-              else if (itemId == R.id.nav_ride_history) { showFragment(RideHistoryFragment.newInstance(currentUser)); return true; }
-            } else if (itemId == R.id.nav_profile_changes) {
+            }
+            else if (itemId == R.id.nav_ride_history) { showFragment(RideHistoryFragment.newInstance(currentUser)); return true; }
+            else if (itemId == R.id.nav_profile_changes) {
                 showFragment(ProfileChangesFragment.newInstance());
                 return true;
             } else if (itemId == R.id.nav_log_out) {

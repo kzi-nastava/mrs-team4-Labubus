@@ -207,7 +207,7 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
     @Override
     public void onItemClicked(RideDto ride) {
         MainActivity activity = (MainActivity) this.getActivity();
-        Fragment f = RideDetailsFragment.newInstance(ride, new UserDto(1L, Role.ADMIN, "", "mail@mail.com", "Pera", "Peric", "0124120412041", "Adresa 123" ));
+        Fragment f = RideDetailsFragment.newInstance(ride, currentUser);
         activity.showFragment(f);
     }
 }
