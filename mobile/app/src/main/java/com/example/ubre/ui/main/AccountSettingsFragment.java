@@ -59,7 +59,7 @@ public class AccountSettingsFragment extends Fragment {
         LinearLayout statsContainer = view.findViewById(R.id.stats_container);
 
         if (statsContainer != null) {
-            UserStatsDto stats = new UserStatsDto(0, 0, 0.0, 0.0, 0.0);
+            UserStatsDto stats = new UserStatsDto(0L, 0, 0, 0.0, 0.0, 0.0);
             stats.setActivePast24Hours(450);
             stats.setDistanceTraveled(1920.0);
             renderStats(statsContainer, stats);
