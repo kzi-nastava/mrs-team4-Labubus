@@ -17,6 +17,10 @@ import { RideList } from '../../shared/ui/ride-list/ride-list';
 import { RideCard } from '../../shared/ui/ride-card/ride-card';
 import { Router } from '@angular/router';
 
+
+
+// bogdan
+
 type UserSettingsVM = {
   role: 'registered-user' | 'driver' | 'admin' | 'guest';
   avatarUrl: string;
@@ -29,6 +33,9 @@ type UserSettingsVM = {
   activeLast24h?: string; // driver
 };
 
+
+// bogdan
+
 // TESTING PURPOSES ONLY - WILL NOT BE AVAILABLE FOR THE USER TO EDIT
 type VehicleInformationVM = {
   model: string;
@@ -38,6 +45,9 @@ type VehicleInformationVM = {
   babyFriendly: 'Yes' | 'No';
   petFriendly: 'Yes' | 'No';
 };
+
+
+// bogdan
 
 type DriverRegisterVM = {
   avatarUrl: string;
@@ -420,24 +430,48 @@ export class UserLayout {
     this.menuOpen = true;
   }
 
-  // EXAMPLE OF RIDE CARD CONTROL VARIABLES
-  // selectedRide = undefined;
-  // favoriteRides : any[] = [];
 
-  // EXAMPLE FOR RIDE CARD EVENT HANDLERS
-  // onRideSelected(ride : any) {
-  //   if (this.selectedRide === ride.id)
-  //     this.selectedRide = undefined;
-  //   else
-  //     this.selectedRide = ride.id;
-  // }
 
-  // onRideAction(ride : any) {
-  //   if (this.favoriteRides.includes(ride.id))
-  //     this.favoriteRides = this.favoriteRides.filter(id => id != ride.id)
-  //   else
-  //     this.favoriteRides.push(ride.id);
-  // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // CHANGE PASSWORD SHEET LOGIC
   changePasswordOpen = false;
@@ -531,6 +565,33 @@ export class UserLayout {
   // EASTER EGG
 
   private confetti = inject(ConfettiService);
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // Ride HISTORY SHEET LOGIC
   showRideHistory = false;
@@ -695,6 +756,41 @@ export class UserLayout {
     console.log('closed');
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // RIDE OPTIONS SHEET LOGIC
 
   rideOptions = {
@@ -726,10 +822,50 @@ export class UserLayout {
     this.destOpen = true;
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   onScheduleRide() {
     this.closeRideOptions();
     this.showToast('Ride scheduled', 'Your ride has been scheduled successfully.');
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   onCheckout() {
     this.closeRideOptions();
