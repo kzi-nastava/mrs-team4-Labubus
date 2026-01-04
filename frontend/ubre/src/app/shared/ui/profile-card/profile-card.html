@@ -1,7 +1,7 @@
 <div class="profile-card">
-    <img [src]="user.profilePicture ? user.profilePicture : 'default-avatar.jpg'" alt="" class="picture">
+    <img [src]="user.avatarUrl ? user.avatarUrl : 'default-avatar.jpg'" alt="" class="picture">
     <div class="info">
-        <div class="name">{{ user.firstName + " " + user.lastName }}</div>
+        <div class="name">{{ user.name + " " + user.surname }}</div>
     </div>
     @if (icon) {
         <img [src]="icon" alt="" class="action-icon">

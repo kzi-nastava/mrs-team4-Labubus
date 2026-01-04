@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Vehicle } from '../../../dtos/vehicle';
+import { VehicleDto } from '../../../dtos/vehicle-dto';
+import { VehicleType } from '../../../enums/vehicle_type';
 
 @Component({
   selector: 'app-vehicle-card',
@@ -8,7 +9,7 @@ import { Vehicle } from '../../../dtos/vehicle';
   styleUrl: './vehicle-card.css',
 })
 export class VehicleCard {
-  @Input({ required: true }) vehicle : Vehicle = {model: "", type: "Standard", image: ""};
+  @Input({ required: true }) vehicle : VehicleDto = { model: 'Missing vehicle', type: VehicleType.STANDARD, id: 0, seats: 0, babyFriendly: false, petFriendly: false, plates: "" };
   @Input() icon : string = "";
   @Output() onAction = new EventEmitter<void>();
 

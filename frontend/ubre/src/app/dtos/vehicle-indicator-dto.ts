@@ -1,16 +1,16 @@
-import { DriverStatus } from "../enums/user-status";
+import { UserStatus } from "../enums/user-status";
 import { WaypointDto } from "./waypoint-dto";
 
 export class VehicleIndicatorDto {
     public driverId : number;
     public location : WaypointDto;
-    public driverStatus : DriverStatus;
+    public userStatus : UserStatus;
     public panic : boolean = false;
 
-    constructor(driverId : number, location : WaypointDto, driverStatus : DriverStatus, panic : boolean = false) {
+    constructor(driverId : number, location : WaypointDto, userStatus : UserStatus, panic : boolean = false) {
         this.driverId = driverId;
         this.location = location;
-        this.driverStatus = driverStatus;
+        this.userStatus = userStatus;
         this.panic = panic;
     }
 }

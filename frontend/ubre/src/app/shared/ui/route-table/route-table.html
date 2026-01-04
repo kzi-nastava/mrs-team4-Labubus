@@ -1,9 +1,9 @@
 <div class="route-table">
     @if (waypoints.length > 0) {
         <div class="start-icon icon"></div>
-        <p class="start">{{ waypoints[0] }}</p>
+        <p class="start">{{ waypoints[0].label }}</p>
 
-        @for (waypoint of waypoints.slice(1, waypoints.length); track waypoint) {
+        @for (waypoint of waypoints.slice(1, waypoints.length); track waypoint.id) {
             <div class="dots">
                 <div class="dot"></div>
                 <div class="dot"></div>
@@ -14,7 +14,7 @@
             <div class="separator"></div>
             
             <div class="waypoint-icon icon"></div>
-            <p class="waypoint">{{ waypoint }}</p>
+            <p class="waypoint">{{ waypoint.label }}</p>
         }
     }
 </div>

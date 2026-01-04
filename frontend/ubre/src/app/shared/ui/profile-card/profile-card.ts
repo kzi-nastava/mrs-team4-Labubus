@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { User } from '../../../dtos/user';
+import { UserDto } from '../../../dtos/user-dto';
+import { Role } from '../../../enums/role';
 
 @Component({
   selector: 'app-profile-card',
@@ -8,7 +9,16 @@ import { User } from '../../../dtos/user';
   styleUrl: './profile-card.css',
 })
 export class ProfileCard {
-  @Input({ required: true }) user : User = {email: "", firstName: "", lastName: "", profilePicture: "", role: "guest"};
+  @Input({ required: true }) user : UserDto = {
+        email: '',
+        name: '',
+        surname: '',
+        avatarUrl: '',
+        role: Role.GUEST,
+        id: 0,
+        phone: "",
+        address: ""
+      };;
   @Input() icon : string = "";
   @Output() onAction = new EventEmitter<void>();
 
