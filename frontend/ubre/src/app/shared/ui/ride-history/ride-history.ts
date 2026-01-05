@@ -4,6 +4,7 @@ import { RideService } from '../../../services/ride-service';
 import { RideCardDto } from '../../../dtos/ride-card-dto';
 import { UserDto } from '../../../dtos/user-dto';
 import { UserService } from '../../../services/user-service';
+import { Role } from '../../../enums/role';
 
 
 @Component({
@@ -20,7 +21,16 @@ export class RideHistory {
   userService : UserService = inject(UserService)
 
   rides : RideCardDto[] = [];
-  currentUser? : UserDto;
+  currentUser : UserDto = {
+        email: '',
+        name: '',
+        surname: '',
+        avatarUrl: '',
+        role: Role.GUEST,
+        id: 0,
+        phone: "",
+        address: ""
+      };;
 
   ngOnInit() {
     this.rideService.getHistory().subscribe((rides : RideCardDto[]) => {
