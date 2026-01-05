@@ -1,11 +1,14 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { KeyValuePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RideCard } from '../ride-card/ride-card';
 import { ModalContainer } from '../modal-container/modal-container';
 import { RideDetails } from '../ride-details/ride-details';
 import { RideDto } from '../../../dtos/ride-dto';
-import { User } from '../../../dtos/user';
+import { UserDto } from '../../../dtos/user-dto';
+import { RideCardDto } from '../../../dtos/ride-card-dto';
+import { RideService } from '../../../services/ride-service';
+import { Role } from '../../../enums/role';
 
 
 @Component({
@@ -15,14 +18,24 @@ import { User } from '../../../dtos/user';
   styleUrl: './ride-list.css',
 })
 export class RideList {
-  @Input() rides : RideDto[] = [];
+  @Input() rides : RideCardDto[] = [];
   @Input() title : string = "";
   @Input() open : boolean = false;
-  @Input() user : User = {email: '', firstName: '', lastName: '', profilePicture: '', role: 'guest'}
+  @Input() user : UserDto = {
+      email: '',
+      name: '',
+      surname: '',
+      avatarUrl: '',
+      role: Role.GUEST,
+      id: 0,
+      phone: "",
+      address: ""
+    };
   @Output() onClose = new EventEmitter<void>();
 
+  rideService : RideService = inject(RideService);
+
   selectedRide : RideDto | undefined = undefined;
-  favoriteRides : Number[] = [];
 
   filterDate : Date = new Date();
   filterDriver : string = "";
@@ -30,18 +43,18 @@ export class RideList {
   selectedField : string = "";
   ascending : boolean = false;
 
-  onRideSelected(ride : RideDto) {
-    if (this.selectedRide !== undefined && this.selectedRide.id == ride.id)
+  onRideSelected(rideCard : RideCardDto) {
+    if (this.selectedRide !== undefined && this.selectedRide.id == rideCard.rideId)
       this.selectedRide = undefined;
-    else
-      this.selectedRide = ride;
+    else {
+      this.rideService.getRide(rideCard.rideId).subscribe((ride : RideDto | undefined) => {
+        this.selectedRide = ride;
+      })
+    }
   }
 
-  onRideAction(ride : RideDto) {
-    if (this.favoriteRides.includes(ride.id))
-      this.favoriteRides = this.favoriteRides.filter(id => id != ride.id)
-    else
-      this.favoriteRides.push(ride.id);
+  onRideAction(ride : RideCardDto) {
+    this.rideService.toggleFavorite(this.user.id, ride.rideId)
   }
 
   onToggleSort() {

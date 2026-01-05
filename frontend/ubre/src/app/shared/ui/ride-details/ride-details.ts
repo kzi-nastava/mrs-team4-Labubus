@@ -7,7 +7,8 @@ import { StatCard } from '../stat-card/stat-card';
 import { Button } from '../button/button';
 import { RideDto } from '../../../dtos/ride-dto';
 import { DatePipe } from '@angular/common';
-import { User } from '../../../dtos/user';
+import { UserDto } from '../../../dtos/user-dto';
+import { Role } from '../../../enums/role';
 
 @Component({
   selector: 'app-ride-details',
@@ -17,5 +18,14 @@ import { User } from '../../../dtos/user';
 })
 export class RideDetails {
   @Input({required: true}) ride! : RideDto;
-  @Input() user : User = {email: '', firstName: '', lastName: '', profilePicture: '', role: 'guest'}
+  @Input() user : UserDto = {
+        email: '',
+        name: '',
+        surname: '',
+        avatarUrl: '',
+        role: Role.GUEST,
+        id: 0,
+        phone: "",
+        address: ""
+      };;
 }

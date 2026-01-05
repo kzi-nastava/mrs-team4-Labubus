@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { WaypointDto } from '../../../dtos/waypoint-dto';
 
 @Component({
   selector: 'app-route-table',
@@ -7,5 +8,5 @@ import { Component, Input } from '@angular/core';
   styleUrl: './route-table.css',
 })
 export class RouteTable {
-  @Input({required: true}) waypoints : string[] = [];
+  @Input({required: true}) waypoints : WaypointDto[] = [];
 }

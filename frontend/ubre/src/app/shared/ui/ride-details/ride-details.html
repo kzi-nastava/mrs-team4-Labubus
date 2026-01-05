@@ -19,15 +19,15 @@
       <app-route-table [waypoints]="ride.waypoints"></app-route-table>
 
       <div class="stats">
-            <div class="distance">{{ ride.travelDistance + 'km' }}</div>
-            @if (ride.panicActivated) {<img src="warning_60dp_FFFFFF_FILL0_wght400_GRAD0_opsz48.svg" alt="" class="panic icon">}
+            <div class="distance">{{ ride.distance + 'km' }}</div>
+            @if (ride.panic) {<img src="warning_60dp_FFFFFF_FILL0_wght400_GRAD0_opsz48.svg" alt="" class="panic icon">}
             @if (ride.canceledBy !== null) {
-                  @if (ride.canceledBy !== ride.driver.email) {<img src="cancel-surface.svg" alt="" class="user-canceled icon">}
-                  @if (ride.canceledBy === ride.driver.email) {<img src="cancel-surface.svg" alt="" class="driver-canceled icon">}
+                  @if (ride.canceledBy !== ride.driver.id) {<img src="cancel-surface.svg" alt="" class="user-canceled icon">}
+                  @if (ride.canceledBy === ride.driver.id) {<img src="cancel-surface.svg" alt="" class="driver-canceled icon">}
             }
       </div>
 
-      @if (user.role == 'driver' || user.role === 'admin') {
+      @if (user.role == 'DRIVER' || user.role === 'ADMIN') {
             <div class="section">
                   <div class="section-title"> Passengers</div>
                   <div class="profile-list">
@@ -38,7 +38,7 @@
                   </div>
             </div>
       }
-      @if (user.role === 'registered-user' || user.role === 'admin') {
+      @if (user.role === 'REGISTERED_USER' || user.role === 'ADMIN') {
             <div class="section">
                   <div class="section-title"> Driver</div>
                   <app-profile-card [user]="ride.driver" icon="review-primary-text.svg"></app-profile-card>

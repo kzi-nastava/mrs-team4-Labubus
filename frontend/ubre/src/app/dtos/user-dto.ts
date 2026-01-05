@@ -1,4 +1,4 @@
-import { Role } from "../shared/ui/side-menu/menu.config";
+import { Role } from "../enums/role";
 
 export class UserDto {
     public id : number;
