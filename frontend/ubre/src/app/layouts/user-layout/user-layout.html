@@ -367,12 +367,12 @@
           <div class="rd-field">
             <div class="rd-label-row">
               <span>Password</span>
-              @if (driverRegistration.passwordError) { <span class="rd-required">Required</span> }
+              @if (passwordError) { <span class="rd-required">Required</span> }
             </div>
 
             <input
               class="rd-input"
-              [class.error]="driverRegistration.passwordError"
+              [class.error]="passwordError"
               type="password"
               [(ngModel)]="driverRegistration.password"
               placeholder="Driver's password"
@@ -382,7 +382,7 @@
 
           <div class="rd-field">
             <div class="rd-label">Confirm password</div>
-            <input class="rd-input" type="password" [(ngModel)]="driverRegistration.confirmPassword" placeholder="Driver's password">
+            <input class="rd-input" type="password" [(ngModel)]="confirmPasswordDR" placeholder="Driver's password">
           </div>
 
 

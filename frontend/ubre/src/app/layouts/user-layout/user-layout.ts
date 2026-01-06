@@ -514,6 +514,19 @@ export class UserLayout implements OnInit {
     this.driverRegistration.vehicle.seats = Math.min(9, this.driverRegistration.vehicle.seats + 1);
   }
 
+  confirmPasswordDR = '';
+  passwordError = false;
+
+  validateDriverPassword() {
+    this.passwordError = !this.driverRegistration.password?.trim();
+  }
+
+  validateConfirmPassword() {
+    this.passwordError =
+      !this.driverRegistration.password?.trim() ||
+      this.driverRegistration.password !== this.confirmPasswordDR;
+  }
+
   // EASTER EGG
 
   private confetti = inject(ConfettiService);
