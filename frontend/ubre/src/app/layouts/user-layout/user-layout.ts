@@ -78,11 +78,6 @@ type NominatimItem = {
   lon: string;
 };
 
-type RideOptionsVM = {
-  rideType: 'Standard' | 'Luxury' | 'Van';
-  babyFriendly: boolean;
-  petFriendly: boolean;
-};
 
 @Component({
   selector: 'app-user-layout',

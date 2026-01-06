@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { RideCardDto } from '../dtos/ride-card-dto';
 import { RideDto } from '../dtos/ride-dto';
 import { RideStatus } from '../enums/ride-status';
-import { VehicleType } from '../enums/vehicle_type';
+import { VehicleType } from '../enums/vehicle-type';
 import { Role } from '../enums/role';
 
 @Injectable({
