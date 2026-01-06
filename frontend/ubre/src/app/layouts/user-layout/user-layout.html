@@ -356,25 +356,25 @@
           <div class="rd-section-title"><span>Account information</span></div>
 
           <div class="rd-avatar">
-            <img [src]="driverRegister.avatarUrl" alt="avatar">
+            <img [src]="driverRegistration.avatarUrl" alt="avatar">
           </div>
 
           <div class="rd-field">
             <div class="rd-label">Email</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.email" placeholder="Driver's email">
+            <input class="rd-input" [(ngModel)]="driverRegistration.email" placeholder="Driver's email">
           </div>
 
           <div class="rd-field">
             <div class="rd-label-row">
               <span>Password</span>
-              @if (driverRegister.passwordError) { <span class="rd-required">Required</span> }
+              @if (driverRegistration.passwordError) { <span class="rd-required">Required</span> }
             </div>
 
             <input
               class="rd-input"
-              [class.error]="driverRegister.passwordError"
+              [class.error]="driverRegistration.passwordError"
               type="password"
-              [(ngModel)]="driverRegister.password"
+              [(ngModel)]="driverRegistration.password"
               placeholder="Driver's password"
               (blur)="validateDriverPassword()"
             >
@@ -382,7 +382,7 @@
 
           <div class="rd-field">
             <div class="rd-label">Confirm password</div>
-            <input class="rd-input" type="password" [(ngModel)]="driverRegister.confirmPassword" placeholder="Driver's password">
+            <input class="rd-input" type="password" [(ngModel)]="driverRegistration.confirmPassword" placeholder="Driver's password">
           </div>
 
 
@@ -390,22 +390,22 @@
 
           <div class="rd-field">
             <div class="rd-label">Name</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.name" placeholder="Driver's name">
+            <input class="rd-input" [(ngModel)]="driverRegistration.name" placeholder="Driver's name">
           </div>
 
           <div class="rd-field">
             <div class="rd-label">Surname</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.surname" placeholder="Driver's surname">
+            <input class="rd-input" [(ngModel)]="driverRegistration.surname" placeholder="Driver's surname">
           </div>
 
           <div class="rd-field">
             <div class="rd-label">Residental address</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.address" placeholder="Driver's residental address">
+            <input class="rd-input" [(ngModel)]="driverRegistration.address" placeholder="Driver's residental address">
           </div>
 
           <div class="rd-field">
             <div class="rd-label">Phone number</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.phone" placeholder="Driver's phone number">
+            <input class="rd-input" [(ngModel)]="driverRegistration.phone" placeholder="Driver's phone number">
           </div>
 
 
@@ -413,7 +413,7 @@
 
           <div class="rd-field">
             <div class="rd-label">Vehicle model</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.vehicleModel" placeholder="Driver's vehicle model">
+            <input class="rd-input" [(ngModel)]="driverRegistration.vehicle.model" placeholder="Driver's vehicle model">
           </div>
 
           <div class="rd-field">
@@ -422,22 +422,22 @@
             <div class="rd-pills">
               <button class="rd-pill"
                       type="button"
-                      [class.active]="driverRegister.vehicleType==='Standard'"
-                      (click)="driverRegister.vehicleType='Standard'">
+                      [class.active]="driverRegistration.vehicle.type===VehicleType.STANDARD"
+                      (click)="driverRegistration.vehicle.type=VehicleType.STANDARD">
                 Standard
               </button>
 
               <button class="rd-pill"
                       type="button"
-                      [class.active]="driverRegister.vehicleType==='Luxury'"
-                      (click)="driverRegister.vehicleType='Luxury'">
+                      [class.active]="driverRegistration.vehicle.type===VehicleType.LUXURY"
+                      (click)="driverRegistration.vehicle.type=VehicleType.LUXURY">
                 Luxury
               </button>
 
               <button class="rd-pill"
                       type="button"
-                      [class.active]="driverRegister.vehicleType==='Van'"
-                      (click)="driverRegister.vehicleType='Van'">
+                      [class.active]="driverRegistration.vehicle.type===VehicleType.VAN"
+                      (click)="driverRegistration.vehicle.type=VehicleType.VAN">
                 Van
               </button>
             </div>
@@ -445,7 +445,7 @@
 
           <div class="rd-field">
             <div class="rd-label">License plates</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.plates" placeholder="Vehicle license plates">
+            <input class="rd-input" [(ngModel)]="driverRegistration.vehicle.plates" placeholder="Vehicle license plates">
           </div>
 
           <div class="rd-row">
@@ -453,7 +453,7 @@
 
             <div class="rd-stepper">
               <button class="rd-step" type="button" (click)="decDriverSeats()">−</button>
-              <div class="rd-step-value">{{ driverRegister.seats }}</div>
+              <div class="rd-step-value">{{ driverRegistration.vehicle.seats }}</div>
               <button class="rd-step" type="button" (click)="incDriverSeats()">+</button>
             </div>
           </div>
@@ -462,8 +462,8 @@
             <div class="rd-row-label">Baby-friendly</div>
             <button class="rd-switch"
                     type="button"
-                    [class.on]="driverRegister.babyFriendly"
-                    (click)="driverRegister.babyFriendly=!driverRegister.babyFriendly">
+                    [class.on]="driverRegistration.vehicle.babyFriendly"
+                    (click)="driverRegistration.vehicle.babyFriendly=!driverRegistration.vehicle.babyFriendly">
               <span class="rd-knob"></span>
             </button>
           </div>
@@ -472,8 +472,8 @@
             <div class="rd-row-label">Pet-friendly</div>
             <button class="rd-switch dark"
                     type="button"
-                    [class.on]="driverRegister.petFriendly"
-                    (click)="driverRegister.petFriendly=!driverRegister.petFriendly">
+                    [class.on]="driverRegistration.vehicle.petFriendly"
+                    (click)="driverRegistration.vehicle.petFriendly=!driverRegistration.vehicle.petFriendly">
               <span class="rd-knob"></span>
             </button>
           </div>

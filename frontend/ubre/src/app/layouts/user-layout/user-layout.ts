@@ -21,41 +21,8 @@ import { UserDto } from '../../dtos/user-dto';
 import { UserStatsDto } from '../../dtos/user-stats-dto';
 import { VehicleDto } from '../../dtos/vehicle-dto';
 import { Role } from '../../enums/role';
-
-
-// TESTING PURPOSES ONLY - WILL NOT BE AVAILABLE FOR THE USER TO EDIT
-type VehicleInformationVM = {
-  model: string;
-  type: string;
-  plates: string;
-  seats: number;
-  babyFriendly: 'Yes' | 'No';
-  petFriendly: 'Yes' | 'No';
-};
-
-
-// bogdan
-
-type DriverRegisterVM = {
-  avatarUrl: string;
-
-  email: string;
-  password: string;
-  confirmPassword: string;
-  passwordError: boolean;
-
-  name: string;
-  surname: string;
-  address: string;
-  phone: string;
-
-  vehicleModel: string;
-  vehicleType: 'Standard' | 'Luxury' | 'Van';
-  plates: string;
-  seats: number;
-  babyFriendly: boolean;
-  petFriendly: boolean;
-};
+import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
+import { VehicleType } from '../../enums/vehicle-type';
 
 type Waypoint = { id: string; label: string; lat: number; lon: number };
 
@@ -92,10 +59,12 @@ export class UserLayout implements OnInit {
   private userService = inject(UserService);
 
   Role = Role;
+  VehicleType = VehicleType;
 
   user!: UserDto;
   userStats!: UserStatsDto;
   vehicle!: VehicleDto;
+  driverRegistration! : DriverRegistrationDto;
 
   ngOnInit() {
     this.userService.getCurrentUser().subscribe((user: UserDto) => {
@@ -108,28 +77,14 @@ export class UserLayout implements OnInit {
       this.userService.getUserVehicle(user.id).subscribe((veh: VehicleDto) => {
         this.vehicle = veh;
       });
-    });
+
+      this.userService.getDriverRegistration().subscribe((reg: DriverRegistrationDto) => {
+        this.driverRegistration = reg;
+      });
+
+      this.cdr.detectChanges();
+    }); 
   }
-
-  driverRegister: DriverRegisterVM = {
-    avatarUrl: 'default-avatar.jpg',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    passwordError: false,
-
-    name: '',
-    surname: '',
-    address: '',
-    phone: '',
-
-    vehicleModel: '',
-    vehicleType: 'Standard',
-    plates: '',
-    seats: 4,
-    babyFriendly: false,
-    petFriendly: false,
-  };
 
   // MAP AND DESTINATION SELECTION LOGIC
   waypoints: Waypoint[] = [];
@@ -510,6 +465,26 @@ export class UserLayout implements OnInit {
     this.openVehicleInfo();
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // DRIVER REGISTRATION SHEET LOGIC
+
   registerDriverOpen = false;
 
   openRegisterDriver() {
@@ -532,15 +507,11 @@ export class UserLayout implements OnInit {
     this.menuOpen = true;
   }
 
-  validateDriverPassword() {
-    this.driverRegister.passwordError = !this.driverRegister.password.trim();
-  }
-
   decDriverSeats() {
-    this.driverRegister.seats = Math.max(0, this.driverRegister.seats - 1);
+    this.driverRegistration.vehicle.seats = Math.max(0, this.driverRegistration.vehicle.seats - 1);
   }
   incDriverSeats() {
-    this.driverRegister.seats = Math.min(9, this.driverRegister.seats + 1);
+    this.driverRegistration.vehicle.seats = Math.min(9, this.driverRegistration.vehicle.seats + 1);
   }
 
   // EASTER EGG
