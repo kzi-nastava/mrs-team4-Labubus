@@ -197,7 +197,7 @@
           <div class="as-input-row">
             <input class="as-input"
                   [type]="hidePassword ? 'password' : 'text'"
-                  [value]="editing.passwordMasked"
+                  [value]="'mockpassword'"
                   readonly>
 
             <button class="as-eye" type="button" (click)="hidePassword = !hidePassword">
@@ -212,10 +212,10 @@
           </button>
         </div>
 
-        @if (editing.role === 'driver') {
+        @if (editing.role === Role.DRIVER) {
           <div class="as-section-title"><span>Statistics</span></div>
           <div class="as-stat">
-            <app-stat-card [value]="editing.activeLast24h ?? '0m'"
+            <app-stat-card [value]="userStats.activePast24Hours + 'm'"
                           label="Active in last 24h"
                           variant="dark"></app-stat-card>
           </div>
@@ -243,7 +243,7 @@
           <input class="as-input" [(ngModel)]="editing.phone">
         </div>
 
-        @if (editing.role === 'driver') {
+        @if (editing.role === Role.DRIVER) {
           <button class="as-link as-link-bottom" type="button" (click)="onViewVehicleInfo()">
             View vehicle information
           </button>
@@ -344,7 +344,7 @@
 
 
     <!-- REGISTER A DRIVER (ADMIN ROLE)-->  
-    @if (user.role === 'admin') {
+    @if (user.role === Role.ADMIN) {
       <app-sheet
         [open]="registerDriverOpen"
         title="Register a driver"

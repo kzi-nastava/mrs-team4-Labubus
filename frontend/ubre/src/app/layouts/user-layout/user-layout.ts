@@ -15,25 +15,13 @@ import { inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { RideHistory } from '../../shared/ui/ride-history/ride-history';
+import { OnInit } from '@angular/core';
+import { UserService } from '../../services/user-service';
+import { UserDto } from '../../dtos/user-dto';
+import { UserStatsDto } from '../../dtos/user-stats-dto';
+import { VehicleDto } from '../../dtos/vehicle-dto';
+import { Role } from '../../enums/role';
 
-
-
-// bogdan
-
-type UserSettingsVM = {
-  role: 'registered-user' | 'driver' | 'admin' | 'guest';
-  avatarUrl: string;
-  email: string;
-  passwordMasked: string;
-  name: string;
-  surname: string;
-  address: string;
-  phone: string;
-  activeLast24h?: string; // driver
-};
-
-
-// bogdan
 
 // TESTING PURPOSES ONLY - WILL NOT BE AVAILABLE FOR THE USER TO EDIT
 type VehicleInformationVM = {
@@ -98,30 +86,30 @@ type NominatimItem = {
   templateUrl: './user-layout.html',
   styleUrl: './user-layout.css',
 })
-export class UserLayout {
+export class UserLayout implements OnInit {
   constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
 
-  user: UserSettingsVM = {
-    role: 'admin',
-    avatarUrl: 'default-avatar.jpg',
-    email: 'john@doe.com',
-    passwordMasked: '********',
-    name: 'John',
-    surname: 'Doe',
-    address: '123 Main St, Anytown, USA',
-    phone: '+1 234 567 8900',
-    activeLast24h: '5h 30m',
-  };
+  private userService = inject(UserService);
 
-  // NOTE: Dummy vehicle data is here ONLY for testing in registered-user layout.
-  vehicle: VehicleInformationVM = {
-    model: 'Toyota Corolla 2021',
-    type: 'Standard',
-    plates: 'AB-123-CD',
-    seats: 4,
-    babyFriendly: 'Yes',
-    petFriendly: 'No',
-  };
+  Role = Role;
+
+  user!: UserDto;
+  userStats!: UserStatsDto;
+  vehicle!: VehicleDto;
+
+  ngOnInit() {
+    this.userService.getCurrentUser().subscribe((user: UserDto) => {
+      this.user = user;
+
+      this.userService.getUserStats(user.id).subscribe((stats: UserStatsDto) => {
+        this.userStats = stats;
+      });
+
+      this.userService.getUserVehicle(user.id).subscribe((veh: VehicleDto) => {
+        this.vehicle = veh;
+      });
+    });
+  }
 
   driverRegister: DriverRegisterVM = {
     avatarUrl: 'default-avatar.jpg',
@@ -320,7 +308,7 @@ export class UserLayout {
     this.rideOptionsOpen = true;
   }
 
-  editing: UserSettingsVM = { ...this.user };
+  editing: UserDto = { ...this.user };
   hidePassword = true;
 
   menuOpen = false;
@@ -356,7 +344,7 @@ export class UserLayout {
 
   handleMenuAction(action: string) {
     if (action === 'logout') {
-      this.user = { ...this.user, name: 'Guest', surname: '', phone: '', role: 'guest' };
+      this.user = { ...this.user, name: 'Guest', surname: '', phone: '', role: Role.GUEST };
     }
     if (action === 'account-settings') {
       this.openAccountSettings();
