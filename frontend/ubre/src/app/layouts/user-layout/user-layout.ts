@@ -32,14 +32,15 @@ import { forkJoin } from 'rxjs';
   imports: [Map,IconButton,SideMenu,Toast,
     Modal,ModalContainer,StatCard,Button,
     Sheet,FormsModule,RideHistory,],
-  templateUrl: './user-layout.html',
-  styleUrl: './user-layout.css',
-})
-export class UserLayout implements OnInit {
-  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
-
-  private userService = inject(UserService);
-  public mapService = inject(MapService);
+    templateUrl: './user-layout.html',
+    styleUrl: './user-layout.css',
+  })
+  export class UserLayout implements OnInit {
+    constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
+    
+    private userService = inject(UserService);
+    public mapService = inject(MapService);
+    private confetti = inject(ConfettiService);
 
   Role = Role;
   VehicleType = VehicleType;
@@ -184,15 +185,26 @@ export class UserLayout implements OnInit {
     // Open chat widget
   }
 
-  // ACCOUNT SETTINGS SHEET LOGIC
-  accountSettingsOpen = false;
 
+
+
+
+
+
+
+
+
+
+
+  
+
+  // ACCOUNT SETTINGS SHEET LOGIC
   openAccountSettings() {
-    this.accountSettingsOpen = true;
+    this.ui.accountSettingsOpen = true;
     this.editing = { ...this.user };
   }
   closeAccountSettings() {
-    this.accountSettingsOpen = false;
+    this.ui.accountSettingsOpen = false;
     this.user = { ...this.editing };
   }
 
@@ -251,15 +263,13 @@ export class UserLayout implements OnInit {
 
 
   // CHANGE PASSWORD SHEET LOGIC
-  changePasswordOpen = false;
-
   newPassword = '';
   confirmPassword = '';
   passwordMismatch = false;
 
   onChangePassword() {
-    this.accountSettingsOpen = false;
-    this.changePasswordOpen = true;
+    this.ui.accountSettingsOpen = false;
+    this.ui.changePasswordOpen = true;
 
     this.newPassword = '';
     this.confirmPassword = '';
@@ -267,13 +277,13 @@ export class UserLayout implements OnInit {
   }
 
   closeChangePassword() {
-    this.changePasswordOpen = false;
+    this.ui.changePasswordOpen = false;
     this.passwordMismatch = false;
   }
 
   onChangePasswordBack() {
     this.closeChangePassword();
-    this.accountSettingsOpen = true;
+    this.ui.accountSettingsOpen = true;
   }
 
   savePassword() {
@@ -286,23 +296,42 @@ export class UserLayout implements OnInit {
     this.showToast('Password changed', 'Your password has been updated.');
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // VEHICLE INFORMATION SHEET LOGIC
-  vehicleInfoOpen = false;
 
   openVehicleInfo() {
-    this.vehicleInfoOpen = true;
+    this.ui.vehicleInfoOpen = true;
   }
   closeVehicleInfo() {
-    this.vehicleInfoOpen = false;
+    this.ui.vehicleInfoOpen = false;
   }
 
   onVehicleInfoBack() {
     this.closeVehicleInfo();
-    this.accountSettingsOpen = true;
+    this.ui.accountSettingsOpen = true;
   }
 
   onViewVehicleInfo() {
-    this.accountSettingsOpen = false;
+    this.ui.accountSettingsOpen = false;
     this.openVehicleInfo();
   }
 
@@ -365,9 +394,6 @@ export class UserLayout implements OnInit {
       this.driverRegistration.password !== this.confirmPasswordDR;
   }
 
-  // EASTER EGG
-
-  private confetti = inject(ConfettiService);
   
 
 
