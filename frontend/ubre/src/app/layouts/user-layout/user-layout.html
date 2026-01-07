@@ -1,14 +1,14 @@
 <div class="screen">
   <app-map
     class="map"
-    [waypoints]="waypoints"
-    (mapClick)="addFromMapClick($event.lat, $event.lon)">
+    [waypoints]="mapService.waypoints"
+    (mapClick)="mapService.addFromMapClick($event.lat, $event.lon)">
   </app-map>
 
   <div class="overlay">
 
     <!-- MAP CHOOSE A DESTINATION OVERLAY -->
-    @if (destOpen) {
+    @if (mapService.destOpen) {
       <div class="dest-card show">
         <div class="dest-header">
           <button type="button" class="dest-back" (click)="onDestBack()">
@@ -17,11 +17,11 @@
           <div class="dest-title">Choose a destination</div>
         </div>
 
-        @for (w of waypoints; track w.id) {
+        @for (w of mapService.waypoints; track w.id) {
           <div class="wp-row">
             <img src="waypoint.svg" alt="pin" class="wp-ico">
             <span class="wp-text">{{ w.label }}</span>
-            <button type="button" class="wp-x" (click)="removeWaypoint(w.id)">
+            <button type="button" class="wp-x" (click)="mapService.removeWaypoint(w.id)">
               <img src="cancel_16dp_999999_FILL0_wght400_GRAD0_opsz20.svg" alt="remove waypoint">
             </button>
           </div>
@@ -31,14 +31,14 @@
           <input
             class="wp-input"
             type="text"
-            [(ngModel)]="query"
-            (input)="onQueryChange()"
+            [(ngModel)]="mapService.query"
+            (ngModelChange)="mapService.setQuery($event)"
             placeholder="Enter destination">
         </div>
 
         <div class="suggestions">
-          @for (s of suggestions; track s.place_id) {
-            <button type="button" class="s-item" (click)="addFromSuggestion(s)">
+          @for (s of mapService.suggestions; track s.place_id) {
+            <button type="button" class="s-item" (click)="mapService.addFromSuggestion(s)">
               <img src="location.svg" alt="pin" class="s-ico">
               <span class="s-text">{{ s.display_name }}</span>
             </button>

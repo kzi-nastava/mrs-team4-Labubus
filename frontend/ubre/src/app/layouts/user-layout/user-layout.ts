@@ -23,33 +23,15 @@ import { VehicleDto } from '../../dtos/vehicle-dto';
 import { Role } from '../../enums/role';
 import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 import { VehicleType } from '../../enums/vehicle-type';
-
-type Waypoint = { id: string; label: string; lat: number; lon: number };
-
-type NominatimItem = {
-  place_id: string;
-  display_name: string;
-  lat: string;
-  lon: string;
-};
-
+import { MapService } from '../../services/map-service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-user-layout',
   standalone: true,
-  imports: [
-    Map,
-    IconButton,
-    SideMenu,
-    Toast,
-    Modal,
-    ModalContainer,
-    StatCard,
-    Button,
-    Sheet,
-    FormsModule,
-    RideHistory,
-  ],
+  imports: [Map,IconButton,SideMenu,Toast,
+    Modal,ModalContainer,StatCard,Button,
+    Sheet,FormsModule,RideHistory,],
   templateUrl: './user-layout.html',
   styleUrl: './user-layout.css',
 })
@@ -57,6 +39,7 @@ export class UserLayout implements OnInit {
   constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
 
   private userService = inject(UserService);
+  public mapService = inject(MapService);
 
   Role = Role;
   VehicleType = VehicleType;
@@ -70,198 +53,48 @@ export class UserLayout implements OnInit {
     this.userService.getCurrentUser().subscribe((user: UserDto) => {
       this.user = user;
 
-      this.userService.getUserStats(user.id).subscribe((stats: UserStatsDto) => {
+      forkJoin({
+        stats: this.userService.getUserStats(user.id),
+        veh: this.userService.getUserVehicle(user.id),
+        reg: this.userService.getDriverRegistration(),
+      }).subscribe(({ stats, veh, reg }) => {
         this.userStats = stats;
-      });
-
-      this.userService.getUserVehicle(user.id).subscribe((veh: VehicleDto) => {
         this.vehicle = veh;
-      });
-
-      this.userService.getDriverRegistration().subscribe((reg: DriverRegistrationDto) => {
         this.driverRegistration = reg;
       });
-
-      this.cdr.detectChanges();
-    }); 
-  }
-
-  // MAP AND DESTINATION SELECTION LOGIC
-  waypoints: Waypoint[] = [];
-  query = '';
-  suggestions: NominatimItem[] = [];
-  suggestTimer: any = null;
-  private suggestReqId = 0;
-
-  destOpen = false;
-
-  openDest() {
-    this.destOpen = true;
-  }
-  closeDest() {
-    this.destOpen = false;
-  }
-
-  toLatin(s: string) {
-    const map: Record<string, string> = {
-      А: 'A',
-      Б: 'B',
-      В: 'V',
-      Г: 'G',
-      Д: 'D',
-      Ђ: 'Đ',
-      Е: 'E',
-      Ж: 'Ž',
-      З: 'Z',
-      И: 'I',
-      Ј: 'J',
-      К: 'K',
-      Л: 'L',
-      Љ: 'Lj',
-      М: 'M',
-      Н: 'N',
-      Њ: 'Nj',
-      О: 'O',
-      П: 'P',
-      Р: 'R',
-      С: 'S',
-      Т: 'T',
-      Ћ: 'Ć',
-      У: 'U',
-      Ф: 'F',
-      Х: 'H',
-      Ц: 'C',
-      Ч: 'Č',
-      Џ: 'Dž',
-      Ш: 'Š',
-      а: 'a',
-      б: 'b',
-      в: 'v',
-      г: 'g',
-      д: 'd',
-      ђ: 'đ',
-      е: 'e',
-      ж: 'ž',
-      з: 'z',
-      и: 'i',
-      ј: 'j',
-      к: 'k',
-      л: 'l',
-      љ: 'lj',
-      м: 'm',
-      н: 'n',
-      њ: 'nj',
-      о: 'o',
-      п: 'p',
-      р: 'r',
-      с: 's',
-      т: 't',
-      ћ: 'ć',
-      у: 'u',
-      ф: 'f',
-      х: 'h',
-      ц: 'c',
-      ч: 'č',
-      џ: 'dž',
-      ш: 'š',
-    };
-
-    return s.replace(/[\u0400-\u04FF]/g, (ch) => map[ch] ?? ch);
-  }
-
-  onQueryChange() {
-    const q = this.query.trim();
-
-    if (this.suggestTimer) clearTimeout(this.suggestTimer);
-
-    if (q.length < 3) {
-      this.suggestions = [];
-      this.cdr.detectChanges();
-      return;
-    }
-
-    this.suggestTimer = setTimeout(() => {
-      const reqId = ++this.suggestReqId;
-
-      const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&q=${encodeURIComponent(
-        q + ', Novi Sad, Serbia'
-      )}`;
-
-      this.http.get<NominatimItem[]>(url).subscribe((items) => {
-        if (reqId !== this.suggestReqId) return;
-
-        this.suggestions = (items ?? []).map((i) => ({
-          ...i,
-          display_name: this.toLatin(i.display_name),
-        }));
-        this.cdr.detectChanges();
-      });
-    }, 250);
-  }
-
-  addFromSuggestion(s: NominatimItem) {
-    const wp: Waypoint = {
-      id: String(s.place_id),
-      label: s.display_name,
-      lat: Number(s.lat),
-      lon: Number(s.lon),
-    };
-    this.waypoints = [...this.waypoints, wp];
-
-    this.query = '';
-    this.suggestions = [];
-  }
-
-  addFromMapClick(lat: number, lon: number) {
-    if (this.destOpen === false) return;
-    const id = crypto.randomUUID();
-
-    const fallback = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-
-    this.waypoints = [...this.waypoints, { id, label: fallback, lat, lon }];
-
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=sr-Latn`;
-
-    this.http.get<any>(url).subscribe({
-      next: (res) => {
-        const label = res?.display_name ? this.toLatin(res.display_name) : fallback;
-
-        this.waypoints = this.waypoints.map((w) => (w.id === id ? { ...w, label } : w));
-
-        this.cdr.detectChanges();
-      },
-      error: () => {},
     });
   }
 
-  removeWaypoint(id: string) {
-    this.waypoints = this.waypoints.filter((w) => w.id !== id);
-  }
 
-  get currentRoute() {
-    return this.waypoints.map((wp) => [wp.lat, wp.lon] as [number, number]);
-  }
 
+
+  // map logic
+  cdModalOpen = true; // Choose a destination modal
+  
   onDestBack() {
-    this.waypoints = [];
-    this.suggestions = [];
-    this.query = '';
-    this.closeDest();
+    this.mapService.resetDest();
   }
-
+  
   toggleDest() {
-    this.destOpen = !this.destOpen;
-    if (this.destOpen) this.cdModalOpen = false;
+    this.mapService.toggleDest();
+    if (this.mapService.destOpen) this.cdModalOpen = false;
   }
-
+  
   onCdProceed() {
-    if (this.waypoints.length === 0) {
+    if (this.mapService.waypoints.length === 0) {
       this.showToast('No destination', 'Please add at least one destination waypoint.');
       return;
     }
-    this.closeDest();
+    this.mapService.closeDest();
     this.rideOptionsOpen = true;
   }
+
+
+
+
+
+
+
 
   editing: UserDto = { ...this.user };
   hidePassword = true;
@@ -272,7 +105,6 @@ export class UserLayout implements OnInit {
   toastTitle = 'Ignore this toast';
   toastMessage = 'This is just a demo message for the toast';
 
-  cdModalOpen = true; // Choose a destination modal
 
   openMenu() {
     this.menuOpen = true;
@@ -293,7 +125,7 @@ export class UserLayout implements OnInit {
     this.closeChangePassword();
     this.closeVehicleInfo();
     this.closeRegisterDriver();
-    this.closeDest();
+    this.mapService.closeDest();
     this.closeRideHistory();
   }
 
@@ -336,7 +168,7 @@ export class UserLayout implements OnInit {
 
   onCdModalAction() {
     this.cdModalOpen = false;
-    this.destOpen = true;
+    this.mapService.openDest();
   }
 
   openChat() {
@@ -638,7 +470,7 @@ export class UserLayout implements OnInit {
   }
   onRideOptionsBack() {
     this.rideOptionsOpen = false;
-    this.destOpen = true;
+    this.mapService.openDest();
   }
 
 
