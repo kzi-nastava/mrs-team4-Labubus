@@ -65,11 +65,24 @@ export class UserLayout implements OnInit {
     });
   }
 
+  ui = {
+    menuOpen: false,
+    cdModalOpen: true,
+    accountSettingsOpen: false,
+    changePasswordOpen: false,
+    vehicleInfoOpen: false,
+    registerDriverOpen: false,
+    rideHistoryOpen: false,
+    rideOptionsOpen: false,
+    checkoutModalOpen: false,
+    toastOpen: false,
+  };
 
 
 
-  // map logic
-  cdModalOpen = true; // Choose a destination modal
+
+
+
   
   onDestBack() {
     this.mapService.resetDest();
@@ -77,7 +90,7 @@ export class UserLayout implements OnInit {
   
   toggleDest() {
     this.mapService.toggleDest();
-    if (this.mapService.destOpen) this.cdModalOpen = false;
+    if (this.mapService.destOpen) this.ui.cdModalOpen = false;
   }
   
   onCdProceed() {
@@ -98,25 +111,21 @@ export class UserLayout implements OnInit {
 
   editing: UserDto = { ...this.user };
   hidePassword = true;
-
-  menuOpen = false;
-
-  toastOpen = false;
   toastTitle = 'Ignore this toast';
   toastMessage = 'This is just a demo message for the toast';
 
 
   openMenu() {
-    this.menuOpen = true;
+    this.ui.menuOpen = true;
   }
   closeMenu() {
-    this.menuOpen = false;
+    this.ui.menuOpen = false;
   }
   openCdModal() {
-    this.cdModalOpen = true;
+    this.ui.cdModalOpen = true;
   }
   closeCdModal() {
-    this.cdModalOpen = false;
+    this.ui.cdModalOpen = false;
   }
 
   closeAllSidePanels() {
@@ -154,7 +163,7 @@ export class UserLayout implements OnInit {
   showToast(title: string, message: string) {
     this.toastTitle = title;
     this.toastMessage = message;
-    this.toastOpen = true;
+    this.ui.toastOpen = true;
 
     setTimeout(() => {
       this.hideToast();
@@ -163,11 +172,11 @@ export class UserLayout implements OnInit {
   }
 
   hideToast() {
-    this.toastOpen = false;
+    this.ui.toastOpen = false;
   }
 
   onCdModalAction() {
-    this.cdModalOpen = false;
+    this.ui.cdModalOpen = false;
     this.mapService.openDest();
   }
 
@@ -195,7 +204,7 @@ export class UserLayout implements OnInit {
 
   onAccountSettingsBack() {
     this.closeAccountSettings();
-    this.menuOpen = true;
+    this.ui.menuOpen = true;
   }
 
 
@@ -336,7 +345,7 @@ export class UserLayout implements OnInit {
 
   onRegisterDriverBack() {
     this.closeRegisterDriver();
-    this.menuOpen = true;
+    this.ui.menuOpen = true;
   }
 
   decDriverSeats() {
@@ -395,12 +404,12 @@ export class UserLayout implements OnInit {
 
   onRideHistoryBack() {
     this.showRideHistory = false;
-    this.menuOpen = true;
+    this.ui.menuOpen = true;
   }
 
   openRideHistory() {
     this.showRideHistory = true;
-    this.menuOpen = false;
+    this.ui.menuOpen = false;
   }
 
   closeRideHistory() {
@@ -520,20 +529,17 @@ export class UserLayout implements OnInit {
 
   onCheckout() {
     this.closeRideOptions();
-    this.checkoutModalOpen = true;
+    this.ui.checkoutModalOpen = true;
   }
 
-  // CHECKOUT MODAL LOGIC
-  checkoutModalOpen = false;
-
   onCheckoutModalBack() {
-    this.checkoutModalOpen = false;
+    this.ui.checkoutModalOpen = false;
     this.rideOptionsOpen = true;
   }
 
   onConfirmRide() {
     // TODO: API call za potvrdu vožnje
-    this.checkoutModalOpen = false;
+    this.ui.checkoutModalOpen = false;
     this.showToast('Ride confirmed', 'Your ride has been confirmed successfully.');
   }
 }

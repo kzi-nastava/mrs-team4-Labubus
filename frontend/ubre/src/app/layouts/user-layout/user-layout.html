@@ -54,7 +54,7 @@
 
 
     <!-- RIDE OPTIONS MODAL -->
-    @if (rideOptionsOpen) {
+    @if (ui.rideOptionsOpen) {
       <div class="ro-modal show" role="dialog" aria-label="Ride options">
         <div class="rd-wrap">
           <div class="ro-header">
@@ -120,7 +120,7 @@
 
     <!-- MAIN OVERLAY CONTENT -->
 
-    @if (cdModalOpen) {
+    @if (ui.cdModalOpen) {
       <app-modal class="cd-modal show"
         title="Choose a destination"
         message="Please select a valid destination"
@@ -148,13 +148,13 @@
     </app-icon-button>
 
     <!-- TOAST NOTIFICATION -->
-    @if (toastOpen) {
+    @if (ui.toastOpen) {
       <app-toast [title]="toastTitle" [message]="toastMessage"></app-toast>
     }
 
     <!-- SIDE MENU -->
     <app-side-menu
-      [open]="menuOpen"
+      [open]="ui.menuOpen"
       title="Account"
       [role]="user.role"
       [user]="user"
@@ -163,7 +163,7 @@
     </app-side-menu>
 
     <!-- CHECKOUT MODAL -->
-    @if (checkoutModalOpen) {
+    @if (ui.checkoutModalOpen) {
       <app-modal-container class="checkout-modal" title="Checkout" [showTitleBar]="true" (backPressed)="onCheckoutModalBack()">
         <app-stat-card value="$12.50" label="Estimated price" variant="dark"></app-stat-card>
         <app-button width="290px" (click)="onConfirmRide()">Confirm ride</app-button>
