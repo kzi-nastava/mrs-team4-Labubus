@@ -196,7 +196,7 @@ import { forkJoin } from 'rxjs';
 
 
 
-  
+
 
   // ACCOUNT SETTINGS SHEET LOGIC
   openAccountSettings() {
@@ -205,11 +205,11 @@ import { forkJoin } from 'rxjs';
   }
   closeAccountSettings() {
     this.ui.accountSettingsOpen = false;
-    this.user = { ...this.editing };
   }
 
   saveAccountSettings() {
     // Save account settings logic
+    this.user = { ...this.editing };
     this.closeAccountSettings();
     this.showToast('Settings saved', 'Your account settings have been updated.');
   }
@@ -520,6 +520,7 @@ import { forkJoin } from 'rxjs';
 
   onScheduleRide() {
     this.closeRideOptions();
+    // TODO: API call za zakazivanje vožnje
     this.showToast('Ride scheduled', 'Your ride has been scheduled successfully.');
   }
 
