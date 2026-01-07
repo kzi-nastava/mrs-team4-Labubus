@@ -346,7 +346,7 @@
     <!-- REGISTER A DRIVER (ADMIN ROLE)-->  
     @if (user.role === Role.ADMIN) {
       <app-sheet
-        [open]="registerDriverOpen"
+        [open]="ui.registerDriverOpen"
         title="Register a driver"
         (closed)="closeAllSidePanels()"
         (back)="onRegisterDriverBack()"

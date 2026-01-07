@@ -99,7 +99,7 @@ export class UserLayout implements OnInit {
       return;
     }
     this.mapService.closeDest();
-    this.rideOptionsOpen = true;
+    this.ui.rideOptionsOpen = true;
   }
 
 
@@ -325,14 +325,11 @@ export class UserLayout implements OnInit {
 
 
   // DRIVER REGISTRATION SHEET LOGIC
-
-  registerDriverOpen = false;
-
   openRegisterDriver() {
-    this.registerDriverOpen = true;
+    this.ui.registerDriverOpen = true;
   }
   closeRegisterDriver() {
-    this.registerDriverOpen = false;
+    this.ui.registerDriverOpen = false;
   }
 
   onRegisterDriver() {
@@ -459,7 +456,6 @@ export class UserLayout implements OnInit {
     petFriendly: false,
   };
 
-  rideOptionsOpen = false;
   setRideType(type: 'Standard' | 'Luxury' | 'Van') {
     this.rideOptions.rideType = type;
   }
@@ -472,13 +468,13 @@ export class UserLayout implements OnInit {
   }
 
   closeRideOptions() {
-    this.rideOptionsOpen = false;
+    this.ui.rideOptionsOpen = false;
   }
   openRideOptions() {
-    this.rideOptionsOpen = true;
+    this.ui.rideOptionsOpen = true;
   }
   onRideOptionsBack() {
-    this.rideOptionsOpen = false;
+    this.ui.rideOptionsOpen = false;
     this.mapService.openDest();
   }
 
@@ -534,7 +530,7 @@ export class UserLayout implements OnInit {
 
   onCheckoutModalBack() {
     this.ui.checkoutModalOpen = false;
-    this.rideOptionsOpen = true;
+    this.ui.rideOptionsOpen = true;
   }
 
   onConfirmRide() {
