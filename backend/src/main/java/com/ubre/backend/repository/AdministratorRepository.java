@@ -1,11 +1,11 @@
 package com.ubre.backend.repository;
 
-import com.ubre.backend.model.Administrator;
+import com.ubre.backend.model.Admin;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface AdministratorRepository extends JpaRepository<Administrator, Long> {
-    Optional<Administrator> findByEmail(String email);
+public interface AdministratorRepository extends JpaRepository<Admin, Long> {
+    Optional<Admin> findByEmail(String email);
 }

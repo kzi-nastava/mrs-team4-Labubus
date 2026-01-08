@@ -1,5 +1,10 @@
 package com.ubre.backend.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class LoginDto {
     private String email;
     private String passwordHash;
@@ -10,14 +15,5 @@ public class LoginDto {
     public LoginDto(String email, String passwordHash) {
         this.email = email;
         this.passwordHash = passwordHash;
-    }
-    public String getEmail() {
-        return email;
-    }
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    public String getPasswordHash() {
-        return passwordHash;
     }
 }

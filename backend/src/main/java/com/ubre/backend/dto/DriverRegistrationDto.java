@@ -2,6 +2,11 @@ package com.ubre.backend.dto;
 
 // DTO for driver registration data
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class DriverRegistrationDto {
     private Long id;
     private String avatarUrl;
@@ -23,33 +28,5 @@ public class DriverRegistrationDto {
         this.phone = phone;
         this.address = address;
         this.vehicle = vehicle;
-    }
-
-    public Long getId() {
-        return id;
-    }
-    public String getAvatarUrl() {
-        return avatarUrl;
-    }
-    public String getEmail() {
-        return email;
-    }
-    public String getPassword() {
-        return password;
-    }
-    public String getName() {
-        return name;
-    }
-    public String getSurname() {
-        return surname;
-    }
-    public String getPhone() {
-        return phone;
-    }
-    public String getAddress() {
-        return address;
-    }
-    public VehicleDto getVehicle() {
-        return vehicle;
     }
 }

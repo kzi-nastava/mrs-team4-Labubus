@@ -2,6 +2,11 @@ package com.ubre.backend.dto;
 
 // For handling complaints made by users against drivers
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class ComplaintDto {
     private Long id;
     private Long driverId;
@@ -15,31 +20,6 @@ public class ComplaintDto {
         this.id = id;
         this.driverId = driverId;
         this.userId = userId;
-        this.text = text;
-    }
-
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public Long getDriverId() {
-        return driverId;
-    }
-    public void setDriverId(Long driverId) {
-        this.driverId = driverId;
-    }
-    public Long getUserId() {
-        return userId;
-    }
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-    public String getText() {
-        return text;
-    }
-    public void setText(String text) {
         this.text = text;
     }
 }
