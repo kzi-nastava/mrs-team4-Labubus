@@ -1,14 +1,14 @@
 <div class="screen">
   <app-map
     class="map"
-    [waypoints]="waypoints"
-    (mapClick)="addFromMapClick($event.lat, $event.lon)">
+    [waypoints]="mapService.waypoints"
+    (mapClick)="mapService.addFromMapClick($event.lat, $event.lon)">
   </app-map>
 
   <div class="overlay">
 
     <!-- MAP CHOOSE A DESTINATION OVERLAY -->
-    @if (destOpen) {
+    @if (mapService.destOpen) {
       <div class="dest-card show">
         <div class="dest-header">
           <button type="button" class="dest-back" (click)="onDestBack()">
@@ -17,11 +17,11 @@
           <div class="dest-title">Choose a destination</div>
         </div>
 
-        @for (w of waypoints; track w.id) {
+        @for (w of mapService.waypoints; track w.id) {
           <div class="wp-row">
             <img src="waypoint.svg" alt="pin" class="wp-ico">
             <span class="wp-text">{{ w.label }}</span>
-            <button type="button" class="wp-x" (click)="removeWaypoint(w.id)">
+            <button type="button" class="wp-x" (click)="mapService.removeWaypoint(w.id)">
               <img src="cancel_16dp_999999_FILL0_wght400_GRAD0_opsz20.svg" alt="remove waypoint">
             </button>
           </div>
@@ -31,14 +31,14 @@
           <input
             class="wp-input"
             type="text"
-            [(ngModel)]="query"
-            (input)="onQueryChange()"
+            [(ngModel)]="mapService.query"
+            (ngModelChange)="mapService.setQuery($event)"
             placeholder="Enter destination">
         </div>
 
         <div class="suggestions">
-          @for (s of suggestions; track s.place_id) {
-            <button type="button" class="s-item" (click)="addFromSuggestion(s)">
+          @for (s of mapService.suggestions; track s.place_id) {
+            <button type="button" class="s-item" (click)="mapService.addFromSuggestion(s)">
               <img src="location.svg" alt="pin" class="s-ico">
               <span class="s-text">{{ s.display_name }}</span>
             </button>
@@ -54,7 +54,7 @@
 
 
     <!-- RIDE OPTIONS MODAL -->
-    @if (rideOptionsOpen) {
+    @if (ui.rideOptionsOpen) {
       <div class="ro-modal show" role="dialog" aria-label="Ride options">
         <div class="rd-wrap">
           <div class="ro-header">
@@ -120,7 +120,7 @@
 
     <!-- MAIN OVERLAY CONTENT -->
 
-    @if (cdModalOpen) {
+    @if (ui.cdModalOpen) {
       <app-modal class="cd-modal show"
         title="Choose a destination"
         message="Please select a valid destination"
@@ -148,13 +148,13 @@
     </app-icon-button>
 
     <!-- TOAST NOTIFICATION -->
-    @if (toastOpen) {
+    @if (ui.toastOpen) {
       <app-toast [title]="toastTitle" [message]="toastMessage"></app-toast>
     }
 
     <!-- SIDE MENU -->
     <app-side-menu
-      [open]="menuOpen"
+      [open]="ui.menuOpen"
       title="Account"
       [role]="user.role"
       [user]="user"
@@ -163,7 +163,7 @@
     </app-side-menu>
 
     <!-- CHECKOUT MODAL -->
-    @if (checkoutModalOpen) {
+    @if (ui.checkoutModalOpen) {
       <app-modal-container class="checkout-modal" title="Checkout" [showTitleBar]="true" (backPressed)="onCheckoutModalBack()">
         <app-stat-card value="$12.50" label="Estimated price" variant="dark"></app-stat-card>
         <app-button width="290px" (click)="onConfirmRide()">Confirm ride</app-button>
@@ -172,7 +172,7 @@
 
     <!-- ACCOUNT SETTINGS SHEET -->
     <app-sheet
-      [open]="accountSettingsOpen"
+      [open]="ui.accountSettingsOpen"
       title="Account settings"
       (closed)="closeAllSidePanels()"
       (back)="onAccountSettingsBack()"
@@ -197,7 +197,7 @@
           <div class="as-input-row">
             <input class="as-input"
                   [type]="hidePassword ? 'password' : 'text'"
-                  [value]="editing.passwordMasked"
+                  [value]="'mockpassword'"
                   readonly>
 
             <button class="as-eye" type="button" (click)="hidePassword = !hidePassword">
@@ -212,10 +212,10 @@
           </button>
         </div>
 
-        @if (editing.role === 'driver') {
+        @if (editing.role === Role.DRIVER) {
           <div class="as-section-title"><span>Statistics</span></div>
           <div class="as-stat">
-            <app-stat-card [value]="editing.activeLast24h ?? '0m'"
+            <app-stat-card [value]="userStats.activePast24Hours + 'm'"
                           label="Active in last 24h"
                           variant="dark"></app-stat-card>
           </div>
@@ -243,7 +243,7 @@
           <input class="as-input" [(ngModel)]="editing.phone">
         </div>
 
-        @if (editing.role === 'driver') {
+        @if (editing.role === Role.DRIVER) {
           <button class="as-link as-link-bottom" type="button" (click)="onViewVehicleInfo()">
             View vehicle information
           </button>
@@ -255,7 +255,7 @@
       <div class="footer-actions" sheetFooter>
         <app-button (clicked)="saveAccountSettings()">Save</app-button>
         <app-button variant="outlined"
-                    (clicked)="accountSettingsOpen=false">
+                    (clicked)="ui.accountSettingsOpen=false">
           Cancel
         </app-button>
       </div>
@@ -263,7 +263,7 @@
 
     <!-- CHANGE PASSWORD SHEET -->
     <app-sheet
-      [open]="changePasswordOpen"
+      [open]="ui.changePasswordOpen"
       title="Change password"
       (closed)="closeChangePassword()"
       (back)="onChangePasswordBack()">
@@ -300,7 +300,7 @@
 
     <!-- VEHICLE INFORMATION SHEET -->
     <app-sheet
-      [open]="vehicleInfoOpen"
+      [open]="ui.vehicleInfoOpen"
       title="Vehicle information"
       (closed)="closeVehicleInfo()"
       (back)="onVehicleInfoBack()">
@@ -344,9 +344,9 @@
 
 
     <!-- REGISTER A DRIVER (ADMIN ROLE)-->  
-    @if (user.role === 'admin') {
+    @if (user.role === Role.ADMIN) {
       <app-sheet
-        [open]="registerDriverOpen"
+        [open]="ui.registerDriverOpen"
         title="Register a driver"
         (closed)="closeAllSidePanels()"
         (back)="onRegisterDriverBack()"
@@ -356,25 +356,25 @@
           <div class="rd-section-title"><span>Account information</span></div>
 
           <div class="rd-avatar">
-            <img [src]="driverRegister.avatarUrl" alt="avatar">
+            <img [src]="driverRegistration.avatarUrl" alt="avatar">
           </div>
 
           <div class="rd-field">
             <div class="rd-label">Email</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.email" placeholder="Driver's email">
+            <input class="rd-input" [(ngModel)]="driverRegistration.email" placeholder="Driver's email">
           </div>
 
           <div class="rd-field">
             <div class="rd-label-row">
               <span>Password</span>
-              @if (driverRegister.passwordError) { <span class="rd-required">Required</span> }
+              @if (passwordError) { <span class="rd-required">Required</span> }
             </div>
 
             <input
               class="rd-input"
-              [class.error]="driverRegister.passwordError"
+              [class.error]="passwordError"
               type="password"
-              [(ngModel)]="driverRegister.password"
+              [(ngModel)]="driverRegistration.password"
               placeholder="Driver's password"
               (blur)="validateDriverPassword()"
             >
@@ -382,7 +382,7 @@
 
           <div class="rd-field">
             <div class="rd-label">Confirm password</div>
-            <input class="rd-input" type="password" [(ngModel)]="driverRegister.confirmPassword" placeholder="Driver's password">
+            <input class="rd-input" type="password" [(ngModel)]="confirmPasswordDR" placeholder="Driver's password">
           </div>
 
 
@@ -390,22 +390,22 @@
 
           <div class="rd-field">
             <div class="rd-label">Name</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.name" placeholder="Driver's name">
+            <input class="rd-input" [(ngModel)]="driverRegistration.name" placeholder="Driver's name">
           </div>
 
           <div class="rd-field">
             <div class="rd-label">Surname</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.surname" placeholder="Driver's surname">
+            <input class="rd-input" [(ngModel)]="driverRegistration.surname" placeholder="Driver's surname">
           </div>
 
           <div class="rd-field">
             <div class="rd-label">Residental address</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.address" placeholder="Driver's residental address">
+            <input class="rd-input" [(ngModel)]="driverRegistration.address" placeholder="Driver's residental address">
           </div>
 
           <div class="rd-field">
             <div class="rd-label">Phone number</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.phone" placeholder="Driver's phone number">
+            <input class="rd-input" [(ngModel)]="driverRegistration.phone" placeholder="Driver's phone number">
           </div>
 
 
@@ -413,7 +413,7 @@
 
           <div class="rd-field">
             <div class="rd-label">Vehicle model</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.vehicleModel" placeholder="Driver's vehicle model">
+            <input class="rd-input" [(ngModel)]="driverRegistration.vehicle.model" placeholder="Driver's vehicle model">
           </div>
 
           <div class="rd-field">
@@ -422,22 +422,22 @@
             <div class="rd-pills">
               <button class="rd-pill"
                       type="button"
-                      [class.active]="driverRegister.vehicleType==='Standard'"
-                      (click)="driverRegister.vehicleType='Standard'">
+                      [class.active]="driverRegistration.vehicle.type===VehicleType.STANDARD"
+                      (click)="driverRegistration.vehicle.type=VehicleType.STANDARD">
                 Standard
               </button>
 
               <button class="rd-pill"
                       type="button"
-                      [class.active]="driverRegister.vehicleType==='Luxury'"
-                      (click)="driverRegister.vehicleType='Luxury'">
+                      [class.active]="driverRegistration.vehicle.type===VehicleType.LUXURY"
+                      (click)="driverRegistration.vehicle.type=VehicleType.LUXURY">
                 Luxury
               </button>
 
               <button class="rd-pill"
                       type="button"
-                      [class.active]="driverRegister.vehicleType==='Van'"
-                      (click)="driverRegister.vehicleType='Van'">
+                      [class.active]="driverRegistration.vehicle.type===VehicleType.VAN"
+                      (click)="driverRegistration.vehicle.type=VehicleType.VAN">
                 Van
               </button>
             </div>
@@ -445,7 +445,7 @@
 
           <div class="rd-field">
             <div class="rd-label">License plates</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.plates" placeholder="Vehicle license plates">
+            <input class="rd-input" [(ngModel)]="driverRegistration.vehicle.plates" placeholder="Vehicle license plates">
           </div>
 
           <div class="rd-row">
@@ -453,7 +453,7 @@
 
             <div class="rd-stepper">
               <button class="rd-step" type="button" (click)="decDriverSeats()">−</button>
-              <div class="rd-step-value">{{ driverRegister.seats }}</div>
+              <div class="rd-step-value">{{ driverRegistration.vehicle.seats }}</div>
               <button class="rd-step" type="button" (click)="incDriverSeats()">+</button>
             </div>
           </div>
@@ -462,8 +462,8 @@
             <div class="rd-row-label">Baby-friendly</div>
             <button class="rd-switch"
                     type="button"
-                    [class.on]="driverRegister.babyFriendly"
-                    (click)="driverRegister.babyFriendly=!driverRegister.babyFriendly">
+                    [class.on]="driverRegistration.vehicle.babyFriendly"
+                    (click)="driverRegistration.vehicle.babyFriendly=!driverRegistration.vehicle.babyFriendly">
               <span class="rd-knob"></span>
             </button>
           </div>
@@ -472,8 +472,8 @@
             <div class="rd-row-label">Pet-friendly</div>
             <button class="rd-switch dark"
                     type="button"
-                    [class.on]="driverRegister.petFriendly"
-                    (click)="driverRegister.petFriendly=!driverRegister.petFriendly">
+                    [class.on]="driverRegistration.vehicle.petFriendly"
+                    (click)="driverRegistration.vehicle.petFriendly=!driverRegistration.vehicle.petFriendly">
               <span class="rd-knob"></span>
             </button>
           </div>

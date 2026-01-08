@@ -1,4 +1,4 @@
-export type Role = 'admin' | 'driver' | 'registered-user' | 'guest';
+import { Role } from "../../../enums/role";
 
 export type MenuItem = {
   label: string;
@@ -7,7 +7,7 @@ export type MenuItem = {
 };
 
 export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
-  'registered-user': [
+  [Role.REGISTERED_USER]: [
     {
       label: 'Ride history',
       icon: 'directions_car_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',
@@ -34,7 +34,7 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
       action: 'logout',
     },
   ],
-  driver: [
+  [Role.DRIVER]: [
     {
       label: 'Ride history',
       icon: 'directions_car_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',
@@ -56,7 +56,7 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
       action: 'logout',
     },
   ],
-  admin: [
+  [Role.ADMIN]: [
     {
       label: 'Ride history',
       icon: 'directions_car_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',
@@ -86,7 +86,7 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
       action: 'logout',
     },
   ],
-  guest: [
+  [Role.GUEST]: [
     { label: 'Log in', icon: 'login_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg', action: 'login' },
     {
       label: 'Sign up',

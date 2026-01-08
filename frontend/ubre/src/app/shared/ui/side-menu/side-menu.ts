@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { MENU_BY_ROLE, Role, MenuItem } from './menu.config';
+import { MENU_BY_ROLE, MenuItem } from './menu.config';
+import { Role } from '../../../enums/role';
 
 type UserVM = {
   name: string;
@@ -17,7 +18,7 @@ type UserVM = {
 export class SideMenu {
   @Input() open = false;
   @Input() title = 'Account';
-  @Input() role: Role = 'guest';
+  @Input() role: Role = Role.GUEST;
   @Input() user: UserVM | null = null;
 
   @Output() closed = new EventEmitter<void>();
