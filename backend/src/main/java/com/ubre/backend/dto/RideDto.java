@@ -1,9 +1,14 @@
 package com.ubre.backend.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
+@Getter
+@Setter
 public class RideDto implements Serializable {
     private Long id;
     private LocalDateTime start;
@@ -29,83 +34,6 @@ public class RideDto implements Serializable {
         this.panic = panic;
         this.canceledBy = canceledBy;
         this.price = price;
-        this.distance = distance;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public LocalDateTime getStart() {
-        return start;
-    }
-
-    public LocalDateTime getEnd() {
-        return end;
-    }
-
-    public WaypointDto[] getWaypoints() {
-        return waypoints;
-    }
-
-    public UserDto getDriver() {
-        return driver;
-    }
-
-    public Collection<UserDto> getPassengers() {
-        return passengers;
-    }
-
-    public Boolean isPanic() {
-        return panic;
-    }
-
-    public String getCanceledBy() {
-        return canceledBy;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public Double getDistance() {
-        return distance;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public void setStart(LocalDateTime start) {
-        this.start = start;
-    }
-    public void setEnd(LocalDateTime end) {
-        this.end = end;
-    }
-    public void setWaypoints(WaypointDto[] waypoints) {
-        this.waypoints = waypoints;
-    }
-
-    public void setDriver(UserDto driver) {
-        this.driver = driver;
-    }
-
-    public void setPassengers(Collection<UserDto> passengers) {
-        this.passengers = passengers;
-    }
-
-    public void setPanic(Boolean panic) {
-        this.panic = panic;
-    }
-
-    public void setCanceledBy(String canceledBy) {
-        this.canceledBy = canceledBy;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public void setDistance(Double distance) {
         this.distance = distance;
     }
 }

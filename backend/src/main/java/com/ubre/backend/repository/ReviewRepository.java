@@ -1,6 +1,6 @@
 package com.ubre.backend.repository;
 
-import com.ubre.backend.model.Rating;
+import com.ubre.backend.model.Review;
 import com.ubre.backend.model.Driver;
 import com.ubre.backend.model.Ride;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface RatingRepository extends JpaRepository<Rating, Long> {
-    Optional<Rating> findByRide(Ride ride);
-    List<Rating> findByDriver(Driver driver);
+public interface ReviewRepository extends JpaRepository<Review, Long> {
+    Optional<Review> findByRide(Ride ride);
+    List<Review> findByDriver(Driver driver);
     
-    @Query("SELECT AVG(r.driverRating) FROM Rating r WHERE r.driver = :driver")
-    Double getAverageDriverRating(Driver driver);
+//    @Query("SELECT AVG(r.driverRating) FROM Review r WHERE r.driver = :driver")
+//    Double getAverageDriverRating(Driver driver);
 }

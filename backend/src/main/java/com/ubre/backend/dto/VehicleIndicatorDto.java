@@ -1,9 +1,13 @@
 package com.ubre.backend.dto;
 
 import com.ubre.backend.enums.UserStatus;
+import lombok.Getter;
+import lombok.Setter;
 
 // Every vehicle that is visible on the map has some indicator info
 
+@Getter
+@Setter
 public class VehicleIndicatorDto {
     private Long driverId;
     private WaypointDto location;
@@ -19,33 +23,4 @@ public class VehicleIndicatorDto {
         this.status = status;
         this.panic = panic;
     }
-
-    public Long getDriverId() {
-        return driverId;
-    }
-    public void setDriverId(Long driverId) {
-        this.driverId = driverId;
-    }
-
-    public WaypointDto getLocation() {
-        return location;
-    }
-    public void setLocation(WaypointDto location) {
-        this.location = location;
-    }
-
-    public UserStatus getStatus() {
-        return status;
-    }
-    public void setStatus(UserStatus status) {
-        this.status = status;
-    }
-
-    public Boolean isPanic() {
-        return panic;
-    }
-    public void setPanic(Boolean panic) {
-        this.panic = panic;
-    }
-
 }

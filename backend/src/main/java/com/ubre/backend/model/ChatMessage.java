@@ -1,8 +1,13 @@
 package com.ubre.backend.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "chat_messages")
 public class ChatMessage {
@@ -11,8 +16,8 @@ public class ChatMessage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "message_text", columnDefinition = "TEXT", nullable = false)
-    private String messageText;
+    @Column(name = "text", columnDefinition = "TEXT", nullable = false)
+    private String text;
 
     @Column(name = "sent_at", nullable = false)
     private LocalDateTime sentAt;
@@ -33,59 +38,10 @@ public class ChatMessage {
         this.sentAt = LocalDateTime.now();
     }
 
-    public ChatMessage(String messageText, Chat chat, User sender) {
-        this.messageText = messageText;
+    public ChatMessage(String text, Chat chat, User sender) {
+        this.text = text;
         this.chat = chat;
         this.sender = sender;
         this.sentAt = LocalDateTime.now();
-    }
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getMessageText() {
-        return messageText;
-    }
-
-    public void setMessageText(String messageText) {
-        this.messageText = messageText;
-    }
-
-    public LocalDateTime getSentAt() {
-        return sentAt;
-    }
-
-    public void setSentAt(LocalDateTime sentAt) {
-        this.sentAt = sentAt;
-    }
-
-    public boolean isRead() {
-        return isRead;
-    }
-
-    public void setRead(boolean read) {
-        isRead = read;
-    }
-
-    public Chat getChat() {
-        return chat;
-    }
-
-    public void setChat(Chat chat) {
-        this.chat = chat;
-    }
-
-    public User getSender() {
-        return sender;
-    }
-
-    public void setSender(User sender) {
-        this.sender = sender;
     }
 }
