@@ -61,24 +61,40 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
       label: 'Ride history',
       icon: 'directions_car_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',
       action: 'ride-history',
-    }, //admin-dashboard
-    { label: 'Active rides', icon: 'active-rides-primary-text.svg', action: 'admin-users' },
+    },
+    { label: 'Active rides', 
+      icon: 'active-rides-primary-text.svg', 
+      action: 'admin-users' 
+    },
     {
       label: 'Account settings',
       icon: 'settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',
       action: 'account-settings',
     },
-    { label: 'Price adjustment', icon: 'price-adjustment-primary-text.svg', action: 'admin-users' },
+    { 
+      label: 'Price adjustment', 
+      icon: 'price-adjustment-primary-text.svg', 
+      action: 'admin-users' 
+    },
     {
       label: 'Register a driver',
       icon: 'person_add_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',
       action: 'register-driver',
     },
-    { label: 'Panic notifications', icon: 'warning-primary-text.svg', action: 'admin-users' },
+    { 
+      label: 'Panic notifications', 
+      icon: 'warning-primary-text.svg', 
+      action: 'admin-users' 
+    },
     {
       label: 'Reports',
       icon: 'analytics_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',
       action: 'reports',
+    },
+    {
+      label: 'Profile changes',
+      icon: 'person_edit_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',
+      action: 'profile-changes',
     },
     {
       label: 'Log out',
@@ -87,7 +103,11 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
     },
   ],
   [Role.GUEST]: [
-    { label: 'Log in', icon: 'login_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg', action: 'login' },
+    { 
+      label: 'Log in', 
+      icon: 'login_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg', 
+      action: 'login' 
+    },
     {
       label: 'Sign up',
       icon: 'person_add_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',
