@@ -6,7 +6,6 @@ import { Observable, of } from 'rxjs';
 import { UserStatsDto } from '../dtos/user-stats-dto';
 import { VehicleDto } from '../dtos/vehicle-dto';
 import { VehicleType } from '../enums/vehicle-type';
-import { DriverRegistrationDto } from '../dtos/driver-registration-dto';
 
 @Injectable({
   providedIn: 'root',

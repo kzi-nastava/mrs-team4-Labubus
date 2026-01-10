@@ -26,6 +26,8 @@ import { VehicleType } from '../../enums/vehicle-type';
 import { MapService } from '../../services/map-service';
 import { forkJoin } from 'rxjs';
 import { DriverRegistrationService } from '../../services/driver-registration-service';
+import { ProfileChangeService } from '../../services/profile-change-service';
+import { ProfileChangeDto } from '../../dtos/profile-change-dto';
 
 @Component({
   selector: 'app-user-layout',
@@ -43,6 +45,7 @@ import { DriverRegistrationService } from '../../services/driver-registration-se
     private driverRegistrationService = inject(DriverRegistrationService);
     public mapService = inject(MapService);
     private confetti = inject(ConfettiService);
+    private profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
 
   Role = Role;
   VehicleType = VehicleType;
@@ -51,6 +54,8 @@ import { DriverRegistrationService } from '../../services/driver-registration-se
   userStats!: UserStatsDto;
   vehicle!: VehicleDto;
   driverRegistration! : DriverRegistrationDto;
+  profileChange! : ProfileChangeDto;
+  
 
   ngOnInit() {
     this.userService.getCurrentUser().subscribe((user: UserDto) => {
@@ -79,6 +84,7 @@ import { DriverRegistrationService } from '../../services/driver-registration-se
     rideOptionsOpen: false,
     checkoutModalOpen: false,
     toastOpen: false,
+    profileChangesOpen: false,
   };
 
 
