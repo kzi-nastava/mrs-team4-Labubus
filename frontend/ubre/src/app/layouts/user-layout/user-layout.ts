@@ -25,13 +25,17 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 import { VehicleType } from '../../enums/vehicle-type';
 import { MapService } from '../../services/map-service';
 import { forkJoin } from 'rxjs';
+import { DriverRegistrationService } from '../../services/driver-registration-service';
+import { ProfileChangeService } from '../../services/profile-change-service';
+import { ProfileChangeDto } from '../../dtos/profile-change-dto';
+import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-change-card';
 
 @Component({
   selector: 'app-user-layout',
   standalone: true,
   imports: [Map,IconButton,SideMenu,Toast,
     Modal,ModalContainer,StatCard,Button,
-    Sheet,FormsModule,RideHistory,],
+    Sheet,FormsModule,RideHistory,ProfileChangeCard],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -39,8 +43,10 @@ import { forkJoin } from 'rxjs';
     constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
     
     private userService = inject(UserService);
+    private driverRegistrationService = inject(DriverRegistrationService);
     public mapService = inject(MapService);
     private confetti = inject(ConfettiService);
+    private profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
 
   Role = Role;
   VehicleType = VehicleType;
@@ -48,7 +54,9 @@ import { forkJoin } from 'rxjs';
   user!: UserDto;
   userStats!: UserStatsDto;
   vehicle!: VehicleDto;
-  driverRegistration! : DriverRegistrationDto;
+  driverRegistration! : DriverRegistrationDto;  
+
+  profileChanges: ProfileChangeDto[] = [];
 
   ngOnInit() {
     this.userService.getCurrentUser().subscribe((user: UserDto) => {
@@ -57,7 +65,7 @@ import { forkJoin } from 'rxjs';
       forkJoin({
         stats: this.userService.getUserStats(user.id),
         veh: this.userService.getUserVehicle(user.id),
-        reg: this.userService.getDriverRegistration(),
+        reg: this.driverRegistrationService.getDriverRegistration(),
       }).subscribe(({ stats, veh, reg }) => {
         this.userStats = stats;
         this.vehicle = veh;
@@ -77,6 +85,7 @@ import { forkJoin } from 'rxjs';
     rideOptionsOpen: false,
     checkoutModalOpen: false,
     toastOpen: false,
+    profileChangesOpen: false,
   };
 
 
@@ -137,6 +146,7 @@ import { forkJoin } from 'rxjs';
     this.closeRegisterDriver();
     this.mapService.closeDest();
     this.closeRideHistory();
+    this.closeProfileChanges();
   }
 
   handleMenuAction(action: string) {
@@ -157,6 +167,9 @@ import { forkJoin } from 'rxjs';
     }
     if (action === 'sign-up') {
       this.router.navigate(['/signup']);
+    }
+    if (action === 'profile-changes') {
+      this.openProfileChanges();
     }
     this.closeMenu();
   }
@@ -564,5 +577,53 @@ import { forkJoin } from 'rxjs';
     // TODO: API call za potvrdu vožnje
     this.ui.checkoutModalOpen = false;
     this.showToast('Ride confirmed', 'Your ride has been confirmed successfully.');
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // PROFILE CHANGES SHEET LOGIC
+  loadProfileChanges() {
+    this.profileChangeService.getProfileChanges().subscribe(list => {
+      this.profileChanges = list;
+    });
+  }
+
+  openProfileChanges() {
+    this.ui.menuOpen = false;
+    this.ui.profileChangesOpen = true;
+    this.loadProfileChanges();
+  }
+
+  closeProfileChanges() {
+    this.ui.profileChangesOpen = false;
+  }
+
+  onProfileChangesBack() {
+    this.closeProfileChanges();
+    this.ui.menuOpen = true;
+  }
+
+  acceptProfileChange(id: number) {
+    this.profileChangeService.accept(id).subscribe(() => this.loadProfileChanges());
+  }
+
+  rejectProfileChange(id: number) {
+    this.profileChangeService.reject(id).subscribe(() => this.loadProfileChanges());
   }
 }
