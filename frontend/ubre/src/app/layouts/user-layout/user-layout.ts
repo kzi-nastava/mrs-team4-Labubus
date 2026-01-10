@@ -28,13 +28,14 @@ import { forkJoin } from 'rxjs';
 import { DriverRegistrationService } from '../../services/driver-registration-service';
 import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
+import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-change-card';
 
 @Component({
   selector: 'app-user-layout',
   standalone: true,
   imports: [Map,IconButton,SideMenu,Toast,
     Modal,ModalContainer,StatCard,Button,
-    Sheet,FormsModule,RideHistory,],
+    Sheet,FormsModule,RideHistory,ProfileChangeCard],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -53,9 +54,9 @@ import { ProfileChangeDto } from '../../dtos/profile-change-dto';
   user!: UserDto;
   userStats!: UserStatsDto;
   vehicle!: VehicleDto;
-  driverRegistration! : DriverRegistrationDto;
-  profileChange! : ProfileChangeDto;
-  
+  driverRegistration! : DriverRegistrationDto;  
+
+  profileChanges: ProfileChangeDto[] = [];
 
   ngOnInit() {
     this.userService.getCurrentUser().subscribe((user: UserDto) => {
@@ -145,6 +146,7 @@ import { ProfileChangeDto } from '../../dtos/profile-change-dto';
     this.closeRegisterDriver();
     this.mapService.closeDest();
     this.closeRideHistory();
+    this.closeProfileChanges();
   }
 
   handleMenuAction(action: string) {
@@ -165,6 +167,9 @@ import { ProfileChangeDto } from '../../dtos/profile-change-dto';
     }
     if (action === 'sign-up') {
       this.router.navigate(['/signup']);
+    }
+    if (action === 'profile-changes') {
+      this.openProfileChanges();
     }
     this.closeMenu();
   }
@@ -572,5 +577,53 @@ import { ProfileChangeDto } from '../../dtos/profile-change-dto';
     // TODO: API call za potvrdu vožnje
     this.ui.checkoutModalOpen = false;
     this.showToast('Ride confirmed', 'Your ride has been confirmed successfully.');
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // PROFILE CHANGES SHEET LOGIC
+  loadProfileChanges() {
+    this.profileChangeService.getProfileChanges().subscribe(list => {
+      this.profileChanges = list;
+    });
+  }
+
+  openProfileChanges() {
+    this.ui.menuOpen = false;
+    this.ui.profileChangesOpen = true;
+    this.loadProfileChanges();
+  }
+
+  closeProfileChanges() {
+    this.ui.profileChangesOpen = false;
+  }
+
+  onProfileChangesBack() {
+    this.closeProfileChanges();
+    this.ui.menuOpen = true;
+  }
+
+  acceptProfileChange(id: number) {
+    this.profileChangeService.accept(id).subscribe(() => this.loadProfileChanges());
+  }
+
+  rejectProfileChange(id: number) {
+    this.profileChangeService.reject(id).subscribe(() => this.loadProfileChanges());
   }
 }

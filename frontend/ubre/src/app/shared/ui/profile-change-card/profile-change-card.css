@@ -1,0 +1,92 @@
+.pc-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  opacity: 1;
+  transform: none;
+
+  max-height: 260px;
+  transition:
+    opacity .18s ease,
+    max-height .28s ease,
+    margin .28s ease,
+    padding .28s ease;
+}
+
+.pc-card.leaving{
+  opacity: 0;
+  max-height: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+}
+
+.pc-userid {
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+}
+
+.pc-avatars {
+  display: flex;
+  align-items: center;
+}
+
+.pc-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #eee;
+}
+
+.pc-gap {
+  width: 12px;
+}
+
+.pc-old,
+.pc-new {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.pc-old {
+  color: #666;
+}
+
+.pc-new {
+  color: #111;
+  font-weight: 500;
+}
+
+.pc-actions {
+  display: flex;
+  margin-top: 8px;
+}
+
+.pc-btn {
+  flex: 1;
+  height: 44px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pc-btn-filled {
+  background-color: var(--color-primary-dark);
+  color: var(--color-surface);
+  border: 1px solid var(--color-primary-dark);
+}
+
+.pc-btn-outlined {
+  background-color: var(--color-surface);
+  color: var(--color-primary-dark);
+  border: 1px solid var(--color-primary-dark);
+}

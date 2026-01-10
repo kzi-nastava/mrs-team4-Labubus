@@ -490,5 +490,30 @@
 
     <!-- RIDE HISTORY SHEET -->
     <app-ride-history class="ride-history" (onClose)="onRideHistoryBack()" [open]="showRideHistory"></app-ride-history>
+
+
+    <!-- PROFILE CHANGES SHEET -->
+    @if (user.role === Role.ADMIN) {
+    <app-sheet
+      [open]="ui.profileChangesOpen"
+      title="Profile changes"
+      (closed)="closeProfileChanges()"
+      (back)="closeProfileChanges()">
+
+      <div class="pc-list">
+        @for (it of profileChanges; track it.id) {
+          <app-profile-change-card [item]="it"
+            (accept)="acceptProfileChange($event)"
+            (reject)="rejectProfileChange($event)">
+          </app-profile-change-card>
+        }
+
+        @if (profileChanges.length === 0) {
+          <div class="pc-empty">No pending requests</div>
+        }
+      </div>
+    </app-sheet>
+  }
+
   </div>
 </div>
