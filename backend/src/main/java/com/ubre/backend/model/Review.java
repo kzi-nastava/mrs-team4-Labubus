@@ -1,5 +1,6 @@
 package com.ubre.backend.model;
 
+import com.ubre.backend.dto.ReviewDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,6 +49,12 @@ public class Review {
         this.ride = ride;
         this.user = user;
         this.driver = driver;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public Review(ReviewDto dto) {
+        this.rating = dto.getRating();
+        this.text = dto.getText();
         this.createdAt = LocalDateTime.now();
     }
 }

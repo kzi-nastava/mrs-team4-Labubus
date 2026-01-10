@@ -1,8 +1,21 @@
 package com.ubre.backend.service.impl;
 
 import com.ubre.backend.dto.ReviewDto;
+import com.ubre.backend.enums.Role;
+import com.ubre.backend.model.Driver;
+import com.ubre.backend.model.Review;
+import com.ubre.backend.model.Ride;
+import com.ubre.backend.model.User;
+import com.ubre.backend.repository.DriverRepository;
+import com.ubre.backend.repository.ReviewRepository;
+import com.ubre.backend.repository.RideRepository;
+import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.ReviewService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.ErrorResponseException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
 import java.util.List;
@@ -10,58 +23,105 @@ import java.util.Optional;
 
 @Service
 public class ReviewServiceImpl implements ReviewService {
-    Collection<ReviewDto> reviews = List.of(
-            new ReviewDto(1L, 1L, 1L, 5, "Fair and reliable service."),
-            new ReviewDto(2L, 2L, 1L, 4, "Does not have AC."),
-            new ReviewDto(3L, 2L, 2L, 3, "Couldnt stop talking during the ride."),
-            new ReviewDto(4L, 3L, 2L, 4, "Vehicle was very loud.")
-    );
+    @Autowired
+    private ReviewRepository reviewRepository;
+    @Autowired
+    private DriverRepository driverRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private RideRepository rideRepository;
+
+//    Collection<ReviewDto> reviews = List.of(
+//            new ReviewDto(1L, 1L, 1L, 5, "Fair and reliable service."),
+//            new ReviewDto(2L, 2L, 1L, 4, "Does not have AC."),
+//            new ReviewDto(3L, 2L, 2L, 3, "Couldnt stop talking during the ride."),
+//            new ReviewDto(4L, 3L, 2L, 4, "Vehicle was very loud.")
+//    );
 
 
     @Override
     public ReviewDto getReview(Long id) {
-        Optional<ReviewDto> targetReview = reviews.stream().filter(review -> review.getId() == id).findFirst();
-        return targetReview.orElse(null);
+        Optional<Review> review = reviewRepository.findById(id);
+        if (review.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found");
+
+        return new ReviewDto(review.get());
     }
 
     @Override
     public Collection<ReviewDto> getDriverReviews(Long driverId) {
-        return reviews.stream().filter(review -> review.getDriverId() == driverId).toList();
+        Optional<Driver> driver = driverRepository.findById(driverId);
+        if (driver.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found");
+
+        List<Review> driverReviews = reviewRepository.findByDriver(driver.get());
+        return driverReviews.stream().map(ReviewDto::new).toList();
     }
 
     @Override
     public Collection<ReviewDto> getUserReviews(Long userId) {
-        return reviews.stream().filter(review -> review.getUserId() == userId).toList();
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty() /*|| user.get().getRole() != Role.REGISTERED_USER*/)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+
+        List<Review> userReviews = reviewRepository.findByUser(user.get());
+        return userReviews.stream().map(ReviewDto::new).toList();
     }
 
     @Override
     public Double getDriverAverageRating(Long driverId) {
-        return getDriverReviews(driverId).stream().mapToInt(ReviewDto::getRating).average().orElse(0);
+        Optional<Driver> driver = driverRepository.findById(driverId);
+        if (driver.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found");
+
+        return reviewRepository.getAverageDriverRating(driver.get());
     }
 
     @Override
-    public ReviewDto createReview(ReviewDto reviewDto) {
-        reviewDto.setId(reviews.stream().mapToLong(ReviewDto::getId).max().orElse(0) + 1);
-        reviews.add(reviewDto);
-        return reviewDto;
+    public ReviewDto createReview(Long rideId, ReviewDto reviewDto) {
+        Optional<Driver> driver = driverRepository.findById(reviewDto.getDriverId());
+        if (driver.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found");
+
+        Optional<User> user = userRepository.findById(reviewDto.getUserId());
+        if (user.isEmpty() /*|| user.get().getRole() != Role.REGISTERED_USER*/)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+
+        Optional<Ride> ride = rideRepository.findById(rideId);
+        if (ride.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
+
+        Optional<Review> review = reviewRepository.findByRide(ride.get());
+        if (review.isPresent())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Review already exists");
+
+        Review newReview = new Review(reviewDto);
+        newReview.setDriver(driver.get());
+        newReview.setUser(user.get());
+        newReview.setRide(ride.get());
+        return new ReviewDto(reviewRepository.save(newReview));
     }
 
     @Override
     public ReviewDto updateReview(Long id, ReviewDto reviewDto) {
-        ReviewDto review = getReview(id);
-        if (review != null) {
-            reviewDto.setId(id);
-            reviews.remove(review);
-            reviews.add(reviewDto);
-            return reviewDto;
-        }
-        return null;
+        Optional<Review> review = reviewRepository.findById(id);
+        if (review.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found");
+
+        Review updatedReview = review.get();
+        updatedReview.setText(reviewDto.getText());
+        updatedReview.setRating(reviewDto.getRating());
+        return  new ReviewDto(reviewRepository.save(updatedReview));
     }
 
     @Override
     public ReviewDto deleteReview(Long id) {
-        ReviewDto review = getReview(id);
-        reviews.remove(review);
-        return review;
+        Optional<Review> review = reviewRepository.findById(id);
+        if (review.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found");
+
+        reviewRepository.delete(review.get());
+        return new ReviewDto(review.get());
     }
 }
