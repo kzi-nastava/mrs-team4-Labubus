@@ -1,5 +1,6 @@
 package com.ubre.backend.model;
 
+import com.ubre.backend.dto.WaypointDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,5 +31,12 @@ public class Waypoint {
         this.label = label;
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    public Waypoint(WaypointDto dto) {
+        this.id = dto.getId();
+        this.label = dto.getLabel();
+        this.latitude = dto.getLatitude();
+        this.longitude = dto.getLongitude();
     }
 }
