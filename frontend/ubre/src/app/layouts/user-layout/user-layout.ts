@@ -25,6 +25,7 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 import { VehicleType } from '../../enums/vehicle-type';
 import { MapService } from '../../services/map-service';
 import { forkJoin } from 'rxjs';
+import { DriverRegistrationService } from '../../services/driver-registration-service';
 
 @Component({
   selector: 'app-user-layout',
@@ -39,6 +40,7 @@ import { forkJoin } from 'rxjs';
     constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
     
     private userService = inject(UserService);
+    private driverRegistrationService = inject(DriverRegistrationService);
     public mapService = inject(MapService);
     private confetti = inject(ConfettiService);
 
@@ -57,7 +59,7 @@ import { forkJoin } from 'rxjs';
       forkJoin({
         stats: this.userService.getUserStats(user.id),
         veh: this.userService.getUserVehicle(user.id),
-        reg: this.userService.getDriverRegistration(),
+        reg: this.driverRegistrationService.getDriverRegistration(),
       }).subscribe(({ stats, veh, reg }) => {
         this.userStats = stats;
         this.vehicle = veh;

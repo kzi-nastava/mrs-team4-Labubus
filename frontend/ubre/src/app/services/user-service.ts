@@ -42,27 +42,6 @@ export class UserService {
     plates: "BG1234AB",
   };
 
-  private driverRegistration : DriverRegistrationDto = {
-    id : 0,
-    avatarUrl : 'default-avatar.jpg',
-    email : '',
-    password : '',
-    name : '',
-    surname : '',
-    phone : '',
-    address : '',
-
-    vehicle : {
-      id: 0,
-      model: "",
-      type: VehicleType.STANDARD,
-      seats: 4,
-      babyFriendly: false,
-      petFriendly: false,
-      plates: "",
-    }
-  };
-
   private readonly http = inject(HttpClient);
 
   getCurrentUser() : Observable<UserDto> {
@@ -75,9 +54,5 @@ export class UserService {
 
   getUserVehicle(userId : number) : Observable<VehicleDto> {
     return of(this.currentUserVehicle);
-  }
-
-  getDriverRegistration() : Observable<DriverRegistrationDto> {
-    return of(this.driverRegistration);
   }
 }
