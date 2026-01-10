@@ -38,10 +38,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(Long id) {
-        return users.stream()
-                .filter(user -> user.getId().equals(id))
-                .findFirst()
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        return new UserDto(
+                user.getId(),
+                user.getRole(),
+                user.getAvatarUrl(),
+                user.getEmail(),
+                user.getName(),
+                user.getSurname(),
+                user.getPhone(),
+                user.getAddress(),
+                user.getStatus()
+        );
     }
 
     @Override

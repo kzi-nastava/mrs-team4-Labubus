@@ -6,21 +6,26 @@ import { Observable, of } from 'rxjs';
 import { UserStatsDto } from '../dtos/user-stats-dto';
 import { VehicleDto } from '../dtos/vehicle-dto';
 import { VehicleType } from '../enums/vehicle-type';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
-  private currentUser: UserDto = {
+
+  private readonly http = inject(HttpClient);
+  private readonly api = 'http://localhost:8080/api';
+
+  private readonly currentUser = new BehaviorSubject<UserDto>({
     email: 'mika@mikic.com',
     name: 'Mika',
     surname: 'Mikic',
     avatarUrl: 'default-avatar.jpg',
     role: Role.ADMIN,
     id: 2,
-    phone: "1251323523",
-    address: "Test adress 123"
-  };
+    phone: '1251323523',
+    address: 'Test adress 123',
+  });
 
   private currentUserStats : UserStatsDto = {
     userId: 2,
@@ -41,10 +46,8 @@ export class UserService {
     plates: "BG1234AB",
   };
 
-  private readonly http = inject(HttpClient);
-
   getCurrentUser() : Observable<UserDto> {
-    return of(this.currentUser);
+    return this.currentUser.asObservable();
   }
 
   getUserStats(userId : number) : Observable<UserStatsDto> {
@@ -53,5 +56,18 @@ export class UserService {
 
   getUserVehicle(userId : number) : Observable<VehicleDto> {
     return of(this.currentUserVehicle);
+  }
+
+  getUserById(userId: number): Observable<UserDto> {
+    return this.http.get<UserDto>(`${this.api}/user/${userId}`);
+  }
+
+  setCurrentUserById(id: number) {
+    this.getUserById(id).subscribe({
+      next: user => this.currentUser.next(user),
+      error: err => {
+        if (err.status === 404) alert('User not found');
+      }
+    });
   }
 }

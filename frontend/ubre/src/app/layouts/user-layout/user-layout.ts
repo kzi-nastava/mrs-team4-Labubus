@@ -59,6 +59,7 @@ import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-c
   profileChanges: ProfileChangeDto[] = [];
 
   ngOnInit() {
+    this.userService.setCurrentUserById(1);
     this.userService.getCurrentUser().subscribe((user: UserDto) => {
       this.user = user;
 
@@ -73,6 +74,7 @@ import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-c
       });
     });
   }
+
 
   ui = {
     menuOpen: false,
