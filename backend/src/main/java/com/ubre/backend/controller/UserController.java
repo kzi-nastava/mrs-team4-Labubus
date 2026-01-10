@@ -105,7 +105,10 @@ public class UserController {
     // not sure how to implement this endpoint yet? (questtion for later)
 
 
-
+    @GetMapping("/admins")
+    public List<UserDto> admins() {
+        return userService.getAdmins();
+    }
 
 
 //    @Autowired

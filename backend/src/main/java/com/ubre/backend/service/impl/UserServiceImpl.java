@@ -6,7 +6,9 @@ import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.dto.UserStatsDto;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.repository.AdminRepository;
 import com.ubre.backend.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,6 +29,10 @@ public class UserServiceImpl implements UserService {
         users.add(new UserDto(2L, Role.REGISTERED_USER, "avatar2.png", "jane@doe.com", "Jane", "Doe", "0987654321", "456 Elm St", UserStatus.INACTIVE));
         users.add(new UserDto(3L, Role.DRIVER, "avatar3.png", "king@cobra.com", "King", "Cobra", "1122334455", "789 Oak St", UserStatus.ON_RIDE));
     }
+
+    // real repository
+    @Autowired
+    private AdminRepository adminRepository;
 
     @Override
     public UserDto getUserById(Long id) {
@@ -136,4 +142,23 @@ public class UserServiceImpl implements UserService {
         }
         // todo: implement send passenger request logic via email
     }
+
+    @Override
+    public List<UserDto> getAdmins() {
+        return adminRepository.findAll()
+                .stream()
+                .map(a -> new UserDto(
+                        a.getId(),
+                        a.getRole(),
+                        a.getAvatarUrl(),
+                        a.getEmail(),
+                        a.getName(),
+                        a.getSurname(),
+                        a.getPhone(),
+                        a.getAddress(),
+                        a.getStatus()
+                ))
+                .toList();
+    }
+
 }
