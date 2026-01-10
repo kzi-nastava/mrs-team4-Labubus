@@ -21,5 +21,4 @@ public interface UserService {
     void requestProfileChange(ProfileChangeDto profileChangeDto);
     List<ProfileChangeDto> getAllProfileChangeRequests();
     void sendPassengerRequest(Long userId, String passengerEmail);
-    List<UserDto> getAdmins();
 }

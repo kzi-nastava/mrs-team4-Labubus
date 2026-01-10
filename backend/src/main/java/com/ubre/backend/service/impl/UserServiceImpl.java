@@ -6,7 +6,9 @@ import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.dto.UserStatsDto;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.model.User;
 import com.ubre.backend.repository.AdminRepository;
+import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,7 +34,7 @@ public class UserServiceImpl implements UserService {
 
     // real repository
     @Autowired
-    private AdminRepository adminRepository;
+    private UserRepository userRepository;
 
     @Override
     public UserDto getUserById(Long id) {
@@ -44,10 +46,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserByEmail(String email) {
-        return users.stream()
-                .filter(user -> user.getEmail().equalsIgnoreCase(email))
-                .findFirst()
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        return new UserDto(
+                user.getId(),
+                user.getRole(),
+                user.getAvatarUrl(),
+                user.getEmail(),
+                user.getName(),
+                user.getSurname(),
+                user.getPhone(),
+                user.getAddress(),
+                user.getStatus()
+        );
     }
 
     @Override
@@ -142,23 +154,4 @@ public class UserServiceImpl implements UserService {
         }
         // todo: implement send passenger request logic via email
     }
-
-    @Override
-    public List<UserDto> getAdmins() {
-        return adminRepository.findAll()
-                .stream()
-                .map(a -> new UserDto(
-                        a.getId(),
-                        a.getRole(),
-                        a.getAvatarUrl(),
-                        a.getEmail(),
-                        a.getName(),
-                        a.getSurname(),
-                        a.getPhone(),
-                        a.getAddress(),
-                        a.getStatus()
-                ))
-                .toList();
-    }
-
 }
