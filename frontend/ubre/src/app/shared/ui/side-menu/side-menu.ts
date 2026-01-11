@@ -17,7 +17,6 @@ type SideMenuUser = {
 })
 export class SideMenu {
   @Input() open = false;
-  @Input() title = 'Account';
   @Input() role: Role = Role.GUEST;
   @Input() user: SideMenuUser | null = null;
 
