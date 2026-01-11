@@ -216,6 +216,7 @@ import { AsyncPipe } from '@angular/common';
   
   
   editing!: UserDto;
+  editingAvatarSrc = this.avatarSrc$;
   hidePassword = true;
   toastTitle = 'Ignore this toast';
   toastMessage = 'This is just a demo message for the toast';
