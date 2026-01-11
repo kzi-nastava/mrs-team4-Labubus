@@ -29,13 +29,15 @@ import { DriverRegistrationService } from '../../services/driver-registration-se
 import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
 import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-change-card';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-user-layout',
   standalone: true,
   imports: [Map,IconButton,SideMenu,Toast,
     Modal,ModalContainer,StatCard,Button,
-    Sheet,FormsModule,RideHistory,ProfileChangeCard],
+    Sheet,FormsModule,RideHistory,ProfileChangeCard,
+    AsyncPipe],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
