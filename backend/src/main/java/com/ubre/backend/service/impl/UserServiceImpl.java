@@ -11,10 +11,16 @@ import com.ubre.backend.repository.AdminRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +41,42 @@ public class UserServiceImpl implements UserService {
     // real repository
     @Autowired
     private UserRepository userRepository;
+
+    @Value("${app.upload.dir}")
+    private String uploadDir;
+
+    @Override
+    public Resource getAvatar(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        String avatarUrl = user.getAvatarUrl();
+        if (avatarUrl == null || avatarUrl.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Avatar not found");
+        }
+
+        if (!avatarUrl.toLowerCase().endsWith(".jpg")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported avatar format");
+        }
+
+        Path root = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Path filePath = root.resolve(avatarUrl).normalize();
+        
+        if (!filePath.startsWith(root)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid avatar path");
+        }
+
+        try {
+            Resource resource = new UrlResource(filePath.toUri());
+            if (!resource.exists() || !resource.isReadable()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Avatar not found");
+            }
+            return resource;
+        } catch (MalformedURLException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid avatar URL");
+        }
+    }
+
 
     @Override
     public UserDto getUserById(Long id) {
