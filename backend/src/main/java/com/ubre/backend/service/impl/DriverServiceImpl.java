@@ -5,42 +5,88 @@ import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.model.Driver;
+import com.ubre.backend.repository.DriverRepository;
 import com.ubre.backend.service.DriverService;
+import com.ubre.backend.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class DriverServiceImpl implements DriverService {
 
-    // Mock List only for testing purposes
-    private final List<UserDto> drivers = new ArrayList<UserDto>();
+    @Autowired
+    private DriverRepository driverRepository;
 
-    public DriverServiceImpl() {
-        drivers.add(new UserDto(1L, Role.DRIVER, "avatarUrl1", "driver1@ubre.com", "John", "Wick", "0123456789", "Crazy street 1", UserStatus.ACTIVE));
-        drivers.add(new UserDto(2L, Role.DRIVER, "avatarUrl2", "driver2@ubre.com", "Jane", "Doe", "9876543210", "Mysterious avenue 2", UserStatus.ON_RIDE));
-        drivers.add(new UserDto(3L, Role.DRIVER, "avatarUrl3", "driver3@ubre.com", "Bob", "Smith", "5555555555", "Hidden boulevard 3", UserStatus.INACTIVE));
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public List<UserDto> getAllDrivers() {
-        return drivers;
+        List<Driver> drivers = driverRepository.findAll();
+        List<UserDto> driverDtos = new ArrayList<>();
+        for (Driver driver : drivers) {
+            UserDto dto = new UserDto(
+                    driver.getId(),
+                    Role.DRIVER,
+                    driver.getAvatarUrl(),
+                    driver.getEmail(),
+                    driver.getName(),
+                    driver.getSurname(),
+                    driver.getPhone(),
+                    driver.getAddress(),
+                    driver.getStatus()
+            );
+            driverDtos.add(dto);
+        }
+        return driverDtos;
     }
+
 
     @Override
     public List<UserDto> getAvailableDrivers() {
-        return drivers; // In a real implementation, filter by availability
+        List<Driver> drivers = driverRepository.findByStatus(UserStatus.ACTIVE);
+        List<UserDto> driverDtos = new ArrayList<>();
+        for (Driver driver : drivers) {
+            UserDto dto = new UserDto(
+                    driver.getId(),
+                    Role.DRIVER,
+                    driver.getAvatarUrl(),
+                    driver.getEmail(),
+                    driver.getName(),
+                    driver.getSurname(),
+                    driver.getPhone(),
+                    driver.getAddress(),
+                    driver.getStatus()
+            );
+            driverDtos.add(dto);
+        }
+        return driverDtos;
     }
 
     @Override
     public UserDto getDriverById(Long id) {
-        return drivers.stream()
-                .filter(driver -> driver.getId().equals(id))
-                .findFirst()
+        Driver driver = driverRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found"));
+
+        return new UserDto(
+                driver.getId(),
+                Role.DRIVER,
+                driver.getAvatarUrl(),
+                driver.getEmail(),
+                driver.getName(),
+                driver.getSurname(),
+                driver.getPhone(),
+                driver.getAddress(),
+                driver.getStatus()
+        );
     }
 
     @Override
@@ -67,40 +113,46 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public UserDto createDriver(DriverRegistrationDto dto) {
 
-        if (dto.getEmail() == null || dto.getEmail().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Email is required"
-            );
+        boolean emailExists = driverRepository.findByEmail(dto.getEmail()).isPresent();
+
+        if (emailExists) { throw new ResponseStatusException(
+                HttpStatus.CONFLICT, "Email already exists");
         }
 
-        boolean emailExists = drivers.stream()
-                .anyMatch(d -> d.getEmail().equalsIgnoreCase(dto.getEmail()));
+        Driver newDriver = new Driver();
+        newDriver.setRole(Role.DRIVER);
+        newDriver.setName(dto.getName());
+        newDriver.setSurname(dto.getSurname());
+        newDriver.setEmail(dto.getEmail());
+        newDriver.setPassword(passwordEncoder.encode(dto.getPassword()));
+        newDriver.setPhone(dto.getPhone());
+        newDriver.setAddress(dto.getAddress());
+        newDriver.setStatus(UserStatus.INACTIVE); // New drivers are inactive by default
+        newDriver.setAvatarUrl(dto.getAvatarUrl());
+        newDriver.setIsActivated(false);
+        newDriver.setIsBlocked(false);
 
-        if (emailExists) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Email already exists"
-            );
-        }
+        String activationToken = java.util.UUID.randomUUID().toString();
+        LocalDateTime activationTokenExpiry = LocalDateTime.now().plusDays(1);
 
-        Long newId = (long) (drivers.size() + 1);
+        newDriver.setActivationToken(activationToken);
+        newDriver.setActivationTokenExpiry(activationTokenExpiry);
 
-        UserDto newDriver = new UserDto(
-                newId,
-                Role.DRIVER,
-                dto.getAvatarUrl(),
-                dto.getEmail(),
-                dto.getName(),
-                dto.getSurname(),
-                dto.getPhone(),
-                dto.getAddress(),
-                UserStatus.INACTIVE
+        Driver savedDriver = driverRepository.save(newDriver);
+
+        //emailService.sendDriverActivationEmail(savedDriver.getEmail(), activationToken);
+        
+        return new UserDto(
+                savedDriver.getId(),
+                savedDriver.getRole(),
+                savedDriver.getAvatarUrl(),
+                savedDriver.getEmail(),
+                savedDriver.getName(),
+                savedDriver.getSurname(),
+                savedDriver.getPhone(),
+                savedDriver.getAddress(),
+                savedDriver.getStatus()
         );
-
-        drivers.add(newDriver);
-        System.out.println("New driver created: " + newDriver.getEmail());
-        return newDriver;
     }
 
     @Override
