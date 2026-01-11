@@ -6,6 +6,7 @@ import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.dto.UserStatsDto;
 import com.ubre.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,16 @@ public class UserController {
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         UserDto user = userService.getUserById(id);
         return ResponseEntity.status(HttpStatus.OK).body(user);
+    }
+
+    // getting users avater by id
+    @GetMapping(
+            value = "/{id}/avatar",
+            produces = MediaType.IMAGE_JPEG_VALUE
+    )
+    public ResponseEntity<Resource> getUserAvatar(@PathVariable Long id) {
+        Resource avatar = userService.getAvatar(id);
+        return ResponseEntity.status(HttpStatus.OK).body(avatar);
     }
 
     // getting user stats by id
@@ -103,8 +114,6 @@ public class UserController {
 
     // accept a passenger request via email link
     // not sure how to implement this endpoint yet? (questtion for later)
-
-
 
 
 

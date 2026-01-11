@@ -1,57 +1,95 @@
-import { inject, Injectable } from '@angular/core';
-import { UserDto } from '../dtos/user-dto';
-import { Role } from '../enums/role';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { UserDto } from '../dtos/user-dto';
 import { UserStatsDto } from '../dtos/user-stats-dto';
 import { VehicleDto } from '../dtos/vehicle-dto';
+import { Role } from '../enums/role';
 import { VehicleType } from '../enums/vehicle-type';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class UserService {
-  private currentUser: UserDto = {
+  private readonly http = inject(HttpClient);
+  private readonly api = 'http://localhost:8080/api';
+
+  private readonly currentUserSubject = new BehaviorSubject<UserDto>({
     email: 'mika@mikic.com',
     name: 'Mika',
     surname: 'Mikic',
     avatarUrl: 'default-avatar.jpg',
     role: Role.ADMIN,
     id: 2,
-    phone: "1251323523",
-    address: "Test adress 123"
-  };
+    phone: '1251323523',
+    address: 'Test adress 123',
+  });
+  readonly currentUser$ = this.currentUserSubject.asObservable();
 
-  private currentUserStats : UserStatsDto = {
+  private readonly avatarSrcSubject = new BehaviorSubject<string>('default-avatar.jpg');
+  readonly avatarSrc$ = this.avatarSrcSubject.asObservable();
+
+  // mock podaci (privremeno)
+  private currentUserStats: UserStatsDto = {
     userId: 2,
     activePast24Hours: 500,
     numberOfRides: 15,
     distanceTravelled: 1200,
     moneySpent: 300,
-    moneyEarned: 150
+    moneyEarned: 150,
   };
 
-  private currentUserVehicle : VehicleDto = {
+  private currentUserVehicle: VehicleDto = {
     id: 1,
-    model: "Toyota Prius",
+    model: 'Toyota Prius',
     type: VehicleType.STANDARD,
     seats: 4,
     babyFriendly: true,
     petFriendly: false,
-    plates: "BG1234AB",
+    plates: 'BG1234AB',
   };
 
-  private readonly http = inject(HttpClient);
-
-  getCurrentUser() : Observable<UserDto> {
-    return of(this.currentUser);
+  // --- API ---
+  getUserById(userId: number): Observable<UserDto> {
+    return this.http.get<UserDto>(`${this.api}/user/${userId}`);
   }
 
-  getUserStats(userId : number) : Observable<UserStatsDto> {
-    return of(this.currentUserStats);
+  getUserAvatar(userId: number): Observable<Blob> {
+    return this.http.get(`${this.api}/user/${userId}/avatar`, { responseType: 'blob' });
   }
 
-  getUserVehicle(userId : number) : Observable<VehicleDto> {
+  // --- actions ---
+  setCurrentUserById(id: number) {
+    this.getUserById(id).subscribe({
+      next: user => {
+        this.currentUserSubject.next(user);
+        this.loadAvatar(user.id); // automatski učitaj avatar kad se postavi user
+      },
+      error: err => {
+        if (err.status === 404) alert('User not found');
+      },
+    });
+  }
+
+  loadAvatar(userId: number) {
+    this.getUserAvatar(userId).subscribe({
+      next: blob => this.avatarSrcSubject.next(URL.createObjectURL(blob)),
+      error: () => this.avatarSrcSubject.next('default-avatar.jpg'),
+    });
+  }
+
+  // --- mock (privremeno) ---
+  getUserStats(userId: number): Observable<UserStatsDto> {
+    return of({ ...this.currentUserStats, userId });
+  }
+
+  getUserVehicle(userId: number): Observable<VehicleDto> {
     return of(this.currentUserVehicle);
+  }
+
+
+
+
+  // GETTER ZA RIDE HISTORY (MOŽE DA SE IZBACI - ne diram ništa sam)
+  getCurrentUser(): Observable<UserDto> {
+    return this.currentUser$;
   }
 }

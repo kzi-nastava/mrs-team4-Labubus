@@ -3,6 +3,8 @@ package com.ubre.backend.controller;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,19 +21,23 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin")
 @CrossOrigin(origins = "*")
-public class AdministratorController {
+public class AdminController {
 
     // get all administrators
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<UserDto>> getAllAdministrators() {
-        List<UserDto> administrators = List.of(
-                new UserDto(100L, Role.ADMIN, "", "admin1@ubre.com", "Admin", "One", "111-111", "Admin Street 1", UserStatus.ACTIVE),
-                new UserDto(101L, Role.ADMIN, "", "admin2@ubre.com", "Admin", "Two", "222-222", "Admin Street 2", UserStatus.ACTIVE)
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(administrators);
-    }
+//    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+//    public ResponseEntity<List<UserDto>> getAllAdmins() {
+//        List<UserDto> administrators = List.of(
+//                new UserDto(100L, Role.ADMIN, "", "admin1@ubre.com", "Admin", "One", "111-111", "Admin Street 1", UserStatus.ACTIVE),
+//                new UserDto(101L, Role.ADMIN, "", "admin2@ubre.com", "Admin", "Two", "222-222", "Admin Street 2", UserStatus.ACTIVE)
+//        );
+//        return ResponseEntity.status(HttpStatus.OK).body(administrators);
+//    }
 
     // create a new administrator profile
+
+    @Autowired
+    private UserService userService;
+
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDto> createAdministrator(@RequestBody UserDto administratorDto) {
         UserDto createdAdministrator = new UserDto(
@@ -51,7 +57,7 @@ public class AdministratorController {
     // get single administrator
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDto> getAdministrator(@PathVariable Long id) {
-        UserDto administrator = new UserDto(id, Role.ADMIN, "", "admin@ubre.com", "Admin", "Profile", "000-111", "Admin Street", UserStatus.ACTIVE);
-        return ResponseEntity.status(HttpStatus.OK).body(administrator);
+        UserDto admin = userService.getUserById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(admin);
     }
 }

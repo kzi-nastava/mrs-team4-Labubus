@@ -4,6 +4,9 @@ import com.ubre.backend.dto.PasswordChangeDto;
 import com.ubre.backend.dto.UserStatsDto;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.dto.ProfileChangeDto;
+import org.apache.coyote.Response;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -21,4 +24,5 @@ public interface UserService {
     void requestProfileChange(ProfileChangeDto profileChangeDto);
     List<ProfileChangeDto> getAllProfileChangeRequests();
     void sendPassengerRequest(Long userId, String passengerEmail);
+    Resource getAvatar(Long userId);
 }

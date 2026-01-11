@@ -29,13 +29,15 @@ import { DriverRegistrationService } from '../../services/driver-registration-se
 import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
 import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-change-card';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-user-layout',
   standalone: true,
   imports: [Map,IconButton,SideMenu,Toast,
     Modal,ModalContainer,StatCard,Button,
-    Sheet,FormsModule,RideHistory,ProfileChangeCard],
+    Sheet,FormsModule,RideHistory,ProfileChangeCard,
+    AsyncPipe],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -58,9 +60,16 @@ import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-c
 
   profileChanges: ProfileChangeDto[] = [];
 
+  avatarSrc$ = this.userService.avatarSrc$;
+
   ngOnInit() {
-    this.userService.getCurrentUser().subscribe((user: UserDto) => {
+    this.userService.setCurrentUserById(1);
+
+    this.userService.currentUser$.subscribe(user => {
+      if (!user) return;
+
       this.user = user;
+      this.editing = { ...this.user };
 
       forkJoin({
         stats: this.userService.getUserStats(user.id),
@@ -119,12 +128,8 @@ import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-c
 
 
 
-  editing: UserDto = { ...this.user };
-  hidePassword = true;
-  toastTitle = 'Ignore this toast';
-  toastMessage = 'This is just a demo message for the toast';
-
-
+  
+  
   openMenu() {
     this.ui.menuOpen = true;
   }
@@ -137,7 +142,7 @@ import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-c
   closeCdModal() {
     this.ui.cdModalOpen = false;
   }
-
+  
   closeAllSidePanels() {
     this.closeMenu();
     this.closeAccountSettings();
@@ -148,7 +153,7 @@ import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-c
     this.closeRideHistory();
     this.closeProfileChanges();
   }
-
+  
   handleMenuAction(action: string) {
     if (action === 'logout') {
       this.user = { ...this.user, name: 'Guest', surname: '', phone: '', role: Role.GUEST };
@@ -173,44 +178,48 @@ import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-c
     }
     this.closeMenu();
   }
-
+  
   showToast(title: string, message: string) {
     this.toastTitle = title;
     this.toastMessage = message;
     this.ui.toastOpen = true;
-
+    
     setTimeout(() => {
       this.hideToast();
       this.cdr.detectChanges();
     }, 3000);
   }
-
+  
   hideToast() {
     this.ui.toastOpen = false;
   }
-
+  
   onCdModalAction() {
     this.ui.cdModalOpen = false;
     this.mapService.openDest();
   }
-
+  
   openChat() {
     // Open chat widget
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  editing!: UserDto;
+  hidePassword = true;
+  toastTitle = 'Ignore this toast';
+  toastMessage = 'This is just a demo message for the toast';
+  
   // ACCOUNT SETTINGS SHEET LOGIC
   openAccountSettings() {
     this.ui.accountSettingsOpen = true;
@@ -219,10 +228,10 @@ import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-c
   closeAccountSettings() {
     this.ui.accountSettingsOpen = false;
   }
-
+  
   saveAccountSettings() {
     // Save account settings logic
-    this.user = { ...this.editing };
+    this.user = { ...this.user, ...this.editing };
     this.closeAccountSettings();
     this.showToast('Settings saved', 'Your account settings have been updated.');
   }

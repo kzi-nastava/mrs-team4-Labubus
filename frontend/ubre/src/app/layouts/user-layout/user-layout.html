@@ -158,6 +158,7 @@
       title="Account"
       [role]="user.role"
       [user]="user"
+      [avatarSrc]="(avatarSrc$ | async) ?? 'default-avatar.jpg'"
       (closed)="closeMenu()"
       (action)="handleMenuAction($event)">
     </app-side-menu>
@@ -183,7 +184,7 @@
         <div class="as-section-title"><span>Account information</span></div>
 
         <div class="as-avatar">
-          <img [src]="editing.avatarUrl" alt="avatar">
+          <img [src]="editing.avatarSrc" alt="avatar">
         </div>
 
         <div class="as-field">
