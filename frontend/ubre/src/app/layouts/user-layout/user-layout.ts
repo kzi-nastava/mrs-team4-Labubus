@@ -58,17 +58,15 @@ import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-c
 
   profileChanges: ProfileChangeDto[] = [];
 
-  avatarSrc = ''; // current user avatar source
+  avatarSrc$ = this.userService.avatarSrc$;
 
   ngOnInit() {
     this.userService.setCurrentUserById(1);
-    this.userService.getCurrentUser().subscribe((user: UserDto) => {
-      this.user = user;
 
-      this.userService.getUserAvatar(user.id).subscribe(blob => {
-        this.avatarSrc = URL.createObjectURL(blob);
-        this.cdr.detectChanges();
-      });
+    this.userService.currentUser$.subscribe(user => {
+      if (!user) return;
+
+      this.user = user;
 
       forkJoin({
         stats: this.userService.getUserStats(user.id),
@@ -81,7 +79,6 @@ import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-c
       });
     });
   }
-
 
   ui = {
     menuOpen: false,
