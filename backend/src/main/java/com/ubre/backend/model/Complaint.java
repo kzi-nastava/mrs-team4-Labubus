@@ -1,5 +1,6 @@
 package com.ubre.backend.model;
 
+import com.ubre.backend.dto.ComplaintDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,6 +45,12 @@ public class Complaint {
         this.ride = ride;
         this.user = user;
         this.driver = driver;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public Complaint(ComplaintDto dto) {
+        this.id = dto.getId();
+        this.text = dto.getText();
         this.createdAt = LocalDateTime.now();
     }
 }
