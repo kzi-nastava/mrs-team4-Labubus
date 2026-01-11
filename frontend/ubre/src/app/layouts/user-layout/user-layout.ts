@@ -69,6 +69,7 @@ import { AsyncPipe } from '@angular/common';
       if (!user) return;
 
       this.user = user;
+      this.editing = { ...this.user };
 
       forkJoin({
         stats: this.userService.getUserStats(user.id),
@@ -127,12 +128,8 @@ import { AsyncPipe } from '@angular/common';
 
 
 
-  editing: UserDto = { ...this.user };
-  hidePassword = true;
-  toastTitle = 'Ignore this toast';
-  toastMessage = 'This is just a demo message for the toast';
-
-
+  
+  
   openMenu() {
     this.ui.menuOpen = true;
   }
@@ -145,7 +142,7 @@ import { AsyncPipe } from '@angular/common';
   closeCdModal() {
     this.ui.cdModalOpen = false;
   }
-
+  
   closeAllSidePanels() {
     this.closeMenu();
     this.closeAccountSettings();
@@ -156,7 +153,7 @@ import { AsyncPipe } from '@angular/common';
     this.closeRideHistory();
     this.closeProfileChanges();
   }
-
+  
   handleMenuAction(action: string) {
     if (action === 'logout') {
       this.user = { ...this.user, name: 'Guest', surname: '', phone: '', role: Role.GUEST };
@@ -181,44 +178,48 @@ import { AsyncPipe } from '@angular/common';
     }
     this.closeMenu();
   }
-
+  
   showToast(title: string, message: string) {
     this.toastTitle = title;
     this.toastMessage = message;
     this.ui.toastOpen = true;
-
+    
     setTimeout(() => {
       this.hideToast();
       this.cdr.detectChanges();
     }, 3000);
   }
-
+  
   hideToast() {
     this.ui.toastOpen = false;
   }
-
+  
   onCdModalAction() {
     this.ui.cdModalOpen = false;
     this.mapService.openDest();
   }
-
+  
   openChat() {
     // Open chat widget
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  editing!: UserDto;
+  hidePassword = true;
+  toastTitle = 'Ignore this toast';
+  toastMessage = 'This is just a demo message for the toast';
+  
   // ACCOUNT SETTINGS SHEET LOGIC
   openAccountSettings() {
     this.ui.accountSettingsOpen = true;
@@ -227,10 +228,10 @@ import { AsyncPipe } from '@angular/common';
   closeAccountSettings() {
     this.ui.accountSettingsOpen = false;
   }
-
+  
   saveAccountSettings() {
     // Save account settings logic
-    this.user = { ...this.editing };
+    this.user = { ...this.user, ...this.editing };
     this.closeAccountSettings();
     this.showToast('Settings saved', 'Your account settings have been updated.');
   }
