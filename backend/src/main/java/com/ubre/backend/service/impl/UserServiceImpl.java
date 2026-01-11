@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
 
         Path root = Paths.get(uploadDir).toAbsolutePath().normalize();
         Path filePath = root.resolve(avatarUrl).normalize();
-        
+
         if (!filePath.startsWith(root)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid avatar path");
         }

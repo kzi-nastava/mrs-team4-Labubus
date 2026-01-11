@@ -21,6 +21,8 @@ export class SideMenu {
   @Input() role: Role = Role.GUEST;
   @Input() user: UserVM | null = null;
 
+  @Input() avatarSrc?: string;
+
   @Output() closed = new EventEmitter<void>();
   @Output() action = new EventEmitter<string>();
 

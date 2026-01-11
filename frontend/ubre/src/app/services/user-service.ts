@@ -70,4 +70,12 @@ export class UserService {
       }
     });
   }
+
+
+
+
+  // user avatar loggic goes here
+  getUserAvatar(userId: number): Observable<Blob> {
+    return this.http.get(`${this.api}/user/${userId}/avatar`, { responseType: 'blob' });
+  }
 }

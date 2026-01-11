@@ -12,7 +12,7 @@
 
   <div class="profile">
     <img class="avatar"
-         [src]="user?.avatarUrl ?? 'default-avatar.jpg'"
+         [src]="avatarSrc ?? 'default-avatar.jpg'"
          alt="avatar">
     <div class="meta">
       <div class="name">{{ user ? (user.name + ' ' + user.surname).trim() : 'Guest' }}</div>

@@ -38,7 +38,7 @@ public class UserController {
             produces = MediaType.IMAGE_JPEG_VALUE
     )
     public ResponseEntity<Resource> getUserAvatar(@PathVariable Long id) {
-        Resource avatar = userService.getUserAvatar(id);
+        Resource avatar = userService.getAvatar(id);
         return ResponseEntity.status(HttpStatus.OK).body(avatar);
     }
 
