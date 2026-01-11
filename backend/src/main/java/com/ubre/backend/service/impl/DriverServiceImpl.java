@@ -8,7 +8,6 @@ import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.Driver;
 import com.ubre.backend.repository.DriverRepository;
 import com.ubre.backend.service.DriverService;
-import com.ubre.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -141,7 +140,7 @@ public class DriverServiceImpl implements DriverService {
         Driver savedDriver = driverRepository.save(newDriver);
 
         //emailService.sendDriverActivationEmail(savedDriver.getEmail(), activationToken);
-        
+
         return new UserDto(
                 savedDriver.getId(),
                 savedDriver.getRole(),
