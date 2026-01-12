@@ -1,16 +1,20 @@
 package com.ubre.backend.model;
 
+import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.enums.RideStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "rides")
 public class Ride {
@@ -73,9 +77,6 @@ public class Ride {
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL)
     private List<Complaint> complaints = new ArrayList<>();
 
-    // Constructors
-    public Ride() {}
-
     public Ride(LocalDateTime startTime, RideStatus status, User creator, Driver driver, List<Waypoint> waypoints) {
         this.startTime = startTime;
         this.status = status;
@@ -86,5 +87,15 @@ public class Ride {
         this.favorite = false;
         this.canceledBy = null;
         this.passengers = List.of(creator);
+    }
+
+    public Ride(RideDto dto) {
+        this.id = dto.getId();
+        this.startTime = dto.getStart();
+        this.waypoints = Arrays.stream(dto.getWaypoints()).map(Waypoint::new).toList();
+        this.panic = false;
+        this.favorite = false;
+        this.canceledBy = null;
+        this.passengers = new ArrayList<>();
     }
 }

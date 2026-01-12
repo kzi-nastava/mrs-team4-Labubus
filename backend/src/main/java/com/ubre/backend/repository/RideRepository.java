@@ -4,17 +4,25 @@ import com.ubre.backend.model.Ride;
 import com.ubre.backend.model.Driver;
 import com.ubre.backend.enums.RideStatus;
 import com.ubre.backend.model.User;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Repository
 public interface RideRepository extends JpaRepository<Ride, Long> {
-    List<Ride> findByCreatorOrderByStartTimeDesc(User creator);
-    List<Ride> findByDriverOrderByStartTimeDesc(Driver driver);
+    List<Ride> findByCreatorAndStatusIn(User creator, Collection<RideStatus> statuses, Pageable pageable);
+    List<Ride> findByDriverAndStatusIn(Driver driver, Collection<RideStatus> statuses, Pageable pageable);
+    List<Ride> findByCreatorAndStatusInAndStartTimeBetween(User creator, Collection<RideStatus> statuses, LocalDateTime startStartTime, LocalDateTime endStartTime, Pageable pageable);
+    List<Ride> findByDriverAndStatusInAndStartTimeBetween(Driver driver, Collection<RideStatus> statuses, LocalDateTime startStartTime, LocalDateTime endStartTime, Pageable pageable);
+    List<Ride> findByCreatorAndFavoriteTrue(User creator, Pageable pageable);
+    List<Ride> findByCreatorAndFavoriteTrueAndStartTimeBetween(User creator, LocalDateTime startStartTime, LocalDateTime endStartTime, Pageable pageable);
+
 //    List<Ride> findByRideStatus(RideStatus status);
     
 //    @Query("SELECT r FROM Ride r WHERE r.creator = :user OR :user MEMBER OF r.passengers ORDER BY r.startTime DESC")

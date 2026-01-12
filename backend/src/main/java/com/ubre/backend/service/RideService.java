@@ -1,5 +1,6 @@
 package com.ubre.backend.service;
 
+import com.ubre.backend.dto.RideCardDto;
 import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.dto.RideQueryDto;
@@ -20,13 +21,13 @@ public interface RideService {
     void stopRideInProgress(Long rideId);
     double estimateRidePrice(RideDto rideDto);
     List<RideDto> getRidesBetween(LocalDateTime start, LocalDateTime end);
-    List<RideDto> getFavoriteRides(Long userId);
+    List<RideCardDto> getFavoriteRides(Long userId, Integer skip, Integer count, RideQueryDto queryDto);
     void addRideToFavorites(Long userId, Long rideId);
     void removeRideFromFavorites(Long userId, Long rideId);
     List<UserDto> getAvailableDrivers(RideDto rideDto);
     RideDto scheduleRide(Long userId, RideDto rideDto);
     
-    List<RideDto> getRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query);
-    List<RideDto> getScheduledRides(Long driverId, Integer skip, Integer count, RideQueryDto query);
+    List<RideCardDto> getRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query);
+    List<RideCardDto> getScheduledRides(Long driverId, Integer skip, Integer count, RideQueryDto query);
     void trackRide(Long id);
 }
