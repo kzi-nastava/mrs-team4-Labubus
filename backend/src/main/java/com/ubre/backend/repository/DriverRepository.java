@@ -21,4 +21,6 @@ public interface DriverRepository extends JpaRepository<Driver, Long> {
 //    List<Driver> findAvailableDrivers(UserStatus status);
     
 //    List<Driver> findByIsAvailableTrue();
+
+    List<Driver> findByStatus(UserStatus status);
 }

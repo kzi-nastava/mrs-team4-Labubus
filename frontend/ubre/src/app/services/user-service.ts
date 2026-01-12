@@ -49,11 +49,11 @@ export class UserService {
 
   // --- API ---
   getUserById(userId: number): Observable<UserDto> {
-    return this.http.get<UserDto>(`${this.api}/user/${userId}`);
+    return this.http.get<UserDto>(`${this.api}/users/${userId}`);
   }
 
   getUserAvatar(userId: number): Observable<Blob> {
-    return this.http.get(`${this.api}/user/${userId}/avatar`, { responseType: 'blob' });
+    return this.http.get(`${this.api}/users/${userId}/avatar`, { responseType: 'blob' });
   }
 
   // --- actions ---

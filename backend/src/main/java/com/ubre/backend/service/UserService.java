@@ -7,6 +7,7 @@ import com.ubre.backend.dto.ProfileChangeDto;
 import org.apache.coyote.Response;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -25,4 +26,5 @@ public interface UserService {
     List<ProfileChangeDto> getAllProfileChangeRequests();
     void sendPassengerRequest(Long userId, String passengerEmail);
     Resource getAvatar(Long userId);
+    void uploadAvatar(Long userId, MultipartFile avatar);
 }
