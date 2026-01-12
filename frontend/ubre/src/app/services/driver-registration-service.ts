@@ -18,6 +18,7 @@ export class DriverRegistrationService {
   private readonly http = inject(HttpClient);
   private readonly driversApi = 'http://localhost:8080/api/drivers';
   private readonly vehiclesApi = 'http://localhost:8080/api/vehicles';
+  private readonly usersApi = 'http://localhost:8080/api/users';
 
   private readonly avatarSrcSubject = new BehaviorSubject<string>('');
   readonly avatarSrc$ = this.avatarSrcSubject.asObservable();
@@ -94,7 +95,6 @@ export class DriverRegistrationService {
 
     const model = (dto.vehicle?.model ?? '').trim();
     const plates = (dto.vehicle?.plates ?? '').trim();
-    const seats = dto.vehicle?.seats ?? 0;
 
     if (!email) e.email = 'Required';
     else if (!/^\S+@\S+\.\S+$/.test(email)) e.email = 'Email format is not valid';
@@ -128,7 +128,15 @@ export class DriverRegistrationService {
     return this.http.post<UserDto>(this.driversApi, dto).pipe(
       switchMap(driver =>
         this.http.post<VehicleDto>(`${this.vehiclesApi}/driver/${driver.id}`, dto.vehicle).pipe(
-          map(vehicle => ({ driver, vehicle }))
+          switchMap(vehicle => {
+            if (!this.avatarFile) return new Observable<{ driver: UserDto; vehicle: VehicleDto }>(sub => {
+              sub.next({ driver, vehicle }); sub.complete();
+            });
+
+            return this.uploadAvatar(driver.id, this.avatarFile).pipe(
+              map(() => ({ driver, vehicle }))
+            );
+          })
         )
       ),
       tap(() => this.resetDraft())
@@ -138,6 +146,8 @@ export class DriverRegistrationService {
   private clone(v: DriverRegistrationDto): DriverRegistrationDto {
     return { ...v, vehicle: { ...v.vehicle } };
   }
+
+  private avatarFile: File | null = null;
 
   setAvatarFile(file: File | null) {
     const prev = this.avatarSrcSubject.value;
@@ -152,5 +162,15 @@ export class DriverRegistrationService {
     const src = URL.createObjectURL(file);
     this.avatarSrcSubject.next(src);
     this.patchDraft({ avatarUrl: file.name });
+
+    this.avatarFile = file;
   }
+
+  uploadAvatar(driverId: number, file: File): Observable<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<void>(`${this.usersApi}/${driverId}/avatar`, formData);
+  }
+
 }

@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
-    // getting users avater by id
+    // getting users avatar by id
     @GetMapping(
             value = "/{id}/avatar",
             produces = MediaType.IMAGE_JPEG_VALUE
@@ -40,6 +41,16 @@ public class UserController {
     public ResponseEntity<Resource> getUserAvatar(@PathVariable Long id) {
         Resource avatar = userService.getAvatar(id);
         return ResponseEntity.status(HttpStatus.OK).body(avatar);
+    }
+
+    // upload user avatar (note: this endpoint doesn't change avatar url in user profile, that should be done separately)
+    @PostMapping(
+            value = "/{id}/avatar",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<Void> uploadUserAvatar(@PathVariable Long id, @RequestParam("file") MultipartFile avatar) {
+        userService.uploadAvatar(id, avatar);
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
     // getting user stats by id
