@@ -142,9 +142,16 @@ export class DriverRegistrationService {
         )
       ),
       tap(() => this.resetDraft()),
-      catchError((err: HttpErrorResponse) =>
-        throwError(() => err.error?.message) // server errors
-      )
+      catchError((err: HttpErrorResponse) => {
+        const reason =
+          typeof err.error === 'string'
+            ? err.error
+            : err.error?.detail || err.message;
+
+        const msg = `Registration couldn’t be completed. ${reason} (Error ${err.status}).`;
+
+        return throwError(() => msg);
+      })
     );
   }
 

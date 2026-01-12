@@ -215,6 +215,11 @@ import { AsyncPipe } from '@angular/common';
   openChat() {
     // Open chat widget
   }
+
+  focusNext(el: HTMLElement) {
+    el.focus();
+  }
+
   
   
   
@@ -436,8 +441,8 @@ import { AsyncPipe } from '@angular/common';
         this.fieldErrors = null;
       },
       error: (e) => {
-        if (typeof e === 'string') this.showToast('Registration error', e); // server error message
-        else this.fieldErrors = e; // field validation errors
+        if (typeof e === 'string') this.showToast('Registration error', e);
+        else this.fieldErrors = e;
       }
     });
   }
