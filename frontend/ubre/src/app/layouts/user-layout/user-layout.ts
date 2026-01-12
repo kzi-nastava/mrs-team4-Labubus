@@ -56,33 +56,31 @@ import { AsyncPipe } from '@angular/common';
   user!: UserDto;
   userStats!: UserStatsDto;
   vehicle!: VehicleDto;
-  driverRegistration! : DriverRegistrationDto;  
 
   profileChanges: ProfileChangeDto[] = [];
 
   avatarSrc$ = this.userService.avatarSrc$;
 
+  
   ngOnInit() {
     this.userService.setCurrentUserById(1);
-
+    
     this.userService.currentUser$.subscribe(user => {
       if (!user) return;
-
+      
       this.user = user;
       this.editing = { ...this.user };
-
+      
       forkJoin({
         stats: this.userService.getUserStats(user.id),
         veh: this.userService.getUserVehicle(user.id),
-        reg: this.driverRegistrationService.getDriverRegistration(),
-      }).subscribe(({ stats, veh, reg }) => {
+      }).subscribe(({ stats, veh}) => {
         this.userStats = stats;
         this.vehicle = veh;
-        this.driverRegistration = reg;
       });
     });
   }
-
+  
   ui = {
     menuOpen: false,
     cdModalOpen: true,
@@ -96,12 +94,12 @@ import { AsyncPipe } from '@angular/common';
     toastOpen: false,
     profileChangesOpen: false,
   };
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
   
   onDestBack() {
     this.mapService.resetDest();
@@ -120,14 +118,14 @@ import { AsyncPipe } from '@angular/common';
     this.mapService.closeDest();
     this.ui.rideOptionsOpen = true;
   }
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   openMenu() {
@@ -236,160 +234,199 @@ import { AsyncPipe } from '@angular/common';
     this.closeAccountSettings();
     this.showToast('Settings saved', 'Your account settings have been updated.');
   }
-
+  
   onAccountSettingsBack() {
     this.closeAccountSettings();
     this.ui.menuOpen = true;
   }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
   // CHANGE PASSWORD SHEET LOGIC
   newPassword = '';
   confirmPassword = '';
   passwordMismatch = false;
-
+  
   onChangePassword() {
     this.ui.accountSettingsOpen = false;
     this.ui.changePasswordOpen = true;
-
+    
     this.newPassword = '';
     this.confirmPassword = '';
     this.passwordMismatch = false;
   }
-
+  
   closeChangePassword() {
     this.ui.changePasswordOpen = false;
     this.passwordMismatch = false;
   }
-
+  
   onChangePasswordBack() {
     this.closeChangePassword();
     this.ui.accountSettingsOpen = true;
   }
-
+  
   savePassword() {
     this.passwordMismatch = this.newPassword !== this.confirmPassword;
-
+    
     if (this.passwordMismatch) return;
-
+    
     // TODO: API call za promenu lozinke
     this.closeChangePassword();
     this.showToast('Password changed', 'Your password has been updated.');
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   // VEHICLE INFORMATION SHEET LOGIC
-
+  
   openVehicleInfo() {
     this.ui.vehicleInfoOpen = true;
   }
   closeVehicleInfo() {
     this.ui.vehicleInfoOpen = false;
   }
-
+  
   onVehicleInfoBack() {
     this.closeVehicleInfo();
     this.ui.accountSettingsOpen = true;
   }
-
+  
   onViewVehicleInfo() {
     this.ui.accountSettingsOpen = false;
     this.openVehicleInfo();
   }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  driverRegistrationDraft$ = this.driverRegistrationService.draft$;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  confirmPasswordDR = '';
+  errors: any = null;
 
   // DRIVER REGISTRATION SHEET LOGIC
   openRegisterDriver() {
     this.ui.registerDriverOpen = true;
+    this.errors = null;
   }
+
   closeRegisterDriver() {
     this.ui.registerDriverOpen = false;
+    this.driverRegistrationService.resetDraft();
+    this.confirmPasswordDR = '';
+    this.errors = null;
+  }
+
+  patchDriverRegistration(changes : any) {
+    this.driverRegistrationService.patchDraft(changes);
+  }
+
+  setVehiceleType(type: VehicleType) {
+    this.driverRegistrationService.patchDraft({ vehicle: { type } });
+  }
+
+  toggleBabyFriendly() {
+    const curr = this.driverRegistrationService.getDraftSnapshot().vehicle.babyFriendly;
+    this.driverRegistrationService.patchDraft({ vehicle: { babyFriendly: !curr } });
+  }
+
+  togglePetFriendly() {
+    const curr = this.driverRegistrationService.getDraftSnapshot().vehicle.petFriendly;
+    this.driverRegistrationService.patchDraft({ vehicle: { petFriendly: !curr } });
   }
 
   onRegisterDriver() {
-    // TODO: API call za registraciju vozača
+    this.errors = null;
 
-    this.closeRegisterDriver();
-    this.showToast('Driver registered', 'Activation mail has been sent to the driver.');
-    this.confetti.fire();
+    this.driverRegistrationService.register(this.confirmPasswordDR).subscribe({
+      next: () => {
+        this.closeRegisterDriver();
+        this.showToast('Driver registered', 'Activation mail has been sent to the driver.');
+        this.confetti.fire();
+        this.confirmPasswordDR = '';
+        this.errors = null;
+      },
+      error: (err) => {
+        // err = validation errors iz servisa (objekat)
+        this.errors = err;
+        // alertuj ceo driver registration objekat za lakše debugovanje
+        alert(JSON.stringify(this.driverRegistrationService.getDraftSnapshot()));
+      }
+    });
   }
 
   onRegisterDriverBack() {
@@ -398,24 +435,27 @@ import { AsyncPipe } from '@angular/common';
   }
 
   decDriverSeats() {
-    this.driverRegistration.vehicle.seats = Math.max(0, this.driverRegistration.vehicle.seats - 1);
+    this.driverRegistrationService.decSeats();
   }
+
   incDriverSeats() {
-    this.driverRegistration.vehicle.seats = Math.min(9, this.driverRegistration.vehicle.seats + 1);
+    this.driverRegistrationService.incSeats();
   }
 
-  confirmPasswordDR = '';
-  passwordError = false;
-
-  validateDriverPassword() {
-    this.passwordError = !this.driverRegistration.password?.trim();
+  validateAll() {
+    this.errors = this.driverRegistrationService.validate(
+      this.driverRegistrationService.getDraftSnapshot(),
+      this.confirmPasswordDR
+    );
   }
 
-  validateConfirmPassword() {
-    this.passwordError =
-      !this.driverRegistration.password?.trim() ||
-      this.driverRegistration.password !== this.confirmPasswordDR;
+  clearFieldError(field: string) {
+    if (!this.errors) return;
+    this.errors = { ...this.errors, [field]: null };
   }
+
+
+
 
   
 
