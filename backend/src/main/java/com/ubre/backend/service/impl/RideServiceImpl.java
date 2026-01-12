@@ -20,10 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class RideServiceImpl implements RideService {
@@ -149,20 +146,30 @@ public class RideServiceImpl implements RideService {
 
     @Override
     public void addRideToFavorites(Long userId, Long rideId) {
-        // pronaći vožnju i postaviti atribut omiljene na true
-        boolean found = false;
-        if (!found) {
+        Optional<Ride> rideOptional = rideRepository.findById(rideId);
+        if (rideOptional.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
-        }
+
+        Ride ride = rideOptional.get();
+        if (!Objects.equals(ride.getCreator().getId(), userId))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User may only favorite their rides");
+
+        ride.setFavorite(true);
+        rideRepository.save(ride);
     }
 
     @Override
     public void removeRideFromFavorites(Long userId, Long rideId) {
-        // pronaći vožnju i postaviti atribut omiljene na false
-        boolean found = false;
-        if (!found) {
+        Optional<Ride> rideOptional = rideRepository.findById(rideId);
+        if (rideOptional.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
-        }
+
+        Ride ride = rideOptional.get();
+        if (!Objects.equals(ride.getCreator().getId(), userId))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User may only unfavorite their rides");
+
+        ride.setFavorite(false);
+        rideRepository.save(ride);
     }
 
     @Override
