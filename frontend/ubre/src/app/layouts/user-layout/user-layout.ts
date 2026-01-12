@@ -21,7 +21,6 @@ import { UserDto } from '../../dtos/user-dto';
 import { UserStatsDto } from '../../dtos/user-stats-dto';
 import { VehicleDto } from '../../dtos/vehicle-dto';
 import { Role } from '../../enums/role';
-import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 import { VehicleType } from '../../enums/vehicle-type';
 import { MapService } from '../../services/map-service';
 import { forkJoin } from 'rxjs';
@@ -177,16 +176,32 @@ import { AsyncPipe } from '@angular/common';
     this.closeMenu();
   }
   
+  private toastTimer: any = null;
+
   showToast(title: string, message: string) {
-    this.toastTitle = title;
-    this.toastMessage = message;
-    this.ui.toastOpen = true;
-    
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+      this.toastTimer = null;
+    }
+
+    this.ui.toastOpen = false;
+    this.cdr.detectChanges();
+
     setTimeout(() => {
-      this.hideToast();
+      this.toastTitle = title;
+      this.toastMessage = message;
+
+      this.ui.toastOpen = true;
       this.cdr.detectChanges();
-    }, 3000);
+
+      this.toastTimer = setTimeout(() => {
+        this.ui.toastOpen = false;
+        this.cdr.detectChanges();
+        this.toastTimer = null;
+      }, 3000);
+    }, 0);
   }
+
   
   hideToast() {
     this.ui.toastOpen = false;
@@ -376,19 +391,22 @@ import { AsyncPipe } from '@angular/common';
   driverRegistrationDraft$ = this.driverRegistrationService.draft$;
   driverRegistrationAvatarSrc$ = this.driverRegistrationService.avatarSrc$;
   confirmPasswordDR = '';
-  errors: any = null;
+  fieldErrors: any = null;           // for field-specific error messages
+  serverError: string | null = null; // for toast messages
 
   // DRIVER REGISTRATION SHEET LOGIC
   openRegisterDriver() {
     this.ui.registerDriverOpen = true;
-    this.errors = null;
+    this.fieldErrors = null;
+    this.serverError = null;
   }
 
   closeRegisterDriver() {
     this.ui.registerDriverOpen = false;
     this.driverRegistrationService.resetDraft();
     this.confirmPasswordDR = '';
-    this.errors = null;
+    this.fieldErrors = null;
+    this.serverError = null;
   }
 
   patchDriverRegistration(changes : any) {
@@ -410,7 +428,8 @@ import { AsyncPipe } from '@angular/common';
   }
 
   onRegisterDriver() {
-    this.errors = null;
+    this.fieldErrors = null;
+    this.serverError = null;
 
     this.driverRegistrationService.register(this.confirmPasswordDR).subscribe({
       next: () => {
@@ -418,13 +437,19 @@ import { AsyncPipe } from '@angular/common';
         this.showToast('Driver registered', 'Activation mail has been sent to the driver.');
         this.confetti.fire();
         this.confirmPasswordDR = '';
-        this.errors = null;
+        this.fieldErrors = null;
+        this.serverError = null;
       },
       error: (err) => {
-        // err = validation errors iz servisa (objekat)
-        this.errors = err;
-        // alertuj ceo driver registration objekat za lakše debugovanje
-        alert(JSON.stringify(this.driverRegistrationService.getDraftSnapshot()));
+        // general server error
+        if (err?.message) {
+          this.serverError = err.message;
+          this.showToast('Registration error', err.message);
+          return;
+        }
+
+        // field-specific validation errors
+        this.fieldErrors = err;
       }
     });
   }
@@ -443,15 +468,15 @@ import { AsyncPipe } from '@angular/common';
   }
 
   validateAll() {
-    this.errors = this.driverRegistrationService.validate(
+    this.fieldErrors = this.driverRegistrationService.validate(
       this.driverRegistrationService.getDraftSnapshot(),
       this.confirmPasswordDR
     );
   }
 
   clearFieldError(field: string) {
-    if (!this.errors) return;
-    this.errors = { ...this.errors, [field]: null };
+    if (!this.fieldErrors) return;
+    this.fieldErrors = { ...this.fieldErrors, [field]: null };
   }
 
   onDrAvatarSelected(e: Event) {

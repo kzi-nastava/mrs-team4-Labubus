@@ -367,22 +367,22 @@
           <div class="rd-field">
               <div class="rd-label-row">
               <span>Email</span>
-                @if (errors?.email) {
-                  <span class="rd-error">{{ errors.email }}</span>
+                @if (fieldErrors?.email) {
+                  <span class="rd-error">{{ fieldErrors.email }}</span>
                 }
             </div>
-            <input class="rd-input" [class.error]="!!errors?.email" [(ngModel)]="driverRegistration.email" (ngModelChange)="patchDriverRegistration({ email: $event }); clearFieldError('email')" placeholder="Driver's email">
+            <input class="rd-input" [class.error]="!!fieldErrors?.email" [(ngModel)]="driverRegistration.email" (ngModelChange)="patchDriverRegistration({ email: $event }); clearFieldError('email')" placeholder="Driver's email">
           </div>
 
           <div class="rd-field">
             <div class="rd-label-row">
               <span>Password</span>
-              @if (!!errors?.password) { <span class="rd-error"> {{ errors.password }}</span> }
+              @if (!!fieldErrors?.password) { <span class="rd-error"> {{ fieldErrors.password }}</span> }
             </div>
 
             <input
               class="rd-input"
-              [class.error]="!!errors?.password"
+              [class.error]="!!fieldErrors?.password"
               type="password"
               [(ngModel)]="driverRegistration.password"
               placeholder="Driver's password"
@@ -393,9 +393,9 @@
           <div class="rd-field">
             <div class="rd-label-row">
               <span>Confirm</span>
-              @if (!!errors?.passwordConfirm) { <span class="rd-error"> {{ errors.passwordConfirm }}</span> }
+              @if (!!fieldErrors?.passwordConfirm) { <span class="rd-error"> {{ fieldErrors.passwordConfirm }}</span> }
             </div>
-            <input class="rd-input" type="password" [(ngModel)]="confirmPasswordDR" placeholder="Driver's password" (ngModelChange)="clearFieldError('passwordConfirm')" [class.error]="!!errors?.passwordConfirm">
+            <input class="rd-input" type="password" [(ngModel)]="confirmPasswordDR" placeholder="Driver's password" (ngModelChange)="clearFieldError('passwordConfirm')" [class.error]="!!fieldErrors?.passwordConfirm">
           </div>
 
 
@@ -404,41 +404,41 @@
           <div class="rd-field">
             <div class="rd-label-row">
               <span>Name</span>
-              @if (!!errors?.name) {
-                <span class="rd-error">{{ errors.name }}</span>
+              @if (!!fieldErrors?.name) {
+                <span class="rd-error">{{ fieldErrors.name }}</span>
               }
             </div>
-            <input class="rd-input" [(ngModel)]="driverRegistration.name" placeholder="Driver's name" (ngModelChange)="patchDriverRegistration({ name: $event }); clearFieldError('name')" [class.error]="!!errors?.name">
+            <input class="rd-input" [(ngModel)]="driverRegistration.name" placeholder="Driver's name" (ngModelChange)="patchDriverRegistration({ name: $event }); clearFieldError('name')" [class.error]="!!fieldErrors?.name">
           </div>
 
           <div class="rd-field">
             <div class="rd-label-row">
               <span>Surname</span>
-              @if (!!errors?.surname) {
-                <span class="rd-error">{{ errors.surname }}</span>
+              @if (!!fieldErrors?.surname) {
+                <span class="rd-error">{{ fieldErrors.surname }}</span>
               }
             </div>
-            <input class="rd-input" [(ngModel)]="driverRegistration.surname" placeholder="Driver's surname" (ngModelChange)="patchDriverRegistration({ surname: $event }); clearFieldError('surname')" [class.error]="!!errors?.surname">
+            <input class="rd-input" [(ngModel)]="driverRegistration.surname" placeholder="Driver's surname" (ngModelChange)="patchDriverRegistration({ surname: $event }); clearFieldError('surname')" [class.error]="!!fieldErrors?.surname">
           </div>
 
           <div class="rd-field">
             <div class="rd-label-row">
               <span>Residental address</span>
-              @if (!!errors?.address) {
-                <span class="rd-error">{{ errors.address }}</span>
+              @if (!!fieldErrors?.address) {
+                <span class="rd-error">{{ fieldErrors.address }}</span>
               }
             </div>
-            <input class="rd-input" [(ngModel)]="driverRegistration.address" placeholder="Driver's residental address" (ngModelChange)="patchDriverRegistration({ address: $event }); clearFieldError('address')" [class.error]="!!errors?.address">
+            <input class="rd-input" [(ngModel)]="driverRegistration.address" placeholder="Driver's residental address" (ngModelChange)="patchDriverRegistration({ address: $event }); clearFieldError('address')" [class.error]="!!fieldErrors?.address">
           </div>
 
           <div class="rd-field">
             <div class="rd-label-row">
               <span>Phone number</span>
-              @if (!!errors?.phone) {
-                <span class="rd-error">{{ errors.phone }}</span>
+              @if (!!fieldErrors?.phone) {
+                <span class="rd-error">{{ fieldErrors.phone }}</span>
               }
             </div>
-            <input class="rd-input" [(ngModel)]="driverRegistration.phone" placeholder="Driver's phone number" (ngModelChange)="patchDriverRegistration({ phone: $event }); clearFieldError('phone')" [class.error]="!!errors?.phone">
+            <input class="rd-input" [(ngModel)]="driverRegistration.phone" placeholder="Driver's phone number" (ngModelChange)="patchDriverRegistration({ phone: $event }); clearFieldError('phone')" [class.error]="!!fieldErrors?.phone">
           </div>
 
 
@@ -447,11 +447,11 @@
           <div class="rd-field">
             <div class="rd-label-row">
               <span>Vehicle model</span>
-              @if (!!errors?.model) {
-                <span class="rd-error">{{ errors.model }}</span>
+              @if (!!fieldErrors?.model) {
+                <span class="rd-error">{{ fieldErrors.model }}</span>
               }
             </div>
-            <input class="rd-input" [(ngModel)]="driverRegistration.vehicle.model" placeholder="Driver's vehicle model" (ngModelChange)="patchDriverRegistration({ vehicle: { model: $event } }); clearFieldError('model')" [class.error]="!!errors?.model">
+            <input class="rd-input" [(ngModel)]="driverRegistration.vehicle.model" placeholder="Driver's vehicle model" (ngModelChange)="patchDriverRegistration({ vehicle: { model: $event } }); clearFieldError('model')" [class.error]="!!fieldErrors?.model">
           </div>
 
           <div class="rd-field">
@@ -484,11 +484,11 @@
           <div class="rd-field">
             <div class="rd-label-row">
               <span>License plates</span>
-              @if (!!errors?.plates) {
-                <span class="rd-error">{{ errors.plates }}</span>
+              @if (!!fieldErrors?.plates) {
+                <span class="rd-error">{{ fieldErrors.plates }}</span>
               }
             </div>
-            <input class="rd-input" [(ngModel)]="driverRegistration.vehicle.plates" placeholder="Vehicle license plates" (ngModelChange)="patchDriverRegistration({ vehicle: { plates: $event } }); clearFieldError('plates')" [class.error]="!!errors?.plates">  
+            <input class="rd-input" [(ngModel)]="driverRegistration.vehicle.plates" placeholder="Vehicle license plates" (ngModelChange)="patchDriverRegistration({ vehicle: { plates: $event } }); clearFieldError('plates')" [class.error]="!!fieldErrors?.plates">  
           </div>
 
           <div class="rd-row">

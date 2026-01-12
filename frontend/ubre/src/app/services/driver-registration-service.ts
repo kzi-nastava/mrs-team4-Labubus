@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 
@@ -8,7 +8,9 @@ import { UserDto } from '../dtos/user-dto';
 import { VehicleDto } from '../dtos/vehicle-dto';
 import { VehicleType } from '../enums/vehicle-type';
 
-type ValidationErrors = Partial<Record<
+import { catchError } from 'rxjs/operators';
+
+type FieldErrors = Partial<Record<
   'email' | 'password' | 'passwordConfirm' | 'name' | 'surname' | 'phone' | 'address' | 'plates' | 'model',
   string
 >>;
@@ -83,8 +85,8 @@ export class DriverRegistrationService {
     this.patchDraft({ vehicle: { seats: Math.min(9, s + 1) } });
   }
 
-  validate(dto: DriverRegistrationDto, confirmPassword?: string): ValidationErrors {
-    const e: ValidationErrors = {};
+  validate(dto: DriverRegistrationDto, confirmPassword?: string): FieldErrors {
+    const e: FieldErrors = {};
 
     const email = (dto.email ?? '').trim();
     const pass = (dto.password ?? '').trim();
@@ -139,7 +141,19 @@ export class DriverRegistrationService {
           })
         )
       ),
-      tap(() => this.resetDraft())
+      tap(() => this.resetDraft()),
+      catchError((err: any) => {
+        // server validation errors
+        if (err instanceof HttpErrorResponse) {
+          return throwError(() => ({
+            status: err.status,
+            message: err.error?.message || err.message
+          }));
+        }
+
+        // ui validation errors
+        return throwError(() => err);
+      })
     );
   }
 
