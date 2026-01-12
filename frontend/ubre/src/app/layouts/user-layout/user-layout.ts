@@ -392,13 +392,11 @@ import { AsyncPipe } from '@angular/common';
   driverRegistrationAvatarSrc$ = this.driverRegistrationService.avatarSrc$;
   confirmPasswordDR = '';
   fieldErrors: any = null;           // for field-specific error messages
-  serverError: string | null = null; // for toast messages
 
   // DRIVER REGISTRATION SHEET LOGIC
   openRegisterDriver() {
     this.ui.registerDriverOpen = true;
     this.fieldErrors = null;
-    this.serverError = null;
   }
 
   closeRegisterDriver() {
@@ -406,7 +404,6 @@ import { AsyncPipe } from '@angular/common';
     this.driverRegistrationService.resetDraft();
     this.confirmPasswordDR = '';
     this.fieldErrors = null;
-    this.serverError = null;
   }
 
   patchDriverRegistration(changes : any) {
@@ -429,7 +426,6 @@ import { AsyncPipe } from '@angular/common';
 
   onRegisterDriver() {
     this.fieldErrors = null;
-    this.serverError = null;
 
     this.driverRegistrationService.register(this.confirmPasswordDR).subscribe({
       next: () => {
@@ -438,18 +434,10 @@ import { AsyncPipe } from '@angular/common';
         this.confetti.fire();
         this.confirmPasswordDR = '';
         this.fieldErrors = null;
-        this.serverError = null;
       },
-      error: (err) => {
-        // general server error
-        if (err?.message) {
-          this.serverError = err.message;
-          this.showToast('Registration error', err.message);
-          return;
-        }
-
-        // field-specific validation errors
-        this.fieldErrors = err;
+      error: (e) => {
+        if (typeof e === 'string') this.showToast('Registration error', e); // server error message
+        else this.fieldErrors = e; // field validation errors
       }
     });
   }

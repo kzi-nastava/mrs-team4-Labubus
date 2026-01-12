@@ -124,7 +124,7 @@ export class DriverRegistrationService {
     const errors = this.validate(dto, confirmPassword);
 
     if (Object.keys(errors).length) {
-      return throwError(() => errors);
+      return throwError(() => errors); // field validation errors
     }
 
     return this.http.post<UserDto>(this.driversApi, dto).pipe(
@@ -142,18 +142,9 @@ export class DriverRegistrationService {
         )
       ),
       tap(() => this.resetDraft()),
-      catchError((err: any) => {
-        // server validation errors
-        if (err instanceof HttpErrorResponse) {
-          return throwError(() => ({
-            status: err.status,
-            message: err.error?.message || err.message
-          }));
-        }
-
-        // ui validation errors
-        return throwError(() => err);
-      })
+      catchError((err: HttpErrorResponse) =>
+        throwError(() => err.error?.message) // server errors
+      )
     );
   }
 
