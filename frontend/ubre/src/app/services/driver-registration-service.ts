@@ -19,6 +19,9 @@ export class DriverRegistrationService {
   private readonly driversApi = 'http://localhost:8080/api/drivers';
   private readonly vehiclesApi = 'http://localhost:8080/api/vehicles';
 
+  private readonly avatarSrcSubject = new BehaviorSubject<string>('');
+  readonly avatarSrc$ = this.avatarSrcSubject.asObservable();
+
   private readonly initialDraft: DriverRegistrationDto = {
     id: 0,
     avatarUrl: 'default-avatar.jpg',
@@ -66,6 +69,7 @@ export class DriverRegistrationService {
 
   resetDraft() {
     this.draftSubject.next(this.clone(this.initialDraft));
+    this.setAvatarFile(null);
   }
 
   decSeats() {
@@ -133,5 +137,20 @@ export class DriverRegistrationService {
 
   private clone(v: DriverRegistrationDto): DriverRegistrationDto {
     return { ...v, vehicle: { ...v.vehicle } };
+  }
+
+  setAvatarFile(file: File | null) {
+    const prev = this.avatarSrcSubject.value;
+    if (prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+
+    if (!file) {
+      this.avatarSrcSubject.next('');
+      this.patchDraft({ avatarUrl: 'default-avatar.jpg' });
+      return;
+    }
+
+    const src = URL.createObjectURL(file);
+    this.avatarSrcSubject.next(src);
+    this.patchDraft({ avatarUrl: file.name });
   }
 }

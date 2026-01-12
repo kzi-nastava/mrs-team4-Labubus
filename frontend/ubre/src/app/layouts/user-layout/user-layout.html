@@ -346,6 +346,7 @@
 
     <!-- REGISTER A DRIVER (ADMIN ROLE)-->  
     @let driverRegistration = (driverRegistrationDraft$ | async);
+    @let driverAvatarSrc = (driverRegistrationAvatarSrc$ | async);
     @if (user.role === Role.ADMIN && driverRegistration) {
       <app-sheet
         [open]="ui.registerDriverOpen"
@@ -357,9 +358,11 @@
 
           <div class="rd-section-title"><span>Account information</span></div>
 
-          <div class="rd-avatar">
-            <img [src]="driverRegistration.avatarUrl" alt="avatar">
+          <div class="rd-avatar" (click)="driverAvatarInput.click()">
+            <img [src]="driverAvatarSrc || 'default-avatar.jpg'" alt="avatar">
           </div>
+
+          <input #driverAvatarInput type="file" accept=".jpg" hidden (change)="onDrAvatarSelected($event)">
 
           <div class="rd-field">
               <div class="rd-label-row">

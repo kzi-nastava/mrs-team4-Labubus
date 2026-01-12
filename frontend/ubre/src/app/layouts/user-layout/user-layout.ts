@@ -374,7 +374,7 @@ import { AsyncPipe } from '@angular/common';
   
   
   driverRegistrationDraft$ = this.driverRegistrationService.draft$;
-
+  driverRegistrationAvatarSrc$ = this.driverRegistrationService.avatarSrc$;
   confirmPasswordDR = '';
   errors: any = null;
 
@@ -453,6 +453,14 @@ import { AsyncPipe } from '@angular/common';
     if (!this.errors) return;
     this.errors = { ...this.errors, [field]: null };
   }
+
+  onDrAvatarSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.driverRegistrationService.setAvatarFile(file);
+    input.value = '';
+  }
+
 
 
 
