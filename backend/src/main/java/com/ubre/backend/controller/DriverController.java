@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/drivers")
 @CrossOrigin(origins = "*")
@@ -40,7 +42,18 @@ public class DriverController {
         return ResponseEntity.status(HttpStatus.OK).body(rideDto);
     }
 
-
+    // activate driver account (in request body, there is token, email and newPassword)
+    @PostMapping(
+            value = "/activate",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Void> activateDriverAccount(@RequestBody Map<String, String> activationData) {
+        String token = activationData.get("token");
+        String email = activationData.get("email");
+        String newPassword = activationData.get("newPassword");
+        driverService.activateDriverAccount(token, email, newPassword);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
 
 
 //    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)

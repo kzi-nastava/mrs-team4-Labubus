@@ -93,6 +93,36 @@ public class DriverServiceImpl implements DriverService {
     }
 
     @Override
+    public void activateDriverAccount(String token, String email, String newPassword) {
+        Driver driver = driverRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found"));
+
+        if (driver.getIsActivated()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Account is already activated");
+        }
+
+        // error 400 - bad request
+        if (!driver.getActivationToken().equals(token)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid activation token");
+        }
+
+        // error 410 - gone
+        if (driver.getActivationTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.GONE, "Activation token has expired");
+        }
+
+        // TODO: errors such as unauthorized or forbidden
+
+        driver.setPassword(passwordEncoder.encode(newPassword));
+        driver.setIsActivated(true);
+        driver.setStatus(UserStatus.INACTIVE); // Set status to INACTIVE upon activation
+        driver.setActivationToken(null);
+        driver.setActivationTokenExpiry(null);
+
+        driverRepository.save(driver);
+    }
+
+    @Override
     public void toggleAvailability(Long id) {
         UserDto driver = getDriverById(id);
 
