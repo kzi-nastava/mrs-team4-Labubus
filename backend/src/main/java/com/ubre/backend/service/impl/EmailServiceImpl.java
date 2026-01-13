@@ -29,8 +29,8 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendDriverActivationEmail(String recipientEmail, String activationToken) {
-        String activationLink = buildActivationLink(activationToken);
-        String subject = "Aktivacija naloga vozača";
+        String activationLink = buildActivationLink(activationToken, recipientEmail);
+        String subject = "Activate your driver account";
         String body = buildDriverActivationEmailBody(activationLink);
 
         MimeMessage message = mailSender.createMimeMessage();
@@ -40,34 +40,54 @@ public class EmailServiceImpl implements EmailService {
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name()
             );
-            helper.setFrom(fromAddress);
             helper.setTo(recipientEmail);
             helper.setSubject(subject);
             helper.setText(body, true);
+            helper.setFrom("Ubre <" + fromAddress + ">");
             mailSender.send(message);
         } catch (MessagingException ex) {
             throw new IllegalStateException("Failed to send activation email.", ex);
         }
     }
 
-    private String buildActivationLink(String activationToken) {
+    private String buildActivationLink(String token, String email) {
         String separator = activationLinkBaseUrl.contains("?") ? "&" : "?";
-        return activationLinkBaseUrl + separator + "token=" + activationToken;
+        return activationLinkBaseUrl
+                + separator + "token=" + token
+                + "&email=" + email;
     }
+
 
     private String buildDriverActivationEmailBody(String activationLink) {
         return """
-                <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937;">
-                  <h2 style="color:#111827; margin-bottom: 8px;">Dobro došli u Ubre!</h2>
-                  <p>Administrator je upravo kreirao vaš nalog za vozača. Da biste aktivirali profil i postavili lozinku, kliknite na link ispod.</p>
-                  <p style="margin: 16px 0;">
-                    <a href="%s" style="background:#2563eb; color:#ffffff; padding:10px 16px; text-decoration:none; border-radius:6px;">
-                      Aktiviraj nalog
-                    </a>
-                  </p>
-                  <p>Link je jednokratan i važi 24 časa. Ukoliko niste zatražili nalog, ignorišite ovu poruku.</p>
-                  <p>Hvala,<br/>Ubre tim</p>
-                </div>
-                """.formatted(activationLink);
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; max-width:600px; margin:0 auto; background:#ffffff; padding:24px; border-radius:8px;">
+          
+          <h2 style="color:#111827; margin-bottom:12px;">Welcome to Ubre!</h2>
+          
+          <p>
+            An administrator has just created your driver account.
+            To activate your profile and set your password, please click the button below.
+          </p>
+
+          <div style="text-align:center; margin:24px 0;">
+            <a href="%s"
+               style="background:#2563eb; color:#ffffff; padding:12px 20px; text-decoration:none; border-radius:6px; font-weight:600; display:inline-block;">
+              Activate Account
+            </a>
+          </div>
+
+          <p style="font-size:14px; color:#374151;">
+            This link can be used only once and is valid for 24 hours.
+            If you did not request this account, you can safely ignore this email.
+          </p>
+
+          <hr style="border:none; border-top:1px solid #e5e7eb; margin:24px 0;"/>
+
+          <p style="font-size:14px; color:#6b7280;">
+            Thank you,<br/>
+            <strong>Ubre Team</strong>
+          </p>
+        </div>
+        """.formatted(activationLink);
     }
 }
