@@ -28,6 +28,8 @@ public class Driver extends User {
     @OneToMany(mappedBy = "driver", cascade = CascadeType.ALL)
     private List<Review> reviews = new ArrayList<>();
 
+    private boolean pendingInactiveStatus = false;
+
     // Constructors
     public Driver() {
         super();

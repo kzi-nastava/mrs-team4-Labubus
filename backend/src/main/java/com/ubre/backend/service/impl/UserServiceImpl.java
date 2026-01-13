@@ -1,26 +1,30 @@
 package com.ubre.backend.service.impl;
 
-import com.ubre.backend.dto.PasswordChangeDto;
-import com.ubre.backend.dto.ProfileChangeDto;
-import com.ubre.backend.dto.UserDto;
-import com.ubre.backend.dto.UserStatsDto;
+import com.ubre.backend.dto.*;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.model.Driver;
+import com.ubre.backend.model.Passenger;
 import com.ubre.backend.model.User;
-import com.ubre.backend.repository.AdminRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +45,10 @@ public class UserServiceImpl implements UserService {
     // real repository
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -75,6 +83,29 @@ public class UserServiceImpl implements UserService {
         } catch (MalformedURLException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid avatar URL");
         }
+    }
+
+    @Override
+    public UserDto registerUser(UserRegistrationDto dto) {
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use");
+        }
+
+        User user = new Passenger();
+        user.setAvatarUrl(dto.getAvatarUrl());
+        user.setEmail(dto.getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setName(dto.getName());
+        user.setSurname(dto.getSurname());
+        user.setPhone(dto.getPhone());
+        user.setAddress(dto.getAddress());
+        user.setCreatedAt(LocalDateTime.now());
+        user.setIsBlocked(false);
+        user.setRole(Role.REGISTERED_USER);
+        user.setIsActivated(false);
+        User savedUser = userRepository.save(user);
+
+        return new UserDto(savedUser);
     }
 
 
@@ -206,4 +237,7 @@ public class UserServiceImpl implements UserService {
         }
         // todo: implement send passenger request logic via email
     }
+
+
+
 }
