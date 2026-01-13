@@ -7,6 +7,7 @@ import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.Driver;
 import com.ubre.backend.repository.DriverRepository;
+import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.DriverService;
 import com.ubre.backend.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ public class DriverServiceImpl implements DriverService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public List<UserDto> getAllDrivers() {
@@ -146,7 +150,7 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public UserDto createDriver(DriverRegistrationDto dto) {
 
-        boolean emailExists = driverRepository.findByEmail(dto.getEmail()).isPresent();
+        boolean emailExists = userRepository.findByEmail(dto.getEmail()).isPresent();
 
         if (emailExists) { throw new ResponseStatusException(
                 HttpStatus.CONFLICT, "Email already exists");

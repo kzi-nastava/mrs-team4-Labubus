@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -40,7 +41,8 @@ export class DriverActivation implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
@@ -97,6 +99,7 @@ export class DriverActivation implements OnInit {
   showError(message: string) {
     this.errorMessage = message;
     this.showErrorModal = true;
+    this.cdr.detectChanges();
   }
 
   onErrorModalAction() {
@@ -106,6 +109,7 @@ export class DriverActivation implements OnInit {
   showSuccess(message: string) {
     this.successMessage = message;
     this.showSuccessModal = true;
+    this.cdr.detectChanges();
   }
 
   onSuccessModalAction() {

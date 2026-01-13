@@ -4,6 +4,7 @@ import com.ubre.backend.dto.DriverRegistrationDto;
 import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.service.DriverService;
+import com.ubre.backend.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +20,9 @@ public class DriverController {
 
     @Autowired
     private DriverService driverService;
+
+    @Autowired
+    private EmailService emailService;
 
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
