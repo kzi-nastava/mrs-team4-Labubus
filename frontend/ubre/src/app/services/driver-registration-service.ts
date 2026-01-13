@@ -108,13 +108,9 @@ export class DriverRegistrationService {
       e.passwordConfirm = 'Passwords do not match';
     }
 
-    if (!name) e.name = 'Required';
-    if (!surname) e.surname = 'Required';
-    if (!phone) e.phone = 'Required';
-    if (!address) e.address = 'Required';
-
-    if (!model) e.model = 'Required';
-    if (!plates) e.plates = 'Required';
+    if (!name) e.name = 'Required'; if (!surname) e.surname = 'Required';
+    if (!phone) e.phone = 'Required'; if (!address) e.address = 'Required';
+    if (!model) e.model = 'Required'; if (!plates) e.plates = 'Required';
 
     return e;
   }

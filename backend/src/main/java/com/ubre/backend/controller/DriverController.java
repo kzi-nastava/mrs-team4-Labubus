@@ -4,11 +4,14 @@ import com.ubre.backend.dto.DriverRegistrationDto;
 import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.service.DriverService;
+import com.ubre.backend.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/drivers")
@@ -17,6 +20,9 @@ public class DriverController {
 
     @Autowired
     private DriverService driverService;
+
+    @Autowired
+    private EmailService emailService;
 
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -40,7 +46,18 @@ public class DriverController {
         return ResponseEntity.status(HttpStatus.OK).body(rideDto);
     }
 
-
+    // activate driver account (in request body, there is token, email and newPassword)
+    @PostMapping(
+            value = "/activate",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Void> activateDriverAccount(@RequestBody Map<String, String> activationData) {
+        String token = activationData.get("token");
+        String email = activationData.get("email");
+        String newPassword = activationData.get("newPassword");
+        driverService.activateDriverAccount(token, email, newPassword);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
 
 
 //    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)

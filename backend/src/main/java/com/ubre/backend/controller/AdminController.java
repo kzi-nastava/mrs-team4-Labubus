@@ -3,6 +3,7 @@ package com.ubre.backend.controller;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.service.EmailService;
 import com.ubre.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
