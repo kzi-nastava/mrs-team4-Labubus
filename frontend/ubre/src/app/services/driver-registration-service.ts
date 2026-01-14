@@ -19,7 +19,6 @@ type FieldErrors = Partial<Record<
 export class DriverRegistrationService {
   private readonly http = inject(HttpClient);
   private readonly driversApi = 'http://localhost:8080/api/drivers';
-  private readonly vehiclesApi = 'http://localhost:8080/api/vehicles';
   private readonly usersApi = 'http://localhost:8080/api/users';
 
   private readonly avatarSrcSubject = new BehaviorSubject<string>('');
@@ -115,41 +114,35 @@ export class DriverRegistrationService {
     return e;
   }
 
-  register(confirmPassword?: string): Observable<{ driver: UserDto; vehicle: VehicleDto }> {
+  register(confirmPassword?: string): Observable<UserDto> {
     const dto = this.getDraftSnapshot();
     const errors = this.validate(dto, confirmPassword);
-
+  
     if (Object.keys(errors).length) {
-      return throwError(() => errors); // field validation errors
+      return throwError(() => errors);
     }
-
+  
     return this.http.post<UserDto>(this.driversApi, dto).pipe(
-      switchMap(driver =>
-        this.http.post<VehicleDto>(`${this.vehiclesApi}/driver/${driver.id}`, dto.vehicle).pipe(
-          switchMap(vehicle => {
-            if (!this.avatarFile) return new Observable<{ driver: UserDto; vehicle: VehicleDto }>(sub => {
-              sub.next({ driver, vehicle }); sub.complete();
-            });
-
-            return this.uploadAvatar(driver.id, this.avatarFile).pipe(
-              map(() => ({ driver, vehicle }))
-            );
-          })
-        )
-      ),
+      switchMap(driver => {
+        if (!this.avatarFile) return new Observable<UserDto>(sub => { sub.next(driver); sub.complete(); });
+  
+        return this.uploadAvatar(driver.id, this.avatarFile).pipe(
+          map(() => driver)
+        );
+      }),
       tap(() => this.resetDraft()),
       catchError((err: HttpErrorResponse) => {
         const reason =
           typeof err.error === 'string'
             ? err.error
             : err.error?.detail || err.message;
-
-        const msg = `Registration couldn’t be completed. ${reason} (Error ${err.status}).`;
-
+  
+        const msg = `Registration couldn't be completed. ${reason} (Error ${err.status}).`;
         return throwError(() => msg);
       })
     );
   }
+  
 
   private clone(v: DriverRegistrationDto): DriverRegistrationDto {
     return { ...v, vehicle: { ...v.vehicle } };

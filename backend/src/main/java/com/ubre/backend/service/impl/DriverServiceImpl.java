@@ -7,8 +7,10 @@ import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.Driver;
 import com.ubre.backend.model.UserStats;
+import com.ubre.backend.model.Vehicle;
 import com.ubre.backend.repository.DriverRepository;
 import com.ubre.backend.repository.UserRepository;
+import com.ubre.backend.repository.VehicleRepository;
 import com.ubre.backend.service.DriverService;
 import com.ubre.backend.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,9 @@ public class DriverServiceImpl implements DriverService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private VehicleRepository vehicleRepository;
 
     @Override
     public List<UserDto> getAllDrivers() {
@@ -157,6 +162,11 @@ public class DriverServiceImpl implements DriverService {
                 HttpStatus.CONFLICT, "Email already exists");
         }
 
+        boolean vehiclePlatesExists = vehicleRepository.findByPlates(dto.getVehicle().getPlates()).isPresent();
+        if (vehiclePlatesExists) { throw new ResponseStatusException(
+                HttpStatus.CONFLICT, "Vehicle with the same plates already exists");
+        }
+
         Driver newDriver = new Driver();
         newDriver.setRole(Role.DRIVER);
         newDriver.setName(dto.getName());
@@ -179,6 +189,17 @@ public class DriverServiceImpl implements DriverService {
         // dont forget user statistics
         UserStats userStats = new UserStats(newDriver);
         newDriver.setStats(userStats);
+
+        Vehicle vehicle = new Vehicle();
+        vehicle.setDriver(newDriver);
+        vehicle.setModel(dto.getVehicle().getModel());
+        vehicle.setPlates(dto.getVehicle().getPlates());
+        vehicle.setType(dto.getVehicle().getType());
+        vehicle.setSeats(dto.getVehicle().getSeats());
+        vehicle.setBabyFriendly(dto.getVehicle().getBabyFriendly());
+        vehicle.setPetFriendly(dto.getVehicle().getPetFriendly());
+
+        newDriver.setVehicle(vehicle);
 
         Driver savedDriver = driverRepository.save(newDriver);
 
