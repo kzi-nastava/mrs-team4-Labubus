@@ -107,6 +107,10 @@ public class UserServiceImpl implements UserService {
                 Files.deleteIfExists(oldFilePath);
             }
 
+            // set filename as avatarUrl in user entity
+            user.setAvatarUrl(filename);
+            userRepository.save(user);
+
             Path filePath = root.resolve(filename).normalize();
 
             Files.copy(avatar.getInputStream(), filePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
@@ -181,11 +185,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long id) {
-        UserDto user = getUserById(id);
-        if (user == null) {
+        boolean exists = userRepository.existsById(id);
+        if (!exists) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
-        users.remove(user);
+        userRepository.deleteById(id);
     }
 
     @Override

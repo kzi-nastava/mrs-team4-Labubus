@@ -159,15 +159,15 @@ public class UserController {
 //        }
 //    }
 //
-//    @DeleteMapping(value = "/{id}")
-//    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-//        try {
-//            userService.deleteUser(id);
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
 //
 //    @PutMapping(value = "/{id}/block")
 //    public ResponseEntity<Void> blockUser(@PathVariable Long id) {
