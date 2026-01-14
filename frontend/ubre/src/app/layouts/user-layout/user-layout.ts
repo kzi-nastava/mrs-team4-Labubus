@@ -62,7 +62,7 @@ import { AsyncPipe } from '@angular/common';
 
   
   ngOnInit() {
-    this.userService.setCurrentUserById(21);
+    this.userService.setCurrentUserById(22);
     
     this.userService.currentUser$.subscribe(user => {
       if (!user) return;
