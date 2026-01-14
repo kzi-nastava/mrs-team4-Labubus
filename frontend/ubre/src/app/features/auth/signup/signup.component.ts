@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -10,6 +10,7 @@ import {
 import { Button } from '../../../shared/ui/button/button';
 import { CommonModule } from '@angular/common';
 import { Modal } from '../../../shared/ui/modal/modal';
+import { AuthService } from '../auth-service';
 
 @Component({
   selector: 'app-signup',
@@ -25,6 +26,8 @@ export class SignupComponent {
   showConfirmPassword = false;
   fileName = '';
   selectedFile: File | null = null;
+
+  constructor(private authService: AuthService, private cdr: ChangeDetectorRef) {}
 
   signUpForm = new FormGroup(
     {
@@ -57,8 +60,26 @@ export class SignupComponent {
 
   onSubmit() {
     if (this.signUpForm.valid) {
-      console.log('Form Data:', this.signUpForm.value);
-      this.showSuccessModal = true;
+      const dto: UserRegistrationDto = {
+        name: this.signUpForm.value.name!,
+        surname: this.signUpForm.value.surname!,
+        phone: this.signUpForm.value.phoneNumber!,
+        address: this.signUpForm.value.address!,
+        email: this.signUpForm.value.email!,
+        password: this.signUpForm.value.password!,
+        avatarUrl: '', // za sada prazno
+      };
+
+      this.authService.register(dto).subscribe({
+        next: (user) => {
+          this.showSuccessModal = true;
+          this.cdr.detectChanges();
+          console.log('User registered successfully', user);
+        },
+        error: (err) => {
+          console.error('Registration failed', err);
+        },
+      });
     } else {
       this.signUpForm.markAllAsTouched();
     }
@@ -80,4 +101,14 @@ export class SignupComponent {
   onCdModalAction() {
     this.showSuccessModal = false;
   }
+}
+
+export interface UserRegistrationDto {
+  name: string;
+  surname: string;
+  phone: string;
+  address: string;
+  email: string;
+  password: string;
+  avatarUrl?: string;
 }

@@ -30,25 +30,39 @@ import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
 import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-change-card';
 import { AsyncPipe } from '@angular/common';
+import { AuthService } from '../../features/auth/auth-service';
 
 @Component({
   selector: 'app-user-layout',
   standalone: true,
-  imports: [Map,IconButton,SideMenu,Toast,
-    Modal,ModalContainer,StatCard,Button,
-    Sheet,FormsModule,RideHistory,ProfileChangeCard,
-    AsyncPipe],
-    templateUrl: './user-layout.html',
-    styleUrl: './user-layout.css',
-  })
-  export class UserLayout implements OnInit {
-    constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
-    
-    private userService = inject(UserService);
-    private driverRegistrationService = inject(DriverRegistrationService);
-    public mapService = inject(MapService);
-    private confetti = inject(ConfettiService);
-    private profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
+  imports: [
+    Map,
+    IconButton,
+    SideMenu,
+    Toast,
+    Modal,
+    ModalContainer,
+    StatCard,
+    Button,
+    Sheet,
+    FormsModule,
+    RideHistory,
+    ProfileChangeCard,
+    AsyncPipe,
+  ],
+  templateUrl: './user-layout.html',
+  styleUrl: './user-layout.css',
+})
+export class UserLayout implements OnInit {
+  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
+
+  private userService = inject(UserService);
+  private authService = inject(AuthService);
+
+  private driverRegistrationService = inject(DriverRegistrationService);
+  public mapService = inject(MapService);
+  private confetti = inject(ConfettiService);
+  private profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
 
   Role = Role;
   VehicleType = VehicleType;
@@ -56,16 +70,31 @@ import { AsyncPipe } from '@angular/common';
   user!: UserDto;
   userStats!: UserStatsDto;
   vehicle!: VehicleDto;
-  driverRegistration! : DriverRegistrationDto;  
+  driverRegistration!: DriverRegistrationDto;
 
   profileChanges: ProfileChangeDto[] = [];
 
   avatarSrc$ = this.userService.avatarSrc$;
 
   ngOnInit() {
-    this.userService.setCurrentUserById(1);
+    const userId = this.authService.getId();
 
-    this.userService.currentUser$.subscribe(user => {
+    if (userId !== null) {
+      this.userService.setCurrentUserById(userId);
+    } else {
+      this.user = {
+        id: 0,
+        name: '',
+        surname: '',
+        phone: '',
+        email: '',
+        address: '',
+        role: Role.GUEST,
+        avatarUrl: '',
+      };
+    }
+
+    this.userService.currentUser$.subscribe((user) => {
       if (!user) return;
 
       this.user = user;
@@ -97,21 +126,15 @@ import { AsyncPipe } from '@angular/common';
     profileChangesOpen: false,
   };
 
-
-
-
-
-
-  
   onDestBack() {
     this.mapService.resetDest();
   }
-  
+
   toggleDest() {
     this.mapService.toggleDest();
     if (this.mapService.destOpen) this.ui.cdModalOpen = false;
   }
-  
+
   onCdProceed() {
     if (this.mapService.waypoints.length === 0) {
       this.showToast('No destination', 'Please add at least one destination waypoint.');
@@ -121,15 +144,6 @@ import { AsyncPipe } from '@angular/common';
     this.ui.rideOptionsOpen = true;
   }
 
-
-
-
-
-
-
-
-  
-  
   openMenu() {
     this.ui.menuOpen = true;
   }
@@ -142,7 +156,7 @@ import { AsyncPipe } from '@angular/common';
   closeCdModal() {
     this.ui.cdModalOpen = false;
   }
-  
+
   closeAllSidePanels() {
     this.closeMenu();
     this.closeAccountSettings();
@@ -153,7 +167,7 @@ import { AsyncPipe } from '@angular/common';
     this.closeRideHistory();
     this.closeProfileChanges();
   }
-  
+
   handleMenuAction(action: string) {
     if (action === 'logout') {
       this.user = { ...this.user, name: 'Guest', surname: '', phone: '', role: Role.GUEST };
@@ -178,49 +192,37 @@ import { AsyncPipe } from '@angular/common';
     }
     this.closeMenu();
   }
-  
+
   showToast(title: string, message: string) {
     this.toastTitle = title;
     this.toastMessage = message;
     this.ui.toastOpen = true;
-    
+
     setTimeout(() => {
       this.hideToast();
       this.cdr.detectChanges();
     }, 3000);
   }
-  
+
   hideToast() {
     this.ui.toastOpen = false;
   }
-  
+
   onCdModalAction() {
     this.ui.cdModalOpen = false;
     this.mapService.openDest();
   }
-  
+
   openChat() {
     // Open chat widget
   }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   editing!: UserDto;
   editingAvatarSrc = this.avatarSrc$;
   hidePassword = true;
   toastTitle = 'Ignore this toast';
   toastMessage = 'This is just a demo message for the toast';
-  
+
   // ACCOUNT SETTINGS SHEET LOGIC
   openAccountSettings() {
     this.ui.accountSettingsOpen = true;
@@ -229,7 +231,7 @@ import { AsyncPipe } from '@angular/common';
   closeAccountSettings() {
     this.ui.accountSettingsOpen = false;
   }
-  
+
   saveAccountSettings() {
     // Save account settings logic
     this.user = { ...this.user, ...this.editing };
@@ -241,49 +243,6 @@ import { AsyncPipe } from '@angular/common';
     this.closeAccountSettings();
     this.ui.menuOpen = true;
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   // CHANGE PASSWORD SHEET LOGIC
   newPassword = '';
@@ -319,26 +278,6 @@ import { AsyncPipe } from '@angular/common';
     this.showToast('Password changed', 'Your password has been updated.');
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // VEHICLE INFORMATION SHEET LOGIC
 
   openVehicleInfo() {
@@ -357,24 +296,6 @@ import { AsyncPipe } from '@angular/common';
     this.ui.accountSettingsOpen = false;
     this.openVehicleInfo();
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   // DRIVER REGISTRATION SHEET LOGIC
   openRegisterDriver() {
@@ -417,34 +338,6 @@ import { AsyncPipe } from '@angular/common';
       this.driverRegistration.password !== this.confirmPasswordDR;
   }
 
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // Ride HISTORY SHEET LOGIC
   showRideHistory = false;
 
@@ -461,41 +354,6 @@ import { AsyncPipe } from '@angular/common';
   closeRideHistory() {
     this.showRideHistory = false;
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   // RIDE OPTIONS SHEET LOGIC
 
@@ -527,51 +385,11 @@ import { AsyncPipe } from '@angular/common';
     this.mapService.openDest();
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   onScheduleRide() {
     this.closeRideOptions();
     // TODO: API call za zakazivanje vožnje
     this.showToast('Ride scheduled', 'Your ride has been scheduled successfully.');
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   onCheckout() {
     this.closeRideOptions();
@@ -589,27 +407,9 @@ import { AsyncPipe } from '@angular/common';
     this.showToast('Ride confirmed', 'Your ride has been confirmed successfully.');
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // PROFILE CHANGES SHEET LOGIC
   loadProfileChanges() {
-    this.profileChangeService.getProfileChanges().subscribe(list => {
+    this.profileChangeService.getProfileChanges().subscribe((list) => {
       this.profileChanges = list;
     });
   }
