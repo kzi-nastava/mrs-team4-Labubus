@@ -27,4 +27,5 @@ public interface UserService {
     void sendPassengerRequest(Long userId, String passengerEmail);
     Resource getAvatar(Long userId);
     void uploadAvatar(Long userId, MultipartFile avatar);
+    UserDto createAdmin(UserDto adminDto);
 }

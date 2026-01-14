@@ -6,7 +6,9 @@ import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.dto.UserStatsDto;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.model.Admin;
 import com.ubre.backend.model.User;
+import com.ubre.backend.model.UserStats;
 import com.ubre.backend.repository.AdminRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.UserService;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -43,6 +46,9 @@ public class UserServiceImpl implements UserService {
     // real repository
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -235,4 +241,46 @@ public class UserServiceImpl implements UserService {
         }
         // todo: implement send passenger request logic via email
     }
+
+    @Override
+    public UserDto createAdmin(UserDto adminDto) {
+        boolean exists = userRepository.findByEmail(adminDto.getEmail()).isPresent();
+        if (exists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User with this email already exists");
+        }
+
+        Admin newAdmin = new Admin();
+        newAdmin.setRole(Role.ADMIN);
+        newAdmin.setName(adminDto.getName());
+        newAdmin.setSurname(adminDto.getSurname());
+        newAdmin.setEmail(adminDto.getEmail());
+        newAdmin.setPassword(passwordEncoder.encode("admin123")); // default password, should be changed later
+        newAdmin.setPhone(adminDto.getPhone());
+        newAdmin.setAddress(adminDto.getAddress());
+        newAdmin.setStatus(UserStatus.INACTIVE); // new admin is inactive by default
+        newAdmin.setAvatarUrl(adminDto.getAvatarUrl());
+        newAdmin.setIsActivated(true);
+        newAdmin.setIsBlocked(false);
+
+        // user stats
+        UserStats stats = new UserStats(newAdmin);
+        newAdmin.setStats(stats);
+
+        Admin savedAdmin = userRepository.save(newAdmin);
+
+        return new UserDto(
+                savedAdmin.getId(),
+                savedAdmin.getRole(),
+                savedAdmin.getAvatarUrl(),
+                savedAdmin.getEmail(),
+                savedAdmin.getName(),
+                savedAdmin.getSurname(),
+                savedAdmin.getPhone(),
+                savedAdmin.getAddress(),
+                savedAdmin.getStatus()
+        );
+    }
+
+
+
 }

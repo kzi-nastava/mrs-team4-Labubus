@@ -39,13 +39,8 @@ public class AdminController {
 
     // create a new administrator profile
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserDto> createAdministrator(@RequestBody UserDto administratorDto) {
-
-        boolean emailExists = userService.getAllUsers().stream()
-                .anyMatch(user -> user.getEmail().equalsIgnoreCase(administratorDto.getEmail()));
-        if (emailExists) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
-        }
+    public ResponseEntity<UserDto> createAdmin(@RequestBody UserDto adminDto) {
+        UserDto createdAdministrator = userService.createAdmin(adminDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAdministrator);
     }
 
