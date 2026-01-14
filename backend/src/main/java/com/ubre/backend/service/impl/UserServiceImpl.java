@@ -98,6 +98,9 @@ public class UserServiceImpl implements UserService {
         Path root = Paths.get(uploadDir).toAbsolutePath().normalize();
         try {
             Files.createDirectories(root);
+
+            // avatar filename should be unique per user, add user email in front of filename
+            filename = user.getEmail() + "_" + filename;
             // delete old if exists (not null and not default-avatar.jpg)
             if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty() && !user.getAvatarUrl().equals("default-avatar.jpg")) {
                 Path oldFilePath = root.resolve(user.getAvatarUrl()).normalize();
