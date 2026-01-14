@@ -1,8 +1,10 @@
 package com.ubre.backend.service.impl;
 
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.model.ActivationToken;
 import com.ubre.backend.model.Driver;
 import com.ubre.backend.model.User;
+import com.ubre.backend.repository.ActivationTokenRepository;
 import com.ubre.backend.repository.DriverRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.AuthService;
@@ -11,12 +13,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 @Service
 public class AuthServiceImpl implements AuthService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private DriverRepository driverRepository;
+
+    @Autowired
+    private ActivationTokenRepository tokenRepository;
 
     @Override
     public User save(User user) {
@@ -58,8 +66,29 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void sendResetToken(String email) {
+    public void activateAccount(String token) throws BadRequestException {
+        ActivationToken activationToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new BadRequestException("Invalid activation token"));
 
+        if (activationToken.getConfirmedAt() != null) {
+            throw new BadRequestException("Account already activated");
+        }
+
+        if (activationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("Activation token expired");
+        }
+
+        User user = activationToken.getUser();
+        user.setIsActivated(true);
+        userRepository.save(user);
+
+        activationToken.setConfirmedAt(LocalDateTime.now());
+        tokenRepository.save(activationToken);
+    }
+
+    @Override
+    public Optional<User> findByEmail(String trim) {
+        return userRepository.findByEmail(trim);
     }
 
 

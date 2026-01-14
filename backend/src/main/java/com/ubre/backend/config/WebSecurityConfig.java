@@ -81,7 +81,7 @@ public class WebSecurityConfig {
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(restAuthenticationEntryPoint));
         http.authorizeHttpRequests(request -> {
-            request.requestMatchers("/api/auth/login").permitAll()
+            request.requestMatchers("/api/auth/login", "/api/user/register").permitAll()
                     .requestMatchers("/error").permitAll()
                     .requestMatchers(
                             "/",

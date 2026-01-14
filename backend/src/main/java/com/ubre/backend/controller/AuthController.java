@@ -11,6 +11,7 @@ import com.ubre.backend.model.User;
 import com.ubre.backend.service.AuthService;
 import com.ubre.backend.service.DriverService;
 import com.ubre.backend.service.UserService;
+import com.ubre.backend.service.impl.CustomUserDetailsService;
 import com.ubre.backend.util.TokenUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -24,10 +25,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -39,16 +43,20 @@ public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
     @Autowired
-    private UserService userService;
-    @Autowired
     private AuthService authService;
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
+
+    @Autowired
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     // login existing user and return sanitized profile information
     @PostMapping("/login")
     public ResponseEntity<UserTokenState> createAuthenticationToken(
             @RequestBody @Valid LoginDto authenticationRequest, HttpServletResponse response) {
+
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                authenticationRequest.getEmail(), authenticationRequest.getPassword()));
+                authenticationRequest.getEmail().trim().toLowerCase(), authenticationRequest.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -62,15 +70,9 @@ public class AuthController {
     }
 
     @GetMapping("/logout")
-    public ResponseEntity<String> logout(Principal principal) {
-        try {
-            authService.logout(principal.getName());
-            return ResponseEntity.ok("Successfully logged out.");
-        } catch (BadRequestException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<String> logout(Principal principal) throws BadRequestException {
+        authService.logout(principal.getName());
+        return ResponseEntity.ok("Successfully logged out.");
     }
 
     @PutMapping("/status")
@@ -80,5 +82,10 @@ public class AuthController {
         return ResponseEntity.ok(message);
     }
 
+    @GetMapping("/activate")
+    public ResponseEntity<String> activate(@RequestParam String token) throws BadRequestException {
+        authService.activateAccount(token);
+        return ResponseEntity.ok("Account successfully activated");
+    }
 
 }

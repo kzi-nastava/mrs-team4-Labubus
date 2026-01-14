@@ -3,9 +3,11 @@ package com.ubre.backend.service.impl;
 import com.ubre.backend.dto.*;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.model.ActivationToken;
 import com.ubre.backend.model.Driver;
 import com.ubre.backend.model.Passenger;
 import com.ubre.backend.model.User;
+import com.ubre.backend.repository.ActivationTokenRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,20 +19,25 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final String DEFAULT_AVATAR_URL = "default.png";
     // Mock data for demonstration purposes
     private static List<UserDto> users = new ArrayList<UserDto>();
     private static List<ProfileChangeDto> profileChangeRequests = new ArrayList<>();
@@ -47,8 +54,10 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private ActivationTokenRepository tokenRepository;
 
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -92,7 +101,11 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = new Passenger();
-        user.setAvatarUrl(dto.getAvatarUrl());
+        if (dto.getAvatarUrl() == null || dto.getAvatarUrl().isBlank()) {
+            user.setAvatarUrl(DEFAULT_AVATAR_URL);
+        } else {
+            user.setAvatarUrl(dto.getAvatarUrl());
+        }
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setName(dto.getName());
@@ -101,13 +114,22 @@ public class UserServiceImpl implements UserService {
         user.setAddress(dto.getAddress());
         user.setCreatedAt(LocalDateTime.now());
         user.setIsBlocked(false);
-        user.setRole(Role.REGISTERED_USER);
-        user.setIsActivated(false);
+        //user.setRole(Role.REGISTERED_USER);
+        // activate endpoint
+        user.setIsActivated(true);
         User savedUser = userRepository.save(user);
+
+        ActivationToken token = new ActivationToken();
+        token.setToken(UUID.randomUUID().toString());
+        token.setUser(user);
+        token.setExpiresAt(LocalDateTime.now().plusHours(24));
+
+        tokenRepository.save(token);
+
+        // email service for sending the token
 
         return new UserDto(savedUser);
     }
-
 
     @Override
     public UserDto getUserById(Long id) {
