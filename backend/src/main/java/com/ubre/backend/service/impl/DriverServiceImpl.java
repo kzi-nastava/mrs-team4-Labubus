@@ -6,6 +6,7 @@ import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.Driver;
+import com.ubre.backend.model.UserStats;
 import com.ubre.backend.repository.DriverRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.DriverService;
@@ -174,6 +175,10 @@ public class DriverServiceImpl implements DriverService {
 
         newDriver.setActivationToken(activationToken);
         newDriver.setActivationTokenExpiry(activationTokenExpiry);
+
+        // dont forget user statistics
+        UserStats userStats = new UserStats(newDriver);
+        newDriver.setStats(userStats);
 
         Driver savedDriver = driverRepository.save(newDriver);
 
