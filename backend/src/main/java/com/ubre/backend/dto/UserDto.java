@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.model.User;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,5 +33,17 @@ public class UserDto implements Serializable {
         this.phone = phone;
         this.address = address;
         this.status = status;
+    }
+
+    public UserDto(User user) {
+        this.id = user.getId();
+        this.role = user.getRole();
+        this.avatarUrl = user.getAvatarUrl();
+        this.email = user.getEmail();
+        this.name = user.getName();
+        this.surname = user.getSurname();
+        this.phone = user.getPhone();
+        this.address = user.getAddress();
+        this.status = user.getStatus();
     }
 }

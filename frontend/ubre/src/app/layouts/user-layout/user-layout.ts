@@ -30,6 +30,8 @@ import { ProfileChangeDto } from '../../dtos/profile-change-dto';
 import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-change-card';
 import { AsyncPipe } from '@angular/common';
 import { AccountSettingsService } from '../../services/account-settings-service';
+import { AuthService } from '../../features/auth/auth-service';
+import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 
 @Component({
   selector: 'app-user-layout',
@@ -45,6 +47,7 @@ import { AccountSettingsService } from '../../services/account-settings-service'
     constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
     
     public userService = inject(UserService);
+    private authService = inject(AuthService);
     public driverRegistrationService = inject(DriverRegistrationService);
     public mapService = inject(MapService);
     private confetti = inject(ConfettiService);
@@ -57,11 +60,27 @@ import { AccountSettingsService } from '../../services/account-settings-service'
   user!: UserDto;
   userStats!: UserStatsDto;
   vehicle!: VehicleDto;
+  driverRegistration!: DriverRegistrationDto;
 
   profileChanges: ProfileChangeDto[] = [];
 
   ngOnInit() {
-    this.userService.setCurrentUserById(17);
+    const userId = this.authService.getId();
+
+    if (userId !== null) {
+      this.userService.setCurrentUserById(userId);
+    } else {
+      this.user = {
+        id: 0,
+        name: '',
+        surname: '',
+        phone: '',
+        email: '',
+        address: '',
+        role: Role.GUEST,
+        avatarUrl: '',
+      };
+    }
     
     this.userService.currentUser$.subscribe(user => {
       if (!user) return;
@@ -92,6 +111,8 @@ import { AccountSettingsService } from '../../services/account-settings-service'
     toastOpen: false,
     profileChangesOpen: false,
   };
+
+
   
   
   
@@ -102,12 +123,12 @@ import { AccountSettingsService } from '../../services/account-settings-service'
   onDestBack() {
     this.mapService.resetDest();
   }
-  
+
   toggleDest() {
     this.mapService.toggleDest();
     if (this.mapService.destOpen) this.ui.cdModalOpen = false;
   }
-  
+
   onCdProceed() {
     if (this.mapService.waypoints.length === 0) {
       this.showToast('No destination', 'Please add at least one destination waypoint.');
@@ -116,6 +137,7 @@ import { AccountSettingsService } from '../../services/account-settings-service'
     this.mapService.closeDest();
     this.ui.rideOptionsOpen = true;
   }
+
   
   
   
@@ -138,7 +160,7 @@ import { AccountSettingsService } from '../../services/account-settings-service'
   closeCdModal() {
     this.ui.cdModalOpen = false;
   }
-  
+
   closeAllSidePanels() {
     this.closeMenu();
     this.closeAccountSettings();
@@ -149,10 +171,11 @@ import { AccountSettingsService } from '../../services/account-settings-service'
     this.closeRideHistory();
     this.closeProfileChanges();
   }
-  
+
   handleMenuAction(action: string) {
     if (action === 'logout') {
       this.user = { ...this.user, name: 'Guest', surname: '', phone: '', role: Role.GUEST };
+      this.authService.logout();
     }
     if (action === 'account-settings') {
       this.openAccountSettings();
@@ -202,19 +225,21 @@ import { AccountSettingsService } from '../../services/account-settings-service'
     }, 0);
   }
 
+
   
   hideToast() {
     this.ui.toastOpen = false;
   }
-  
+
   onCdModalAction() {
     this.ui.cdModalOpen = false;
     this.mapService.openDest();
   }
-  
+
   openChat() {
     // Open chat widget
   }
+
 
   focusNext(el: HTMLElement) {
     el.focus();
@@ -245,7 +270,7 @@ import { AccountSettingsService } from '../../services/account-settings-service'
     this.ui.accountSettingsOpen = false;
     this.accountSettingsService.clearDraft();
   }
-  
+
   saveAccountSettings() {
     this.accountSettingsService.save().subscribe({
       next: () => {
@@ -314,6 +339,7 @@ import { AccountSettingsService } from '../../services/account-settings-service'
   
   
 
+
   
   // CHANGE PASSWORD SHEET LOGIC
   newPassword = '';
@@ -348,6 +374,7 @@ import { AccountSettingsService } from '../../services/account-settings-service'
     this.closeChangePassword();
     this.showToast('Password changed', 'Your password has been updated.');
   }
+
   
   
   
@@ -387,6 +414,7 @@ import { AccountSettingsService } from '../../services/account-settings-service'
     this.ui.accountSettingsOpen = false;
     this.openVehicleInfo();
   }
+
   
   
   
@@ -485,6 +513,7 @@ import { AccountSettingsService } from '../../services/account-settings-service'
 
 
 
+
   
 
 
@@ -530,41 +559,6 @@ import { AccountSettingsService } from '../../services/account-settings-service'
     this.showRideHistory = false;
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // RIDE OPTIONS SHEET LOGIC
 
   rideOptions = {
@@ -595,51 +589,11 @@ import { AccountSettingsService } from '../../services/account-settings-service'
     this.mapService.openDest();
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   onScheduleRide() {
     this.closeRideOptions();
     // TODO: API call za zakazivanje vožnje
     this.showToast('Ride scheduled', 'Your ride has been scheduled successfully.');
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   onCheckout() {
     this.closeRideOptions();
@@ -657,27 +611,9 @@ import { AccountSettingsService } from '../../services/account-settings-service'
     this.showToast('Ride confirmed', 'Your ride has been confirmed successfully.');
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // PROFILE CHANGES SHEET LOGIC
   loadProfileChanges() {
-    this.profileChangeService.getProfileChanges().subscribe(list => {
+    this.profileChangeService.getProfileChanges().subscribe((list) => {
       this.profileChanges = list;
     });
   }

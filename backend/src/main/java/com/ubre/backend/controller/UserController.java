@@ -1,10 +1,9 @@
 package com.ubre.backend.controller;
 
-import com.ubre.backend.dto.PasswordChangeDto;
-import com.ubre.backend.dto.ProfileChangeDto;
-import com.ubre.backend.dto.UserDto;
-import com.ubre.backend.dto.UserStatsDto;
+import com.ubre.backend.dto.*;
 import com.ubre.backend.service.UserService;
+import jakarta.validation.Valid;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -121,6 +120,18 @@ public class UserController {
     public ResponseEntity<Void> sendPassengerRequest(@PathVariable Long id, @RequestBody String email) {
         userService.sendPassengerRequest(id, email);
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
+    }
+
+
+    // register a new passenger account
+    @PostMapping(
+            value = "/register",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<UserDto> register(@Valid @RequestBody UserRegistrationDto registrationDto) {
+        UserDto createdUser = userService.registerUser(registrationDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
     // accept a passenger request via email link
