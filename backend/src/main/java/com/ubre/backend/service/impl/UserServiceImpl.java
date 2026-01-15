@@ -1,20 +1,26 @@
 package com.ubre.backend.service.impl;
 
-import com.ubre.backend.dto.PasswordChangeDto;
-import com.ubre.backend.dto.ProfileChangeDto;
-import com.ubre.backend.dto.UserDto;
-import com.ubre.backend.dto.UserStatsDto;
+import com.ubre.backend.dto.*;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.model.ActivationToken;
+import com.ubre.backend.model.Driver;
+import com.ubre.backend.model.Passenger;
 import com.ubre.backend.model.User;
-import com.ubre.backend.repository.AdminRepository;
+import com.ubre.backend.repository.ActivationTokenRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,12 +29,15 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final String DEFAULT_AVATAR_URL = "default.png";
     // Mock data for demonstration purposes
     private static List<UserDto> users = new ArrayList<UserDto>();
     private static List<ProfileChangeDto> profileChangeRequests = new ArrayList<>();
@@ -43,6 +52,12 @@ public class UserServiceImpl implements UserService {
     // real repository
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ActivationTokenRepository tokenRepository;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -77,6 +92,43 @@ public class UserServiceImpl implements UserService {
         } catch (MalformedURLException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid avatar URL");
         }
+    }
+
+    @Override
+    public UserDto registerUser(UserRegistrationDto dto) {
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use");
+        }
+
+        User user = new Passenger();
+        if (dto.getAvatarUrl() == null || dto.getAvatarUrl().isBlank()) {
+            user.setAvatarUrl(DEFAULT_AVATAR_URL);
+        } else {
+            user.setAvatarUrl(dto.getAvatarUrl());
+        }
+        user.setEmail(dto.getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setName(dto.getName());
+        user.setSurname(dto.getSurname());
+        user.setPhone(dto.getPhone());
+        user.setAddress(dto.getAddress());
+        user.setCreatedAt(LocalDateTime.now());
+        user.setIsBlocked(false);
+        //user.setRole(Role.REGISTERED_USER);
+        // activate endpoint
+        user.setIsActivated(true);
+        User savedUser = userRepository.save(user);
+
+        ActivationToken token = new ActivationToken();
+        token.setToken(UUID.randomUUID().toString());
+        token.setUser(user);
+        token.setExpiresAt(LocalDateTime.now().plusHours(24));
+
+        tokenRepository.save(token);
+
+        // email service for sending the token
+
+        return new UserDto(savedUser);
     }
 
     // avater upload
@@ -235,4 +287,7 @@ public class UserServiceImpl implements UserService {
         }
         // todo: implement send passenger request logic via email
     }
+
+
+
 }
