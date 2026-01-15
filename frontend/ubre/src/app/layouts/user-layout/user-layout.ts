@@ -263,6 +263,14 @@ import { AccountSettingsService } from '../../services/account-settings-service'
     this.closeAccountSettings();
     this.ui.menuOpen = true;
   }
+
+  onAccountSettingsAvatarSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.accountSettingsService.setAvatarFile(file);
+    input.value = ''; 
+  }
+
   
   
   
@@ -466,7 +474,7 @@ import { AccountSettingsService } from '../../services/account-settings-service'
     this.driverRegistrationService.fieldErrors = Object.keys(errors).length > 0 ? errors : null;
   }
 
-  onDrAvatarSelected(e: Event) {
+  onDriverRegistrationAvatarSelected(e: Event) {
     const input = e.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
     this.driverRegistrationService.setAvatarFile(file);

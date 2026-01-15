@@ -3,10 +3,11 @@
 
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, take, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { catchError, switchMap, map, take, tap } from 'rxjs/operators';
 import { UserService } from './user-service';
 import { UserDto } from '../dtos/user-dto';
+import { of } from 'rxjs';
 
 type FieldErrors = Partial<Record<
     'name' | 'surname' | 'phone' | 'address',
@@ -22,11 +23,19 @@ export class AccountSettingsService {
     draft: UserDto | null = null;
     fieldErrors: FieldErrors | null = null;
 
+    private avatarSrcSubject = new BehaviorSubject<string>('default-avatar.jpg');
+    readonly avatarSrc$ = this.avatarSrcSubject.asObservable();
+    avatarFile: File | null = null;
+
     loadDraft(): void {
         this.userService.currentUser$.pipe(take(1)).subscribe(user => {
             if (!user || !user.id) return;
             this.draft = { ...user };
             this.fieldErrors = null; 
+            // pull avatar src from user service just once 
+            this.userService.avatarSrc$.pipe(take(1)).subscribe(src => {
+                this.avatarSrcSubject.next(src);
+            });
         });
     }
 
@@ -53,11 +62,20 @@ export class AccountSettingsService {
         }
 
         return this.http.put<UserDto>(`${this.api}/users/${this.draft.id}`, this.draft).pipe(
-            tap(updatedUser => {
+            switchMap(updatedUser => {
+                if (!this.avatarFile) return of(updatedUser);
+          
+                return this.uploadAvatar(updatedUser.id, this.avatarFile).pipe(
+                  map(() => updatedUser)
+                );
+              }),
+              tap(updatedUser => {
                 this.userService.setCurrentUserById(updatedUser.id);
                 this.draft = { ...updatedUser };
-                this.fieldErrors = null; 
-            }),
+                this.fieldErrors = null;
+          
+                this.avatarFile = null;
+              }),
             catchError((err: HttpErrorResponse) => {
                 if (err.error && typeof err.error === 'object' && !err.error.detail) {
                     this.fieldErrors = err.error as FieldErrors;
@@ -100,5 +118,27 @@ export class AccountSettingsService {
     clearFieldError(field: keyof FieldErrors): void {
         if (!this.fieldErrors) return;
         this.fieldErrors = { ...this.fieldErrors, [field]: null };
+    }
+
+    setAvatarFile(file: File | null): void {
+        const prev = this.avatarSrcSubject.value;
+        if (prev.startsWith('blob:')) URL.revokeObjectURL(prev);
+
+        if (!file) {
+            this.avatarSrcSubject.next('default-avatar.jpg');
+            this.avatarFile = null;
+            return;
+        }
+
+        const src = URL.createObjectURL(file);
+        this.avatarSrcSubject.next(src);
+        this.avatarFile = file;
+    }
+
+    // use upload avatar from register a driver
+    uploadAvatar(userId: number, file: File): Observable<void> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<void>(`${this.api}/users/${userId}/avatar`, formData);
     }
 }

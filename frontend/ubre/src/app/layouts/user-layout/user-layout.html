@@ -183,8 +183,9 @@
 
         <div class="as-section-title"><span>Account information</span></div>
 
-        <div class="as-avatar">
-          <img [src]="userService.avatarSrc$ | async" alt="avatar">
+        <div class="as-avatar" (click)="accountSettingsAvatarInput.click()">
+          <img [src]="accountSettingsService.avatarSrc$ | async" alt="avatar">
+          <input #accountSettingsAvatarInput type="file" accept=".jpg" hidden (change)="onAccountSettingsAvatarSelected($event)">
         </div>
 
         <div class="as-field">
@@ -396,7 +397,7 @@
             <img [src]="driverAvatarSrc || 'default-avatar.jpg'" alt="avatar">
           </div>
 
-          <input #driverAvatarInput type="file" accept=".jpg" hidden (change)="onDrAvatarSelected($event)">
+          <input #driverAvatarInput type="file" accept=".jpg" hidden (change)="onDriverRegistrationAvatarSelected($event)">
 
           <div class="rd-field">
               <div class="rd-label-row">
