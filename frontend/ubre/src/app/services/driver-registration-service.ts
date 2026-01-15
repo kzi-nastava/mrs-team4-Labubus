@@ -47,6 +47,8 @@ export class DriverRegistrationService {
   private readonly draftSubject = new BehaviorSubject<DriverRegistrationDto>(this.clone(this.initialDraft));
   readonly draft$ = this.draftSubject.asObservable();
 
+  fieldErrors: FieldErrors | null = null;
+
   getDraftSnapshot(): DriverRegistrationDto {
     return this.draftSubject.value;
   }
@@ -72,6 +74,7 @@ export class DriverRegistrationService {
   resetDraft() {
     this.draftSubject.next(this.clone(this.initialDraft));
     this.setAvatarFile(null);
+    this.fieldErrors = null;
   }
 
   decSeats() {
@@ -115,11 +118,14 @@ export class DriverRegistrationService {
   }
 
   register(confirmPassword?: string): Observable<UserDto> {
+    this.fieldErrors = null;
+
     const dto = this.getDraftSnapshot();
     const errors = this.validate(dto, confirmPassword);
   
-    if (Object.keys(errors).length) {
-      return throwError(() => errors);
+    if (Object.keys(errors).length > 0) {
+      this.fieldErrors = errors;
+      return throwError(() => 'Validation failed');
     }
   
     return this.http.post<UserDto>(this.driversApi, dto).pipe(
@@ -130,13 +136,19 @@ export class DriverRegistrationService {
           map(() => driver)
         );
       }),
-      tap(() => this.resetDraft()),
+      tap(() => {
+        this.resetDraft();
+        this.fieldErrors = null;
+      }),
       catchError((err: HttpErrorResponse) => {
+        if (err.error && typeof err.error === 'object' && !err.error.detail) {
+          this.fieldErrors = err.error as FieldErrors;
+        }
+        
         const reason =
           typeof err.error === 'string'
             ? err.error
-            : err.error?.detail || err.message;
-  
+            : err.error?.detail || err.message || 'Registration failed';
         const msg = `Registration couldn't be completed. ${reason} (Error ${err.status}).`;
         return throwError(() => msg);
       })
@@ -172,6 +184,11 @@ export class DriverRegistrationService {
     formData.append('file', file);
 
     return this.http.post<void>(`${this.usersApi}/${driverId}/avatar`, formData);
+  }
+
+  clearFieldError(field: keyof FieldErrors): void {
+    if (!this.fieldErrors) return;
+    this.fieldErrors = { ...this.fieldErrors, [field]: null };
   }
 
 }

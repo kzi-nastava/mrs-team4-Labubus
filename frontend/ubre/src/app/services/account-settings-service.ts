@@ -20,11 +20,13 @@ export class AccountSettingsService {
     private readonly api = 'http://localhost:8080/api';
 
     draft: UserDto | null = null;
+    fieldErrors: FieldErrors | null = null;
 
     loadDraft(): void {
         this.userService.currentUser$.pipe(take(1)).subscribe(user => {
             if (!user || !user.id) return;
             this.draft = { ...user };
+            this.fieldErrors = null; 
         });
     }
 
@@ -37,8 +39,15 @@ export class AccountSettingsService {
         };
     }
 
+    save(): Observable<UserDto> {
+        this.fieldErrors = null;
 
-    saveDraft(): Observable<UserDto> {
+        const errors = this.validate();
+        if (Object.keys(errors).length > 0) {
+            this.fieldErrors = errors;
+            return throwError(() => 'Validation failed');
+        }
+
         if (!this.draft || !this.draft.id) {
             return throwError(() => 'No draft to save');
         }
@@ -47,8 +56,13 @@ export class AccountSettingsService {
             tap(updatedUser => {
                 this.userService.setCurrentUserById(updatedUser.id);
                 this.draft = { ...updatedUser };
+                this.fieldErrors = null; 
             }),
             catchError((err: HttpErrorResponse) => {
+                if (err.error && typeof err.error === 'object' && !err.error.detail) {
+                    this.fieldErrors = err.error as FieldErrors;
+                }
+                
                 const reason =
                     typeof err.error === 'string'
                         ? err.error
@@ -60,11 +74,9 @@ export class AccountSettingsService {
 
     clearDraft(): void {
         this.draft = null;
+        this.fieldErrors = null;
     }
 
-    /**
-     * Validira draft i vraća greške po poljima
-     */
     validate(): FieldErrors {
         const e: FieldErrors = {};
 
@@ -83,5 +95,10 @@ export class AccountSettingsService {
         if (!address) e.address = 'Required';
 
         return e;
+    }
+
+    clearFieldError(field: keyof FieldErrors): void {
+        if (!this.fieldErrors) return;
+        this.fieldErrors = { ...this.fieldErrors, [field]: null };
     }
 }

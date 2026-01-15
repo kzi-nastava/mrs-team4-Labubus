@@ -61,7 +61,7 @@ import { AccountSettingsService } from '../../services/account-settings-service'
   profileChanges: ProfileChangeDto[] = [];
 
   ngOnInit() {
-    this.userService.setCurrentUserById(22);
+    this.userService.setCurrentUserById(17);
     
     this.userService.currentUser$.subscribe(user => {
       if (!user) return;
@@ -233,7 +233,6 @@ import { AccountSettingsService } from '../../services/account-settings-service'
   
   
   
-  editingAvatarSrc = this.userService.avatarSrc$;
   hidePassword = true;
   
   // ACCOUNT SETTINGS SHEET LOGIC
@@ -244,18 +243,19 @@ import { AccountSettingsService } from '../../services/account-settings-service'
   
   closeAccountSettings() {
     this.ui.accountSettingsOpen = false;
-    this.accountSettingsService.clearDraft(); 
+    this.accountSettingsService.clearDraft();
   }
   
   saveAccountSettings() {
-    this.accountSettingsService.saveDraft().subscribe({
+    this.accountSettingsService.save().subscribe({
       next: () => {
         this.closeAccountSettings();
         this.showToast('Settings saved', 'Your account settings have been updated.');
       },
       error: (err) => {
-        const message = typeof err === 'string' ? err : 'Failed to save account settings';
-        this.showToast('Error', message);
+        if (typeof err === 'string' && err !== 'Validation failed') {
+          this.showToast('Error saving settings', err);
+        }
       }
     });
   }
@@ -399,19 +399,17 @@ import { AccountSettingsService } from '../../services/account-settings-service'
   
   
   confirmPasswordDR = '';
-  fieldErrors: any = null;           // for field-specific error messages
 
   // DRIVER REGISTRATION SHEET LOGIC
   openRegisterDriver() {
     this.ui.registerDriverOpen = true;
-    this.fieldErrors = null;
+    this.driverRegistrationService.fieldErrors = null;
   }
 
   closeRegisterDriver() {
     this.ui.registerDriverOpen = false;
     this.driverRegistrationService.resetDraft();
     this.confirmPasswordDR = '';
-    this.fieldErrors = null;
   }
 
   patchDriverRegistration(changes : any) {
@@ -433,19 +431,17 @@ import { AccountSettingsService } from '../../services/account-settings-service'
   }
 
   onRegisterDriver() {
-    this.fieldErrors = null;
-
     this.driverRegistrationService.register(this.confirmPasswordDR).subscribe({
       next: () => {
         this.closeRegisterDriver();
         this.showToast('Driver registered', 'Activation mail has been sent to the driver.');
         this.confetti.fire();
         this.confirmPasswordDR = '';
-        this.fieldErrors = null;
       },
       error: (e) => {
-        if (typeof e === 'string') this.showToast('Registration error', e);
-        else this.fieldErrors = e;
+        if (typeof e === 'string') {
+          this.showToast('Registration error', e);
+        }
       }
     });
   }
@@ -464,15 +460,11 @@ import { AccountSettingsService } from '../../services/account-settings-service'
   }
 
   validateAll() {
-    this.fieldErrors = this.driverRegistrationService.validate(
+    const errors = this.driverRegistrationService.validate(
       this.driverRegistrationService.getDraftSnapshot(),
       this.confirmPasswordDR
     );
-  }
-
-  clearFieldError(field: string) {
-    if (!this.fieldErrors) return;
-    this.fieldErrors = { ...this.fieldErrors, [field]: null };
+    this.driverRegistrationService.fieldErrors = Object.keys(errors).length > 0 ? errors : null;
   }
 
   onDrAvatarSelected(e: Event) {

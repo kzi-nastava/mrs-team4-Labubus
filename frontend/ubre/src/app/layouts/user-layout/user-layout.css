@@ -115,7 +115,24 @@
 .as-avatar img{ width:138px; height:138px; border-radius:999px; object-fit:cover; }
 
 .as-field{ margin: 4px 0; }
-.as-label{ font-size: var(--font-size-regular); color:var(--color-text-primary); margin: 0 0 6px 6px; }
+.as-label{ 
+  font-size: var(--font-size-regular); 
+  color:var(--color-text-primary); 
+  margin: 0 0 6px 6px; 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.as-error{
+  margin-left: 20px;
+  font-size: 12px;
+  color:#d23b3b;
+}
+
+.as-input.error{
+  border-color:#d23b3b;
+}
 
 .as-input{
   width:100%; height:44px; padding:0 14px;
