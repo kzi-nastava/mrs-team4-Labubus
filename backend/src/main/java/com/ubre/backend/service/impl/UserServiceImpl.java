@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
     private ActivationTokenRepository tokenRepository;
 
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
