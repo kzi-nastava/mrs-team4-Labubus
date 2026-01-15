@@ -30,6 +30,7 @@ import { ProfileChangeDto } from '../../dtos/profile-change-dto';
 import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-change-card';
 import { AsyncPipe } from '@angular/common';
 import { AuthService } from '../../features/auth/auth-service';
+import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 
 @Component({
   selector: 'app-user-layout',
@@ -187,6 +188,7 @@ export class UserLayout implements OnInit {
   handleMenuAction(action: string) {
     if (action === 'logout') {
       this.user = { ...this.user, name: 'Guest', surname: '', phone: '', role: Role.GUEST };
+      this.authService.logout();
     }
     if (action === 'account-settings') {
       this.openAccountSettings();
