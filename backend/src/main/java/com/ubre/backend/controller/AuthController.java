@@ -21,14 +21,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 import java.util.Optional;
@@ -51,19 +51,27 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<UserTokenState> createAuthenticationToken(
             @RequestBody @Valid LoginDto authenticationRequest, HttpServletResponse response) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    authenticationRequest.getEmail().trim().toLowerCase(), authenticationRequest.getPassword()));
 
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                authenticationRequest.getEmail().trim().toLowerCase(), authenticationRequest.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            User user = (User) authentication.getPrincipal();
+            String jwt = tokenUtils.generateToken(user);
+            Long expiresIn = tokenUtils.getExpiredIn();
 
-        User user = (User) authentication.getPrincipal();
-        String jwt = tokenUtils.generateToken(user);
-        Long expiresIn = tokenUtils.getExpiredIn();
+            authService.updateUserStatus(user, UserStatus.ACTIVE);
 
-        authService.updateUserStatus(user, UserStatus.ACTIVE);
+            return ResponseEntity.ok(new UserTokenState(jwt, expiresIn));
 
-        return ResponseEntity.ok(new UserTokenState(jwt, expiresIn));
+        } catch (DisabledException e) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account is not activated. Please check your email.");
+        } catch (BadCredentialsException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password.");
+        } catch (LockedException e) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Your account is blocked.");
+        }
     }
 
     @GetMapping("/logout")

@@ -11,6 +11,8 @@ import { Button } from '../../../shared/ui/button/button';
 import { CommonModule } from '@angular/common';
 import { Modal } from '../../../shared/ui/modal/modal';
 import { AuthService } from '../auth-service';
+import { UserService } from '../../../services/user-service';
+import { DriverRegistrationService } from '../../../services/driver-registration-service';
 
 @Component({
   selector: 'app-signup',
@@ -27,7 +29,7 @@ export class SignupComponent {
   fileName = '';
   selectedFile: File | null = null;
 
-  constructor(private authService: AuthService, private cdr: ChangeDetectorRef) {}
+  constructor(private authService: AuthService, private avatarService: DriverRegistrationService, private cdr: ChangeDetectorRef) {}
 
   signUpForm = new FormGroup(
     {
@@ -75,6 +77,13 @@ export class SignupComponent {
           this.showSuccessModal = true;
           this.cdr.detectChanges();
           console.log('User registered successfully', user);
+          if (this.selectedFile) this.avatarService.uploadAvatar(user.id, this.selectedFile).subscribe({
+            next: () => {
+              this.showSuccessModal = true;
+              this.cdr.detectChanges();
+            },
+            error: (err) => console.error('Avatar upload failed', err)
+          });
         },
         error: (err) => {
           console.error('Registration failed', err);
@@ -95,7 +104,7 @@ export class SignupComponent {
         profilePicture: file.name,
       });
 
-      console.log('Selected file:', file);
+      this.avatarService.setAvatarFile(file);
     }
   }
   onCdModalAction() {

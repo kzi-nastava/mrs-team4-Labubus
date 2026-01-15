@@ -9,6 +9,7 @@ import com.ubre.backend.model.Passenger;
 import com.ubre.backend.model.User;
 import com.ubre.backend.repository.ActivationTokenRepository;
 import com.ubre.backend.repository.UserRepository;
+import com.ubre.backend.service.EmailService;
 import com.ubre.backend.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.apache.coyote.BadRequestException;
@@ -58,6 +59,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -114,9 +118,7 @@ public class UserServiceImpl implements UserService {
         user.setAddress(dto.getAddress());
         user.setCreatedAt(LocalDateTime.now());
         user.setIsBlocked(false);
-        //user.setRole(Role.REGISTERED_USER);
-        // activate endpoint
-        user.setIsActivated(true);
+        user.setIsActivated(false);
         User savedUser = userRepository.save(user);
 
         ActivationToken token = new ActivationToken();
@@ -126,8 +128,7 @@ public class UserServiceImpl implements UserService {
 
         tokenRepository.save(token);
 
-        // email service for sending the token
-
+        emailService.sendPassengerActivationEmail(savedUser.getEmail(), token.getToken());
         return new UserDto(savedUser);
     }
 
