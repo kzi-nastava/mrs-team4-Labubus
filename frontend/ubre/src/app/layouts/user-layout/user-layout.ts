@@ -21,7 +21,6 @@ import { UserDto } from '../../dtos/user-dto';
 import { UserStatsDto } from '../../dtos/user-stats-dto';
 import { VehicleDto } from '../../dtos/vehicle-dto';
 import { Role } from '../../enums/role';
-import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 import { VehicleType } from '../../enums/vehicle-type';
 import { MapService } from '../../services/map-service';
 import { forkJoin } from 'rxjs';
@@ -76,6 +75,7 @@ export class UserLayout implements OnInit {
 
   avatarSrc$ = this.userService.avatarSrc$;
 
+  
   ngOnInit() {
     const userId = this.authService.getId();
 
@@ -93,25 +93,23 @@ export class UserLayout implements OnInit {
         avatarUrl: '',
       };
     }
-
-    this.userService.currentUser$.subscribe((user) => {
+    
+    this.userService.currentUser$.subscribe(user => {
       if (!user) return;
-
+      
       this.user = user;
       this.editing = { ...this.user };
-
+      
       forkJoin({
         stats: this.userService.getUserStats(user.id),
         veh: this.userService.getUserVehicle(user.id),
-        reg: this.driverRegistrationService.getDriverRegistration(),
-      }).subscribe(({ stats, veh, reg }) => {
+      }).subscribe(({ stats, veh}) => {
         this.userStats = stats;
         this.vehicle = veh;
-        this.driverRegistration = reg;
       });
     });
   }
-
+  
   ui = {
     menuOpen: false,
     cdModalOpen: true,
@@ -126,6 +124,14 @@ export class UserLayout implements OnInit {
     profileChangesOpen: false,
   };
 
+
+  
+  
+  
+  
+  
+  
+  
   onDestBack() {
     this.mapService.resetDest();
   }
@@ -144,6 +150,16 @@ export class UserLayout implements OnInit {
     this.ui.rideOptionsOpen = true;
   }
 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   openMenu() {
     this.ui.menuOpen = true;
   }
@@ -192,18 +208,35 @@ export class UserLayout implements OnInit {
     }
     this.closeMenu();
   }
+  
+  private toastTimer: any = null;
 
   showToast(title: string, message: string) {
-    this.toastTitle = title;
-    this.toastMessage = message;
-    this.ui.toastOpen = true;
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+      this.toastTimer = null;
+    }
+
+    this.ui.toastOpen = false;
+    this.cdr.detectChanges();
 
     setTimeout(() => {
-      this.hideToast();
+      this.toastTitle = title;
+      this.toastMessage = message;
+
+      this.ui.toastOpen = true;
       this.cdr.detectChanges();
-    }, 3000);
+
+      this.toastTimer = setTimeout(() => {
+        this.ui.toastOpen = false;
+        this.cdr.detectChanges();
+        this.toastTimer = null;
+      }, 3000);
+    }, 0);
   }
 
+
+  
   hideToast() {
     this.ui.toastOpen = false;
   }
@@ -217,6 +250,24 @@ export class UserLayout implements OnInit {
     // Open chat widget
   }
 
+
+  focusNext(el: HTMLElement) {
+    el.focus();
+  }
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   editing!: UserDto;
   editingAvatarSrc = this.avatarSrc$;
   hidePassword = true;
@@ -238,79 +289,200 @@ export class UserLayout implements OnInit {
     this.closeAccountSettings();
     this.showToast('Settings saved', 'Your account settings have been updated.');
   }
-
+  
   onAccountSettingsBack() {
     this.closeAccountSettings();
     this.ui.menuOpen = true;
   }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
+
+  
   // CHANGE PASSWORD SHEET LOGIC
   newPassword = '';
   confirmPassword = '';
   passwordMismatch = false;
-
+  
   onChangePassword() {
     this.ui.accountSettingsOpen = false;
     this.ui.changePasswordOpen = true;
-
+    
     this.newPassword = '';
     this.confirmPassword = '';
     this.passwordMismatch = false;
   }
-
+  
   closeChangePassword() {
     this.ui.changePasswordOpen = false;
     this.passwordMismatch = false;
   }
-
+  
   onChangePasswordBack() {
     this.closeChangePassword();
     this.ui.accountSettingsOpen = true;
   }
-
+  
   savePassword() {
     this.passwordMismatch = this.newPassword !== this.confirmPassword;
-
+    
     if (this.passwordMismatch) return;
-
+    
     // TODO: API call za promenu lozinke
     this.closeChangePassword();
     this.showToast('Password changed', 'Your password has been updated.');
   }
 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   // VEHICLE INFORMATION SHEET LOGIC
-
+  
   openVehicleInfo() {
     this.ui.vehicleInfoOpen = true;
   }
   closeVehicleInfo() {
     this.ui.vehicleInfoOpen = false;
   }
-
+  
   onVehicleInfoBack() {
     this.closeVehicleInfo();
     this.ui.accountSettingsOpen = true;
   }
-
+  
   onViewVehicleInfo() {
     this.ui.accountSettingsOpen = false;
     this.openVehicleInfo();
   }
 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  driverRegistrationDraft$ = this.driverRegistrationService.draft$;
+  driverRegistrationAvatarSrc$ = this.driverRegistrationService.avatarSrc$;
+  confirmPasswordDR = '';
+  fieldErrors: any = null;           // for field-specific error messages
+
   // DRIVER REGISTRATION SHEET LOGIC
   openRegisterDriver() {
     this.ui.registerDriverOpen = true;
+    this.fieldErrors = null;
   }
+
   closeRegisterDriver() {
     this.ui.registerDriverOpen = false;
+    this.driverRegistrationService.resetDraft();
+    this.confirmPasswordDR = '';
+    this.fieldErrors = null;
+  }
+
+  patchDriverRegistration(changes : any) {
+    this.driverRegistrationService.patchDraft(changes);
+  }
+
+  setVehiceleType(type: VehicleType) {
+    this.driverRegistrationService.patchDraft({ vehicle: { type } });
+  }
+
+  toggleBabyFriendly() {
+    const curr = this.driverRegistrationService.getDraftSnapshot().vehicle.babyFriendly;
+    this.driverRegistrationService.patchDraft({ vehicle: { babyFriendly: !curr } });
+  }
+
+  togglePetFriendly() {
+    const curr = this.driverRegistrationService.getDraftSnapshot().vehicle.petFriendly;
+    this.driverRegistrationService.patchDraft({ vehicle: { petFriendly: !curr } });
   }
 
   onRegisterDriver() {
-    // TODO: API call za registraciju vozača
+    this.fieldErrors = null;
 
-    this.closeRegisterDriver();
-    this.showToast('Driver registered', 'Activation mail has been sent to the driver.');
-    this.confetti.fire();
+    this.driverRegistrationService.register(this.confirmPasswordDR).subscribe({
+      next: () => {
+        this.closeRegisterDriver();
+        this.showToast('Driver registered', 'Activation mail has been sent to the driver.');
+        this.confetti.fire();
+        this.confirmPasswordDR = '';
+        this.fieldErrors = null;
+      },
+      error: (e) => {
+        if (typeof e === 'string') this.showToast('Registration error', e);
+        else this.fieldErrors = e;
+      }
+    });
   }
 
   onRegisterDriverBack() {
@@ -319,24 +491,64 @@ export class UserLayout implements OnInit {
   }
 
   decDriverSeats() {
-    this.driverRegistration.vehicle.seats = Math.max(0, this.driverRegistration.vehicle.seats - 1);
+    this.driverRegistrationService.decSeats();
   }
+
   incDriverSeats() {
-    this.driverRegistration.vehicle.seats = Math.min(9, this.driverRegistration.vehicle.seats + 1);
+    this.driverRegistrationService.incSeats();
   }
 
-  confirmPasswordDR = '';
-  passwordError = false;
-
-  validateDriverPassword() {
-    this.passwordError = !this.driverRegistration.password?.trim();
+  validateAll() {
+    this.fieldErrors = this.driverRegistrationService.validate(
+      this.driverRegistrationService.getDraftSnapshot(),
+      this.confirmPasswordDR
+    );
   }
 
-  validateConfirmPassword() {
-    this.passwordError =
-      !this.driverRegistration.password?.trim() ||
-      this.driverRegistration.password !== this.confirmPasswordDR;
+  clearFieldError(field: string) {
+    if (!this.fieldErrors) return;
+    this.fieldErrors = { ...this.fieldErrors, [field]: null };
   }
+
+  onDrAvatarSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.driverRegistrationService.setAvatarFile(file);
+    input.value = '';
+  }
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // Ride HISTORY SHEET LOGIC
   showRideHistory = false;

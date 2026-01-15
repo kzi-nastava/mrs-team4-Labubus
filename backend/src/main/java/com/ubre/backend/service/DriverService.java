@@ -15,4 +15,5 @@ public interface DriverService {
     void toggleAvailability(Long id);
     UserDto createDriver(DriverRegistrationDto driverRegistrationDto);
     RideDto notifyDriver(Long rideId, Long driverId);
+    void activateDriverAccount(String token, String email, String newPassword);
 }

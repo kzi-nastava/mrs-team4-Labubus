@@ -1,0 +1,68 @@
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+<div class="activation-container">
+  <div class="form-card">
+    <h1 class="brand-logo">Driver Activation</h1>
+    <p class="subtitle">Enter your new password to activate your account.</p>
+
+    <form [formGroup]="resetForm" (ngSubmit)="onSubmit()">
+      <div class="rd-field">
+        <div class="rd-label-row">
+          <span>New Password</span>
+          @if (isInvalid('password')) {
+            <span class="rd-error">Password must be at least 6 characters.</span>
+          }
+        </div>
+        <input
+          type="password"
+          formControlName="password"
+          class="rd-input"
+          [class.error]="isInvalid('password')"
+          placeholder="Enter new password"
+        />
+      </div>
+
+      <div class="rd-field">
+        <div class="rd-label-row">
+          <span>Confirm New Password</span>
+          @if (resetForm.hasError('passwordMismatch') && resetForm.get('confirmPassword')?.touched) {
+            <span class="rd-error">Passwords do not match.</span>
+          }
+        </div>
+        <input
+          type="password"
+          formControlName="confirmPassword"
+          class="rd-input"
+          [class.error]="isInvalid('confirmPassword') || resetForm.hasError('passwordMismatch')"
+          placeholder="Confirm new password"
+        />
+      </div>
+
+      <div class="button-container">
+        <app-button width="300px" variant="filled" class="submit-btn" type="submit">
+          Activate Account
+        </app-button>
+      </div>
+    </form>
+  </div>
+</div>
+@if (showErrorModal) {
+<app-modal
+  class="cd-modal show"
+  title="Error"
+  [message]="errorMessage"
+  buttonText="OK"
+  (action)="onErrorModalAction()"
+>
+</app-modal>
+}
+
+@if (showSuccessModal) {
+<app-modal
+  class="cd-modal show"
+  title="Success"
+  message="Your account has been activated successfully."
+  buttonText="OK"
+  (action)="onSuccessModalAction()"
+>
+</app-modal>
+}

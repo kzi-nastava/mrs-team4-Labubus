@@ -5,6 +5,7 @@ import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.User;
 import org.apache.coyote.BadRequestException;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -37,5 +38,8 @@ public interface UserService {
     void sendPassengerRequest(Long userId, String passengerEmail);
 
     Resource getAvatar(Long userId);
+  
     UserDto registerUser(UserRegistrationDto registrationDto);
+  
+    void uploadAvatar(Long userId, MultipartFile avatar);
 }

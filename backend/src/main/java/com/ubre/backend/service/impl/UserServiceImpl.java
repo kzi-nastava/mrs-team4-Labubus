@@ -131,6 +131,34 @@ public class UserServiceImpl implements UserService {
         return new UserDto(savedUser);
     }
 
+    // avater upload
+    @Override
+    public void uploadAvatar(Long userId, MultipartFile avatar) {
+        String filename = avatar.getOriginalFilename();
+        if (filename == null || !filename.toLowerCase().endsWith(".jpg")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only .jpg files are allowed");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        Path root = Paths.get(uploadDir).toAbsolutePath().normalize();
+        try {
+            Files.createDirectories(root);
+            // delete old if exists (not null and not default-avatar.jpg)
+            if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty() && !user.getAvatarUrl().equals("default-avatar.jpg")) {
+                Path oldFilePath = root.resolve(user.getAvatarUrl()).normalize();
+                Files.deleteIfExists(oldFilePath);
+            }
+
+            Path filePath = root.resolve(filename).normalize();
+
+            Files.copy(avatar.getInputStream(), filePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Could not store avatar file");
+        }
+    }
+
+
     @Override
     public UserDto getUserById(Long id) {
         User user = userRepository.findById(id)
