@@ -46,10 +46,7 @@ public class AuthController {
     private AuthService authService;
     @Autowired
     private CustomUserDetailsService userDetailsService;
-
-    @Autowired
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
-
+    
     // login existing user and return sanitized profile information
     @PostMapping("/login")
     public ResponseEntity<UserTokenState> createAuthenticationToken(
