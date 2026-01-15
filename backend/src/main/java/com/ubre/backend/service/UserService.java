@@ -15,7 +15,7 @@ public interface UserService {
     UserDto getUserById(Long id);
     UserDto getUserByEmail(String email);
     List<UserDto> getAllUsers();
-    UserDto updateUser(ProfileChangeDto profileChangeDto);
+    UserDto updateUser(UserDto userDto);
     void deleteUser(Long id);
     void blockUser(Long id);
     void unblockUser(Long id);

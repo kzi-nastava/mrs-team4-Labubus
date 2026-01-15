@@ -161,27 +161,27 @@ public class UserServiceImpl implements UserService {
         return users;
     }
 
-    @Override
-    public UserDto updateUser(ProfileChangeDto profileChangeDto) {
-        UserDto user = getUserById(profileChangeDto.getUserId());
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-        users.remove(user);
-        UserDto updatedUser = new UserDto(
-                user.getId(),
-                user.getRole(),
-                profileChangeDto.getNewAvatarUrl(),
-                user.getEmail(),
-                profileChangeDto.getNewName(),
-                profileChangeDto.getNewSurname(),
-                profileChangeDto.getNewPhone(),
-                profileChangeDto.getNewAddress(),
-                user.getStatus()
-        );
-        users.add(updatedUser);
-        return updatedUser;
-    }
+//    @Override
+//    public UserDto updateUser(ProfileChangeDto profileChangeDto) {
+//        UserDto user = getUserById(profileChangeDto.getUserId());
+//        if (user == null) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+//        }
+//        users.remove(user);
+//        UserDto updatedUser = new UserDto(
+//                user.getId(),
+//                user.getRole(),
+//                profileChangeDto.getNewAvatarUrl(),
+//                user.getEmail(),
+//                profileChangeDto.getNewName(),
+//                profileChangeDto.getNewSurname(),
+//                profileChangeDto.getNewPhone(),
+//                profileChangeDto.getNewAddress(),
+//                user.getStatus()
+//        );
+//        users.add(updatedUser);
+//        return updatedUser;
+//    }
 
     @Override
     public void deleteUser(Long id) {
@@ -190,6 +190,30 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
         userRepository.deleteById(id);
+    }
+
+    // this method is primarly used for updating user profile by the user themselves, and admin also (not for drivers)
+    @Override
+    public UserDto updateUser(UserDto userDto) {
+        User user = userRepository.findById(userDto.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        user.setName(userDto.getName());
+        user.setSurname(userDto.getSurname());
+        user.setPhone(userDto.getPhone());
+        user.setAddress(userDto.getAddress());
+        // avatarUrl is updated via uploadAvatar method
+        User updatedUser = userRepository.save(user);
+        return new UserDto(
+                updatedUser.getId(),
+                updatedUser.getRole(),
+                updatedUser.getAvatarUrl(),
+                updatedUser.getEmail(),
+                updatedUser.getName(),
+                updatedUser.getSurname(),
+                updatedUser.getPhone(),
+                updatedUser.getAddress(),
+                updatedUser.getStatus()
+        );
     }
 
     @Override

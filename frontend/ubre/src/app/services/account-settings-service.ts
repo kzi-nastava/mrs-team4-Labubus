@@ -45,11 +45,11 @@ export class AccountSettingsService {
         const errors = this.validate();
         if (Object.keys(errors).length > 0) {
             this.fieldErrors = errors;
-            return throwError(() => 'Validation failed');
+            return throwError(() => 'Input fields validation has failed. Please check the fields and try again.');
         }
 
         if (!this.draft || !this.draft.id) {
-            return throwError(() => 'No draft to save');
+            return throwError(() => 'No draft to save. Please try again.');
         }
 
         return this.http.put<UserDto>(`${this.api}/users/${this.draft.id}`, this.draft).pipe(
