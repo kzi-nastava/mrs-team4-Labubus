@@ -249,11 +249,10 @@ import { AccountSettingsService } from '../../services/account-settings-service'
   saveAccountSettings() {
     this.accountSettingsService.save().subscribe({
       next: () => {
-        this.closeAccountSettings();
         this.showToast('Settings saved', 'Your account settings have been updated.');
       },
       error: (err) => {
-        if (typeof err === 'string' && err !== 'Validation failed') {
+        if (typeof err === 'string') {
           this.showToast('Error saving settings', err);
         }
       }
