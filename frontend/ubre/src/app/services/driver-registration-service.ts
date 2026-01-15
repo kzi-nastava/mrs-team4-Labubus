@@ -125,7 +125,7 @@ export class DriverRegistrationService {
   
     if (Object.keys(errors).length > 0) {
       this.fieldErrors = errors;
-      return throwError(() => 'Validation failed');
+      return throwError(() => 'Input fields validation has failed. Please check the fields and try again.');
     }
   
     return this.http.post<UserDto>(this.driversApi, dto).pipe(
