@@ -29,6 +29,7 @@ import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
 import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-change-card';
 import { AsyncPipe } from '@angular/common';
+import { AccountSettingsService } from '../../services/account-settings-service';
 
 @Component({
   selector: 'app-user-layout',
@@ -43,11 +44,12 @@ import { AsyncPipe } from '@angular/common';
   export class UserLayout implements OnInit {
     constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
     
-    private userService = inject(UserService);
-    private driverRegistrationService = inject(DriverRegistrationService);
+    public userService = inject(UserService);
+    public driverRegistrationService = inject(DriverRegistrationService);
     public mapService = inject(MapService);
     private confetti = inject(ConfettiService);
     private profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
+    public accountSettingsService = inject(AccountSettingsService);
 
   Role = Role;
   VehicleType = VehicleType;
@@ -58,9 +60,6 @@ import { AsyncPipe } from '@angular/common';
 
   profileChanges: ProfileChangeDto[] = [];
 
-  avatarSrc$ = this.userService.avatarSrc$;
-
-  
   ngOnInit() {
     this.userService.setCurrentUserById(22);
     
@@ -68,7 +67,6 @@ import { AsyncPipe } from '@angular/common';
       if (!user) return;
       
       this.user = user;
-      this.editing = { ...this.user };
       
       forkJoin({
         stats: this.userService.getUserStats(user.id),
@@ -78,6 +76,7 @@ import { AsyncPipe } from '@angular/common';
         this.vehicle = veh;
       });
     });
+
   }
   
   ui = {
@@ -177,7 +176,8 @@ import { AsyncPipe } from '@angular/common';
   }
   
   private toastTimer: any = null;
-
+  public toastTitle: string = '';
+  public toastMessage: string = '';
   showToast(title: string, message: string) {
     if (this.toastTimer) {
       clearTimeout(this.toastTimer);
@@ -233,26 +233,31 @@ import { AsyncPipe } from '@angular/common';
   
   
   
-  editing!: UserDto;
-  editingAvatarSrc = this.avatarSrc$;
+  editingAvatarSrc = this.userService.avatarSrc$;
   hidePassword = true;
-  toastTitle = 'Ignore this toast';
-  toastMessage = 'This is just a demo message for the toast';
   
   // ACCOUNT SETTINGS SHEET LOGIC
   openAccountSettings() {
+    this.accountSettingsService.loadDraft();
     this.ui.accountSettingsOpen = true;
-    this.editing = { ...this.user };
   }
+  
   closeAccountSettings() {
     this.ui.accountSettingsOpen = false;
+    this.accountSettingsService.clearDraft(); 
   }
   
   saveAccountSettings() {
-    // Save account settings logic
-    this.user = { ...this.user, ...this.editing };
-    this.closeAccountSettings();
-    this.showToast('Settings saved', 'Your account settings have been updated.');
+    this.accountSettingsService.saveDraft().subscribe({
+      next: () => {
+        this.closeAccountSettings();
+        this.showToast('Settings saved', 'Your account settings have been updated.');
+      },
+      error: (err) => {
+        const message = typeof err === 'string' ? err : 'Failed to save account settings';
+        this.showToast('Error', message);
+      }
+    });
   }
   
   onAccountSettingsBack() {
@@ -393,8 +398,6 @@ import { AsyncPipe } from '@angular/common';
   
   
   
-  driverRegistrationDraft$ = this.driverRegistrationService.draft$;
-  driverRegistrationAvatarSrc$ = this.driverRegistrationService.avatarSrc$;
   confirmPasswordDR = '';
   fieldErrors: any = null;           // for field-specific error messages
 

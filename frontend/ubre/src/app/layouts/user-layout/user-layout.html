@@ -158,7 +158,7 @@
       title="Account"
       [role]="user.role"
       [user]="user"
-      [avatarSrc]="(avatarSrc$ | async) ?? 'default-avatar.jpg'"
+      [avatarSrc]="(userService.avatarSrc$ | async) ?? 'default-avatar.jpg'"
       (closed)="closeMenu()"
       (action)="handleMenuAction($event)">
     </app-side-menu>
@@ -189,7 +189,7 @@
 
         <div class="as-field">
           <div class="as-label">Email</div>
-          <input class="as-input" [(ngModel)]="editing.email" readonly>
+          <input class="as-input" [ngModel]="accountSettingsService.draft?.email" readonly>
         </div>
 
         <div class="as-field">
@@ -213,7 +213,7 @@
           </button>
         </div>
 
-        @if (editing.role === Role.DRIVER) {
+        @if (accountSettingsService.draft?.role === Role.DRIVER) {
           <div class="as-section-title"><span>Statistics</span></div>
           <div class="as-stat">
             <app-stat-card [value]="userStats.activePast24Hours + 'm'"
@@ -226,25 +226,25 @@
 
         <div class="as-field">
           <div class="as-label">Name</div>
-          <input class="as-input" [(ngModel)]="editing.name">
+          <input class="as-input" [(ngModel)]="accountSettingsService.draft.name">
         </div>
 
         <div class="as-field">
           <div class="as-label">Surname</div>
-          <input class="as-input" [(ngModel)]="editing.surname">
+          <input class="as-input" [(ngModel)]="accountSettingsService.draft.surname">
         </div>
 
         <div class="as-field">
           <div class="as-label">Residental address</div>
-          <input class="as-input" [(ngModel)]="editing.address">
+          <input class="as-input" [(ngModel)]="accountSettingsService.draft.address">
         </div>
 
         <div class="as-field">
           <div class="as-label">Phone number</div>
-          <input class="as-input" [(ngModel)]="editing.phone">
+          <input class="as-input" [(ngModel)]="accountSettingsService.draft.phone">
         </div>
 
-        @if (editing.role === Role.DRIVER) {
+        @if (accountSettingsService.draft?.role === Role.DRIVER) {
           <button class="as-link as-link-bottom" type="button" (click)="onViewVehicleInfo()">
             View vehicle information
           </button>
@@ -345,8 +345,8 @@
 
 
     <!-- REGISTER A DRIVER (ADMIN ROLE)-->  
-    @let driverRegistration = (driverRegistrationDraft$ | async);
-    @let driverAvatarSrc = (driverRegistrationAvatarSrc$ | async);
+    @let driverRegistration = (driverRegistrationService.draft$ | async);
+    @let driverAvatarSrc = (driverRegistrationService.avatarSrc$ | async);
     @if (user.role === Role.ADMIN && driverRegistration) {
       <app-sheet
         [open]="ui.registerDriverOpen"
