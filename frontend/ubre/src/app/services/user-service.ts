@@ -12,20 +12,12 @@ export class UserService {
   private readonly http = inject(HttpClient);
   private readonly api = 'http://localhost:8080/api';
 
-  private readonly currentUserSubject = new BehaviorSubject<UserDto>({
-    email: 'mika@mikic.com',
-    name: 'Mika',
-    surname: 'Mikic',
-    avatarUrl: 'default-avatar.jpg',
-    role: Role.ADMIN,
-    id: 2,
-    phone: '1251323523',
-    address: 'Test adress 123',
-  });
+  private readonly currentUserSubject = new BehaviorSubject<UserDto>({ email: '', name: 'Guest', surname: '', avatarUrl: '', role: Role.GUEST, id: 0, phone: '', address: '' });
   readonly currentUser$ = this.currentUserSubject.asObservable();
 
   private readonly avatarSrcSubject = new BehaviorSubject<string>('default-avatar.jpg');
   readonly avatarSrc$ = this.avatarSrcSubject.asObservable();
+
 
   // mock podaci (privremeno)
   private currentUserStats: UserStatsDto = {

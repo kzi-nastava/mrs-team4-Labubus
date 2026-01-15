@@ -16,9 +16,9 @@ public interface UserService {
     UserDto getUserByEmail(String email);
 
     List<UserDto> getAllUsers();
-
-    UserDto updateUser(ProfileChangeDto profileChangeDto);
-
+  
+    UserDto updateUser(UserDto userDto);
+  
     void deleteUser(Long id);
 
     void blockUser(Long id);
@@ -42,4 +42,5 @@ public interface UserService {
     UserDto registerUser(UserRegistrationDto registrationDto);
   
     void uploadAvatar(Long userId, MultipartFile avatar);
+    UserDto createAdmin(UserDto adminDto);
 }

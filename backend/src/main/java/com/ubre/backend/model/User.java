@@ -76,6 +76,9 @@ public abstract class User implements UserDetails {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Chat chat;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private UserStats stats;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

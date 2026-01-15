@@ -29,40 +29,30 @@ import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
 import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-change-card';
 import { AsyncPipe } from '@angular/common';
+import { AccountSettingsService } from '../../services/account-settings-service';
 import { AuthService } from '../../features/auth/auth-service';
 import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 
 @Component({
   selector: 'app-user-layout',
   standalone: true,
-  imports: [
-    Map,
-    IconButton,
-    SideMenu,
-    Toast,
-    Modal,
-    ModalContainer,
-    StatCard,
-    Button,
-    Sheet,
-    FormsModule,
-    RideHistory,
-    ProfileChangeCard,
-    AsyncPipe,
-  ],
-  templateUrl: './user-layout.html',
-  styleUrl: './user-layout.css',
-})
-export class UserLayout implements OnInit {
-  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
-
-  private userService = inject(UserService);
-  private authService = inject(AuthService);
-
-  private driverRegistrationService = inject(DriverRegistrationService);
-  public mapService = inject(MapService);
-  private confetti = inject(ConfettiService);
-  private profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
+  imports: [Map,IconButton,SideMenu,Toast,
+    Modal,ModalContainer,StatCard,Button,
+    Sheet,FormsModule,RideHistory,ProfileChangeCard,
+    AsyncPipe],
+    templateUrl: './user-layout.html',
+    styleUrl: './user-layout.css',
+  })
+  export class UserLayout implements OnInit {
+    constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
+    
+    public userService = inject(UserService);
+    private authService = inject(AuthService);
+    public driverRegistrationService = inject(DriverRegistrationService);
+    public mapService = inject(MapService);
+    private confetti = inject(ConfettiService);
+    private profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
+    public accountSettingsService = inject(AccountSettingsService);
 
   Role = Role;
   VehicleType = VehicleType;
@@ -74,9 +64,6 @@ export class UserLayout implements OnInit {
 
   profileChanges: ProfileChangeDto[] = [];
 
-  avatarSrc$ = this.userService.avatarSrc$;
-
-  
   ngOnInit() {
     const userId = this.authService.getId();
 
@@ -99,7 +86,6 @@ export class UserLayout implements OnInit {
       if (!user) return;
       
       this.user = user;
-      this.editing = { ...this.user };
       
       forkJoin({
         stats: this.userService.getUserStats(user.id),
@@ -109,6 +95,7 @@ export class UserLayout implements OnInit {
         this.vehicle = veh;
       });
     });
+
   }
   
   ui = {
@@ -212,7 +199,8 @@ export class UserLayout implements OnInit {
   }
   
   private toastTimer: any = null;
-
+  public toastTitle: string = '';
+  public toastMessage: string = '';
   showToast(title: string, message: string) {
     if (this.toastTimer) {
       clearTimeout(this.toastTimer);
@@ -270,32 +258,44 @@ export class UserLayout implements OnInit {
   
   
   
-  editing!: UserDto;
-  editingAvatarSrc = this.avatarSrc$;
   hidePassword = true;
-  toastTitle = 'Ignore this toast';
-  toastMessage = 'This is just a demo message for the toast';
-
+  
   // ACCOUNT SETTINGS SHEET LOGIC
   openAccountSettings() {
+    this.accountSettingsService.loadDraft();
     this.ui.accountSettingsOpen = true;
-    this.editing = { ...this.user };
   }
+  
   closeAccountSettings() {
     this.ui.accountSettingsOpen = false;
+    this.accountSettingsService.clearDraft();
   }
 
   saveAccountSettings() {
-    // Save account settings logic
-    this.user = { ...this.user, ...this.editing };
-    this.closeAccountSettings();
-    this.showToast('Settings saved', 'Your account settings have been updated.');
+    this.accountSettingsService.save().subscribe({
+      next: () => {
+        this.showToast('Settings saved', 'Your account settings have been updated.');
+      },
+      error: (err) => {
+        if (typeof err === 'string') {
+          this.showToast('Error saving settings', err);
+        }
+      }
+    });
   }
   
   onAccountSettingsBack() {
     this.closeAccountSettings();
     this.ui.menuOpen = true;
   }
+
+  onAccountSettingsAvatarSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.accountSettingsService.setAvatarFile(file);
+    input.value = ''; 
+  }
+
   
   
   
@@ -433,22 +433,18 @@ export class UserLayout implements OnInit {
   
   
   
-  driverRegistrationDraft$ = this.driverRegistrationService.draft$;
-  driverRegistrationAvatarSrc$ = this.driverRegistrationService.avatarSrc$;
   confirmPasswordDR = '';
-  fieldErrors: any = null;           // for field-specific error messages
 
   // DRIVER REGISTRATION SHEET LOGIC
   openRegisterDriver() {
     this.ui.registerDriverOpen = true;
-    this.fieldErrors = null;
+    this.driverRegistrationService.fieldErrors = null;
   }
 
   closeRegisterDriver() {
     this.ui.registerDriverOpen = false;
     this.driverRegistrationService.resetDraft();
     this.confirmPasswordDR = '';
-    this.fieldErrors = null;
   }
 
   patchDriverRegistration(changes : any) {
@@ -470,19 +466,17 @@ export class UserLayout implements OnInit {
   }
 
   onRegisterDriver() {
-    this.fieldErrors = null;
-
     this.driverRegistrationService.register(this.confirmPasswordDR).subscribe({
       next: () => {
         this.closeRegisterDriver();
         this.showToast('Driver registered', 'Activation mail has been sent to the driver.');
         this.confetti.fire();
         this.confirmPasswordDR = '';
-        this.fieldErrors = null;
       },
       error: (e) => {
-        if (typeof e === 'string') this.showToast('Registration error', e);
-        else this.fieldErrors = e;
+        if (typeof e === 'string') {
+          this.showToast('Registration error', e);
+        }
       }
     });
   }
@@ -501,18 +495,14 @@ export class UserLayout implements OnInit {
   }
 
   validateAll() {
-    this.fieldErrors = this.driverRegistrationService.validate(
+    const errors = this.driverRegistrationService.validate(
       this.driverRegistrationService.getDraftSnapshot(),
       this.confirmPasswordDR
     );
+    this.driverRegistrationService.fieldErrors = Object.keys(errors).length > 0 ? errors : null;
   }
 
-  clearFieldError(field: string) {
-    if (!this.fieldErrors) return;
-    this.fieldErrors = { ...this.fieldErrors, [field]: null };
-  }
-
-  onDrAvatarSelected(e: Event) {
+  onDriverRegistrationAvatarSelected(e: Event) {
     const input = e.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
     this.driverRegistrationService.setAvatarFile(file);

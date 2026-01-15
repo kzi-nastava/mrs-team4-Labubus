@@ -24,6 +24,7 @@ public class DriverController {
     @Autowired
     private EmailService emailService;
 
+    // this endpoint is for registering a new driver, also creates a vehicle for the driver
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
