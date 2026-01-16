@@ -271,21 +271,23 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
     this.userService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user.role === Role.DRIVER) {
         this.accountSettingsService.requestProfileChange().subscribe({
-          next: () => this.showToast('Profile change requested', 'Your profile change request has been sent.'),
+          next: () =>
+            this.showToast('Profile change requested', 'Your profile change request has been sent.')
+        });
+      } else {
+        this.accountSettingsService.save().subscribe({
+          next: () =>
+            this.showToast('Settings saved', 'Your account settings have been updated.'),
+          error: (err) => {
+            if (typeof err === 'string') {
+              this.showToast('Error saving settings', err);
+            }
+          }
         });
       }
     });
-    this.accountSettingsService.save().subscribe({
-      next: () => {
-        this.showToast('Settings saved', 'Your account settings have been updated.');
-      },
-      error: (err) => {
-        if (typeof err === 'string') {
-          this.showToast('Error saving settings', err);
-        }
-      }
-    });
   }
+  
   
   onAccountSettingsBack() {
     this.closeAccountSettings();
