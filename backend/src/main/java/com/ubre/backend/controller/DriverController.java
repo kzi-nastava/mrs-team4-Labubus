@@ -1,6 +1,7 @@
 package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.DriverRegistrationDto;
+import com.ubre.backend.dto.ProfileChangeDto;
 import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.service.DriverService;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -114,4 +116,47 @@ public class DriverController {
 //            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 //        }
 //    }
+
+    // endpoint for requesting profile changes by driver
+    @PostMapping(
+            value="/profile-changes",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<Void> requestProfileChange(@RequestBody ProfileChangeDto profileChange) {
+        driverService.requestProfileChange(profileChange);
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+    }
+
+    // enpoint for admin to pull profile change requests (pending
+    @GetMapping(
+            value="/profile-changes/pending",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<ProfileChangeDto>> getPendingProfileChanges() {
+        List<ProfileChangeDto> requests = driverService.getPendingProfileChanges();
+        return ResponseEntity.status(HttpStatus.OK).body(requests);
+    }
+
+    // endpoint for admin to approve a profile change request
+    @PutMapping(
+            value="/profile-changes/{id}/approve"
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> approveProfileChange(@PathVariable Long id) {
+        driverService.approveProfileChange(id);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
+    // reject profile change request
+    @PutMapping(
+            value="/profile-changes/{id}/reject"
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> rejectProfileChange(@PathVariable Long id) {
+        driverService.rejectProfileChange(id);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
 }

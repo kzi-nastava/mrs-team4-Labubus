@@ -23,7 +23,7 @@ import { VehicleDto } from '../../dtos/vehicle-dto';
 import { Role } from '../../enums/role';
 import { VehicleType } from '../../enums/vehicle-type';
 import { MapService } from '../../services/map-service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, take } from 'rxjs';
 import { DriverRegistrationService } from '../../services/driver-registration-service';
 import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
@@ -51,7 +51,7 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
     public driverRegistrationService = inject(DriverRegistrationService);
     public mapService = inject(MapService);
     private confetti = inject(ConfettiService);
-    private profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
+    public profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
     public accountSettingsService = inject(AccountSettingsService);
 
   Role = Role;
@@ -61,8 +61,6 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
   userStats!: UserStatsDto;
   vehicle!: VehicleDto;
   driverRegistration!: DriverRegistrationDto;
-
-  profileChanges: ProfileChangeDto[] = [];
 
   ngOnInit() {
     const userId = this.authService.getId();
@@ -270,6 +268,13 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
   }
 
   saveAccountSettings() {
+    this.userService.currentUser$.pipe(take(1)).subscribe(user => {
+      if (user.role === Role.DRIVER) {
+        this.accountSettingsService.requestProfileChange().subscribe({
+          next: () => this.showToast('Profile change requested', 'Your profile change request has been sent.'),
+        });
+      }
+    });
     this.accountSettingsService.save().subscribe({
       next: () => {
         this.showToast('Settings saved', 'Your account settings have been updated.');
@@ -609,11 +614,36 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
     this.showToast('Ride confirmed', 'Your ride has been confirmed successfully.');
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // PROFILE CHANGES SHEET LOGIC
   loadProfileChanges() {
-    this.profileChangeService.getProfileChanges().subscribe((list) => {
-      this.profileChanges = list;
-    });
+    this.profileChangeService.loadPendingProfileChanges();
   }
 
   openProfileChanges() {
@@ -631,11 +661,11 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
     this.ui.menuOpen = true;
   }
 
-  acceptProfileChange(id: number) {
-    this.profileChangeService.accept(id).subscribe(() => this.loadProfileChanges());
+  approveProfileChange(id: number) {
+    this.profileChangeService.approve(id);
   }
 
   rejectProfileChange(id: number) {
-    this.profileChangeService.reject(id).subscribe(() => this.loadProfileChanges());
+    this.profileChangeService.reject(id);
   }
 }

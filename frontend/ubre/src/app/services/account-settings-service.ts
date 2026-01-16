@@ -8,6 +8,9 @@ import { catchError, switchMap, map, take, tap } from 'rxjs/operators';
 import { UserService } from './user-service';
 import { UserDto } from '../dtos/user-dto';
 import { of } from 'rxjs';
+import { ProfileChangeDto } from '../dtos/profile-change-dto';
+import { ProfileChangeStatus } from '../enums/profile-change-status';
+import { Role } from '../enums/role';
 
 type FieldErrors = Partial<Record<
     'name' | 'surname' | 'phone' | 'address',
@@ -22,6 +25,11 @@ export class AccountSettingsService {
 
     draft: UserDto | null = null;
     fieldErrors: FieldErrors | null = null;
+
+    oldUser: UserDto | null = null; // filled by requestProfileChange
+    newUser: UserDto | null = null; // filled by most recent draft
+
+    profileChange: ProfileChangeDto | null = null; // filled by requestProfileChange
 
     private avatarSrcSubject = new BehaviorSubject<string>('default-avatar.jpg');
     readonly avatarSrc$ = this.avatarSrcSubject.asObservable();
@@ -146,5 +154,23 @@ export class AccountSettingsService {
         const formData = new FormData();
         formData.append('file', file);
         return this.http.post<void>(`${this.api}/users/${userId}/avatar`, formData);
+    }
+
+
+
+
+
+    // DRIVER SPECIFIC METHODS -  profile change requests and similar features
+
+    requestProfileChange(): Observable<void> {
+        // send first request to backend and put in old user dto
+        this.userService.currentUser$.pipe(take(1)).subscribe(user => {
+            if (!user || !user.id) return;
+            this.oldUser = user;
+        });
+
+        // create empty profile change dto and harvest all the data from fields in account settings draft
+        const profileChange = new ProfileChangeDto(0, this.draft?.id ?? 0, this.oldUser?.name ?? '', this.draft?.name ?? '', this.oldUser?.surname ?? '', this.draft?.surname ?? '', this.oldUser?.address ?? '', this.draft?.address ?? '', this.oldUser?.phone ?? '', this.draft?.phone ?? '', this.oldUser?.avatarUrl ?? '', this.draft?.avatarUrl ?? '', ProfileChangeStatus.PENDING);
+        return this.http.post<void>(`${this.api}/drivers/profile-changes`, profileChange)
     }
 }

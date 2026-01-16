@@ -580,14 +580,14 @@
       (back)="closeProfileChanges()">
 
       <div class="pc-list">
-        @for (it of profileChanges; track it.id) {
+        @for (it of profileChangeService.profileChanges$ | async; track it.id) {
           <app-profile-change-card [item]="it"
-            (accept)="acceptProfileChange($event)"
+            (approve)="approveProfileChange($event)"
             (reject)="rejectProfileChange($event)">
           </app-profile-change-card>
         }
 
-        @if (profileChanges.length === 0) {
+        @if ((profileChangeService.profileChanges$ | async)?.length === 0) {
           <div class="pc-empty">No pending requests</div>
         }
       </div>
