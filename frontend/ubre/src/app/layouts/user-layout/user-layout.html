@@ -344,32 +344,32 @@
       <div class="vi-wrap">
         <div class="vi-field">
           <div class="vi-label">Vehicle model</div>
-          <input class="vi-input" [value]="vehicle.model" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.model" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">Vehicle type</div>
-          <input class="vi-input" [value]="vehicle.type" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.type" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">License plates</div>
-          <input class="vi-input" [value]="vehicle.plates" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.plates" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">Number of seats</div>
-          <input class="vi-input" [value]="vehicle.seats" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.seats" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">Baby-friendly</div>
-          <input class="vi-input" [value]="vehicle.babyFriendly" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.babyFriendly" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">Pet-friendly</div>
-          <input class="vi-input" [value]="vehicle.petFriendly" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.petFriendly" readonly>
         </div>
       </div>
     </app-sheet>

@@ -89,10 +89,8 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
       
       forkJoin({
         stats: this.userService.getUserStats(user.id),
-        veh: this.userService.getUserVehicle(user.id),
-      }).subscribe(({ stats, veh}) => {
+      }).subscribe(({ stats }) => {
         this.userStats = stats;
-        this.vehicle = veh;
       });
     });
 
