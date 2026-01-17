@@ -280,7 +280,8 @@ export class RideService {
   fetchHistory(query : RideQueryDto, skip : number = 0, count : number = 10) : void {
     const params : HttpParams = this.extractParams(query, skip, count);
     let userId : number = query.userId ?? this.currentUser.id;
-    console.log(this.http.get<RideCardDto[]>(`${this.BASE_URL}ride/history/5`, {params}).subscribe((value : RideCardDto[]) => {
+    console.log(this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/history/5`, {params}).subscribe((value : RideCardDto[]) => {
+      console.log(value)
       this.history.next(value);
     }))
   }
@@ -302,7 +303,7 @@ export class RideService {
   fetchFavorites(query : RideQueryDto, skip : number = 0, count : number = 10) : void {
     const params : HttpParams = this.extractParams(query, skip, count);
     let userId : number = this.currentUser.id;
-    this.http.get<RideCardDto[]>(`${this.BASE_URL}ride/${userId}/favorites`, {params})
+    this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/${userId}/favorites`, {params})
   }
 
   clearFavorites() {
