@@ -1,6 +1,7 @@
 package com.ubre.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ubre.backend.dto.ProfileChangeDto;
 import com.ubre.backend.enums.ProfileChangeStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -44,4 +45,21 @@ public class ProfileChange {
 
     private String oldAvatarUrl;
     private String newAvatarUrl;
+
+    public ProfileChange() {
+    }
+
+    public ProfileChange(ProfileChangeDto dto) {
+        this.id = dto.getId();
+        this.oldName = dto.getOldName();
+        this.newName = dto.getNewName();
+        this.oldSurname = dto.getOldSurname();
+        this.newSurname = dto.getNewSurname();
+        this.oldAddress = dto.getOldAddress();
+        this.newAddress = dto.getNewAddress();
+        this.oldPhone = dto.getOldPhone();
+        this.newPhone = dto.getNewPhone();
+        this.oldAvatarUrl = dto.getOldAvatarUrl();
+        this.newAvatarUrl = dto.getNewAvatarUrl();
+    }
 }
