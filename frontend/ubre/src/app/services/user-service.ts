@@ -18,7 +18,7 @@ export class UserService {
     surname: 'Mikic',
     avatarUrl: 'default-avatar.jpg',
     role: Role.ADMIN,
-    id: 2,
+    id: 5,
     phone: '1251323523',
     address: 'Test adress 123',
   });

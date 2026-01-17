@@ -7,8 +7,8 @@
 <div class="options" [class.move-up]="open">
   <div class="sort">
     <app-modal-container [showTitleBar] = false>
-        <input type="datetime-local" placeholder="Date created" [(ngModel)]="filterDate">
-        @if (user.role === 'ADMIN') {<input type="text" placeholder="Driver" [(ngModel)]="filterDriver">}
+        <input type="datetime-local" placeholder="Date created" (input)="onSelectDate($event)">
+        @if (user.role === 'ADMIN') {<input type="number" placeholder="Driver" (input)="onInputUser($event)">}
          <div class="selectedField">
            <input readonly placeholder="Sort by" [value]="selectedField">
            <img [class.flip]="sortOpen" src="arrow-down-surface.svg" alt="" class="drop-down" (click)="onToggleSort()">

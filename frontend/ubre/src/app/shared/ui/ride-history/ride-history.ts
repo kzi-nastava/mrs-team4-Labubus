@@ -5,6 +5,7 @@ import { RideCardDto } from '../../../dtos/ride-card-dto';
 import { UserDto } from '../../../dtos/user-dto';
 import { UserService } from '../../../services/user-service';
 import { Role } from '../../../enums/role';
+import { RideQueryDto } from '../../../dtos/ride-query';
 
 
 @Component({
@@ -30,14 +31,21 @@ export class RideHistory {
         id: 0,
         phone: "",
         address: ""
-      };;
+      };
+
+  onQueryChange(qurey : RideQueryDto) {
+    this.rideService.clearHistory();
+    this.rideService.fetchHistory(qurey)
+  }
 
   ngOnInit() {
-    this.rideService.getHistory().subscribe((rides : RideCardDto[]) => {
+    this.rideService.subscribeToHistory((rides : RideCardDto[]) => {
       this.rides = rides;
     })
     this.userService.getCurrentUser().subscribe((user : UserDto) => {
       this.currentUser = user;
     })
+
+    this.onQueryChange(new RideQueryDto(null, "", false, null));
   }
 }

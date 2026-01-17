@@ -17,6 +17,7 @@
 :host .list {
   left: 16px;
   box-shadow: var(--drop-shadow);
+  --modal-height: 100%
 }
 
 :host .options {

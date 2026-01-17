@@ -9,6 +9,7 @@ import { UserDto } from '../../../dtos/user-dto';
 import { RideCardDto } from '../../../dtos/ride-card-dto';
 import { RideService } from '../../../services/ride-service';
 import { Role } from '../../../enums/role';
+import { RideQueryDto } from '../../../dtos/ride-query';
 
 
 @Component({
@@ -32,10 +33,13 @@ export class RideList {
       address: ""
     };
   @Output() onClose = new EventEmitter<void>();
+  @Output() onQueryChange = new EventEmitter<RideQueryDto>();
 
   rideService : RideService = inject(RideService);
 
   selectedRide : RideDto | undefined = undefined;
+
+  query : RideQueryDto = new RideQueryDto(null, "", false, null);
 
   filterDate : Date = new Date();
   filterDriver : string = "";
@@ -62,12 +66,24 @@ export class RideList {
   }
 
   onToggleSortDirection() {
-    this.ascending = !this.ascending;
+    this.query.ascending = !this.query.ascending;
+    this.onQueryChange.emit(this.query)
   }
 
   onSelectField(field : string) {
-    this.selectedField = field
+    this.query.sortBy = field
     this.sortOpen = false;
+    this.onQueryChange.emit(this.query)
+  }
+
+  onSelectDate(event : Event) {
+    this.query.date = new Date((event.target as HTMLInputElement).value);
+    this.onQueryChange.emit(this.query);
+  }
+
+  onInputUser(event : Event) {
+    this.query.userId = new Number((event.target as HTMLInputElement).value).valueOf();
+    this.onQueryChange.emit(this.query)
   }
 
   onBack() {
