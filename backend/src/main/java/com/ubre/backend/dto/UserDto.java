@@ -37,15 +37,15 @@ public class UserDto implements Serializable {
         this.status = status;
     }
 
-    public UserDto(User model) {
-        this.id = model.getId();
-        this.role = model.getRole();
-        this.avatarUrl = model.getAvatarUrl();
-        this.email = model.getEmail();
-        this.name = model.getName();
-        this.surname = model.getSurname();
-        this.phone = model.getPhone();
-        this.address = model.getAddress();
-        this.status = model.getStatus();
+    public UserDto(User user) {
+        this.id = user.getId();
+        this.role = user.getRole();
+        this.avatarUrl = user.getAvatarUrl();
+        this.email = user.getEmail();
+        this.name = user.getName();
+        this.surname = user.getSurname();
+        this.phone = user.getPhone();
+        this.address = user.getAddress();
+        this.status = user.getStatus();
     }
 }
