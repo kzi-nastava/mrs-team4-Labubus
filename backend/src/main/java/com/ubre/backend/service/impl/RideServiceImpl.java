@@ -1,23 +1,35 @@
 package com.ubre.backend.service.impl;
 
-import com.ubre.backend.dto.RideDto;
-import com.ubre.backend.dto.RideQueryDto;
-import com.ubre.backend.dto.UserDto;
-import com.ubre.backend.dto.WaypointDto;
+import com.ubre.backend.dto.*;
+import com.ubre.backend.enums.RideStatus;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.model.Driver;
+import com.ubre.backend.model.Ride;
+import com.ubre.backend.model.User;
+import com.ubre.backend.repository.DriverRepository;
+import com.ubre.backend.repository.RideRepository;
+import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.RideService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class RideServiceImpl implements RideService {
+    @Autowired
+    private RideRepository rideRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private DriverRepository driverRepository;
 
     // Mock data for rides
     List<RideDto> rides = new ArrayList<RideDto>();
@@ -120,33 +132,44 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    public List<RideDto> getFavoriteRides(Long userId) {
-        // prolazimo kroz listu vožnji koje pripadaju kosirniku i uzimamo samo one koju su favorite boolean
-        List<RideDto> temp = new ArrayList<>();
-        for (RideDto ride : rides) {
-            if (true) { // ovde ide provera da li je ride omiljena i da li je do ursera tačno
-                temp.add(ride);
-            }
-        }
-        return temp;
+    public List<RideCardDto> getFavoriteRides(Long userId, Integer skip, Integer count, RideQueryDto query) {
+        Optional<User> creator = userRepository.findById(userId);
+        if (creator.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+
+        Pageable pageable = parseToPageable(skip, count, query);
+
+        if (query != null && query.getDate() != null)
+            return rideRepository.findByCreatorAndFavoriteTrueAndStartTimeBetween(creator.get(), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
+        return rideRepository.findByCreatorAndFavoriteTrue(creator.get(), pageable).stream().map(RideCardDto::new).toList();
     }
 
     @Override
     public void addRideToFavorites(Long userId, Long rideId) {
-        // pronaći vožnju i postaviti atribut omiljene na true
-        boolean found = false;
-        if (!found) {
+        Optional<Ride> rideOptional = rideRepository.findById(rideId);
+        if (rideOptional.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
-        }
+
+        Ride ride = rideOptional.get();
+        if (!Objects.equals(ride.getCreator().getId(), userId))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User may only favorite their rides");
+
+        ride.setFavorite(true);
+        rideRepository.save(ride);
     }
 
     @Override
     public void removeRideFromFavorites(Long userId, Long rideId) {
-        // pronaći vožnju i postaviti atribut omiljene na false
-        boolean found = false;
-        if (!found) {
+        Optional<Ride> rideOptional = rideRepository.findById(rideId);
+        if (rideOptional.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
-        }
+
+        Ride ride = rideOptional.get();
+        if (!Objects.equals(ride.getCreator().getId(), userId))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User may only unfavorite their rides");
+
+        ride.setFavorite(false);
+        rideRepository.save(ride);
     }
 
     @Override
@@ -181,31 +204,56 @@ public class RideServiceImpl implements RideService {
         rides.add(rideDto);
         return rideDto;
     }
-    public List<RideDto> getRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query) {
-        UserDto driver = new UserDto(1L, Role.DRIVER, "", "driver@ubre.com", "Driver", "Driver", "1231234132", "Adress 123", UserStatus.ACTIVE);
-        WaypointDto[] waypoints = new WaypointDto[] {
-                new WaypointDto(1L, "Bulevar oslobodjenja", 48.83, 19.32),
-                new WaypointDto(2L, "Trg mladenaca", 48.83, 19.32),
-                new WaypointDto(3L, "Bulevar despota Stefana", 48.83, 19.32)
-        };
-        UserDto[] passengers = {
-                new UserDto(2L, Role.REGISTERED_USER, "", "passenger1@ubre.com", "Passenger1", "Passenger1", "1231234132", "Adress 123", UserStatus.ACTIVE),
-                new UserDto(3L, Role.REGISTERED_USER, "", "passenger2@ubre.com", "Passenger2", "Passenger2", "1231234132", "Adress 123", UserStatus.ACTIVE)
-        };
+    public List<RideCardDto> getRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
-        return List.of(
-                new RideDto(1L, LocalDateTime.now(), LocalDateTime.now(), waypoints, driver, Arrays.stream(passengers).toList(), true, null, 12.34, 7.3),
-                new RideDto(2L, LocalDateTime.now(), LocalDateTime.now(), waypoints, driver, Arrays.stream(passengers).toList(), false, null, 20.14, 12.1)
-        );
+        Pageable pageable = parseToPageable(skip, count, query);
+
+        if (user.get().getRole() == Role.DRIVER) {
+            Driver driver = driverRepository.findById(userId).get();
+            if (query != null && query.getDate() != null)
+                return rideRepository.findByDriverAndStatusInAndStartTimeBetween(driver, List.of(RideStatus.COMPLETED, RideStatus.CANCELLED), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
+            return rideRepository.findByDriverAndStatusIn(driver, List.of(RideStatus.COMPLETED, RideStatus.CANCELLED), pageable).stream().map(RideCardDto::new).toList();
+        }
+        if (query != null && query.getDate() != null)
+            return rideRepository.findByCreatorAndStatusInAndStartTimeBetween(user.get(), List.of(RideStatus.COMPLETED, RideStatus.CANCELLED), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
+        return rideRepository.findByCreatorAndStatusIn(user.get(), List.of(RideStatus.COMPLETED, RideStatus.CANCELLED), pageable).stream().map(RideCardDto::new).toList();
     }
 
     @Override
-    public List<RideDto> getScheduledRides(Long driverId, Integer skip, Integer count, RideQueryDto query) {
-        return getRideHistory(driverId, skip, count, query);
+    public List<RideCardDto> getScheduledRides(Long driverId, Integer skip, Integer count, RideQueryDto query) {
+        Optional<Driver> driver = driverRepository.findById(driverId);
+        if (driver.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found");
+
+        Pageable pageable = parseToPageable(skip, count, query);
+
+        if (query != null && query.getDate() != null)
+            return rideRepository.findByDriverAndStatusInAndStartTimeBetween(driver.get(), List.of(RideStatus.ACCEPTED), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
+        return rideRepository.findByDriverAndStatusIn(driver.get(), List.of(RideStatus.ACCEPTED), pageable).stream().map(RideCardDto::new).toList();
     }
 
     @Override
     public void trackRide(Long id) {
 
     }
+
+    private Pageable parseToPageable(Integer skip, Integer count, RideQueryDto query) {
+        Sort sort = Sort.by("startTime").descending();
+        if (query != null && query.getSortBy() != null) {
+            sort = Sort.by(query.getSortBy());
+            if (query.getAscending())
+                sort = sort.ascending();
+            else
+                sort = sort.descending();
+        }
+
+        Pageable pageable = PageRequest.of(0, 10, sort);
+        if (skip != null && skip > -1 && count != null && count > 0)
+            pageable = PageRequest.of(skip, count, sort);
+
+        return pageable;
+    };
 }

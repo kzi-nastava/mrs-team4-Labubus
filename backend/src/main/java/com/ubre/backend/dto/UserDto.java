@@ -6,12 +6,14 @@ import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.User;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 // User...
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class UserDto implements Serializable {
     private Long id;
     private Role role;
