@@ -33,6 +33,7 @@ import { AccountSettingsService } from '../../services/account-settings-service'
 import { AuthService } from '../../features/auth/auth-service';
 import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 import { SseService } from '../../services/sse-service';
+import { StatItemDto } from '../../dtos/stat-item-dto';
 
 @Component({
   selector: 'app-user-layout',
@@ -62,7 +63,6 @@ import { SseService } from '../../services/sse-service';
   user!: UserDto;
   userStats!: UserStatsDto;
   vehicle!: VehicleDto;
-  driverRegistration!: DriverRegistrationDto;
 
   // private sseUserId = -1;
 
