@@ -330,17 +330,17 @@ public class DriverServiceImpl implements DriverService {
         driverRepository.save(driver); // by saving driver, profileChange is also saved because of cascade
 
         // sse service sends notification to driver with driver dto about approval
-        sseService.send(driver.getId(), NotificationType.PROFILE_CHANGE_APPROVED.name(), new UserDto(
-                driver.getId(),
-                driver.getRole(),
-                driver.getAvatarUrl(),
-                driver.getEmail(),
-                driver.getName(),
-                driver.getSurname(),
-                driver.getPhone(),
-                driver.getAddress(),
-                driver.getStatus()
-        ));
+//        sseService.send(driver.getId(), NotificationType.PROFILE_CHANGE_APPROVED.name(), new UserDto(
+//                driver.getId(),
+//                driver.getRole(),
+//                driver.getAvatarUrl(),
+//                driver.getEmail(),
+//                driver.getName(),
+//                driver.getSurname(),
+//                driver.getPhone(),
+//                driver.getAddress(),
+//                driver.getStatus()
+//        ));
     }
 
     // reject profile change
@@ -369,6 +369,6 @@ public class DriverServiceImpl implements DriverService {
         profileChange.setStatus(ProfileChangeStatus.REJECTED);
         driverRepository.save(driver); // by saving driver, profileChange is also saved because of cascade
 
-        sseService.send(driver.getId(), NotificationType.PROFILE_CHANGE_REJECTED.name(), null);
+//        sseService.send(driver.getId(), NotificationType.PROFILE_CHANGE_REJECTED.name(), null);
     }
 }

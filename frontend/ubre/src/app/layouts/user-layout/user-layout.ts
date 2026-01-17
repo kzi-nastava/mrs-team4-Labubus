@@ -97,26 +97,26 @@ import { SseService } from '../../services/sse-service';
 
       // SSE CONNECTION LOGIC
 
-      if (!user || user.id === 0) {
-        this.sseService.disconnect();
-        return;
-      }
+    //   if (!user || user.id === 0) {
+    //     this.sseService.disconnect();
+    //     return;
+    //   }
 
-      if (this.sseUserId === user.id) return;
-      this.sseUserId = user.id;
-      this.showToast('Reconnecting to SSE...', 'Please wait while we reconnect to the SSE service.');
-      this.sseService.connect(
-        user.id, 
-        (updatedUser) => {
-          this.userService.setCurrentUserById(updatedUser.id);
-          this.showToast('Profile change approved', 'Your profile change request has been approved.');
-          this.cdr.detectChanges();
-          this.userService.loadAvatar(updatedUser.id);
-        },
-        () => {
-          this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
-        }
-      );
+    //   if (this.sseUserId === user.id) return;
+    //   this.sseUserId = user.id;
+    //   this.showToast('Reconnecting to SSE...', 'Please wait while we reconnect to the SSE service.');
+    //   this.sseService.connect(
+    //     user.id, 
+    //     (updatedUser) => {
+    //       this.userService.setCurrentUserById(updatedUser.id);
+    //       this.showToast('Profile change approved', 'Your profile change request has been approved.');
+    //       this.cdr.detectChanges();
+    //       this.userService.loadAvatar(updatedUser.id);
+    //     },
+    //     () => {
+    //       this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
+    //     }
+    //   );
     });
 
   }

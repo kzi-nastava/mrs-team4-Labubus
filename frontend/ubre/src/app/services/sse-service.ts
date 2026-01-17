@@ -32,23 +32,13 @@ export class SseService {
     this.es.onopen = () => {
       console.log('SSE connected');
     }; 
+
+    this.es.addEventListener('PING', () => {
+      console.log('SSE ping');
+    });
     
     this.es.onerror = (err: any) => {
-      if (this.es?.readyState === EventSource.CLOSED) {
-        console.error('SSE connection closed');
-      } else if (this.es?.readyState === EventSource.CONNECTING) {
-        console.log('SSE reconnecting...');
-      } else {
-        console.error('SSE error:', err);
-      }
-      this.es?.close();
-      setTimeout(() => { 
-        this.connect(userId, onProfileChangeApproved, onProfileChangeRejected);
-      }, 1000);
-    };
-
-    this.es.onmessage = (e: any) => {
-      console.log('SSE message:', e.data);
+      console.warn('SSE error / reconnecting...:', err);
     };
   }
 

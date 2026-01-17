@@ -167,9 +167,11 @@ public class UserController {
 
     @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter sse(@RequestParam Long userId, HttpServletResponse response) {
+        response.setHeader("Content-Type", "text/event-stream");
         response.setHeader("Cache-Control", "no-cache");
         response.setHeader("Connection", "keep-alive");
         response.setHeader("X-Accel-Buffering", "no");
+        response.setHeader("Content-Encoding", "identity");
         return sseService.connect(userId);
     }
 }
