@@ -64,7 +64,7 @@ import { SseService } from '../../services/sse-service';
   vehicle!: VehicleDto;
   driverRegistration!: DriverRegistrationDto;
 
-  private sseUserId = -1;
+  // private sseUserId = -1;
 
   ngOnInit() {
     const userId = this.authService.getId();
