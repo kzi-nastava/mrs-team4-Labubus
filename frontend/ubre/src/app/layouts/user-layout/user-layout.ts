@@ -23,7 +23,7 @@ import { VehicleDto } from '../../dtos/vehicle-dto';
 import { Role } from '../../enums/role';
 import { VehicleType } from '../../enums/vehicle-type';
 import { MapService } from '../../services/map-service';
-import { forkJoin, take } from 'rxjs';
+import { Subscription, forkJoin, take } from 'rxjs';
 import { DriverRegistrationService } from '../../services/driver-registration-service';
 import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
@@ -32,7 +32,7 @@ import { AsyncPipe } from '@angular/common';
 import { AccountSettingsService } from '../../services/account-settings-service';
 import { AuthService } from '../../features/auth/auth-service';
 import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
-import { SseService } from '../../services/sse-service';
+import { WebSocketService } from '../../services/websocket-service';
 import { StatItemDto } from '../../dtos/stat-item-dto';
 
 @Component({
@@ -55,7 +55,7 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
     private confetti = inject(ConfettiService);
     public profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
     public accountSettingsService = inject(AccountSettingsService);
-    public sseService = inject(SseService);
+    public webSocketService = inject(WebSocketService);
 
   Role = Role;
   VehicleType = VehicleType;
@@ -64,7 +64,8 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
   userStats!: UserStatsDto;
   vehicle!: VehicleDto;
 
-  // private sseUserId = -1;
+  private websocketUserId: number | null = null;
+  private profileChangeSubscription?: Subscription;
 
   ngOnInit() {
     const userId = this.authService.getId();
@@ -95,34 +96,47 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
         this.userStats = stats;
       });
 
-      // SSE CONNECTION LOGIC
+      if (!user || user.id === 0) {
+        this.profileChangeSubscription?.unsubscribe();
+        this.webSocketService.disconnect();
+        this.websocketUserId = null;
+        return;
+      }
 
-    //   if (!user || user.id === 0) {
-    //     this.sseService.disconnect();
-    //     return;
-    //   }
+      if (this.websocketUserId === user.id) {
+        return;
+      }
 
-    //   if (this.sseUserId === user.id) return;
-    //   this.sseUserId = user.id;
-    //   this.showToast('Reconnecting to SSE...', 'Please wait while we reconnect to the SSE service.');
-    //   this.sseService.connect(
-    //     user.id, 
-    //     (updatedUser) => {
-    //       this.userService.setCurrentUserById(updatedUser.id);
-    //       this.showToast('Profile change approved', 'Your profile change request has been approved.');
-    //       this.cdr.detectChanges();
-    //       this.userService.loadAvatar(updatedUser.id);
-    //     },
-    //     () => {
-    //       this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
-    //     }
-    //   );
+      this.websocketUserId = user.id;
+      this.profileChangeSubscription?.unsubscribe();
+      this.webSocketService.connect();
+      this.profileChangeSubscription = this.webSocketService
+        .profileChangeNotifications(user.id)
+        .subscribe({
+          next: (notification) => {
+            if (notification.status === 'APPROVED' && notification.user) {
+              this.userService.setCurrentUserById(notification.user.id);
+              this.showToast('Profile change approved', 'Your profile change request has been approved.');
+              this.cdr.detectChanges();
+              this.userService.loadAvatar(notification.user.id);
+              return;
+            }
+
+            if (notification.status === 'REJECTED') {
+              this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
+            }
+          },
+          error: () => {
+            this.showToast('Connection error', 'Could not receive profile change updates.');
+          },
+        });
     });
 
   }
   
   ngOnDestroy() {
-    this.sseService.disconnect();
+    this.profileChangeSubscription?.unsubscribe();
+    this.webSocketService.disconnect();
   }
   ui = {
     menuOpen: false,

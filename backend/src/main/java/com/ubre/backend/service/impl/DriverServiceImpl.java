@@ -4,7 +4,6 @@ import com.ubre.backend.dto.DriverRegistrationDto;
 import com.ubre.backend.dto.ProfileChangeDto;
 import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.dto.UserDto;
-import com.ubre.backend.enums.NotificationType;
 import com.ubre.backend.enums.ProfileChangeStatus;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
@@ -17,6 +16,8 @@ import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.repository.VehicleRepository;
 import com.ubre.backend.service.DriverService;
 import com.ubre.backend.service.EmailService;
+import com.ubre.backend.websocket.ProfileChangeNotification;
+import com.ubre.backend.websocket.WebSocketNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,7 +47,7 @@ public class DriverServiceImpl implements DriverService {
     private VehicleRepository vehicleRepository;
 
     @Autowired
-    private SseService sseService;
+    private WebSocketNotificationService webSocketNotificationService;
 
     @Override
     public List<UserDto> getAllDrivers() {
@@ -329,18 +330,19 @@ public class DriverServiceImpl implements DriverService {
 
         driverRepository.save(driver); // by saving driver, profileChange is also saved because of cascade
 
-        // sse service sends notification to driver with driver dto about approval
-//        sseService.send(driver.getId(), NotificationType.PROFILE_CHANGE_APPROVED.name(), new UserDto(
-//                driver.getId(),
-//                driver.getRole(),
-//                driver.getAvatarUrl(),
-//                driver.getEmail(),
-//                driver.getName(),
-//                driver.getSurname(),
-//                driver.getPhone(),
-//                driver.getAddress(),
-//                driver.getStatus()
-//        ));
+        webSocketNotificationService.sendProfileChangeApproved(driver.getId(), new ProfileChangeNotification(
+                ProfileChangeStatus.APPROVED.name(),
+                new UserDto(
+                driver.getId(),
+                driver.getRole(),
+                driver.getAvatarUrl(),
+                driver.getEmail(),
+                driver.getName(),
+                driver.getSurname(),
+                driver.getPhone(),
+                driver.getAddress(),
+                driver.getStatus()
+        )));
     }
 
     // reject profile change
@@ -369,6 +371,9 @@ public class DriverServiceImpl implements DriverService {
         profileChange.setStatus(ProfileChangeStatus.REJECTED);
         driverRepository.save(driver); // by saving driver, profileChange is also saved because of cascade
 
-//        sseService.send(driver.getId(), NotificationType.PROFILE_CHANGE_REJECTED.name(), null);
+        webSocketNotificationService.sendProfileChangeRejected(driver.getId(), new ProfileChangeNotification(
+                ProfileChangeStatus.REJECTED.name(),
+                null
+        ));
     }
 }
