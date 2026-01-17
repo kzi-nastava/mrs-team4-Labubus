@@ -173,4 +173,6 @@ export class AccountSettingsService {
         const profileChange = new ProfileChangeDto(0, this.draft?.id ?? 0, this.oldUser?.name ?? '', this.draft?.name ?? '', this.oldUser?.surname ?? '', this.draft?.surname ?? '', this.oldUser?.address ?? '', this.draft?.address ?? '', this.oldUser?.phone ?? '', this.draft?.phone ?? '', this.oldUser?.avatarUrl ?? '', this.draft?.avatarUrl ?? '', ProfileChangeStatus.PENDING);
         return this.http.post<void>(`${this.api}/drivers/profile-changes`, profileChange)
     }
+
+    // method for uplodaing both avatars with profile change request (reason is there should be both avatar in database when displaying on profile later
 }

@@ -32,6 +32,7 @@ import { AsyncPipe } from '@angular/common';
 import { AccountSettingsService } from '../../services/account-settings-service';
 import { AuthService } from '../../features/auth/auth-service';
 import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
+import { SseService } from '../../services/sse-service';
 
 @Component({
   selector: 'app-user-layout',
@@ -53,6 +54,7 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
     private confetti = inject(ConfettiService);
     public profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
     public accountSettingsService = inject(AccountSettingsService);
+    public sseService = inject(SseService);
 
   Role = Role;
   VehicleType = VehicleType;
@@ -61,6 +63,8 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
   userStats!: UserStatsDto;
   vehicle!: VehicleDto;
   driverRegistration!: DriverRegistrationDto;
+
+  private sseUserId = -1;
 
   ngOnInit() {
     const userId = this.authService.getId();
@@ -86,14 +90,40 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
       this.user = user;
       
       forkJoin({
-        stats: this.userService.getUserStats(user.id),
+        stats: this.userService.getUserStats(user.id),         // remove later
       }).subscribe(({ stats }) => {
         this.userStats = stats;
       });
+
+      // SSE CONNECTION LOGIC
+
+      if (!user || user.id === 0) {
+        this.sseService.disconnect();
+        return;
+      }
+
+      if (this.sseUserId === user.id) return;
+      this.sseUserId = user.id;
+      this.showToast('Reconnecting to SSE...', 'Please wait while we reconnect to the SSE service.');
+      this.sseService.connect(
+        user.id, 
+        (updatedUser) => {
+          this.userService.setCurrentUserById(updatedUser.id);
+          this.showToast('Profile change approved', 'Your profile change request has been approved.');
+          this.cdr.detectChanges();
+          this.userService.loadAvatar(updatedUser.id);
+        },
+        () => {
+          this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
+        }
+      );
     });
 
   }
   
+  ngOnDestroy() {
+    this.sseService.disconnect();
+  }
   ui = {
     menuOpen: false,
     cdModalOpen: true,

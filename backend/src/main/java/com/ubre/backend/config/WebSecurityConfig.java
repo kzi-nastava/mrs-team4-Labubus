@@ -88,6 +88,7 @@ public class WebSecurityConfig {
                     ).permitAll()
                     .requestMatchers(PathRequest.toStaticResources()
                             .atCommonLocations()).permitAll()
+
                     .anyRequest().authenticated();
         });
         http.addFilterBefore(new TokenAuthenticationFilter(tokenUtils, userDetailsService()), UsernamePasswordAuthenticationFilter.class);

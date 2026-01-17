@@ -4,6 +4,7 @@ import com.ubre.backend.dto.DriverRegistrationDto;
 import com.ubre.backend.dto.ProfileChangeDto;
 import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.dto.UserDto;
+import com.ubre.backend.enums.NotificationType;
 import com.ubre.backend.enums.ProfileChangeStatus;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
@@ -43,6 +44,9 @@ public class DriverServiceImpl implements DriverService {
 
     @Autowired
     private VehicleRepository vehicleRepository;
+
+    @Autowired
+    private SseService sseService;
 
     @Override
     public List<UserDto> getAllDrivers() {
@@ -324,6 +328,19 @@ public class DriverServiceImpl implements DriverService {
         profileChange.setStatus(ProfileChangeStatus.APPROVED);
 
         driverRepository.save(driver); // by saving driver, profileChange is also saved because of cascade
+
+        // sse service sends notification to driver with driver dto about approval
+        sseService.send(driver.getId(), NotificationType.PROFILE_CHANGE_APPROVED.name(), new UserDto(
+                driver.getId(),
+                driver.getRole(),
+                driver.getAvatarUrl(),
+                driver.getEmail(),
+                driver.getName(),
+                driver.getSurname(),
+                driver.getPhone(),
+                driver.getAddress(),
+                driver.getStatus()
+        ));
     }
 
     // reject profile change
@@ -351,5 +368,7 @@ public class DriverServiceImpl implements DriverService {
         // Update profile change status
         profileChange.setStatus(ProfileChangeStatus.REJECTED);
         driverRepository.save(driver); // by saving driver, profileChange is also saved because of cascade
+
+        sseService.send(driver.getId(), NotificationType.PROFILE_CHANGE_REJECTED.name(), null);
     }
 }
