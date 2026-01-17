@@ -199,7 +199,7 @@
           <div class="as-input-row">
             <input class="as-input"
                   [type]="hidePassword ? 'password' : 'text'"
-                  [value]="'mockpassword'"
+                  [value]="'youcannotseeit'"
                   readonly>
 
             <button class="as-eye" type="button" (click)="hidePassword = !hidePassword">
@@ -344,32 +344,32 @@
       <div class="vi-wrap">
         <div class="vi-field">
           <div class="vi-label">Vehicle model</div>
-          <input class="vi-input" [value]="vehicle.model" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.model" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">Vehicle type</div>
-          <input class="vi-input" [value]="vehicle.type" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.type" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">License plates</div>
-          <input class="vi-input" [value]="vehicle.plates" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.plates" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">Number of seats</div>
-          <input class="vi-input" [value]="vehicle.seats" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.seats" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">Baby-friendly</div>
-          <input class="vi-input" [value]="vehicle.babyFriendly" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.babyFriendly" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">Pet-friendly</div>
-          <input class="vi-input" [value]="vehicle.petFriendly" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.petFriendly" readonly>
         </div>
       </div>
     </app-sheet>
@@ -580,14 +580,14 @@
       (back)="closeProfileChanges()">
 
       <div class="pc-list">
-        @for (it of profileChanges; track it.id) {
+        @for (it of profileChangeService.profileChanges$ | async; track it.id) {
           <app-profile-change-card [item]="it"
-            (accept)="acceptProfileChange($event)"
+            (approve)="approveProfileChange($event)"
             (reject)="rejectProfileChange($event)">
           </app-profile-change-card>
         }
 
-        @if (profileChanges.length === 0) {
+        @if ((profileChangeService.profileChanges$ | async)?.length === 0) {
           <div class="pc-empty">No pending requests</div>
         }
       </div>

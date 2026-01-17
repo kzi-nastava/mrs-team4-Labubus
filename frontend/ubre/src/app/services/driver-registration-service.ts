@@ -141,6 +141,12 @@ export class DriverRegistrationService {
         this.fieldErrors = null;
       }),
       catchError((err: HttpErrorResponse) => {
+        if (err.status === 401) {
+          return throwError(() => 'Unauthorized. Please login again.');
+        }
+        if (err.status === 403) {
+          return throwError(() => 'Forbidden. You are not authorized to access this resource.');
+        }
         if (err.error && typeof err.error === 'object' && !err.error.detail) {
           this.fieldErrors = err.error as FieldErrors;
         }

@@ -11,12 +11,12 @@ import { ProfileChangeDto } from '../../../dtos/profile-change-dto';
 })
 export class ProfileChangeCard {
   @Input({ required: true }) item!: ProfileChangeDto;
-  @Output() accept = new EventEmitter<number>();
+  @Output() approve = new EventEmitter<number>();
   @Output() reject = new EventEmitter<number>();
 
   leaving = false;
 
-  onAccept() { this.leaveThen(() => this.accept.emit(this.item.id)); }
+  onApprove() { this.leaveThen(() => this.approve.emit(this.item.id)); }
   onReject() { this.leaveThen(() => this.reject.emit(this.item.id)); }
 
   private leaveThen(fn: () => void) {

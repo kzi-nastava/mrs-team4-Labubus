@@ -18,6 +18,9 @@ export class UserService {
   private readonly avatarSrcSubject = new BehaviorSubject<string>('default-avatar.jpg');
   readonly avatarSrc$ = this.avatarSrcSubject.asObservable();
 
+  private currentUserVehicleSubject = new BehaviorSubject<VehicleDto>({ id: 0, model: '', type: VehicleType.STANDARD, seats: 0, babyFriendly: false, petFriendly: false, plates: '' });
+  readonly currentUserVehicle$ = this.currentUserVehicleSubject.asObservable();
+
 
   // mock podaci (privremeno)
   private currentUserStats: UserStatsDto = {
@@ -29,16 +32,6 @@ export class UserService {
     moneyEarned: 150,
   };
 
-  private currentUserVehicle: VehicleDto = {
-    id: 1,
-    model: 'Toyota Prius',
-    type: VehicleType.STANDARD,
-    seats: 4,
-    babyFriendly: true,
-    petFriendly: false,
-    plates: 'BG1234AB',
-  };
-
   // --- API ---
   getUserById(userId: number): Observable<UserDto> {
     return this.http.get<UserDto>(`${this.api}/users/${userId}`);
@@ -48,12 +41,21 @@ export class UserService {
     return this.http.get(`${this.api}/users/${userId}/avatar`, { responseType: 'blob' });
   }
 
+  getVehicleByDriver(driverId: number): Observable<VehicleDto> {
+    return this.http.get<VehicleDto>(`${this.api}/vehicles/driver/${driverId}`);
+  }
+
+
+
   // --- actions ---
   setCurrentUserById(id: number) {
     this.getUserById(id).subscribe({
       next: user => {
         this.currentUserSubject.next(user);
         this.loadAvatar(user.id); // automatski učitaj avatar kad se postavi user
+        if (user.role === Role.DRIVER) {
+          this.loadUserVehicle(user.id); // automatski učitaj vehicle kad se postavi user (koji je driver)
+        }
       },
       error: err => {
         if (err.status === 404) alert('User not found');
@@ -68,16 +70,19 @@ export class UserService {
     });
   }
 
+  loadUserVehicle(userId: number) {
+    this.getVehicleByDriver(userId).subscribe({
+      next: vehicle => this.currentUserVehicleSubject.next(vehicle),
+      error: err => {
+        if (err.status === 404) alert('Vehicle not found');
+      },
+    });
+  }
+
   // --- mock (privremeno) ---
   getUserStats(userId: number): Observable<UserStatsDto> {
     return of({ ...this.currentUserStats, userId });
   }
-
-  getUserVehicle(userId: number): Observable<VehicleDto> {
-    return of(this.currentUserVehicle);
-  }
-
-
 
 
   // GETTER ZA RIDE HISTORY (MOŽE DA SE IZBACI - ne diram ništa sam)

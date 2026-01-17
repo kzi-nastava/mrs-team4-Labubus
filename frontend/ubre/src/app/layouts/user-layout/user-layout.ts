@@ -23,7 +23,7 @@ import { VehicleDto } from '../../dtos/vehicle-dto';
 import { Role } from '../../enums/role';
 import { VehicleType } from '../../enums/vehicle-type';
 import { MapService } from '../../services/map-service';
-import { forkJoin } from 'rxjs';
+import { Subscription, forkJoin, take } from 'rxjs';
 import { DriverRegistrationService } from '../../services/driver-registration-service';
 import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
@@ -32,6 +32,8 @@ import { AsyncPipe } from '@angular/common';
 import { AccountSettingsService } from '../../services/account-settings-service';
 import { AuthService } from '../../features/auth/auth-service';
 import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
+import { WebSocketService } from '../../services/websocket-service';
+import { StatItemDto } from '../../dtos/stat-item-dto';
 
 @Component({
   selector: 'app-user-layout',
@@ -51,8 +53,9 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
     public driverRegistrationService = inject(DriverRegistrationService);
     public mapService = inject(MapService);
     private confetti = inject(ConfettiService);
-    private profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
+    public profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
     public accountSettingsService = inject(AccountSettingsService);
+    public webSocketService = inject(WebSocketService);
 
   Role = Role;
   VehicleType = VehicleType;
@@ -60,9 +63,9 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
   user!: UserDto;
   userStats!: UserStatsDto;
   vehicle!: VehicleDto;
-  driverRegistration!: DriverRegistrationDto;
 
-  profileChanges: ProfileChangeDto[] = [];
+  private websocketUserId: number | null = null;
+  private profileChangeSubscription?: Subscription;
 
   ngOnInit() {
     const userId = this.authService.getId();
@@ -88,16 +91,53 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
       this.user = user;
       
       forkJoin({
-        stats: this.userService.getUserStats(user.id),
-        veh: this.userService.getUserVehicle(user.id),
-      }).subscribe(({ stats, veh}) => {
+        stats: this.userService.getUserStats(user.id),         // remove later
+      }).subscribe(({ stats }) => {
         this.userStats = stats;
-        this.vehicle = veh;
       });
+
+      if (!user || user.id === 0) {
+        this.profileChangeSubscription?.unsubscribe();
+        this.webSocketService.disconnect();
+        this.websocketUserId = null;
+        return;
+      }
+
+      if (this.websocketUserId === user.id) {
+        return;
+      }
+
+      this.websocketUserId = user.id;
+      this.profileChangeSubscription?.unsubscribe();
+      this.webSocketService.connect();
+      this.profileChangeSubscription = this.webSocketService
+        .profileChangeNotifications(user.id)
+        .subscribe({
+          next: (notification) => {
+            if (notification.status === 'APPROVED' && notification.user) {
+              this.userService.setCurrentUserById(notification.user.id);
+              this.showToast('Profile change approved', 'Your profile change request has been approved.');
+              this.cdr.detectChanges();
+              this.userService.loadAvatar(notification.user.id);
+              return;
+            }
+
+            if (notification.status === 'REJECTED') {
+              this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
+            }
+          },
+          error: () => {
+            this.showToast('Connection error', 'Could not receive profile change updates.');
+          },
+        });
     });
 
   }
   
+  ngOnDestroy() {
+    this.profileChangeSubscription?.unsubscribe();
+    this.webSocketService.disconnect();
+  }
   ui = {
     menuOpen: false,
     cdModalOpen: true,
@@ -272,17 +312,26 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
   }
 
   saveAccountSettings() {
-    this.accountSettingsService.save().subscribe({
-      next: () => {
-        this.showToast('Settings saved', 'Your account settings have been updated.');
-      },
-      error: (err) => {
-        if (typeof err === 'string') {
-          this.showToast('Error saving settings', err);
-        }
+    this.userService.currentUser$.pipe(take(1)).subscribe(user => {
+      if (user.role === Role.DRIVER) {
+        this.accountSettingsService.requestProfileChange().subscribe({
+          next: () =>
+            this.showToast('Profile change requested', 'Your profile change request has been sent.')
+        });
+      } else {
+        this.accountSettingsService.save().subscribe({
+          next: () =>
+            this.showToast('Settings saved', 'Your account settings have been updated.'),
+          error: (err) => {
+            if (typeof err === 'string') {
+              this.showToast('Error saving settings', err);
+            }
+          }
+        });
       }
     });
   }
+  
   
   onAccountSettingsBack() {
     this.closeAccountSettings();
@@ -611,11 +660,36 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
     this.showToast('Ride confirmed', 'Your ride has been confirmed successfully.');
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // PROFILE CHANGES SHEET LOGIC
   loadProfileChanges() {
-    this.profileChangeService.getProfileChanges().subscribe((list) => {
-      this.profileChanges = list;
-    });
+    this.profileChangeService.loadPendingProfileChanges();
   }
 
   openProfileChanges() {
@@ -633,11 +707,11 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
     this.ui.menuOpen = true;
   }
 
-  acceptProfileChange(id: number) {
-    this.profileChangeService.accept(id).subscribe(() => this.loadProfileChanges());
+  approveProfileChange(id: number) {
+    this.profileChangeService.approve(id);
   }
 
   rejectProfileChange(id: number) {
-    this.profileChangeService.reject(id).subscribe(() => this.loadProfileChanges());
+    this.profileChangeService.reject(id);
   }
 }

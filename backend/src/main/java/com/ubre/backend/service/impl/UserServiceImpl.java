@@ -122,6 +122,8 @@ public class UserServiceImpl implements UserService {
         user.setIsActivated(true);
         User savedUser = userRepository.save(user);
 
+
+
         ActivationToken token = new ActivationToken();
         token.setToken(UUID.randomUUID().toString());
         token.setUser(user);

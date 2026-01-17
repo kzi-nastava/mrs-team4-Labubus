@@ -2,6 +2,8 @@ package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.*;
 import com.ubre.backend.service.UserService;
+import com.ubre.backend.service.impl.SseService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +11,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
@@ -21,6 +25,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private SseService sseService;
 
     //getting user details by id
     @GetMapping(
@@ -92,25 +99,6 @@ public class UserController {
 //        return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
 //    }
 
-    // driver sends request and admin approves or rejects it
-    @PostMapping(
-            value="/profile-change/request",
-            consumes = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<Void> requestProfileChange(@RequestBody ProfileChangeDto profileChangeDto) {
-        userService.requestProfileChange(profileChangeDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(null);
-    }
-
-    // get all profile change requests - for admin
-    @GetMapping(
-            value="/profile-change/requests",
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<List<ProfileChangeDto>> getAllProfileChangeRequests() {
-        List<ProfileChangeDto> requests = userService.getAllProfileChangeRequests();
-        return ResponseEntity.status(HttpStatus.OK).body(requests);
-    }
 
     // send a passenger request
     @PostMapping(
@@ -161,6 +149,7 @@ public class UserController {
 
     // this endpoint only updates userdto fields, not password or avatar
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("#id == @securityUtil.currentUserId()")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto updateUserDto) {
         UserDto user = userService.updateUser(updateUserDto);
         return ResponseEntity.status(HttpStatus.OK).body(user);
@@ -175,24 +164,14 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-//
-//    @PutMapping(value = "/{id}/block")
-//    public ResponseEntity<Void> blockUser(@PathVariable Long id) {
-//        try {
-//            userService.blockUser(id);
-//            return new ResponseEntity<>(HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
-//
-//    @PutMapping(value = "/{id}/unblock")
-//    public ResponseEntity<Void> unblockUser(@PathVariable Long id) {
-//        try {
-//            userService.unblockUser(id);
-//            return new ResponseEntity<>(HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
+
+    @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter sse(@RequestParam Long userId, HttpServletResponse response) {
+        response.setHeader("Content-Type", "text/event-stream");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Connection", "keep-alive");
+        response.setHeader("X-Accel-Buffering", "no");
+        response.setHeader("Content-Encoding", "identity");
+        return sseService.connect(userId);
+    }
 }
