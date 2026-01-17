@@ -3,6 +3,8 @@ package com.ubre.backend.controller;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.model.Admin;
+import com.ubre.backend.service.EmailService;
 import com.ubre.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,34 +25,22 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class AdminController {
 
-    // get all administrators
-//    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<UserDto>> getAllAdmins() {
-//        List<UserDto> administrators = List.of(
-//                new UserDto(100L, Role.ADMIN, "", "admin1@ubre.com", "Admin", "One", "111-111", "Admin Street 1", UserStatus.ACTIVE),
-//                new UserDto(101L, Role.ADMIN, "", "admin2@ubre.com", "Admin", "Two", "222-222", "Admin Street 2", UserStatus.ACTIVE)
-//        );
-//        return ResponseEntity.status(HttpStatus.OK).body(administrators);
-//    }
-
-    // create a new administrator profile
-
     @Autowired
     private UserService userService;
 
+    // get all administrators
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<UserDto>> getAllAdmins() {
+        List<UserDto> administrators = userService.getAllUsers().stream()
+                .filter(user -> user.getRole() == Role.ADMIN)
+                .toList();
+        return ResponseEntity.status(HttpStatus.OK).body(administrators);
+    }
+
+    // create a new administrator profile
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserDto> createAdministrator(@RequestBody UserDto administratorDto) {
-        UserDto createdAdministrator = new UserDto(
-                102L,
-                Role.ADMIN,
-                administratorDto.getAvatarUrl(),
-                administratorDto.getEmail(),
-                administratorDto.getName(),
-                administratorDto.getSurname(),
-                administratorDto.getPhone(),
-                administratorDto.getAddress(),
-                UserStatus.ACTIVE
-        );
+    public ResponseEntity<UserDto> createAdmin(@RequestBody UserDto adminDto) {
+        UserDto createdAdministrator = userService.createAdmin(adminDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAdministrator);
     }
 

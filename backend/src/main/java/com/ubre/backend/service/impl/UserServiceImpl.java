@@ -1,20 +1,29 @@
 package com.ubre.backend.service.impl;
 
-import com.ubre.backend.dto.PasswordChangeDto;
-import com.ubre.backend.dto.ProfileChangeDto;
-import com.ubre.backend.dto.UserDto;
-import com.ubre.backend.dto.UserStatsDto;
+import com.ubre.backend.dto.*;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.model.Admin;
 import com.ubre.backend.model.User;
+import com.ubre.backend.model.UserStats;
 import com.ubre.backend.repository.AdminRepository;
+import com.ubre.backend.model.ActivationToken;
+import com.ubre.backend.model.Driver;
+import com.ubre.backend.model.Passenger;
+import com.ubre.backend.repository.ActivationTokenRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,12 +32,15 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
 
+    private static final String DEFAULT_AVATAR_URL = "default.png";
     // Mock data for demonstration purposes
     private static List<UserDto> users = new ArrayList<UserDto>();
     private static List<ProfileChangeDto> profileChangeRequests = new ArrayList<>();
@@ -43,6 +55,12 @@ public class UserServiceImpl implements UserService {
     // real repository
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ActivationTokenRepository tokenRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -79,6 +97,45 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public UserDto registerUser(UserRegistrationDto dto) {
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use");
+        }
+
+        User user = new Passenger();
+        if (dto.getAvatarUrl() == null || dto.getAvatarUrl().isBlank()) {
+            user.setAvatarUrl(DEFAULT_AVATAR_URL);
+        } else {
+            user.setAvatarUrl(dto.getAvatarUrl());
+        }
+        user.setEmail(dto.getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setName(dto.getName());
+        user.setSurname(dto.getSurname());
+        user.setPhone(dto.getPhone());
+        user.setAddress(dto.getAddress());
+        user.setCreatedAt(LocalDateTime.now());
+        user.setIsBlocked(false);
+        //user.setRole(Role.REGISTERED_USER);
+        // activate endpoint
+        user.setIsActivated(true);
+        User savedUser = userRepository.save(user);
+
+
+
+        ActivationToken token = new ActivationToken();
+        token.setToken(UUID.randomUUID().toString());
+        token.setUser(user);
+        token.setExpiresAt(LocalDateTime.now().plusHours(24));
+
+        tokenRepository.save(token);
+
+        // email service for sending the token
+
+        return new UserDto(savedUser);
+    }
+
     // avater upload
     @Override
     public void uploadAvatar(Long userId, MultipartFile avatar) {
@@ -92,11 +149,18 @@ public class UserServiceImpl implements UserService {
         Path root = Paths.get(uploadDir).toAbsolutePath().normalize();
         try {
             Files.createDirectories(root);
+
+            // avatar filename should be unique per user, add user email in front of filename
+            filename = user.getEmail() + "_" + filename;
             // delete old if exists (not null and not default-avatar.jpg)
             if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty() && !user.getAvatarUrl().equals("default-avatar.jpg")) {
                 Path oldFilePath = root.resolve(user.getAvatarUrl()).normalize();
                 Files.deleteIfExists(oldFilePath);
             }
+
+            // set filename as avatarUrl in user entity
+            user.setAvatarUrl(filename);
+            userRepository.save(user);
 
             Path filePath = root.resolve(filename).normalize();
 
@@ -148,35 +212,59 @@ public class UserServiceImpl implements UserService {
         return users;
     }
 
-    @Override
-    public UserDto updateUser(ProfileChangeDto profileChangeDto) {
-        UserDto user = getUserById(profileChangeDto.getUserId());
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-        users.remove(user);
-        UserDto updatedUser = new UserDto(
-                user.getId(),
-                user.getRole(),
-                profileChangeDto.getNewAvatarUrl(),
-                user.getEmail(),
-                profileChangeDto.getNewName(),
-                profileChangeDto.getNewSurname(),
-                profileChangeDto.getNewPhone(),
-                profileChangeDto.getNewAddress(),
-                user.getStatus()
-        );
-        users.add(updatedUser);
-        return updatedUser;
-    }
+//    @Override
+//    public UserDto updateUser(ProfileChangeDto profileChangeDto) {
+//        UserDto user = getUserById(profileChangeDto.getUserId());
+//        if (user == null) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+//        }
+//        users.remove(user);
+//        UserDto updatedUser = new UserDto(
+//                user.getId(),
+//                user.getRole(),
+//                profileChangeDto.getNewAvatarUrl(),
+//                user.getEmail(),
+//                profileChangeDto.getNewName(),
+//                profileChangeDto.getNewSurname(),
+//                profileChangeDto.getNewPhone(),
+//                profileChangeDto.getNewAddress(),
+//                user.getStatus()
+//        );
+//        users.add(updatedUser);
+//        return updatedUser;
+//    }
 
     @Override
     public void deleteUser(Long id) {
-        UserDto user = getUserById(id);
-        if (user == null) {
+        boolean exists = userRepository.existsById(id);
+        if (!exists) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
-        users.remove(user);
+        userRepository.deleteById(id);
+    }
+
+    // this method is primarly used for updating user profile by the user themselves, and admin also (not for drivers)
+    @Override
+    public UserDto updateUser(UserDto userDto) {
+        User user = userRepository.findById(userDto.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        user.setName(userDto.getName());
+        user.setSurname(userDto.getSurname());
+        user.setPhone(userDto.getPhone());
+        user.setAddress(userDto.getAddress());
+        // avatarUrl is updated via uploadAvatar method
+        User updatedUser = userRepository.save(user);
+        return new UserDto(
+                updatedUser.getId(),
+                updatedUser.getRole(),
+                updatedUser.getAvatarUrl(),
+                updatedUser.getEmail(),
+                updatedUser.getName(),
+                updatedUser.getSurname(),
+                updatedUser.getPhone(),
+                updatedUser.getAddress(),
+                updatedUser.getStatus()
+        );
     }
 
     @Override
@@ -235,4 +323,46 @@ public class UserServiceImpl implements UserService {
         }
         // todo: implement send passenger request logic via email
     }
+
+    @Override
+    public UserDto createAdmin(UserDto adminDto) {
+        boolean exists = userRepository.findByEmail(adminDto.getEmail()).isPresent();
+        if (exists) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User with this email already exists");
+        }
+
+        Admin newAdmin = new Admin();
+        newAdmin.setRole(Role.ADMIN);
+        newAdmin.setName(adminDto.getName());
+        newAdmin.setSurname(adminDto.getSurname());
+        newAdmin.setEmail(adminDto.getEmail());
+        newAdmin.setPassword(passwordEncoder.encode("admin123")); // default password, should be changed later
+        newAdmin.setPhone(adminDto.getPhone());
+        newAdmin.setAddress(adminDto.getAddress());
+        newAdmin.setStatus(UserStatus.INACTIVE); // new admin is inactive by default
+        newAdmin.setAvatarUrl(adminDto.getAvatarUrl());
+        newAdmin.setIsActivated(true);
+        newAdmin.setIsBlocked(false);
+
+        // user stats
+        UserStats stats = new UserStats(newAdmin);
+        newAdmin.setStats(stats);
+
+        Admin savedAdmin = userRepository.save(newAdmin);
+
+        return new UserDto(
+                savedAdmin.getId(),
+                savedAdmin.getRole(),
+                savedAdmin.getAvatarUrl(),
+                savedAdmin.getEmail(),
+                savedAdmin.getName(),
+                savedAdmin.getSurname(),
+                savedAdmin.getPhone(),
+                savedAdmin.getAddress(),
+                savedAdmin.getStatus()
+        );
+    }
+
+
+
 }
