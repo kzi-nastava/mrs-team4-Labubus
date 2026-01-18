@@ -34,6 +34,8 @@ import { AuthService } from '../../features/auth/auth-service';
 import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 import { WebSocketService } from '../../services/websocket-service';
 import { StatItemDto } from '../../dtos/stat-item-dto';
+import { ChangePasswordService } from '../../services/change-password-service';
+import { UserStatsService } from '../../services/user-stats-service';
 
 @Component({
   selector: 'app-user-layout',
@@ -53,16 +55,16 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
     public driverRegistrationService = inject(DriverRegistrationService);
     public mapService = inject(MapService);
     private confetti = inject(ConfettiService);
-    public profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
+    public profileChangeService = inject(ProfileChangeService); 
     public accountSettingsService = inject(AccountSettingsService);
     public webSocketService = inject(WebSocketService);
+    public changePasswordService = inject(ChangePasswordService);
+    public userStatsService = inject(UserStatsService);
 
   Role = Role;
   VehicleType = VehicleType;
 
-  user!: UserDto;
   userStats!: UserStatsDto;
-  vehicle!: VehicleDto;
 
   private websocketUserId: number | null = null;
   private profileChangeSubscription?: Subscription;
@@ -70,68 +72,44 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
   ngOnInit() {
     const userId = this.authService.getId();
 
-    if (userId !== null) {
+    if (userId !== null && userId !== 0) {
       this.userService.setCurrentUserById(userId);
-    } else {
-      this.user = {
-        id: 0,
-        name: '',
-        surname: '',
-        phone: '',
-        email: '',
-        address: '',
-        role: Role.GUEST,
-        avatarUrl: '',
-      };
-    }
-    
-    this.userService.currentUser$.subscribe(user => {
-      if (!user) return;
+    } 
       
-      this.user = user;
-      
-      forkJoin({
-        stats: this.userService.getUserStats(user.id),         // remove later
-      }).subscribe(({ stats }) => {
-        this.userStats = stats;
-      });
-
-      if (!user || user.id === 0) {
-        this.profileChangeSubscription?.unsubscribe();
-        this.webSocketService.disconnect();
-        this.websocketUserId = null;
-        return;
-      }
-
-      if (this.websocketUserId === user.id) {
-        return;
-      }
-
-      this.websocketUserId = user.id;
+    if (userId === 0 || userId === null) {
       this.profileChangeSubscription?.unsubscribe();
-      this.webSocketService.connect();
-      this.profileChangeSubscription = this.webSocketService
-        .profileChangeNotifications(user.id)
-        .subscribe({
-          next: (notification) => {
-            if (notification.status === 'APPROVED' && notification.user) {
-              this.userService.setCurrentUserById(notification.user.id);
-              this.showToast('Profile change approved', 'Your profile change request has been approved.');
-              this.cdr.detectChanges();
-              this.userService.loadAvatar(notification.user.id);
-              return;
-            }
+      this.webSocketService.disconnect();
+      this.websocketUserId = null;
+      return;
+    }
 
-            if (notification.status === 'REJECTED') {
-              this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
-            }
-          },
-          error: () => {
-            this.showToast('Connection error', 'Could not receive profile change updates.');
-          },
-        });
-    });
+    if (this.websocketUserId === userId) {
+      return;
+    }
 
+    this.websocketUserId = userId;
+    this.profileChangeSubscription?.unsubscribe();
+    this.webSocketService.connect();
+    this.profileChangeSubscription = this.webSocketService
+      .profileChangeNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          if (notification.status === 'APPROVED' && notification.user) {
+            this.userService.setCurrentUserById(notification.user.id);
+            this.showToast('Profile change approved', 'Your profile change request has been approved.');
+            this.cdr.detectChanges();
+            this.userService.loadAvatar(notification.user.id);
+            return;
+          }
+
+          if (notification.status === 'REJECTED') {
+            this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
+          }
+        },
+        error: () => {
+          this.showToast('Connection error', 'Could not receive profile change updates.');
+        },
+      });
   }
   
   ngOnDestroy() {
@@ -214,7 +192,7 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
 
   handleMenuAction(action: string) {
     if (action === 'logout') {
-      this.user = { ...this.user, name: 'Guest', surname: '', phone: '', role: Role.GUEST };
+      this.userService.setCurrentUserById(0);     // set current user to guest
       this.authService.logout();
     }
     if (action === 'account-settings') {
@@ -304,6 +282,7 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
   openAccountSettings() {
     this.accountSettingsService.loadDraft();
     this.ui.accountSettingsOpen = true;
+    this.userStatsService.loadUserStats();
   }
   
   closeAccountSettings() {
@@ -314,12 +293,12 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
   saveAccountSettings() {
     this.userService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user.role === Role.DRIVER) {
-        this.accountSettingsService.requestProfileChange().subscribe({
+        this.accountSettingsService.requestProfileChange().pipe(take(1)).subscribe({
           next: () =>
             this.showToast('Profile change requested', 'Your profile change request has been sent.')
         });
       } else {
-        this.accountSettingsService.save().subscribe({
+        this.accountSettingsService.save().pipe(take(1)).subscribe({
           next: () =>
             this.showToast('Settings saved', 'Your account settings have been updated.'),
           error: (err) => {
@@ -391,22 +370,15 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
 
   
   // CHANGE PASSWORD SHEET LOGIC
-  newPassword = '';
-  confirmPassword = '';
-  passwordMismatch = false;
   
   onChangePassword() {
     this.ui.accountSettingsOpen = false;
     this.ui.changePasswordOpen = true;
-    
-    this.newPassword = '';
-    this.confirmPassword = '';
-    this.passwordMismatch = false;
+    this.changePasswordService.clearAllErrors();
   }
   
   closeChangePassword() {
     this.ui.changePasswordOpen = false;
-    this.passwordMismatch = false;
   }
   
   onChangePasswordBack() {
@@ -415,13 +387,25 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
   }
   
   savePassword() {
-    this.passwordMismatch = this.newPassword !== this.confirmPassword;
-    
-    if (this.passwordMismatch) return;
-    
-    // TODO: API call za promenu lozinke
-    this.closeChangePassword();
-    this.showToast('Password changed', 'Your password has been updated.');
+    const errors = this.changePasswordService.validate();
+    if (Object.keys(errors).length > 0) {
+      this.changePasswordService.fieldErrors = errors;
+      return;
+    }
+    this.changePasswordService.changePassword().pipe(take(1)).subscribe({
+      next: () => {
+        this.showToast('Password changed', 'Your might need to login again to perform certain actions.');
+        this.changePasswordService.clearAllErrors();
+        // close change password sheet and open account settings sheet
+        this.closeChangePassword();
+        this.openAccountSettings();
+      },
+      error: (err) => {
+        if (typeof err === 'string') {
+          this.showToast('Error changing password', err);
+        }
+      }
+    });
   }
 
   

@@ -156,8 +156,8 @@
     <app-side-menu
       [open]="ui.menuOpen"
       title="Account"
-      [role]="user.role"
-      [user]="user"
+      [role]="(userService.currentUser$ | async)?.role ?? Role.GUEST"
+      [user]="(userService.currentUser$ | async) ?? { id: 0, role: Role.GUEST, name: '', surname: '', email: '', avatarUrl: 'default-avatar.jpg', phone: '', address: '' }"
       [avatarSrc]="(userService.avatarSrc$ | async) ?? 'default-avatar.jpg'"
       (closed)="closeMenu()"
       (action)="handleMenuAction($event)">
@@ -217,7 +217,7 @@
         @if (accountSettingsService.draft?.role === Role.DRIVER) {
           <div class="as-section-title"><span>Statistics</span></div>
           <div class="as-stat">
-            <app-stat-card [value]="userStats.activePast24Hours + 'm'"
+            <app-stat-card [value]="userStatsService.getActivePast24HoursDisplay((userStatsService.currentUserStats$ | async)?.activePast24Hours ?? 0)"
                           label="Active in last 24h"
                           variant="dark"></app-stat-card>
           </div>
@@ -310,8 +310,13 @@
           <input
             class="cp-input"
             type="password"
-            [(ngModel)]="newPassword"
+            [class.error]="!!changePasswordService.fieldErrors?.newPassword"
+            [(ngModel)]="changePasswordService.newPassword"
+            (ngModelChange)="changePasswordService.clearError('newPassword')"
             placeholder="Enter your password">
+            @if (changePasswordService.fieldErrors?.newPassword) {
+              <span class="cp-error">{{ changePasswordService.fieldErrors?.newPassword }}</span>
+            }
         </div>
 
         <div class="cp-field">
@@ -319,12 +324,17 @@
           <input
             class="cp-input"
             type="password"
-            [(ngModel)]="confirmPassword"
+            [class.error]="!!changePasswordService.fieldErrors?.confirmNewPassword"
+            [(ngModel)]="changePasswordService.confirmNewPassword"
+            (ngModelChange)="changePasswordService.clearError('confirmNewPassword')"
             placeholder="Enter your password">
+            @if (changePasswordService.fieldErrors?.confirmNewPassword) {
+              <span class="cp-error">{{ changePasswordService.fieldErrors?.confirmNewPassword }}</span>
+            }
         </div>
 
-        @if (passwordMismatch) {
-          <div class="cp-error">Passwords do not match</div>
+        @if (changePasswordService.fieldErrors?.passwordMismatch) {
+          <div class="cp-error">{{ changePasswordService.fieldErrors?.passwordMismatch }}</div>
         }
       </div>
 
@@ -382,7 +392,7 @@
     <!-- REGISTER A DRIVER (ADMIN ROLE)-->  
     @let driverRegistration = (driverRegistrationService.draft$ | async);
     @let driverAvatarSrc = (driverRegistrationService.avatarSrc$ | async);
-    @if (user.role === Role.ADMIN && driverRegistration) {
+    @if ((userService.currentUser$ | async)?.role === Role.ADMIN && driverRegistration) {
       <app-sheet
         [open]="ui.registerDriverOpen"
         title="Register a driver"
@@ -572,12 +582,12 @@
 
 
     <!-- PROFILE CHANGES SHEET -->
-    @if (user.role === Role.ADMIN) {
+    @if ((userService.currentUser$ | async)?.role === Role.ADMIN) {
     <app-sheet
       [open]="ui.profileChangesOpen"
       title="Profile changes"
       (closed)="closeProfileChanges()"
-      (back)="closeProfileChanges()">
+      (back)="onProfileChangesBack()">
 
       <div class="pc-list">
         @for (it of profileChangeService.profileChanges$ | async; track it.id) {

@@ -12,35 +12,21 @@ import java.util.List;
 
 public interface UserService {
     UserDto getUserById(Long id);
-
     UserDto getUserByEmail(String email);
-
     List<UserDto> getAllUsers();
-  
     UserDto updateUser(UserDto userDto);
-  
     void deleteUser(Long id);
-
     void blockUser(Long id);
-
     void unblockUser(Long id);
-
     UserStatsDto getUserStats(Long id);
-
     void changePassword(PasswordChangeDto passwordChangeDto);
-
     void activateUser(Long id);
-
     void requestProfileChange(ProfileChangeDto profileChangeDto);
-
     List<ProfileChangeDto> getAllProfileChangeRequests();
-
     void sendPassengerRequest(Long userId, String passengerEmail);
-
     Resource getAvatar(Long userId);
-  
     UserDto registerUser(UserRegistrationDto registrationDto);
-  
     void uploadAvatar(Long userId, MultipartFile avatar);
     UserDto createAdmin(UserDto adminDto);
+    void recordUserStatus(Long userId, UserStatus status);
 }

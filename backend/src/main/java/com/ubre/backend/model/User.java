@@ -83,6 +83,9 @@ public abstract class User implements UserDetails {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("validFrom ASC")
+    private List<UserStatusRecord> statusRecords;
 
     // Constructors
     public User() {
