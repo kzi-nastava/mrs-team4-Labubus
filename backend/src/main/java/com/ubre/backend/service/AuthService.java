@@ -12,6 +12,5 @@ public interface AuthService {
     public void logout(String email) throws BadRequestException;
     String toggleAvailability(String email);
     void activateAccount(String token) throws BadRequestException;
-
     Optional<User> findByEmail(String trim);
 }
