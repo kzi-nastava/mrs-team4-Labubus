@@ -1,7 +1,7 @@
 // a service for fetching user statistics on demand
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, take } from 'rxjs';
 import { UserStatsDto } from '../dtos/user-stats-dto';
 import { UserService } from './user-service';
 
@@ -22,4 +22,15 @@ export class UserStatsService {
     setCurrentUserStats(stats: UserStatsDto) {
         this.currentUserStatsSubject.next(stats);
     }    
+
+    loadUserStats() {
+        this.getUserStats().pipe(take(1)).subscribe(stats => this.setCurrentUserStats(stats));
+    }
+
+    // display user stats in format hours minutes (active past 24 hours is in minutes)
+    getActivePast24HoursDisplay(minutes: number): string {
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        return `${hours}h ${remainingMinutes}m`;
+    }
 }

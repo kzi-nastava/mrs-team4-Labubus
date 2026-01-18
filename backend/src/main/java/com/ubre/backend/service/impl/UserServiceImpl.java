@@ -288,7 +288,7 @@ public class UserServiceImpl implements UserService {
         statsDto.setDistanceTraveled(stats.getDistanceTraveled()); // kilometers, float
         statsDto.setMoneySpent(stats.getMoneySpent()); // float
         statsDto.setMoneyEarned(stats.getMoneyEarned()); // float
-        
+
         return statsDto;
     }
 

@@ -35,6 +35,7 @@ import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 import { WebSocketService } from '../../services/websocket-service';
 import { StatItemDto } from '../../dtos/stat-item-dto';
 import { ChangePasswordService } from '../../services/change-password-service';
+import { UserStatsService } from '../../services/user-stats-service';
 
 @Component({
   selector: 'app-user-layout',
@@ -54,10 +55,11 @@ import { ChangePasswordService } from '../../services/change-password-service';
     public driverRegistrationService = inject(DriverRegistrationService);
     public mapService = inject(MapService);
     private confetti = inject(ConfettiService);
-    public profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
+    public profileChangeService = inject(ProfileChangeService); 
     public accountSettingsService = inject(AccountSettingsService);
     public webSocketService = inject(WebSocketService);
     public changePasswordService = inject(ChangePasswordService);
+    public userStatsService = inject(UserStatsService);
 
   Role = Role;
   VehicleType = VehicleType;
@@ -280,6 +282,7 @@ import { ChangePasswordService } from '../../services/change-password-service';
   openAccountSettings() {
     this.accountSettingsService.loadDraft();
     this.ui.accountSettingsOpen = true;
+    this.userStatsService.loadUserStats();
   }
   
   closeAccountSettings() {

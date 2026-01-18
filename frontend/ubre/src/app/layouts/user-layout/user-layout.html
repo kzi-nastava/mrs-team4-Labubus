@@ -217,7 +217,7 @@
         @if (accountSettingsService.draft?.role === Role.DRIVER) {
           <div class="as-section-title"><span>Statistics</span></div>
           <div class="as-stat">
-            <app-stat-card [value]="userStats.activePast24Hours + 'm'"
+            <app-stat-card [value]="userStatsService.getActivePast24HoursDisplay((userStatsService.currentUserStats$ | async)?.activePast24Hours ?? 0)"
                           label="Active in last 24h"
                           variant="dark"></app-stat-card>
           </div>
