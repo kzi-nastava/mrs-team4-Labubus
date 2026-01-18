@@ -1,7 +1,7 @@
 <app-modal-container [showTitleBar] = false>
       <div class="time">
             <img src="clock-primary.svg" alt="" class="icon">
-            <p class="start-time">{{ ride.startTime | date: 'd MMM yyyy h:mm a' }}</p>
+            <p class="start-time">{{ ride.start | date: 'd MMM yyyy h:mm a' }}</p>
 
             <div class="dots">
                   <div class="dot"></div>
@@ -13,7 +13,7 @@
             <div class="separator"></div>
             
             <img src="clock-primary.svg" alt="" class="icon">
-            <p class="end-time">{{ ride.endTime | date: 'd MMM yyyy h:mm a' }}</p>
+            <p class="end-time">{{ ride.end | date: 'd MMM yyyy h:mm a' }}</p>
       </div>
 
       <app-route-table [waypoints]="ride.waypoints"></app-route-table>
@@ -27,13 +27,12 @@
             }
       </div>
 
-      @if (user.role == 'DRIVER' || user.role === 'ADMIN') {
+      @if ((user.role == 'DRIVER' || user.role === 'ADMIN') && ride.passengers && ride.passengers.length > 0) {
             <div class="section">
                   <div class="section-title"> Passengers</div>
                   <div class="profile-list">
-                        <app-profile-card [user]="ride.passengers[0]" icon="ordering-customer-primary-text.svg"></app-profile-card>
-                        @for (passenger of ride.passengers.slice(1, ride.passengers.length); track passenger.email) {
-                              <app-profile-card [user]="passenger"></app-profile-card>
+                        @for (passenger of ride.passengers; track passenger.email) {
+                              <app-profile-card [user]="passenger" [icon]="ride.createdBy == passenger.id ? 'ordering-customer-primary-text.svg' : ''"></app-profile-card>
                         }
                   </div>
             </div>
@@ -45,10 +44,10 @@
             </div>
             <div class="section">
                   <div class="section-title"> Vehicle</div>
-                  <app-vehicle-card [vehicle]="ride.vehicle"></app-vehicle-card>
+                  <app-vehicle-card [driverId]="ride.driver.id"></app-vehicle-card>
             </div>
       }
 
       <app-stat-card [value]="'$' + ride.price" label="Final price" variant="dark"></app-stat-card>
-      @if (user.email === ride.passengers[0].email) {<app-button width="290px">Reorder ride</app-button>}
+      @if (ride.passengers.length > 0 && user.id === ride.passengers[0].id) {<app-button width="290px">Reorder ride</app-button>}
 </app-modal-container>

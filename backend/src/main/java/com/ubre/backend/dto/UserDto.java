@@ -25,9 +25,6 @@ public class UserDto implements Serializable {
     private String address;
     private UserStatus status;
 
-    public UserDto() {
-    }
-
     public UserDto(Long id, Role role, String avatarUrl, String email, String name, String surname, String phone, String address, UserStatus status) {
         this.id = id;
         this.role = role;

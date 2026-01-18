@@ -27,5 +27,5 @@ export class RideDetails {
         id: 0,
         phone: "",
         address: ""
-      };;
+      };
 }

@@ -49,14 +49,13 @@ public class RideServiceImpl implements RideService {
 
     @Override
     public RideDto getRideById(Long id) {
-        RideDto ride = rides.stream()
-                .filter(r -> r.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
+        Optional<Ride> ride = rideRepository.findById(id);
+        if (ride.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
 
         // neophodno je proveriti takodje da li je ride prihvaćen, onda može da se startuje
         // tada vraćamo kod 400
-        return ride;
+        return new RideDto(ride.get());
     }
 
     @Override
@@ -108,7 +107,7 @@ public class RideServiceImpl implements RideService {
                 new UserDto(3L, Role.REGISTERED_USER, "", "passenger2@ubre.com", "Passenger2", "Passenger2", "1231234132", "Adress 123", UserStatus.ACTIVE)
         };
 
-        return new RideDto(1L, LocalDateTime.now(), LocalDateTime.now(), waypoints, driver, Arrays.stream(passengers).toList(), true, null, 12.34, 7.3);
+        return new RideDto(1L, LocalDateTime.now(), LocalDateTime.now(), waypoints, driver, Arrays.stream(passengers).toList(), true, null, 12.34, 7.3, null);
     }
 
     @Override

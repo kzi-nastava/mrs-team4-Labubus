@@ -6,11 +6,13 @@ import { UserDto } from '../../../dtos/user-dto';
 import { UserService } from '../../../services/user-service';
 import { Role } from '../../../enums/role';
 import { RideQueryDto } from '../../../dtos/ride-query';
+import { Observable, of } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 
 
 @Component({
   selector: 'app-ride-history',
-  imports: [RideList],
+  imports: [RideList, AsyncPipe],
   templateUrl: './ride-history.html',
   styleUrl: './ride-history.css',
 })
@@ -21,7 +23,7 @@ export class RideHistory {
   rideService : RideService = inject(RideService)
   userService : UserService = inject(UserService)
 
-  rides : RideCardDto[] = [];
+  rides$ : Observable<RideCardDto[]> = of([]);
   currentUser : UserDto = {
         email: '',
         name: '',
@@ -35,13 +37,12 @@ export class RideHistory {
 
   onQueryChange(qurey : RideQueryDto) {
     this.rideService.clearHistory();
+    console.log(qurey)
     this.rideService.fetchHistory(qurey)
   }
 
   ngOnInit() {
-    this.rideService.subscribeToHistory((rides : RideCardDto[]) => {
-      this.rides = rides;
-    })
+    this.rides$ = this.rideService.history$;
     this.userService.getCurrentUser().subscribe((user : UserDto) => {
       this.currentUser = user;
     })

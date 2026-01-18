@@ -1,5 +1,4 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
-import { KeyValuePipe } from '@angular/common';
+import { Component, EventEmitter, inject, Input, Output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RideCard } from '../ride-card/ride-card';
 import { ModalContainer } from '../modal-container/modal-container';
@@ -10,16 +9,18 @@ import { RideCardDto } from '../../../dtos/ride-card-dto';
 import { RideService } from '../../../services/ride-service';
 import { Role } from '../../../enums/role';
 import { RideQueryDto } from '../../../dtos/ride-query';
+import { VehicleType } from '../../../enums/vehicle-type';
+import { RideStatus } from '../../../enums/ride-status';
 
 
 @Component({
   selector: 'app-ride-list',
-  imports: [RideCard, ModalContainer, KeyValuePipe, FormsModule, RideDetails],
+  imports: [RideCard, ModalContainer, FormsModule, RideDetails],
   templateUrl: './ride-list.html',
   styleUrl: './ride-list.css',
 })
 export class RideList {
-  @Input() rides : RideCardDto[] = [];
+  @Input() rides : RideCardDto[] | null = [];
   @Input() title : string = "";
   @Input() open : boolean = false;
   @Input() user : UserDto = {
@@ -37,7 +38,31 @@ export class RideList {
 
   rideService : RideService = inject(RideService);
 
-  selectedRide : RideDto | undefined = undefined;
+  selectedRide = signal<RideDto>({
+        id: -1,
+        start: new Date(),
+        end: new Date(),
+        waypoints: [],
+        driver: {
+          email: 'pera@peric.com',
+          name: 'Pera',
+          surname: 'Peric',
+          avatarUrl: '',
+          role: Role.DRIVER,
+          id: 1,
+          phone: "1251323523",
+          address: "Test adress 123"
+        },
+        vehicle: { model: 'Toyota Carolla 2021', type: VehicleType.STANDARD, id: 1, seats: 5, babyFriendly: true, petFriendly: false, plates: "123123123" },
+        passengers: [],
+        price: 16.13,
+        distance: 10.3,
+        panic: false,
+        canceledBy: null,
+        status: RideStatus.ACCEPTED,
+        createdBy: -1
+      },);
+  detailsOpen = signal<boolean>(false)
 
   query : RideQueryDto = new RideQueryDto(null, "", false, null);
 
@@ -48,17 +73,22 @@ export class RideList {
   ascending : boolean = false;
 
   onRideSelected(rideCard : RideCardDto) {
-    if (this.selectedRide !== undefined && this.selectedRide.id == rideCard.rideId)
-      this.selectedRide = undefined;
+    if (this.detailsOpen() && this.selectedRide().id == rideCard.id)
+      this.detailsOpen.set(false);
     else {
-      this.rideService.getRide(rideCard.rideId).subscribe((ride : RideDto | undefined) => {
-        this.selectedRide = ride;
+        this.rideService.getRide(rideCard.id).subscribe((ride : RideDto) => {
+        console.log(ride)
+        this.selectedRide.set(ride);
+        this.detailsOpen.set(true)
       })
     }
   }
 
   onRideAction(ride : RideCardDto) {
-    this.rideService.toggleFavorite(this.user.id, ride.rideId)
+    if (ride.favorite)
+      this.rideService.removeFromFavorites(ride.id)
+    else
+      this.rideService.addToFavorites(ride.id)
   }
 
   onToggleSort() {
@@ -70,14 +100,16 @@ export class RideList {
     this.onQueryChange.emit(this.query)
   }
 
-  onSelectField(field : string) {
+  onSelectField(event : Event, field : string) {
     this.query.sortBy = field
+    this.selectedField = (event.target as HTMLElement).innerText
     this.sortOpen = false;
     this.onQueryChange.emit(this.query)
   }
 
   onSelectDate(event : Event) {
-    this.query.date = new Date((event.target as HTMLInputElement).value);
+    const value : string = (event.target as HTMLInputElement).value;
+    this.query.date = value != '' ?  new Date(value) : null;
     this.onQueryChange.emit(this.query);
   }
 

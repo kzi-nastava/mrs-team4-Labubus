@@ -1,9 +1,9 @@
 <div class="profile-card">
-    <img [src]="user.avatarUrl ? user.avatarUrl : 'default-avatar.jpg'" alt="" class="picture">
+    <img [src]="avatarUrl()" alt="" class="picture">
     <div class="info">
-        <div class="name">{{ user.name + " " + user.surname }}</div>
+        <div class="name">{{ user().name + " " + user().surname }}</div>
     </div>
-    @if (icon) {
-        <img [src]="icon" alt="" class="action-icon">
+    @if (icon()) {
+        <img [src]="icon()" alt="" class="action-icon">
     }
 </div>

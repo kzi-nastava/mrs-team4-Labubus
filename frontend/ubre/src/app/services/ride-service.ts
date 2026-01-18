@@ -19,252 +19,11 @@ export class RideService {
   private readonly http = inject(HttpClient);
 
 
-  private rides: RideDto[] = [
-    {
-      id: 1,
-      startTime: new Date(),
-      endTime: new Date(),
-      waypoints: [
-        {
-          id: 1,
-          label: 'Narodnog fronta',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 2,
-          label: 'Bulevar oslobodjenja',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 3,
-          label: 'Bulevar despota Stefana',
-          latitude: 19.45,
-          longitude: 48.21
-        }
-      ],
-      driver: {
-        email: 'pera@peric.com',
-        name: 'Pera',
-        surname: 'Peric',
-        avatarUrl: '',
-        role: Role.DRIVER,
-        id: 1,
-        phone: "1251323523",
-        address: "Test adress 123"
-      },
-      vehicle: { model: 'Toyota Carolla 2021', type: VehicleType.STANDARD, id: 1, seats: 5, babyFriendly: true, petFriendly: false, plates: "123123123" },
-      passengers: [
-        {
-          email: 'mika@mikic.com',
-          name: 'Mika',
-          surname: 'Mikic',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 1,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-        {
-          email: 'djura@djuric.com',
-          name: 'Djura',
-          surname: 'Djuric',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 1,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-      ],
-      price: 16.13,
-      distance: 10.3,
-      panic: false,
-      canceledBy: null,
-      status: RideStatus.ACCEPTED
-    },
-    {
-      id: 2,
-      startTime: new Date(),
-      endTime: new Date(),
-      waypoints: [
-        {
-          id: 6,
-          label: 'Temerinski put',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 7,
-          label: 'Most slobode',
-          latitude: 19.45,
-          longitude: 48.21
-        }
-      ],
-      driver: {
-        email: 'pera@peric.com',
-        name: 'Pera',
-        surname: 'Peric',
-        avatarUrl: '',
-        role: Role.DRIVER,
-        id: 1,
-        phone: "1251323523",
-        address: "Test adress 123"
-      },
-      vehicle: { model: 'Toyota Carolla 2021', type: VehicleType.STANDARD, id: 1, seats: 5, babyFriendly: true, petFriendly: false, plates: "123123123" },
-      passengers: [
-        {
-          email: 'mika@mikic.com',
-          name: 'Mika',
-          surname: 'Mikic',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 1,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-        {
-          email: 'djura@djuric.com',
-          name: 'Djura',
-          surname: 'Djuric',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 1,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-      ],
-      price: 16.13,
-      distance: 10.3,
-      panic: false,
-      canceledBy: null,
-      status: RideStatus.ACCEPTED
-    },
-    {
-      id: 3,
-      startTime: new Date(),
-      endTime: new Date(),
-      waypoints: [
-        {
-          id: 5,
-          label: 'Bulevar cara Lazara',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 3,
-          label: 'Bulevar despota Stefana',
-          latitude: 19.45,
-          longitude: 48.21
-        }
-      ],
-      driver: {
-        email: 'pera@peric.com',
-        name: 'Pera',
-        surname: 'Peric',
-        avatarUrl: '',
-        role: Role.DRIVER,
-        id: 1,
-        phone: "1251323523",
-        address: "Test adress 123"
-      },
-      vehicle: { model: 'Toyota Carolla 2021', type: VehicleType.STANDARD, id: 1, seats: 5, babyFriendly: true, petFriendly: false, plates: "123123123" },
-      passengers: [
-        {
-          email: 'mika@mikic.com',
-          name: 'Mika',
-          surname: 'Mikic',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 1,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-        {
-          email: 'djura@djuric.com',
-          name: 'Djura',
-          surname: 'Djuric',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 1,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-      ],
-      price: 10.74,
-      distance: 5.6,
-      panic: false,
-      canceledBy: 2,
-      status: RideStatus.ACCEPTED
-    },
-    {
-      id: 4,
-      startTime: new Date(),
-      endTime: new Date(),
-      waypoints: [
-        {
-          id: 1,
-          label: 'Narodnog fronta',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 3,
-          label: 'Bulevar despota Stefana',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 4,
-          label: 'Trg mladenaca',
-          latitude: 19.45,
-          longitude: 48.21
-        }
-      ],
-      driver: {
-        email: 'pera@peric.com',
-        name: 'Pera',
-        surname: 'Peric',
-        avatarUrl: '',
-        role: Role.DRIVER,
-        id: 1,
-        phone: "1251323523",
-        address: "Test adress 123"
-      },
-      vehicle: { model: 'Toyota Carolla 2021', type: VehicleType.STANDARD, id: 1, seats: 5, babyFriendly: true, petFriendly: false, plates: "123123123" },
-      passengers: [
-        {
-          email: 'mika@mikic.com',
-          name: 'Mika',
-          surname: 'Mikic',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 2,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-        {
-          email: 'djura@djuric.com',
-          name: 'Djura',
-          surname: 'Djuric',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 3,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-      ],
-      price: 20.84,
-      distance: 17.1,
-      panic: true,
-      canceledBy: 2,
-      status: RideStatus.ACCEPTED
-    }
-  ];
+  private history : BehaviorSubject<RideCardDto[]> = new BehaviorSubject<RideCardDto[]>([]);
+  public history$ : Observable<RideCardDto[]> = this.history.asObservable();
 
-  private history: BehaviorSubject<RideCardDto[]> = new BehaviorSubject<RideCardDto[]>([]);
-
-  private favorites: BehaviorSubject<RideCardDto[]> = new BehaviorSubject<RideCardDto[]>([]);
+  private favorites : BehaviorSubject<RideCardDto[]> = new BehaviorSubject<RideCardDto[]>([]);
+  public favorites$ : Observable<RideCardDto[]> = this.favorites.asObservable();
 
   private currentUser : UserDto = {
         email: '',
@@ -278,26 +37,20 @@ export class RideService {
       };
 
   fetchHistory(query : RideQueryDto, skip : number = 0, count : number = 10) : void {
-    const params : HttpParams = this.extractParams(query, skip, count);
+    const queryParams : HttpParams = this.extractParams(query, skip, count);
     let userId : number = query.userId ?? this.currentUser.id;
-    console.log(this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/history/5`, {params}).subscribe((value : RideCardDto[]) => {
-      console.log(value)
+    console.log(queryParams)
+    this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/history/${userId}`, {params: queryParams}).subscribe((value : RideCardDto[]) => {
       this.history.next(value);
-    }))
+    })
   }
 
   clearHistory() {
     this.history.next([]);
   }
 
-
-  subscribeToHistory(onChange : (cards: RideCardDto[]) => void): void {
-    this.history.subscribe(onChange);
-  }
-
-  getRide(id: number): Observable<RideDto | undefined> {
-    let ride: RideDto | undefined = this.rides.filter(r => r.id == id).length == 0 ? undefined : this.rides.filter(r => r.id == id)[0];
-    return of(ride);
+  getRide(id: number): Observable<RideDto> {
+    return this.http.get<RideDto>(`${this.BASE_URL}rides/${id}`);
   }
 
   fetchFavorites(query : RideQueryDto, skip : number = 0, count : number = 10) : void {
@@ -310,28 +63,59 @@ export class RideService {
     this.favorites.next([]);
   }
 
-  subscribeToFavorites(onChange : (cards: RideCardDto[]) => void): void {
-    this.favorites.subscribe(onChange);
+  addToFavorites(id: number): void {
+    let userId : number = this.currentUser.id;
+    this.http.put<void>(`${this.BASE_URL}rides/33/favorites/${id}`, null).subscribe({
+      next: () => {
+        let updatedHistory = this.history.value
+        updatedHistory = updatedHistory.map((ride : RideCardDto) => {
+          if (ride.id == id)
+            return { ...ride, favorite: true };
+          return ride;
+        })
+        this.history.next(updatedHistory)
+      },
+      error: err => {
+        if (err.status === 404) alert('Ride not found');
+      },
+    })
   }
 
-  toggleFavorite(userId: number, id: number): void {
-    
+  removeFromFavorites(id: number): void {
+    let userId : number = this.currentUser.id;
+    this.http.delete<void>(`${this.BASE_URL}rides/33/favorites/${id}`).subscribe({
+      next: () => {
+        let updatedHistory = this.history.value
+        updatedHistory = updatedHistory.map((ride : RideCardDto) => {
+          if (ride.id == id)
+            return { ...ride, favorite: false };
+          return ride;
+        })
+        this.history.next(updatedHistory)
+
+        let updatedFavorites = this.favorites.value.filter((ride : RideCardDto) => ride.id != id)
+        this.favorites.next(updatedFavorites);
+      },
+      error: err => {
+        if (err.status === 404) alert('Ride not found');
+      },
+    })
   }
 
   private extractParams(query : RideQueryDto, skip : number, count : number) : HttpParams {
-    const params : HttpParams = new HttpParams();
+    let params : HttpParams = new HttpParams();
 
     if (query.sortBy != "" && query.sortBy != null)
-      params.set('sortBy', query.sortBy.valueOf());
+      params = params.set('sortBy', query.sortBy.valueOf());
 
     if (query.sortBy != "" && query.sortBy != null && query.ascending != null)
-      params.set('ascending', query.ascending);
+      params = params.set('ascending', query.ascending);
 
     if (query.date != null)
-      params.set('date', query.date.toISOString().slice(0, 10) + 'T00:00:00');
+      params = params.set('date', query.date.toISOString().slice(0, 10) + 'T00:00:00');
 
-    params.set('skip', skip)
-    params.set('count', count)
+    params = params.set('skip', skip)
+    params = params.set('count', count)
 
     return params;
   }

@@ -185,15 +185,11 @@ public class RideController {
 //        }
 //    }
 //
-//    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<RideDTO> getRideById(@PathVariable Long id) {
-//        try {
-//            RideDTO ride = rideService.getRideById(id);
-//            return new ResponseEntity<>(ride, HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<RideDto> getRideById(@PathVariable Long id) {
+        RideDto ride = rideService.getRideById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(ride);
+    }
 //
 //    @GetMapping(value = "/user/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
 //    public ResponseEntity<List<RideDTO>> getUserRides(@PathVariable Long userId) {

@@ -1,1 +1,1 @@
-<app-ride-list class="ride-history" (onClose)="onClose.emit()" [open]="open" [rides]="rides" [user]="currentUser" title="Ride history"></app-ride-list>
+<app-ride-list class="ride-history" (onClose)="onClose.emit()" [open]="open" [rides]="rides$ | async" [user]="currentUser" (onQueryChange)="onQueryChange($event)" title="Ride history"></app-ride-list>
