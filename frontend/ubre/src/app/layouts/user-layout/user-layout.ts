@@ -60,9 +60,7 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
   Role = Role;
   VehicleType = VehicleType;
 
-  user!: UserDto;
   userStats!: UserStatsDto;
-  vehicle!: VehicleDto;
 
   private websocketUserId: number | null = null;
   private profileChangeSubscription?: Subscription;
@@ -70,68 +68,44 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
   ngOnInit() {
     const userId = this.authService.getId();
 
-    if (userId !== null) {
+    if (userId !== null && userId !== 0) {
       this.userService.setCurrentUserById(userId);
-    } else {
-      this.user = {
-        id: 0,
-        name: '',
-        surname: '',
-        phone: '',
-        email: '',
-        address: '',
-        role: Role.GUEST,
-        avatarUrl: '',
-      };
-    }
-    
-    this.userService.currentUser$.subscribe(user => {
-      if (!user) return;
+    } 
       
-      this.user = user;
-      
-      forkJoin({
-        stats: this.userService.getUserStats(user.id),         // remove later
-      }).subscribe(({ stats }) => {
-        this.userStats = stats;
-      });
-
-      if (!user || user.id === 0) {
-        this.profileChangeSubscription?.unsubscribe();
-        this.webSocketService.disconnect();
-        this.websocketUserId = null;
-        return;
-      }
-
-      if (this.websocketUserId === user.id) {
-        return;
-      }
-
-      this.websocketUserId = user.id;
+    if (userId === 0 || userId === null) {
       this.profileChangeSubscription?.unsubscribe();
-      this.webSocketService.connect();
-      this.profileChangeSubscription = this.webSocketService
-        .profileChangeNotifications(user.id)
-        .subscribe({
-          next: (notification) => {
-            if (notification.status === 'APPROVED' && notification.user) {
-              this.userService.setCurrentUserById(notification.user.id);
-              this.showToast('Profile change approved', 'Your profile change request has been approved.');
-              this.cdr.detectChanges();
-              this.userService.loadAvatar(notification.user.id);
-              return;
-            }
+      this.webSocketService.disconnect();
+      this.websocketUserId = null;
+      return;
+    }
 
-            if (notification.status === 'REJECTED') {
-              this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
-            }
-          },
-          error: () => {
-            this.showToast('Connection error', 'Could not receive profile change updates.');
-          },
-        });
-    });
+    if (this.websocketUserId === userId) {
+      return;
+    }
 
+    this.websocketUserId = userId;
+    this.profileChangeSubscription?.unsubscribe();
+    this.webSocketService.connect();
+    this.profileChangeSubscription = this.webSocketService
+      .profileChangeNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          if (notification.status === 'APPROVED' && notification.user) {
+            this.userService.setCurrentUserById(notification.user.id);
+            this.showToast('Profile change approved', 'Your profile change request has been approved.');
+            this.cdr.detectChanges();
+            this.userService.loadAvatar(notification.user.id);
+            return;
+          }
+
+          if (notification.status === 'REJECTED') {
+            this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
+          }
+        },
+        error: () => {
+          this.showToast('Connection error', 'Could not receive profile change updates.');
+        },
+      });
   }
   
   ngOnDestroy() {
@@ -214,7 +188,7 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
 
   handleMenuAction(action: string) {
     if (action === 'logout') {
-      this.user = { ...this.user, name: 'Guest', surname: '', phone: '', role: Role.GUEST };
+      this.userService.setCurrentUserById(0);     // set current user to guest
       this.authService.logout();
     }
     if (action === 'account-settings') {

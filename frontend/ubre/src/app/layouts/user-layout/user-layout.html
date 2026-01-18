@@ -156,8 +156,8 @@
     <app-side-menu
       [open]="ui.menuOpen"
       title="Account"
-      [role]="user.role"
-      [user]="user"
+      [role]="(userService.currentUser$ | async)?.role ?? Role.GUEST"
+      [user]="(userService.currentUser$ | async) ?? { id: 0, role: Role.GUEST, name: '', surname: '', email: '', avatarUrl: 'default-avatar.jpg', phone: '', address: '' }"
       [avatarSrc]="(userService.avatarSrc$ | async) ?? 'default-avatar.jpg'"
       (closed)="closeMenu()"
       (action)="handleMenuAction($event)">
@@ -382,7 +382,7 @@
     <!-- REGISTER A DRIVER (ADMIN ROLE)-->  
     @let driverRegistration = (driverRegistrationService.draft$ | async);
     @let driverAvatarSrc = (driverRegistrationService.avatarSrc$ | async);
-    @if (user.role === Role.ADMIN && driverRegistration) {
+    @if ((userService.currentUser$ | async)?.role === Role.ADMIN && driverRegistration) {
       <app-sheet
         [open]="ui.registerDriverOpen"
         title="Register a driver"
@@ -572,7 +572,7 @@
 
 
     <!-- PROFILE CHANGES SHEET -->
-    @if (user.role === Role.ADMIN) {
+    @if ((userService.currentUser$ | async)?.role === Role.ADMIN) {
     <app-sheet
       [open]="ui.profileChangesOpen"
       title="Profile changes"
