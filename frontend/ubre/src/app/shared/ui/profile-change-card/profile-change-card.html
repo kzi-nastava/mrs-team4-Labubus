@@ -2,9 +2,7 @@
   <div class="pc-userid">User ID: {{ item.userId }}</div>
 
   <div class="pc-avatars">
-    <img class="pc-avatar" [src]="item.oldAvatarUrl" alt="old avatar">
-    <div class="pc-gap"></div>
-    <img class="pc-avatar" [src]="item.newAvatarUrl" alt="new avatar">
+    <img class="pc-avatar" [src]="avatarSrc$ | async" alt="new avatar">
   </div>
 
   <div class="pc-old">
