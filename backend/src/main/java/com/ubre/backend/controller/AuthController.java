@@ -30,6 +30,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.URI;
 import java.security.Principal;
 import java.util.Optional;
 
@@ -90,7 +91,9 @@ public class AuthController {
     @GetMapping("/activate")
     public ResponseEntity<String> activate(@RequestParam String token) throws BadRequestException {
         authService.activateAccount(token);
-        return ResponseEntity.ok("Account successfully activated");
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("http://localhost:4200/login"))
+                .build();
     }
 
 }

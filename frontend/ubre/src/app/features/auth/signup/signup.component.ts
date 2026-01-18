@@ -29,6 +29,7 @@ export class SignupComponent {
   fileName = '';
   selectedFile: File | null = null;
 
+
   constructor(private authService: AuthService, private avatarService: DriverRegistrationService, private cdr: ChangeDetectorRef) {}
 
   signUpForm = new FormGroup(
@@ -62,6 +63,11 @@ export class SignupComponent {
 
   onSubmit() {
     if (this.signUpForm.valid) {
+      
+      const avatarUrlValue = this.selectedFile 
+        ? `${this.signUpForm.value.email}_${this.selectedFile.name}` 
+        : 'default-avatar.jpg';
+
       const dto: UserRegistrationDto = {
         name: this.signUpForm.value.name!,
         surname: this.signUpForm.value.surname!,
@@ -69,7 +75,7 @@ export class SignupComponent {
         address: this.signUpForm.value.address!,
         email: this.signUpForm.value.email!,
         password: this.signUpForm.value.password!,
-        avatarUrl: '', // za sada prazno
+        avatarUrl: avatarUrlValue
       };
 
       this.authService.register(dto).subscribe({

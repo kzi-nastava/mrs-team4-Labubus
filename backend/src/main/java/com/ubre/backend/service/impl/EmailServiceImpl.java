@@ -93,7 +93,8 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPassengerActivationEmail(String recipientEmail, String activationToken) {
-        String activationLink = buildActivationLink(activationToken, recipientEmail);
+
+        String activationLink = "http://localhost:8080/api/auth/activate?token=" + activationToken;
         String subject = "Activate your Ubre account";
         String body = buildPassengerActivationEmailBody(activationLink);
 
