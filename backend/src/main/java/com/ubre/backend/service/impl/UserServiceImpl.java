@@ -270,14 +270,26 @@ public class UserServiceImpl implements UserService {
         // todo: same sh
     }
 
+    // get user stats by id
     @Override
     public UserStatsDto getUserStats(Long id) {
-        UserDto user = getUserById(id);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        UserStats stats = user.getStats();
+        if (stats == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User stats not found");
         }
-        // Mock stats for demonstration purposes
-        return new UserStatsDto(id,450, 42, 128, 4.5, 15);
+
+        UserStatsDto statsDto = new UserStatsDto();
+        statsDto.setUserId(user.getId());
+        statsDto.setActivePast24Hours(stats.getActivePast24Hours()); // minutes
+        statsDto.setNumberOfRides(stats.getNumberOfRides());
+        statsDto.setDistanceTraveled(stats.getDistanceTraveled()); // kilometers, float
+        statsDto.setMoneySpent(stats.getMoneySpent()); // float
+        statsDto.setMoneyEarned(stats.getMoneyEarned()); // float
+        
+        return statsDto;
     }
 
     @Override
