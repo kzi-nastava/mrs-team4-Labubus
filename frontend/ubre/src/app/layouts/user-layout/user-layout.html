@@ -310,8 +310,13 @@
           <input
             class="cp-input"
             type="password"
-            [(ngModel)]="newPassword"
+            [class.error]="!!changePasswordService.fieldErrors?.newPassword"
+            [(ngModel)]="changePasswordService.newPassword"
+            (ngModelChange)="changePasswordService.clearError('newPassword')"
             placeholder="Enter your password">
+            @if (changePasswordService.fieldErrors?.newPassword) {
+              <span class="cp-error">{{ changePasswordService.fieldErrors?.newPassword }}</span>
+            }
         </div>
 
         <div class="cp-field">
@@ -319,12 +324,17 @@
           <input
             class="cp-input"
             type="password"
-            [(ngModel)]="confirmPassword"
+            [class.error]="!!changePasswordService.fieldErrors?.confirmNewPassword"
+            [(ngModel)]="changePasswordService.confirmNewPassword"
+            (ngModelChange)="changePasswordService.clearError('confirmNewPassword')"
             placeholder="Enter your password">
+            @if (changePasswordService.fieldErrors?.confirmNewPassword) {
+              <span class="cp-error">{{ changePasswordService.fieldErrors?.confirmNewPassword }}</span>
+            }
         </div>
 
-        @if (passwordMismatch) {
-          <div class="cp-error">Passwords do not match</div>
+        @if (changePasswordService.fieldErrors?.passwordMismatch) {
+          <div class="cp-error">{{ changePasswordService.fieldErrors?.passwordMismatch }}</div>
         }
       </div>
 
@@ -577,7 +587,7 @@
       [open]="ui.profileChangesOpen"
       title="Profile changes"
       (closed)="closeProfileChanges()"
-      (back)="closeProfileChanges()">
+      (back)="onProfileChangesBack()">
 
       <div class="pc-list">
         @for (it of profileChangeService.profileChanges$ | async; track it.id) {

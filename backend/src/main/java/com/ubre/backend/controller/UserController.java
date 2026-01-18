@@ -71,10 +71,10 @@ public class UserController {
 
     // password change endpoint
     @PutMapping(
-            value = "/{id}/change-password",
+            value = "/change-password",
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Void> changePassword(@PathVariable Long id, @RequestBody PasswordChangeDto passwordChangeDto) {
+    public ResponseEntity<Void> changePassword(@RequestBody PasswordChangeDto passwordChangeDto) {
         userService.changePassword(passwordChangeDto);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }

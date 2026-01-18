@@ -289,11 +289,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePassword(PasswordChangeDto passwordChangeDto) {
-        UserDto user = getUserById(passwordChangeDto.getUserId()); // takodje radimo sa pravim objektom koji je model ustvari, nema šta sde se primeti sada
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-        // todo: implement password change logic
+        User user = userRepository.findById(passwordChangeDto.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        user.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
+        userRepository.save(user);
     }
 
     @Override

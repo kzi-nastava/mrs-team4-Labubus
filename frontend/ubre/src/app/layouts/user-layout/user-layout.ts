@@ -34,6 +34,7 @@ import { AuthService } from '../../features/auth/auth-service';
 import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 import { WebSocketService } from '../../services/websocket-service';
 import { StatItemDto } from '../../dtos/stat-item-dto';
+import { ChangePasswordService } from '../../services/change-password-service';
 
 @Component({
   selector: 'app-user-layout',
@@ -56,6 +57,7 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
     public profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
     public accountSettingsService = inject(AccountSettingsService);
     public webSocketService = inject(WebSocketService);
+    public changePasswordService = inject(ChangePasswordService);
 
   Role = Role;
   VehicleType = VehicleType;
@@ -288,12 +290,12 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
   saveAccountSettings() {
     this.userService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user.role === Role.DRIVER) {
-        this.accountSettingsService.requestProfileChange().subscribe({
+        this.accountSettingsService.requestProfileChange().pipe(take(1)).subscribe({
           next: () =>
             this.showToast('Profile change requested', 'Your profile change request has been sent.')
         });
       } else {
-        this.accountSettingsService.save().subscribe({
+        this.accountSettingsService.save().pipe(take(1)).subscribe({
           next: () =>
             this.showToast('Settings saved', 'Your account settings have been updated.'),
           error: (err) => {
@@ -365,22 +367,15 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
 
   
   // CHANGE PASSWORD SHEET LOGIC
-  newPassword = '';
-  confirmPassword = '';
-  passwordMismatch = false;
   
   onChangePassword() {
     this.ui.accountSettingsOpen = false;
     this.ui.changePasswordOpen = true;
-    
-    this.newPassword = '';
-    this.confirmPassword = '';
-    this.passwordMismatch = false;
+    this.changePasswordService.clearAllErrors();
   }
   
   closeChangePassword() {
     this.ui.changePasswordOpen = false;
-    this.passwordMismatch = false;
   }
   
   onChangePasswordBack() {
@@ -389,13 +384,25 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
   }
   
   savePassword() {
-    this.passwordMismatch = this.newPassword !== this.confirmPassword;
-    
-    if (this.passwordMismatch) return;
-    
-    // TODO: API call za promenu lozinke
-    this.closeChangePassword();
-    this.showToast('Password changed', 'Your password has been updated.');
+    const errors = this.changePasswordService.validate();
+    if (Object.keys(errors).length > 0) {
+      this.changePasswordService.fieldErrors = errors;
+      return;
+    }
+    this.changePasswordService.changePassword().pipe(take(1)).subscribe({
+      next: () => {
+        this.showToast('Password changed', 'Your might need to login again to perform certain actions.');
+        this.changePasswordService.clearAllErrors();
+        // close change password sheet and open account settings sheet
+        this.closeChangePassword();
+        this.openAccountSettings();
+      },
+      error: (err) => {
+        if (typeof err === 'string') {
+          this.showToast('Error changing password', err);
+        }
+      }
+    });
   }
 
   
