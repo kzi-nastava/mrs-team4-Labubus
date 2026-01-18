@@ -1,6 +1,7 @@
 package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.*;
+import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.service.UserService;
 import com.ubre.backend.service.impl.SseService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -88,17 +89,6 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    // user profile changes request endpoint
-//    @PostMapping(
-//            value="/profile-change",
-//            consumes = MediaType.APPLICATION_JSON_VALUE,
-//            produces = MediaType.APPLICATION_JSON_VALUE
-//    )
-//    public ResponseEntity<UserDto> updateUser(@RequestBody ProfileChangeDto profileChangeDto) {
-//        UserDto updatedUser = userService.updateUser(profileChangeDto);
-//        return ResponseEntity.status(HttpStatus.OK).body(updatedUser);
-//    }
-
 
     // send a passenger request
     @PostMapping(
@@ -122,31 +112,6 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
-    // accept a passenger request via email link
-    // not sure how to implement this endpoint yet? (questtion for later)
-
-
-
-//    @Autowired
-//    private UserService userService;
-//
-//    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<List<UserDTO>> getAllUsers() {
-//        List<UserDTO> users = userService.getAllUsers();
-//        return new ResponseEntity<>(users, HttpStatus.OK);
-//    }
-//
-//    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
-//        try {
-//            UserDTO user = userService.getUserById(id);
-//            return new ResponseEntity<>(user, HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
-//
-
     // this endpoint only updates userdto fields, not password or avatar
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#id == @securityUtil.currentUserId()")
@@ -164,6 +129,27 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    // endpoint for making evidence of current user status (active, inactive, on_ride)
+    @PostMapping(
+            value = "/{id}/status",
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    @PreAuthorize("#id == @securityUtil.currentUserId()")
+    public ResponseEntity<Void> recordUserStatus(@PathVariable Long id, @RequestBody UserStatus statusEnum) {
+        userService.recordUserStatus(id, statusEnum);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
+
+
+
+
+
+
+
+
+
 
     @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter sse(@RequestParam Long userId, HttpServletResponse response) {

@@ -3,26 +3,16 @@ package com.ubre.backend.service.impl;
 import com.ubre.backend.dto.*;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
-import com.ubre.backend.model.Admin;
-import com.ubre.backend.model.User;
-import com.ubre.backend.model.UserStats;
-import com.ubre.backend.repository.AdminRepository;
-import com.ubre.backend.model.ActivationToken;
-import com.ubre.backend.model.Driver;
-import com.ubre.backend.model.Passenger;
+import com.ubre.backend.model.*;
 import com.ubre.backend.repository.ActivationTokenRepository;
 import com.ubre.backend.repository.UserRepository;
+import com.ubre.backend.repository.UserStatusRecordRepository;
 import com.ubre.backend.service.UserService;
-import jakarta.persistence.EntityNotFoundException;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -58,6 +48,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private ActivationTokenRepository tokenRepository;
+
+    @Autowired
+    private UserStatusRecordRepository userStatusRecordRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -363,6 +356,16 @@ public class UserServiceImpl implements UserService {
         );
     }
 
+    // this is only for recording user status, not for updating user status
+    @Override
+    public void recordUserStatus(Long userId, UserStatus status) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-
+        UserStatusRecord statusRecord = new UserStatusRecord();
+        statusRecord.setUser(user);
+        statusRecord.setStatus(status);
+        statusRecord.setValidFrom(LocalDateTime.now());
+        userStatusRecordRepository.save(statusRecord);
+    }
 }
