@@ -23,94 +23,99 @@ import { VehicleDto } from '../../dtos/vehicle-dto';
 import { Role } from '../../enums/role';
 import { VehicleType } from '../../enums/vehicle-type';
 import { MapService } from '../../services/map-service';
-import { forkJoin } from 'rxjs';
+import { Subscription, forkJoin, take } from 'rxjs';
 import { DriverRegistrationService } from '../../services/driver-registration-service';
 import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
 import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-change-card';
 import { AsyncPipe } from '@angular/common';
+import { AccountSettingsService } from '../../services/account-settings-service';
 import { AuthService } from '../../features/auth/auth-service';
 import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
+import { WebSocketService } from '../../services/websocket-service';
+import { StatItemDto } from '../../dtos/stat-item-dto';
+import { ChangePasswordService } from '../../services/change-password-service';
+import { UserStatsService } from '../../services/user-stats-service';
 
 @Component({
   selector: 'app-user-layout',
   standalone: true,
-  imports: [
-    Map,
-    IconButton,
-    SideMenu,
-    Toast,
-    Modal,
-    ModalContainer,
-    StatCard,
-    Button,
-    Sheet,
-    FormsModule,
-    RideHistory,
-    ProfileChangeCard,
-    AsyncPipe,
-  ],
-  templateUrl: './user-layout.html',
-  styleUrl: './user-layout.css',
-})
-export class UserLayout implements OnInit {
-  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
-
-  private userService = inject(UserService);
-  private authService = inject(AuthService);
-
-  private driverRegistrationService = inject(DriverRegistrationService);
-  public mapService = inject(MapService);
-  private confetti = inject(ConfettiService);
-  private profileChangeService = inject(ProfileChangeService); // profile changes, and password change (todo later)
+  imports: [Map,IconButton,SideMenu,Toast,
+    Modal,ModalContainer,StatCard,Button,
+    Sheet,FormsModule,RideHistory,ProfileChangeCard,
+    AsyncPipe],
+    templateUrl: './user-layout.html',
+    styleUrl: './user-layout.css',
+  })
+  export class UserLayout implements OnInit {
+    constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
+    
+    public userService = inject(UserService);
+    private authService = inject(AuthService);
+    public driverRegistrationService = inject(DriverRegistrationService);
+    public mapService = inject(MapService);
+    private confetti = inject(ConfettiService);
+    public profileChangeService = inject(ProfileChangeService); 
+    public accountSettingsService = inject(AccountSettingsService);
+    public webSocketService = inject(WebSocketService);
+    public changePasswordService = inject(ChangePasswordService);
+    public userStatsService = inject(UserStatsService);
 
   Role = Role;
   VehicleType = VehicleType;
 
-  user!: UserDto;
   userStats!: UserStatsDto;
-  vehicle!: VehicleDto;
-  driverRegistration!: DriverRegistrationDto;
 
-  profileChanges: ProfileChangeDto[] = [];
+  private websocketUserId: number | null = null;
+  private profileChangeSubscription?: Subscription;
 
-  avatarSrc$ = this.userService.avatarSrc$;
-
-  
   ngOnInit() {
     const userId = this.authService.getId();
 
-    if (userId !== null) {
+    if (userId !== null && userId !== 0) {
       this.userService.setCurrentUserById(userId);
-    } else {
-      this.user = {
-        id: 0,
-        name: '',
-        surname: '',
-        phone: '',
-        email: '',
-        address: '',
-        role: Role.GUEST,
-        avatarUrl: '',
-      };
+    } 
+      
+    if (userId === 0 || userId === null) {
+      this.profileChangeSubscription?.unsubscribe();
+      this.webSocketService.disconnect();
+      this.websocketUserId = null;
+      return;
     }
-    
-    this.userService.currentUser$.subscribe(user => {
-      if (!user) return;
-      
-      this.user = user;
-      this.editing = { ...this.user };
-      
-      forkJoin({
-        stats: this.userService.getUserStats(user.id),
-        veh: this.userService.getUserVehicle(user.id),
-      }).subscribe(({ stats, veh}) => {
-        this.userStats = stats;
-        this.vehicle = veh;
+
+    if (this.websocketUserId === userId) {
+      return;
+    }
+
+    this.websocketUserId = userId;
+    this.profileChangeSubscription?.unsubscribe();
+    this.webSocketService.connect();
+    this.profileChangeSubscription = this.webSocketService
+      .profileChangeNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          if (notification.status === 'APPROVED' && notification.user) {
+            this.userService.setCurrentUserById(notification.user.id);
+            this.showToast('Profile change approved', 'Your profile change request has been approved.');
+            this.cdr.detectChanges();
+            this.userService.loadAvatar(notification.user.id);
+            return;
+          }
+
+          if (notification.status === 'REJECTED') {
+            this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
+          }
+        },
+        error: () => {
+          this.showToast('Connection error', 'Could not receive profile change updates.');
+        },
       });
-    });
   }
   
+  ngOnDestroy() {
+    this.profileChangeSubscription?.unsubscribe();
+    this.webSocketService.disconnect();
+  }
   ui = {
     menuOpen: false,
     cdModalOpen: true,
@@ -187,7 +192,7 @@ export class UserLayout implements OnInit {
 
   handleMenuAction(action: string) {
     if (action === 'logout') {
-      this.user = { ...this.user, name: 'Guest', surname: '', phone: '', role: Role.GUEST };
+      this.userService.setCurrentUserById(0);     // set current user to guest
       this.authService.logout();
     }
     if (action === 'account-settings') {
@@ -212,7 +217,8 @@ export class UserLayout implements OnInit {
   }
   
   private toastTimer: any = null;
-
+  public toastTitle: string = '';
+  public toastMessage: string = '';
   showToast(title: string, message: string) {
     if (this.toastTimer) {
       clearTimeout(this.toastTimer);
@@ -270,32 +276,54 @@ export class UserLayout implements OnInit {
   
   
   
-  editing!: UserDto;
-  editingAvatarSrc = this.avatarSrc$;
   hidePassword = true;
-  toastTitle = 'Ignore this toast';
-  toastMessage = 'This is just a demo message for the toast';
-
+  
   // ACCOUNT SETTINGS SHEET LOGIC
   openAccountSettings() {
+    this.accountSettingsService.loadDraft();
     this.ui.accountSettingsOpen = true;
-    this.editing = { ...this.user };
+    this.userStatsService.loadUserStats();
   }
+  
   closeAccountSettings() {
     this.ui.accountSettingsOpen = false;
+    this.accountSettingsService.clearDraft();
   }
 
   saveAccountSettings() {
-    // Save account settings logic
-    this.user = { ...this.user, ...this.editing };
-    this.closeAccountSettings();
-    this.showToast('Settings saved', 'Your account settings have been updated.');
+    this.userService.currentUser$.pipe(take(1)).subscribe(user => {
+      if (user.role === Role.DRIVER) {
+        this.accountSettingsService.requestProfileChange().pipe(take(1)).subscribe({
+          next: () =>
+            this.showToast('Profile change requested', 'Your profile change request has been sent.')
+        });
+      } else {
+        this.accountSettingsService.save().pipe(take(1)).subscribe({
+          next: () =>
+            this.showToast('Settings saved', 'Your account settings have been updated.'),
+          error: (err) => {
+            if (typeof err === 'string') {
+              this.showToast('Error saving settings', err);
+            }
+          }
+        });
+      }
+    });
   }
+  
   
   onAccountSettingsBack() {
     this.closeAccountSettings();
     this.ui.menuOpen = true;
   }
+
+  onAccountSettingsAvatarSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.accountSettingsService.setAvatarFile(file);
+    input.value = ''; 
+  }
+
   
   
   
@@ -342,22 +370,15 @@ export class UserLayout implements OnInit {
 
   
   // CHANGE PASSWORD SHEET LOGIC
-  newPassword = '';
-  confirmPassword = '';
-  passwordMismatch = false;
   
   onChangePassword() {
     this.ui.accountSettingsOpen = false;
     this.ui.changePasswordOpen = true;
-    
-    this.newPassword = '';
-    this.confirmPassword = '';
-    this.passwordMismatch = false;
+    this.changePasswordService.clearAllErrors();
   }
   
   closeChangePassword() {
     this.ui.changePasswordOpen = false;
-    this.passwordMismatch = false;
   }
   
   onChangePasswordBack() {
@@ -366,13 +387,25 @@ export class UserLayout implements OnInit {
   }
   
   savePassword() {
-    this.passwordMismatch = this.newPassword !== this.confirmPassword;
-    
-    if (this.passwordMismatch) return;
-    
-    // TODO: API call za promenu lozinke
-    this.closeChangePassword();
-    this.showToast('Password changed', 'Your password has been updated.');
+    const errors = this.changePasswordService.validate();
+    if (Object.keys(errors).length > 0) {
+      this.changePasswordService.fieldErrors = errors;
+      return;
+    }
+    this.changePasswordService.changePassword().pipe(take(1)).subscribe({
+      next: () => {
+        this.showToast('Password changed', 'Your might need to login again to perform certain actions.');
+        this.changePasswordService.clearAllErrors();
+        // close change password sheet and open account settings sheet
+        this.closeChangePassword();
+        this.openAccountSettings();
+      },
+      error: (err) => {
+        if (typeof err === 'string') {
+          this.showToast('Error changing password', err);
+        }
+      }
+    });
   }
 
   
@@ -433,22 +466,18 @@ export class UserLayout implements OnInit {
   
   
   
-  driverRegistrationDraft$ = this.driverRegistrationService.draft$;
-  driverRegistrationAvatarSrc$ = this.driverRegistrationService.avatarSrc$;
   confirmPasswordDR = '';
-  fieldErrors: any = null;           // for field-specific error messages
 
   // DRIVER REGISTRATION SHEET LOGIC
   openRegisterDriver() {
     this.ui.registerDriverOpen = true;
-    this.fieldErrors = null;
+    this.driverRegistrationService.fieldErrors = null;
   }
 
   closeRegisterDriver() {
     this.ui.registerDriverOpen = false;
     this.driverRegistrationService.resetDraft();
     this.confirmPasswordDR = '';
-    this.fieldErrors = null;
   }
 
   patchDriverRegistration(changes : any) {
@@ -470,19 +499,17 @@ export class UserLayout implements OnInit {
   }
 
   onRegisterDriver() {
-    this.fieldErrors = null;
-
     this.driverRegistrationService.register(this.confirmPasswordDR).subscribe({
       next: () => {
         this.closeRegisterDriver();
         this.showToast('Driver registered', 'Activation mail has been sent to the driver.');
         this.confetti.fire();
         this.confirmPasswordDR = '';
-        this.fieldErrors = null;
       },
       error: (e) => {
-        if (typeof e === 'string') this.showToast('Registration error', e);
-        else this.fieldErrors = e;
+        if (typeof e === 'string') {
+          this.showToast('Registration error', e);
+        }
       }
     });
   }
@@ -501,18 +528,14 @@ export class UserLayout implements OnInit {
   }
 
   validateAll() {
-    this.fieldErrors = this.driverRegistrationService.validate(
+    const errors = this.driverRegistrationService.validate(
       this.driverRegistrationService.getDraftSnapshot(),
       this.confirmPasswordDR
     );
+    this.driverRegistrationService.fieldErrors = Object.keys(errors).length > 0 ? errors : null;
   }
 
-  clearFieldError(field: string) {
-    if (!this.fieldErrors) return;
-    this.fieldErrors = { ...this.fieldErrors, [field]: null };
-  }
-
-  onDrAvatarSelected(e: Event) {
+  onDriverRegistrationAvatarSelected(e: Event) {
     const input = e.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
     this.driverRegistrationService.setAvatarFile(file);
@@ -621,11 +644,36 @@ export class UserLayout implements OnInit {
     this.showToast('Ride confirmed', 'Your ride has been confirmed successfully.');
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // PROFILE CHANGES SHEET LOGIC
   loadProfileChanges() {
-    this.profileChangeService.getProfileChanges().subscribe((list) => {
-      this.profileChanges = list;
-    });
+    this.profileChangeService.loadPendingProfileChanges();
   }
 
   openProfileChanges() {
@@ -643,11 +691,11 @@ export class UserLayout implements OnInit {
     this.ui.menuOpen = true;
   }
 
-  acceptProfileChange(id: number) {
-    this.profileChangeService.accept(id).subscribe(() => this.loadProfileChanges());
+  approveProfileChange(id: number) {
+    this.profileChangeService.approve(id);
   }
 
   rejectProfileChange(id: number) {
-    this.profileChangeService.reject(id).subscribe(() => this.loadProfileChanges());
+    this.profileChangeService.reject(id);
   }
 }

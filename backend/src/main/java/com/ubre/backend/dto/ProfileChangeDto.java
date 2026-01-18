@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ProfileChangeDto {
-    public Long requestId;
+    public Long id;
     public Long userId;
 
     public String oldName;
@@ -33,7 +33,7 @@ public class ProfileChangeDto {
 
     public ProfileChangeDto(String newSurname, Long requestId, Long userId, String oldName, String newName, String oldSurname, String oldAddress, String newAddress, String oldPhone, String newPhone, String oldAvatarUrl, String newAvatarUrl) {
         this.newSurname = newSurname;
-        this.requestId = requestId;
+        this.id = requestId;
         this.userId = userId;
         this.oldName = oldName;
         this.newName = newName;

@@ -1,6 +1,7 @@
 package com.ubre.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
 import jakarta.persistence.*;
@@ -76,9 +77,15 @@ public abstract class User implements UserDetails {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Chat chat;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private UserStats stats;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("validFrom ASC")
+    private List<UserStatusRecord> statusRecords;
 
     // Constructors
     public User() {
@@ -100,6 +107,21 @@ public abstract class User implements UserDetails {
         this.createdAt = LocalDateTime.now();
     }
 
+    public User(UserDto dto) {
+        this.id = dto.getId();
+        this.role = dto.getRole();
+        this.email = dto.getEmail();
+        this.password = dto.getEmail();
+        this.name = dto.getName();
+        this.surname = dto.getSurname();
+        this.address = dto.getAddress();
+        this.phone = dto.getAddress();
+        this.avatarUrl = dto.getAvatarUrl();
+        this.status = dto.getStatus();
+        this.isActivated = false;
+        this.isBlocked = false;
+        this.createdAt = LocalDateTime.now();
+    }
 
     public Timestamp getLastPasswordResetDate() {
         return lastPasswordResetDate;

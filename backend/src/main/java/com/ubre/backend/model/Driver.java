@@ -28,6 +28,9 @@ public class Driver extends User {
     @OneToMany(mappedBy = "driver", cascade = CascadeType.ALL)
     private List<Review> reviews = new ArrayList<>();
 
+    @OneToMany(mappedBy = "driver", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProfileChange> profileChanges = new ArrayList<>();
+
     private Boolean pendingInactiveStatus = false;
 
     // Constructors

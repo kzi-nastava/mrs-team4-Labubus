@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of, take } from 'rxjs';
 import { UserDto } from '../dtos/user-dto';
 import { UserStatsDto } from '../dtos/user-stats-dto';
 import { VehicleDto } from '../dtos/vehicle-dto';
@@ -12,20 +12,15 @@ export class UserService {
   private readonly http = inject(HttpClient);
   private readonly api = 'http://localhost:8080/api';
 
-  private readonly currentUserSubject = new BehaviorSubject<UserDto>({
-    email: 'mika@mikic.com',
-    name: 'Mika',
-    surname: 'Mikic',
-    avatarUrl: 'default-avatar.jpg',
-    role: Role.ADMIN,
-    id: 2,
-    phone: '1251323523',
-    address: 'Test adress 123',
-  });
+  private readonly currentUserSubject = new BehaviorSubject<UserDto>({ email: '', name: 'Guest', surname: '', avatarUrl: 'default-avatar.jpg', role: Role.GUEST, id: 0, phone: '', address: '' });
   readonly currentUser$ = this.currentUserSubject.asObservable();
 
   private readonly avatarSrcSubject = new BehaviorSubject<string>('default-avatar.jpg');
   readonly avatarSrc$ = this.avatarSrcSubject.asObservable();
+
+  private currentUserVehicleSubject = new BehaviorSubject<VehicleDto>({ id: 0, model: '', type: VehicleType.STANDARD, seats: 0, babyFriendly: false, petFriendly: false, plates: '' });
+  readonly currentUserVehicle$ = this.currentUserVehicleSubject.asObservable();
+
 
   // mock podaci (privremeno)
   private currentUserStats: UserStatsDto = {
@@ -37,16 +32,6 @@ export class UserService {
     moneyEarned: 150,
   };
 
-  private currentUserVehicle: VehicleDto = {
-    id: 1,
-    model: 'Toyota Prius',
-    type: VehicleType.STANDARD,
-    seats: 4,
-    babyFriendly: true,
-    petFriendly: false,
-    plates: 'BG1234AB',
-  };
-
   // --- API ---
   getUserById(userId: number): Observable<UserDto> {
     return this.http.get<UserDto>(`${this.api}/users/${userId}`);
@@ -56,12 +41,25 @@ export class UserService {
     return this.http.get(`${this.api}/users/${userId}/avatar`, { responseType: 'blob' });
   }
 
+  getVehicleByDriver(driverId: number): Observable<VehicleDto> {
+    return this.http.get<VehicleDto>(`${this.api}/vehicles/driver/${driverId}`);
+  }
+
+
+
   // --- actions ---
   setCurrentUserById(id: number) {
-    this.getUserById(id).subscribe({
+    if (id === 0 || id === null) {
+      this.currentUserSubject.next({ id: 0, role: Role.GUEST, name: 'Guest', surname: '', email: '', avatarUrl: 'default-avatar.jpg', phone: '', address: '' });
+      return;
+    }
+    this.getUserById(id).pipe(take(1)).subscribe({
       next: user => {
         this.currentUserSubject.next(user);
-        this.loadAvatar(user.id); // automatski učitaj avatar kad se postavi user
+        this.loadAvatar(user.id); 
+        if (user.role === Role.DRIVER) {
+          this.loadUserVehicle(user.id); 
+        }
       },
       error: err => {
         if (err.status === 404) alert('User not found');
@@ -70,9 +68,18 @@ export class UserService {
   }
 
   loadAvatar(userId: number) {
-    this.getUserAvatar(userId).subscribe({
+    this.getUserAvatar(userId).pipe(take(1)).subscribe({
       next: blob => this.avatarSrcSubject.next(URL.createObjectURL(blob)),
       error: () => this.avatarSrcSubject.next('default-avatar.jpg'),
+    });
+  }
+
+  loadUserVehicle(userId: number) {
+    this.getVehicleByDriver(userId).pipe(take(1)).subscribe({
+      next: vehicle => this.currentUserVehicleSubject.next(vehicle),
+      error: err => {
+        if (err.status === 404) alert('Vehicle not found');
+      },
     });
   }
 
@@ -81,15 +88,15 @@ export class UserService {
     return of({ ...this.currentUserStats, userId });
   }
 
-  getUserVehicle(userId: number): Observable<VehicleDto> {
-    return of(this.currentUserVehicle);
-  }
-
-
-
 
   // GETTER ZA RIDE HISTORY (MOŽE DA SE IZBACI - ne diram ništa sam)
   getCurrentUser(): Observable<UserDto> {
-    return this.currentUser$;
+    return this.currentUser$
+  }
+
+
+  // get current user id
+  getCurrentUserId(): number {
+    return this.currentUserSubject.value.id;
   }
 }

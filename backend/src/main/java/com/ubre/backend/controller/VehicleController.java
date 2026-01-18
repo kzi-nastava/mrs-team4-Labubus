@@ -28,6 +28,7 @@ public class VehicleController {
         return new ResponseEntity<>(vehicle, HttpStatus.CREATED);
     }
 
+    // get a drivers vehicle by veihicle id
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VehicleDto> getVehicleById(@PathVariable Long id) {
         VehicleDto vehicle = vehicleService.getVehicleById(id);

@@ -1,7 +1,9 @@
 package com.ubre.backend.dto;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
@@ -9,14 +11,14 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class RideQueryDto {
     private String sortBy;
     private Boolean ascending;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDateTime date;
 
-    public RideQueryDto() {
-    }
-    public RideQueryDto(Long userId, String sortBy, boolean ascending, LocalDateTime date) {
+    public RideQueryDto(Long userId, String sortBy, Boolean ascending, LocalDateTime date) {
         this.sortBy = sortBy;
         this.ascending = ascending;
         this.date = date;

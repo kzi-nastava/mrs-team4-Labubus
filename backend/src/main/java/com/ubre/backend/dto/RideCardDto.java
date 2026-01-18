@@ -1,6 +1,8 @@
 package com.ubre.backend.dto;
 
+import com.ubre.backend.model.Ride;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -11,6 +13,7 @@ import java.util.Collection;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class RideCardDto {
     private Long id;
     private LocalDateTime startTime;
@@ -22,5 +25,12 @@ public class RideCardDto {
         this.startTime = startTime;
         this.waypoints = waypoints;
         this.favorite = favorite;
+    }
+
+    public RideCardDto(Ride model) {
+        this.id = model.getId();
+        this.startTime = model.getStartTime();
+        this.waypoints = model.getWaypoints().stream().map(WaypointDto::new).toList();
+        this.favorite = model.getFavorite();
     }
 }
