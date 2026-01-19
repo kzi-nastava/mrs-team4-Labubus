@@ -148,12 +148,8 @@ import { RidePlanningStore } from '../../services/ride-planning/ride-planning-st
   }
 
   onCdProceed() {
-    if (this.ridePlanningStore.waypoints.length === 1 || this.ridePlanningStore.waypoints.length === 0) {
-      this.showToast('No destination', 'Please add at least one destination waypoint.');
-      return;
-    }
-
-    // calculate route
+    // close destination card
+    this.ridePlanningStore.closeDest();
     this.ui.rideOptionsOpen = true;
   }
 

@@ -81,7 +81,7 @@ export class RidePlanningStore {
     addFromSuggestion(suggestion: NominatimItem) {
         const wp: WaypointDto = {
             id: Number(suggestion.place_id),
-            label: suggestion.display_name,
+            label: this.geocodingService.toLatin(suggestion.display_name),
             latitude: Number(suggestion.lat),
             longitude: Number(suggestion.lon),
         };
@@ -94,7 +94,7 @@ export class RidePlanningStore {
 
     addFromMapClick(lat: number, lon: number) {
         if (!this.destOpen) return;
-        const id = crypto.randomUUID();
+        const id = Date.now();
         const fallback = `${lat.toFixed(5)}, ${lon.toFixed(5)}`; // fallback is a fallback for the label, if the label is not found
 
         this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: [...this.waypoints, { id: Number(id), label: fallback, latitude: lat, longitude: lon }] });
@@ -116,8 +116,55 @@ export class RidePlanningStore {
         this.recalculateRoute();
     }
 
+    addCurrentLocationAsFirstWaypoint() {
+        if (!navigator.geolocation) {
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const { latitude, longitude } = pos.coords;
+                const id = Date.now();
+                const fallback = `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+
+                // Add as first waypoint
+                const newWaypoint: WaypointDto = {
+                    id: Number(id),
+                    label: fallback,
+                    latitude: latitude,
+                    longitude: longitude,
+                };
+
+                const currentWaypoints = this.waypoints;
+                this.ridePlanningStateSubject$.next({
+                    ...this.ridePlanningStateSubject$.value,
+                    waypoints: [newWaypoint, ...currentWaypoints]
+                });
+
+                // Try to get reverse geocoded label
+                this.geocodingService.reverse(latitude, longitude).pipe(take(1)).subscribe({
+                    next: (label) => {
+                        if (label) {
+                            const currentState = this.ridePlanningStateSubject$.value;
+                            this.ridePlanningStateSubject$.next({
+                                ...currentState,
+                                waypoints: currentState.waypoints.map((w) => (w.id === Number(id) ? { ...w, label: label ?? fallback } : w))
+                            });
+                        }
+                    },
+                    error: () => {},
+                });
+
+                this.recalculateRoute();
+            },
+            (error) => {
+                console.error('Error getting current location:', error);
+            }
+        );
+    }
+
     resetDest() {
-        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: [], suggestions: [], query: '', destOpen: false });
+        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: [], suggestions: [], query: '', destOpen: false, routeInfo: null });
     }
 
     private clearSuggestions() {

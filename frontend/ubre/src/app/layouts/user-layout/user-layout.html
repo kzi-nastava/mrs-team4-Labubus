@@ -1,8 +1,8 @@
 <div class="screen">
   <app-map
     class="map"
-    [waypoints]="ridePlanningStore.waypoints"
-    [routeGeometry]="ridePlanningStore.routeInfo?.geometry ?? null"
+    [waypoints]="(ridePlanningStore.ridePlanningState$ | async)?.waypoints ?? []"
+    [routeGeometry]="(ridePlanningStore.ridePlanningState$ | async)?.routeInfo?.geometry ?? null"
     (mapClick)="ridePlanningStore.addFromMapClick($event.lat, $event.lon)">
   </app-map>
 
@@ -37,6 +37,13 @@
             placeholder="Enter destination">
         </div>
 
+        @if (((ridePlanningStore.ridePlanningState$ | async)?.waypoints?.length ?? 0) === 0) {
+          <button type="button" class="s-item include-location" (click)="ridePlanningStore.addCurrentLocationAsFirstWaypoint()">
+            <img src="location.svg" alt="pin" class="s-ico">
+            <span class="s-text-medium">From my location</span>
+          </button>
+        }
+
         <div class="suggestions">
           @for (s of ridePlanningStore.suggestions; track s.place_id) {
             <button type="button" class="s-item" (click)="ridePlanningStore.addFromSuggestion(s)">
@@ -47,7 +54,7 @@
         </div>
 
         <div class="dest-footer">
-          <app-button (clicked)="ridePlanningStore.closeDest()" width="100%">Proceed</app-button>
+          <app-button (clicked)="onCdProceed()" width="100%">Proceed</app-button>
         </div>
       </div>
     }

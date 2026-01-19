@@ -19,13 +19,13 @@ export class Map implements AfterViewInit, OnChanges {
   private userIcon = L.icon({
     iconUrl: 'location.svg',
     iconSize: [62, 62],
-    iconAnchor: [31, 62],
+    iconAnchor: [31, 56],
   });
 
   private waypointIcon = L.icon({
     iconUrl: 'waypoint.svg',
     iconSize: [62, 62],
-    iconAnchor: [31, 62],
+    iconAnchor: [31, 56],
   });
 
   @Input() waypoints: WaypointDto[] = []; // waypoints to display on the map
@@ -112,15 +112,7 @@ export class Map implements AfterViewInit, OnChanges {
         } else {
           this.userMarker.setLatLng([latitude, longitude]);
         }
-
-        // very questionable, because who says that my starting location is the first waypoint? 
-        // this is important for later, be careful.
-        if (!this.userEmitted) {
-          this.userEmitted = true;
-          this.zone.run(() => this.mapClick.emit({ lat: latitude, lon: longitude }));
-        }
       }
     );
   }
-  
 }

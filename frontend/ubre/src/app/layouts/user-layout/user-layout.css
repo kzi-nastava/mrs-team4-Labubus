@@ -545,6 +545,22 @@
   border-top:1px solid rgba(0,0,0,0.06);
 }
 
+.include-location{
+  padding-top: 20px;
+  border-top: 1px solid var(--color-neutral-light-gray);
+  border-bottom: 1px solid transparent;
+}
+
+.include-location-text{
+  font-family:var(--font-family);
+  font-size:var(--font-size-regular);
+  color:var(--color-neutral-dark-gray);
+}
+
+.include-location-text:hover{
+  color:var(--color-primary-dark);
+}
+
 .s-ico{
   width:20px;
   height:20px;
@@ -554,6 +570,16 @@
   font-family:var(--font-family);
   font-size:var(--font-size-small);
   color:var(--color-neutral-dark-gray);
+}
+
+.s-text-medium{
+  font-family:var(--font-family);
+  font-size:var(--font-size-regular);
+  color:var(--color-neutral-dark-gray);
+}
+
+.s-text:hover{
+  color:var(--color-primary-dark);
 }
 
 .dest-footer {
