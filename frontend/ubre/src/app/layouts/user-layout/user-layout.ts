@@ -36,6 +36,7 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
 import { ChangePasswordService } from '../../services/change-password-service';
 import { UserStatsService } from '../../services/user-stats-service';
 import { RidePlanningStore } from '../../services/ride-planning/ride-planning-store';
+import { ScheduleTimer } from '../../shared/ui/schedule-timer/schedule-timer';
 
 @Component({
   selector: 'app-user-layout',
@@ -43,7 +44,7 @@ import { RidePlanningStore } from '../../services/ride-planning/ride-planning-st
   imports: [Map,IconButton,SideMenu,Toast,
     Modal,ModalContainer,StatCard,Button,
     Sheet,FormsModule,RideHistory,ProfileChangeCard,
-    AsyncPipe],
+    AsyncPipe,ScheduleTimer],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -128,6 +129,7 @@ import { RidePlanningStore } from '../../services/ride-planning/ride-planning-st
     checkoutModalOpen: false,
     toastOpen: false,
     profileChangesOpen: false,
+    scheduleTimerOpen: false,
   };
 
 
@@ -621,8 +623,20 @@ import { RidePlanningStore } from '../../services/ride-planning/ride-planning-st
 
   onScheduleRide() {
     this.closeRideOptions();
-    // TODO: API call za zakazivanje vožnje
-    this.showToast('Ride scheduled', 'Your ride has been scheduled successfully.');
+    this.ui.scheduleTimerOpen = true;
+  }
+
+  onScheduleTimerBack() {
+    this.ui.scheduleTimerOpen = false;
+    this.ui.rideOptionsOpen = true;
+  }
+
+  onScheduleTimerCheckout(timeData: { hours: number; minutes: number; isAM: boolean }) {
+    this.ui.scheduleTimerOpen = false;
+    // TODO: API call za zakazivanje vožnje sa vremenom
+    const hour12 = timeData.isAM ? timeData.hours : (timeData.hours === 12 ? 12 : timeData.hours + 12);
+    const timeString = `${timeData.hours.toString().padStart(2, '0')}:${timeData.minutes.toString().padStart(2, '0')} ${timeData.isAM ? 'AM' : 'PM'}`;
+    this.showToast('Ride scheduled', `Your ride has been scheduled for ${timeString}.`);
   }
 
   onCheckout() {

@@ -126,6 +126,15 @@
 
 
 
+    <!-- SCHEDULE TIMER -->
+    @if (ui.scheduleTimerOpen) {
+      <app-schedule-timer 
+        class="schedule-timer"
+        (back)="onScheduleTimerBack()"
+        (checkout)="onScheduleTimerCheckout($event)">
+      </app-schedule-timer>
+    }
+
     <!-- MAIN OVERLAY CONTENT -->
 
     @if (ui.cdModalOpen) {

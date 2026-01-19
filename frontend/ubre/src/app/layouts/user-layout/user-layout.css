@@ -42,6 +42,15 @@
   box-shadow: var(--drop-shadow);
 }
 
+:host .schedule-timer {
+  bottom: 16px;
+  left: 16px;
+  position: fixed;
+  z-index: 2100;
+  pointer-events: auto;
+  animation: slideUp 0.3s ease forwards;
+}
+
 @keyframes slideUp {
   from {
     transform: translateY(100%);
