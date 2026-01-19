@@ -614,7 +614,7 @@ import { RideOptions } from '../../shared/ui/ride-options/ride-options';
     this.ui.scheduleTimerOpen = true;
   }
 
-  onRideOptionsProceed(options: { rideType: 'Standard' | 'Luxury' | 'Van'; babyFriendly: boolean; petFriendly: boolean }) {
+  onRideOptionsProceed(options: { rideType: VehicleType; babyFriendly: boolean; petFriendly: boolean }) {
     // Store ride options for later use
     this.closeRideOptions();
     this.previousScreenBeforeInvite = 'ride-options';

@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
+import { VehicleType } from '../../../enums/vehicle-type';
 
 @Component({
   selector: 'app-ride-options',
@@ -10,16 +11,18 @@ import { Component, EventEmitter, Output } from '@angular/core';
 export class RideOptions {
 
   rideOptions = {
-    rideType: 'Standard' as 'Standard' | 'Luxury' | 'Van',
+    rideType: VehicleType.STANDARD,
     babyFriendly: false,
     petFriendly: false,
   };
 
+  readonly VehicleType = VehicleType;
+
   @Output() back = new EventEmitter<void>();
   @Output() scheduleRide = new EventEmitter<void>();
-  @Output() proceed = new EventEmitter<{ rideType: 'Standard' | 'Luxury' | 'Van'; babyFriendly: boolean; petFriendly: boolean }>();
+  @Output() proceed = new EventEmitter<{ rideType: VehicleType; babyFriendly: boolean; petFriendly: boolean }>();
 
-  setRideType(type: 'Standard' | 'Luxury' | 'Van') {
+  setRideType(type: VehicleType) {
     this.rideOptions.rideType = type;
   }
 
