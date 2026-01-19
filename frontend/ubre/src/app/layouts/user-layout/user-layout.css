@@ -51,6 +51,14 @@
   animation: slideUp 0.3s ease forwards;
 }
 
+:host .invite-passengers {
+  bottom: 16px;
+  left: 16px;
+  position: fixed;
+  z-index: 2100;
+  pointer-events: auto;
+}
+
 @keyframes slideUp {
   from {
     transform: translateY(100%);
@@ -595,8 +603,20 @@
   padding-top: 16px;
 }
 
-.dest-footer app-button {
+.dest-btn {
+  height: 44px;
+  border-radius: 12px;
+  font-family: var(--font-family);
+  font-size: var(--font-size-regular);
+  cursor: pointer;
   width: 100%;
+  box-sizing: border-box;
+}
+
+.dest-btn-filled {
+  background: var(--color-primary-dark);
+  border: 1px solid var(--color-primary-dark);
+  color: var(--color-surface);
 }
 
 

@@ -37,6 +37,7 @@ import { ChangePasswordService } from '../../services/change-password-service';
 import { UserStatsService } from '../../services/user-stats-service';
 import { RidePlanningStore } from '../../services/ride-planning/ride-planning-store';
 import { ScheduleTimer } from '../../shared/ui/schedule-timer/schedule-timer';
+import { InvitePassengers } from '../../shared/ui/invite-passengers/invite-passengers';
 
 @Component({
   selector: 'app-user-layout',
@@ -44,7 +45,7 @@ import { ScheduleTimer } from '../../shared/ui/schedule-timer/schedule-timer';
   imports: [Map,IconButton,SideMenu,Toast,
     Modal,ModalContainer,StatCard,Button,
     Sheet,FormsModule,RideHistory,ProfileChangeCard,
-    AsyncPipe,ScheduleTimer],
+    AsyncPipe,ScheduleTimer,InvitePassengers],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -130,7 +131,10 @@ import { ScheduleTimer } from '../../shared/ui/schedule-timer/schedule-timer';
     toastOpen: false,
     profileChangesOpen: false,
     scheduleTimerOpen: false,
+    invitePassengersOpen: false,
   };
+
+  private previousScreenBeforeInvite: 'schedule-timer' | 'ride-options' | null = null;
 
 
   
@@ -633,20 +637,36 @@ import { ScheduleTimer } from '../../shared/ui/schedule-timer/schedule-timer';
 
   onScheduleTimerCheckout(timeData: { hours: number; minutes: number; isAM: boolean }) {
     this.ui.scheduleTimerOpen = false;
-    // TODO: API call za zakazivanje vožnje sa vremenom
-    const hour12 = timeData.isAM ? timeData.hours : (timeData.hours === 12 ? 12 : timeData.hours + 12);
-    const timeString = `${timeData.hours.toString().padStart(2, '0')}:${timeData.minutes.toString().padStart(2, '0')} ${timeData.isAM ? 'AM' : 'PM'}`;
-    this.showToast('Ride scheduled', `Your ride has been scheduled for ${timeString}.`);
+    this.previousScreenBeforeInvite = 'schedule-timer';
+    this.ui.invitePassengersOpen = true;
   }
 
   onCheckout() {
     this.closeRideOptions();
-    this.ui.checkoutModalOpen = true;
+    this.previousScreenBeforeInvite = 'ride-options';
+    this.ui.invitePassengersOpen = true;
   }
 
   onCheckoutModalBack() {
     this.ui.checkoutModalOpen = false;
-    this.ui.rideOptionsOpen = true;
+    this.ui.invitePassengersOpen = true;
+  }
+
+  onInvitePassengersBack() {
+    this.ui.invitePassengersOpen = false;
+    // Go back to previous screen - either schedule timer or ride options
+    if (this.previousScreenBeforeInvite === 'schedule-timer') {
+      this.ui.scheduleTimerOpen = true;
+    } else if (this.previousScreenBeforeInvite === 'ride-options') {
+      this.ui.rideOptionsOpen = true;
+    }
+    this.previousScreenBeforeInvite = null;
+  }
+
+  onInvitePassengersProceed(emails: string[]) {
+    this.ui.invitePassengersOpen = false;
+    this.ui.checkoutModalOpen = true;
+    // TODO: Store emails for later use in checkout
   }
 
   onConfirmRide() {

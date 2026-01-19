@@ -54,7 +54,7 @@
         </div>
 
         <div class="dest-footer">
-          <app-button (clicked)="onCdProceed()" width="100%">Proceed</app-button>
+          <button type="button" class="dest-btn dest-btn-filled" (click)="onCdProceed()">Proceed</button>
         </div>
       </div>
     }
@@ -116,7 +116,7 @@
             </button>
 
             <button type="button" class="ro-btn ro-btn-filled" (click)="onCheckout()">
-              Checkout
+              Proceed
             </button>
           </div>
         </div>
@@ -133,6 +133,15 @@
         (back)="onScheduleTimerBack()"
         (checkout)="onScheduleTimerCheckout($event)">
       </app-schedule-timer>
+    }
+
+    <!-- INVITE PASSENGERS -->
+    @if (ui.invitePassengersOpen) {
+      <app-invite-passengers 
+        class="invite-passengers show"
+        (back)="onInvitePassengersBack()"
+        (proceed)="onInvitePassengersProceed($event)">
+      </app-invite-passengers>
     }
 
     <!-- MAIN OVERLAY CONTENT -->

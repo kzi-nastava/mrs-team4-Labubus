@@ -121,6 +121,7 @@ public class RideServiceImpl implements RideService {
 
     }
 
+
     @Override
     public double estimateRidePrice(RideDto rideDto) {
         return 0;
