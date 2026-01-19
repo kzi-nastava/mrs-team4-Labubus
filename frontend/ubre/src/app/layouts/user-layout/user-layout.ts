@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Map } from '../../features/map/map';
+import { Map } from '../../services/ride-planning/map/map';
 import { IconButton } from '../../shared/ui/icon-button/icon-button';
 import { SideMenu } from '../../shared/ui/side-menu/side-menu';
 import { Toast } from '../../shared/ui/toast/toast';
