@@ -22,8 +22,7 @@ import { UserStatsDto } from '../../dtos/user-stats-dto';
 import { VehicleDto } from '../../dtos/vehicle-dto';
 import { Role } from '../../enums/role';
 import { VehicleType } from '../../enums/vehicle-type';
-import { MapService } from '../../services/map-service';
-import { Subscription, forkJoin, take } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { DriverRegistrationService } from '../../services/driver-registration-service';
 import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
@@ -36,6 +35,7 @@ import { WebSocketService } from '../../services/websocket-service';
 import { StatItemDto } from '../../dtos/stat-item-dto';
 import { ChangePasswordService } from '../../services/change-password-service';
 import { UserStatsService } from '../../services/user-stats-service';
+import { RidePlanningStore } from '../../services/ride-planning/ride-planning-store';
 
 @Component({
   selector: 'app-user-layout',
@@ -53,7 +53,7 @@ import { UserStatsService } from '../../services/user-stats-service';
     public userService = inject(UserService);
     private authService = inject(AuthService);
     public driverRegistrationService = inject(DriverRegistrationService);
-    public mapService = inject(MapService);
+    public ridePlanningStore = inject(RidePlanningStore);
     private confetti = inject(ConfettiService);
     public profileChangeService = inject(ProfileChangeService); 
     public accountSettingsService = inject(AccountSettingsService);
@@ -139,20 +139,21 @@ import { UserStatsService } from '../../services/user-stats-service';
   
   
   onDestBack() {
-    this.mapService.resetDest();
+    this.ridePlanningStore.resetDest();
   }
 
   toggleDest() {
-    this.mapService.toggleDest();
-    if (this.mapService.destOpen) this.ui.cdModalOpen = false;
+    this.ridePlanningStore.toggleDestOpen();
+    if (this.ridePlanningStore.destOpen) this.ui.cdModalOpen = false;
   }
 
   onCdProceed() {
-    if (this.mapService.waypoints.length === 0) {
+    if (this.ridePlanningStore.waypoints.length === 1 || this.ridePlanningStore.waypoints.length === 0) {
       this.showToast('No destination', 'Please add at least one destination waypoint.');
       return;
     }
-    this.mapService.closeDest();
+
+    // calculate route
     this.ui.rideOptionsOpen = true;
   }
 
@@ -185,7 +186,7 @@ import { UserStatsService } from '../../services/user-stats-service';
     this.closeChangePassword();
     this.closeVehicleInfo();
     this.closeRegisterDriver();
-    this.mapService.closeDest();
+    this.ridePlanningStore.closeDest();
     this.closeRideHistory();
     this.closeProfileChanges();
   }
@@ -251,7 +252,7 @@ import { UserStatsService } from '../../services/user-stats-service';
 
   onCdModalAction() {
     this.ui.cdModalOpen = false;
-    this.mapService.openDest();
+    this.ridePlanningStore.openDest();
   }
 
   openChat() {
@@ -619,7 +620,7 @@ import { UserStatsService } from '../../services/user-stats-service';
   }
   onRideOptionsBack() {
     this.ui.rideOptionsOpen = false;
-    this.mapService.openDest();
+    this.ridePlanningStore.openDest();
   }
 
   onScheduleRide() {

@@ -12,16 +12,19 @@ import { BehaviorSubject } from "rxjs";
 import { RidePlanningState, NominatimItem } from "./ride-types";
 import { WaypointDto } from "../../dtos/waypoint-dto";
 import { take } from "rxjs";
+import { RoutingService } from "./routing-service";
 
 @Injectable({ providedIn: 'root' })
 export class RidePlanningStore {
     private geocodingService = inject(GeocodingService);
+    private routingService = inject(RoutingService);
     
     private ridePlanningStateSubject$ = new BehaviorSubject<RidePlanningState>({ // this represents from now on the state of the ride planning process
         waypoints: [],  // types come implicitly from the RidePlanningState type
         query: '',
         suggestions: [],
         destOpen: false,
+        routeInfo: null, // null if no route info is available
     });
 
 
@@ -29,14 +32,19 @@ export class RidePlanningStore {
     QUERY_MIN_LENGTH = 3;
 
 
+
     readonly ridePlanningState$ = this.ridePlanningStateSubject$.asObservable();
     private suggestionTimer: any = null; // this is a timer for the suggestions, it is used to debounce the suggestions, it is used to prevent the suggestions from being fetched too often
     private suggestionRequestId = 0; // this is a request id for the suggestions, it is used to prevent the suggestions from being fetched too often
+    private routingRequestId = 0;  // for preventing old routing requests from being executed
+
+
 
     get waypoints() { return this.ridePlanningStateSubject$.value.waypoints; }
     get query() { return this.ridePlanningStateSubject$.value.query; }
     get suggestions() { return this.ridePlanningStateSubject$.value.suggestions; }
     get destOpen() { return this.ridePlanningStateSubject$.value.destOpen; }
+    get routeInfo() { return this.ridePlanningStateSubject$.value.routeInfo; }
 
     openDest() { this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, destOpen: true }); }
     closeDest() { this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, destOpen: false }); }
@@ -80,6 +88,8 @@ export class RidePlanningStore {
         this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: [...this.waypoints, wp] });
         this.clearSuggestions();
         this.setQuery('');
+
+        this.recalculateRoute(); // recalculate the route after adding a waypoint from a suggestion, maybe new route is optimal
     }
 
     addFromMapClick(lat: number, lon: number) {
@@ -97,10 +107,13 @@ export class RidePlanningStore {
             },
             error: () => {},
         });
+
+        this.recalculateRoute();
     }
 
     removeWaypoint(id: number) {
         this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: this.waypoints.filter((w) => w.id !== id) });
+        this.recalculateRoute();
     }
 
     resetDest() {
@@ -112,7 +125,27 @@ export class RidePlanningStore {
     }
 
 
+    // RECALCULATE ROUTE LOGIC
+    private recalculateRoute() {
+        const wps = this.waypoints;
+        if (wps.length < 2) {
+            this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, routeInfo: null });
+            return;
+        }
+
+        const requestId = ++this.routingRequestId;
+
+        this.routingService.route(wps).pipe(take(1)).subscribe({
+            next: (routeInfo) => {
+                if (requestId !== this.routingRequestId) return;
+                this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, routeInfo: routeInfo });
+            },
+            error: () => {
+                if (requestId !== this.routingRequestId) return;
+                this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, routeInfo: null });
+            },
+        });
+    }
 
 
 }
-

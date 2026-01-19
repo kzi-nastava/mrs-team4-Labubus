@@ -1,14 +1,15 @@
 <div class="screen">
   <app-map
     class="map"
-    [waypoints]="mapService.waypoints"
-    (mapClick)="mapService.addFromMapClick($event.lat, $event.lon)">
+    [waypoints]="ridePlanningStore.waypoints"
+    [routeGeometry]="ridePlanningStore.routeInfo?.geometry ?? null"
+    (mapClick)="ridePlanningStore.addFromMapClick($event.lat, $event.lon)">
   </app-map>
 
   <div class="overlay">
 
     <!-- MAP CHOOSE A DESTINATION OVERLAY -->
-    @if (mapService.destOpen) {
+    @if (ridePlanningStore.destOpen) {
       <div class="dest-card show">
         <div class="dest-header">
           <button type="button" class="dest-back" (click)="onDestBack()">
@@ -17,11 +18,11 @@
           <div class="dest-title">Choose a destination</div>
         </div>
 
-        @for (w of mapService.waypoints; track w.id) {
+        @for (w of ridePlanningStore.waypoints; track w.id) {
           <div class="wp-row">
             <img src="waypoint.svg" alt="pin" class="wp-ico">
             <span class="wp-text">{{ w.label }}</span>
-            <button type="button" class="wp-x" (click)="mapService.removeWaypoint(w.id)">
+            <button type="button" class="wp-x" (click)="ridePlanningStore.removeWaypoint(w.id)">
               <img src="cancel_16dp_999999_FILL0_wght400_GRAD0_opsz20.svg" alt="remove waypoint">
             </button>
           </div>
@@ -31,14 +32,14 @@
           <input
             class="wp-input"
             type="text"
-            [(ngModel)]="mapService.query"
-            (ngModelChange)="mapService.setQuery($event)"
+            [(ngModel)]="ridePlanningStore.query"
+            (ngModelChange)="ridePlanningStore.setQuery($event)"
             placeholder="Enter destination">
         </div>
 
         <div class="suggestions">
-          @for (s of mapService.suggestions; track s.place_id) {
-            <button type="button" class="s-item" (click)="mapService.addFromSuggestion(s)">
+          @for (s of ridePlanningStore.suggestions; track s.place_id) {
+            <button type="button" class="s-item" (click)="ridePlanningStore.addFromSuggestion(s)">
               <img src="location.svg" alt="pin" class="s-ico">
               <span class="s-text">{{ s.display_name }}</span>
             </button>
@@ -46,7 +47,7 @@
         </div>
 
         <div class="dest-footer">
-          <app-button (clicked)="onCdProceed()" width="100%">Proceed</app-button>
+          <app-button (clicked)="ridePlanningStore.closeDest()" width="100%">Proceed</app-button>
         </div>
       </div>
     }
