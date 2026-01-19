@@ -2,12 +2,9 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
-
 import { DriverRegistrationDto } from '../dtos/driver-registration-dto';
 import { UserDto } from '../dtos/user-dto';
-import { VehicleDto } from '../dtos/vehicle-dto';
 import { VehicleType } from '../enums/vehicle-type';
-
 import { catchError } from 'rxjs/operators';
 
 type FieldErrors = Partial<Record<

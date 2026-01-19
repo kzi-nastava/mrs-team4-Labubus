@@ -1,10 +1,10 @@
 import { WaypointDto } from "../../dtos/waypoint-dto";
 
 export type NominatimItem = {
-  place_id: string;
-  display_name: string;
-  lat: string;
-  lon: string;
+  id: number;
+  label: string;
+  latitude: string;
+  longitude: number;
 };
 
 export type RidePlanningState = {
