@@ -1,3 +1,10 @@
-// waypointi, query, suggestions, destOpen, route, setQuery, setSuggestions, add/remove waypoint, setroute, reset
-// NO HTTP REQUESTS IN THE STORE AND LEAFLET
-// this represents the state of the ride planning process 
+/*
+    PURPOSE OF THIS STORE IS TO HANDLE THE RIDE PLANNING PROCESS, 
+    I.E. ADDING AND REMOVING WAYPOINTS, SETTING THE QUERY AND SUGGESTIONS, 
+    SETTING THE DESTINATION OPEN, SETTING THE ROUTE, AND RESETING THE STORE.
+
+    NO HTTP REQUESTS IN THE STORE AND LEAFLET.
+
+    BOGDAN - 19.01.2026
+*/
+
