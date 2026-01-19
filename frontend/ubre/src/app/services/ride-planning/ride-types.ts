@@ -15,4 +15,18 @@ export type RidePlanningState = {
   query: string;
   suggestions: NominatimItem[];
   destOpen: boolean;
+  routeInfo: RouteInfo | null;
 };
+
+export type RouteInfo = { 
+  distance: number; 
+  duration: number; 
+  geometry: GeoJSON.LineString; 
+};
+
+export type OsrmRouteResponse = {
+    code: string; // "Ok" if successful, "NoRoute" if no route found, "InvalidQuery" if the query is invalid, "TooBig" if the request is too big
+    routes: Array<RouteInfo>; // array of routes, each route has a distance, duration and geometry
+};
+
+

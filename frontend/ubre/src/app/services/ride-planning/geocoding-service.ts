@@ -6,8 +6,6 @@
     
     NOMINATIM SEARCH, NOMINATIM REVERSE, HTTP CLIENT, SEARCH(QUERY), REVERSE(LAT, LON)...
     NO BEHAVIOUR SUBJECT, STATE AND LEAFLET!
-
-    BOGDAN - 19.01.2026
 */
 
 import { HttpClient } from "@angular/common/http";
