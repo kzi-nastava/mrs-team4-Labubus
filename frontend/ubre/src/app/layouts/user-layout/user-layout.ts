@@ -194,6 +194,7 @@ import { UserStatsService } from '../../services/user-stats-service';
     if (action === 'logout') {
       this.userService.setCurrentUserById(0);     // set current user to guest
       this.authService.logout();
+      this.userService.resetAvatar();
     }
     if (action === 'account-settings') {
       this.openAccountSettings();

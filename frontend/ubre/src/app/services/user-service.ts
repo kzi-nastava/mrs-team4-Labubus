@@ -9,6 +9,7 @@ import { VehicleType } from '../enums/vehicle-type';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
+  
   private readonly http = inject(HttpClient);
   private readonly api = 'http://localhost:8080/api';
 
@@ -98,5 +99,9 @@ export class UserService {
   // get current user id
   getCurrentUserId(): number {
     return this.currentUserSubject.value.id;
+  }
+
+  resetAvatar() {
+    this.avatarSrcSubject.next('default-avatar.jpg');
   }
 }

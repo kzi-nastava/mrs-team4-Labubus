@@ -90,4 +90,60 @@ public class EmailServiceImpl implements EmailService {
         </div>
         """.formatted(activationLink);
     }
+
+    @Override
+    public void sendPasswordResetEmail(String email, String token) {
+        String resetLink = "http://localhost:4200/reset-password?token=" + token;
+        String subject = "Reset your password";
+        String body = buildPasswordResetEmailBody(resetLink);
+
+        MimeMessage message = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name()
+            );
+            helper.setTo(email);
+            helper.setSubject(subject);
+            helper.setText(body, true);
+            helper.setFrom("Ubre <" + fromAddress + ">");
+            mailSender.send(message);
+        } catch (MessagingException ex) {
+            throw new IllegalStateException("Failed to send activation email.", ex);
+        }
+    }
+
+    private String buildPasswordResetEmailBody(String resetLink) {
+        return """
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; max-width:600px; margin:0 auto; background:#ffffff; padding:24px; border-radius:8px;">
+      
+      <h2 style="color:#111827; margin-bottom:12px;">Reset Your Password</h2>
+      
+      <p>
+        We received a request to reset the password for your Ubre account. 
+        Click the button below to choose a new password.
+      </p>
+
+      <div style="text-align:center; margin:24px 0;">
+        <a href="%s"
+           style="background:#2563eb; color:#ffffff; padding:12px 20px; text-decoration:none; border-radius:6px; font-weight:600; display:inline-block;">
+          Reset Password
+        </a>
+      </div>
+
+      <p style="font-size:14px; color:#374151;">
+        For security reasons, this link will expire in 30 minutes. 
+        If you did not request a password reset, please ignore this email or contact support if you have concerns.
+      </p>
+
+      <hr style="border:none; border-top:1px solid #e5e7eb; margin:24px 0;"/>
+
+      <p style="font-size:14px; color:#6b7280;">
+        Thank you,<br/>
+        <strong>Ubre Team</strong>
+      </p>
+    </div>
+    """.formatted(resetLink);
+    }
 }

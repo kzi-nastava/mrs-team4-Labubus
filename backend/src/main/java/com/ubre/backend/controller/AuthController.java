@@ -1,9 +1,6 @@
 package com.ubre.backend.controller;
 
-import com.ubre.backend.dto.LoginDto;
-import com.ubre.backend.dto.UserDto;
-import com.ubre.backend.dto.UserRegistrationDto;
-import com.ubre.backend.dto.UserTokenState;
+import com.ubre.backend.dto.*;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.Driver;
@@ -44,8 +41,6 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
     @Autowired
     private AuthService authService;
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
     
     // login existing user and return sanitized profile information
     @PostMapping("/login")
@@ -85,4 +80,15 @@ public class AuthController {
         return ResponseEntity.ok("Account successfully activated");
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody String email) {
+        authService.createPasswordResetToken(email);
+        return ResponseEntity.ok("If an account exists, a reset link has been sent.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDto dto) {
+        authService.resetPassword(dto);
+        return ResponseEntity.ok("Account successfully activated");
+    }
 }

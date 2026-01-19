@@ -11,6 +11,7 @@ import { UserDto } from '../../dtos/user-dto';
   providedIn: 'root',
 })
 export class AuthService {
+
   private user$ = new BehaviorSubject<string | null>('');
   userState$ = this.user$.asObservable();
 
@@ -60,4 +61,17 @@ export class AuthService {
   register(user: UserRegistrationDto): Observable<UserDto> {
     return this.http.post<UserDto>(this.apiHost + 'api/user/register', user);
   }
+
+  forgotPassword(email: string) {
+    return this.http.post(this.apiHost + "api/auth/forgot-password", email);
+  }
+
+  resetPassword(dto: ResetPasswordDto): Observable<any> {
+  return this.http.post(this.apiHost + "/reset-password", dto, { responseType: 'text' });
+  }
+}
+
+export interface ResetPasswordDto {
+token:string,
+newPassword:string
 }

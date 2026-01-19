@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Button } from '../../../shared/ui/button/button';
 import { Modal } from '../../../shared/ui/modal/modal';
+import { AuthService } from '../auth-service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -12,6 +13,8 @@ import { Modal } from '../../../shared/ui/modal/modal';
 })
 export class ForgotPassword {
   showSuccessModal = false;
+
+  constructor(private authService: AuthService){}
 
   forgotForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -24,7 +27,15 @@ export class ForgotPassword {
 
   onSubmit() {
     if (this.forgotForm.valid) {
-      this.showSuccessModal = true;
+      const email = this.forgotForm.value.email!;
+      this.authService.forgotPassword(email).subscribe({
+      next: (response) => {
+        this.showSuccessModal = true;
+      },
+      error: (err) => {
+        console.error('Error:', err);
+      }
+    });
     } else {
       this.forgotForm.markAllAsTouched();
     }
