@@ -38,6 +38,7 @@ import { UserStatsService } from '../../services/user-stats-service';
 import { RidePlanningStore } from '../../services/ride-planning/ride-planning-store';
 import { ScheduleTimer } from '../../shared/ui/schedule-timer/schedule-timer';
 import { InvitePassengers } from '../../shared/ui/invite-passengers/invite-passengers';
+import { RideOptions } from '../../shared/ui/ride-options/ride-options';
 
 @Component({
   selector: 'app-user-layout',
@@ -45,7 +46,7 @@ import { InvitePassengers } from '../../shared/ui/invite-passengers/invite-passe
   imports: [Map,IconButton,SideMenu,Toast,
     Modal,ModalContainer,StatCard,Button,
     Sheet,FormsModule,RideHistory,ProfileChangeCard,
-    AsyncPipe,ScheduleTimer,InvitePassengers],
+    AsyncPipe,ScheduleTimer,InvitePassengers,RideOptions],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -597,23 +598,6 @@ import { InvitePassengers } from '../../shared/ui/invite-passengers/invite-passe
 
   // RIDE OPTIONS SHEET LOGIC
 
-  rideOptions = {
-    rideType: 'Standard' as 'Standard' | 'Luxury' | 'Van',
-    babyFriendly: false,
-    petFriendly: false,
-  };
-
-  setRideType(type: 'Standard' | 'Luxury' | 'Van') {
-    this.rideOptions.rideType = type;
-  }
-
-  toggleRideBaby() {
-    this.rideOptions.babyFriendly = !this.rideOptions.babyFriendly;
-  }
-  toggleRidePet() {
-    this.rideOptions.petFriendly = !this.rideOptions.petFriendly;
-  }
-
   closeRideOptions() {
     this.ui.rideOptionsOpen = false;
   }
@@ -625,9 +609,16 @@ import { InvitePassengers } from '../../shared/ui/invite-passengers/invite-passe
     this.ridePlanningStore.openDest();
   }
 
-  onScheduleRide() {
+  onRideOptionsScheduleRide() {
     this.closeRideOptions();
     this.ui.scheduleTimerOpen = true;
+  }
+
+  onRideOptionsProceed(options: { rideType: 'Standard' | 'Luxury' | 'Van'; babyFriendly: boolean; petFriendly: boolean }) {
+    // Store ride options for later use
+    this.closeRideOptions();
+    this.previousScreenBeforeInvite = 'ride-options';
+    this.ui.invitePassengersOpen = true;
   }
 
   onScheduleTimerBack() {
@@ -641,11 +632,6 @@ import { InvitePassengers } from '../../shared/ui/invite-passengers/invite-passe
     this.ui.invitePassengersOpen = true;
   }
 
-  onCheckout() {
-    this.closeRideOptions();
-    this.previousScreenBeforeInvite = 'ride-options';
-    this.ui.invitePassengersOpen = true;
-  }
 
   onCheckoutModalBack() {
     this.ui.checkoutModalOpen = false;
