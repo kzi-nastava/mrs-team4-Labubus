@@ -194,17 +194,17 @@ public class RideServiceImpl implements RideService {
         return List.of();
     }
 
-    @Override
-    public RideDto scheduleRide(Long userId, RideDto rideDto) {
-        // provera da li korisnik već ima zakazanu vožnju u to vreme
-        boolean hasScheduledRide = false;
-        if (hasScheduledRide) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already has a scheduled ride at this time");
-        }
-        rideDto.setId((long) (rides.size() + 1));
-        rides.add(rideDto);
-        return rideDto;
-    }
+//    @Override
+//    public RideDto scheduleRide(Long userId, RideDto rideDto) {
+//        // provera da li korisnik već ima zakazanu vožnju u to vreme
+//        boolean hasScheduledRide = false;
+//        if (hasScheduledRide) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already has a scheduled ride at this time");
+//        }
+//        rideDto.setId((long) (rides.size() + 1));
+//        rides.add(rideDto);
+//        return rideDto;
+//    }
     public List<RideCardDto> getRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty())
@@ -272,5 +272,33 @@ public class RideServiceImpl implements RideService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Creator id is required to order a ride");
         }
 
+        Boolean existsDriverWithActiveStatus = driverRepository.existsDriverWithActiveStatus(); // activer or on ride, same thing
+        if (!existsDriverWithActiveStatus) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No available drivers found for the ride");
+        }
+        Boolean areAllDriversOnRideWithPendingRides = driverRepository.areAllDriversOnRideWithPendingRides();
+        if (areAllDriversOnRideWithPendingRides) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "All drivers are currently busy");
+        }
+
+        // at this point, we can create the ride from a active driver or one that is not on ride, and has no pending rides
+        // first try to find active driver
+        Driver assignedDriver = null;
+        List<Driver> activeDrivers = driverRepository.findByStatus(UserStatus.ACTIVE);
+        // eliminate all drivers that have active time in past 24 hours more than 8 hours (that is 8 * 60 = 480 minutes)
+
+        if (!activeDrivers.isEmpty()) {
+            // assign the first active driver found
+            assignedDriver = activeDrivers.get(0); // we should actually calculate driver distance from starting point, but right now i don't have that data (where vehicle waypoints are stored)
+            // TODO: implement distance calculation later
+        } else {
+            // from drivers that are on ride, and has no pending rides, find one that
+        }
+
+
+
+
+
     }
+
 }
