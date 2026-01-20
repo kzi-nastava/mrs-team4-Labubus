@@ -19,7 +19,7 @@ export type RidePlanningState = {
   routeInfo: RouteInfo | null;
   rideOptions: RideOptionsDto;
   scheduledTime: string; // will be in LocalDateTime format "yyyy-MM-dd'T'HH:mm:ss"
-  passengerEmails: string[];
+  passengersEmails: string[];
   price: number | null;
 };
 

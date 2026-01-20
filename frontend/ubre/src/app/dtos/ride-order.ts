@@ -5,7 +5,7 @@ import { WaypointDto } from "./waypoint-dto";
 export class RideOrderDto {
     public id : number;
     public creatorId : number;
-    public passengerEmails : string[];
+    public passengersEmails : string[] = [];
     public waypoints : WaypointDto[];
     public vehicleType : VehicleType;
     public babyFriendly : boolean;
@@ -15,10 +15,10 @@ export class RideOrderDto {
     public requiredTime : number; // the required time of the ride in seconds
     public price : number; // the price of the ride in euros
 
-    constructor(id : number, creatorId : number, passengerEmails : string[], waypoints : WaypointDto[], vehicleType : VehicleType, babyFriendly : boolean, petFriendly : boolean, scheduledTime : string, distance : number, requiredTime : number, price : number) {
+    constructor(id : number, creatorId : number, passengersEmails : string[], waypoints : WaypointDto[], vehicleType : VehicleType, babyFriendly : boolean, petFriendly : boolean, scheduledTime : string, distance : number, requiredTime : number, price : number) {
         this.id = id;
         this.creatorId = creatorId;
-        this.passengerEmails = passengerEmails;
+        this.passengersEmails = passengersEmails;
         this.waypoints = waypoints;
         this.vehicleType = vehicleType;
         this.babyFriendly = babyFriendly;

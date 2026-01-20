@@ -20,7 +20,7 @@ export class RideOptions {
   readonly VehicleType = VehicleType;
 
   @Output() back = new EventEmitter<void>();
-  @Output() scheduleRide = new EventEmitter<void>();
+  @Output() scheduleRide = new EventEmitter<RideOptionsDto>();
   @Output() proceed = new EventEmitter<RideOptionsDto>();
 
   setRideType(type: VehicleType) {
@@ -40,7 +40,7 @@ export class RideOptions {
   }
 
   onScheduleRide() {
-    this.scheduleRide.emit();
+    this.scheduleRide.emit(this.rideOptions);
   }
 
   onProceed() {

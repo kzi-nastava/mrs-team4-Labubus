@@ -12,7 +12,7 @@ import { Sheet } from '../../shared/ui/sheet/sheet';
 import { FormsModule } from '@angular/forms';
 import { ConfettiService } from '../../services/confetti';
 import { inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { RideHistory } from '../../shared/ui/ride-history/ride-history';
 import { OnInit } from '@angular/core';
@@ -643,8 +643,9 @@ import { RideOptionsDto } from '../../dtos/ride-options-dto';
     this.ridePlanningStore.openDest();
   }
 
-  onRideOptionsScheduleRide() {
+  onRideOptionsScheduleRide(options: RideOptionsDto) {
     this.closeRideOptions();
+    this.ridePlanningStore.setRideOptions(options);
     this.ui.scheduleTimerOpen = true;
   }
 
@@ -658,6 +659,7 @@ import { RideOptionsDto } from '../../dtos/ride-options-dto';
   onScheduleTimerBack() {
     this.ui.scheduleTimerOpen = false;
     this.ui.rideOptionsOpen = true;
+    this.ridePlanningStore.clearScheduledTime();
   }
 
   onScheduleTimerCheckout(timeData: { hours: number; minutes: number; isAM: boolean }) {
@@ -695,17 +697,30 @@ import { RideOptionsDto } from '../../dtos/ride-options-dto';
   onInvitePassengersProceed(emails: string[]) {
     this.ui.invitePassengersOpen = false;
     this.ui.checkoutModalOpen = true;
-    this.ridePlanningStore.setPassengerEmails(emails);
+    this.ridePlanningStore.setPassengersEmails(emails);
     this.ridePlanningStore.estimatePrice();
   }
 
   onConfirmRide() {
-    this.showToast('Ride ordered', 'Your ride has been ordered successfully.');
     this.ui.checkoutModalOpen = false;
-
-    // TODO: API call za potvrdu vožnje
-    
+    this.ridePlanningStore.orderRide().subscribe({
+      next: () => {
+        this.showToast('Ride ordered', 'Your ride has been ordered successfully.');
+      },
+      error: (err: HttpErrorResponse) => {
+        let errorMessage = 'Failed to order ride';
+        if (err.error && typeof err.error === 'string') {
+          errorMessage = err.error;
+        } else if (err.error && err.error.message && typeof err.error.message === 'string') {
+          errorMessage = err.error.message;
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+        this.showToast('Error ordering ride', errorMessage);
+      }
+    });
   }
+
 
 
 

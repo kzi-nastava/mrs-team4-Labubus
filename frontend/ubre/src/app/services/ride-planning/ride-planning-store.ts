@@ -8,7 +8,7 @@
 
 import { inject, Injectable } from "@angular/core";
 import { GeocodingService } from "./geocoding-service";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, catchError, Observable, tap, throwError } from "rxjs";
 import { RidePlanningState, NominatimItem } from "./ride-types";
 import { WaypointDto } from "../../dtos/waypoint-dto";
 import { take } from "rxjs";
@@ -18,6 +18,8 @@ import { RideOptionsDto } from "../../dtos/ride-options-dto";
 import { OrderingService } from "./ordering-service";
 import { RideOrderDto } from "../../dtos/ride-order";
 import { UserService } from "../user-service";
+import { RideDto } from "../../dtos/ride-dto";
+import { HttpErrorResponse } from "@angular/common/http";
 
 @Injectable({ providedIn: 'root' })
 export class RidePlanningStore {
@@ -38,7 +40,7 @@ export class RidePlanningStore {
             petFriendly: false,
         },
         scheduledTime: '',
-        passengerEmails: [],
+        passengersEmails: [],
         price: null,
     });
 
@@ -65,7 +67,7 @@ export class RidePlanningStore {
     get routeInfo() { return this.ridePlanningStateSubject$.value.routeInfo; }
     get price() { return this.ridePlanningStateSubject$.value.price; }
     get scheduledTime() { return this.ridePlanningStateSubject$.value.scheduledTime; }
-    get passengerEmails() { return this.ridePlanningStateSubject$.value.passengerEmails; }
+    get passengersEmails() { return this.ridePlanningStateSubject$.value.passengersEmails; }
     get rideOptions() { return this.ridePlanningStateSubject$.value.rideOptions; }
 
     openDest() { this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, destOpen: true }); }
@@ -186,11 +188,12 @@ export class RidePlanningStore {
     }
 
     resetDest() {
-        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: [], suggestions: [], query: '', destOpen: false, routeInfo: null, rideOptions: { vehicleType: VehicleType.STANDARD, babyFriendly: false, petFriendly: false }, scheduledTime: '', passengerEmails: [], price: null });
+        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: [], suggestions: [], query: '', destOpen: false, routeInfo: null, rideOptions: { vehicleType: VehicleType.STANDARD, babyFriendly: false, petFriendly: false }, scheduledTime: '', passengersEmails: [], price: null });
     }
 
     setRideOptions(options: RideOptionsDto) {
-        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, rideOptions: options });
+        // Reset price when ride options change, as price depends on vehicle type
+        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, rideOptions: options, price: null });
     }
 
     setWaypoints(waypoints: WaypointDto[]) {
@@ -214,8 +217,12 @@ export class RidePlanningStore {
         this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, scheduledTime: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(hours)}:${pad(timeData.minutes)}:00` });
     }
 
-    setPassengerEmails(emails: string[]) {
-        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, passengerEmails: emails });
+    clearScheduledTime() {
+        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, scheduledTime: '' });
+    }
+
+    setPassengersEmails(emails: string[]) {
+        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, passengersEmails: emails });
     }
 
     private clearSuggestions() {
@@ -260,12 +267,27 @@ export class RidePlanningStore {
     }
 
 
+
+
+
+    // ============ RIDE ORDERING LOGIC ============
+
+    public orderedRideSubject$ = new BehaviorSubject<RideDto | null>(null);
+    public orderedRide$ = this.orderedRideSubject$.asObservable();
+
+    public getOrderedRide() {
+        return this.orderedRideSubject$.value;
+    }
+    public clearOrderedRide() {
+        this.orderedRideSubject$.next(null);
+    }
+
     // ORDER RIDE LOGIC
-    public orderRide() {
+    public orderRide(): Observable<RideDto> {
         const rideOrderDto: RideOrderDto = {
             id: 0,
             creatorId: this.userService.getCurrentUserId(),
-            passengerEmails: this.passengerEmails,
+            passengersEmails: this.passengersEmails,
             waypoints: this.waypoints,
             vehicleType: this.rideOptions.vehicleType,
             babyFriendly: this.rideOptions.babyFriendly,
@@ -276,14 +298,15 @@ export class RidePlanningStore {
             price: this.price ?? 0,
         };
 
-        // there could be multiple errors that could happen, so we need to handle them
-        // if there is a error, briefly propagate the error to the user layout to show in toast
-
-        
+        return this.orderingService.orderRide(rideOrderDto).pipe(
+            take(1),
+            tap((ride: RideDto) => {
+                this.orderedRideSubject$.next(ride);
+                alert(JSON.stringify(ride));
+            }),
+            catchError((err: HttpErrorResponse) => {
+                return throwError(() => err);
+            })
+        );
     }
-
-
-
-            
-
 }
