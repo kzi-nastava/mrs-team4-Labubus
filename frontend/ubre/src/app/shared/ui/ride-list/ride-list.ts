@@ -11,6 +11,7 @@ import { Role } from '../../../enums/role';
 import { RideQueryDto } from '../../../dtos/ride-query';
 import { VehicleType } from '../../../enums/vehicle-type';
 import { RideStatus } from '../../../enums/ride-status';
+import { UserService } from '../../../services/user-service';
 
 
 @Component({
@@ -37,6 +38,7 @@ export class RideList {
   @Output() onQueryChange = new EventEmitter<RideQueryDto>();
 
   rideService : RideService = inject(RideService);
+  userService : UserService = inject(UserService);
 
   selectedRide = signal<RideDto>({
         id: -1,
@@ -67,7 +69,8 @@ export class RideList {
   query : RideQueryDto = new RideQueryDto(null, "", false, null);
 
   filterDate : Date = new Date();
-  filterDriver : string = "";
+  filterUser : string = "";
+  userList = signal<UserDto[]>([]);
   sortOpen : boolean = false;
   selectedField : string = "";
   ascending : boolean = false;
@@ -113,9 +116,21 @@ export class RideList {
     this.onQueryChange.emit(this.query);
   }
 
-  onInputUser(event : Event) {
-    this.query.userId = new Number((event.target as HTMLInputElement).value).valueOf();
-    this.onQueryChange.emit(this.query)
+  onInputUser(event : Event, id : number) {
+    this.filterUser = (event.target as HTMLElement).innerText
+    this.query.userId = id;
+    this.onQueryChange.emit(this.query);
+    this.userList.set([]);
+  }
+
+  onInputFilter(event : Event) {
+    let filter : string = (event.target as HTMLInputElement).value;
+    this.userService.getUsersByFullName(filter).subscribe((users : UserDto[]) => {
+        if (filter == "")
+          this.userList.set([])
+        else
+          this.userList.set(users)
+    })
   }
 
   onBack() {

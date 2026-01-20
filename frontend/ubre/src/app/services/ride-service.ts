@@ -25,23 +25,18 @@ export class RideService {
   private favorites : BehaviorSubject<RideCardDto[]> = new BehaviorSubject<RideCardDto[]>([]);
   public favorites$ : Observable<RideCardDto[]> = this.favorites.asObservable();
 
-  private currentUser : UserDto = {
-        email: '',
-        name: '',
-        surname: '',
-        avatarUrl: '',
-        role: Role.GUEST,
-        id: 0,
-        phone: "",
-        address: ""
-      };
-
   fetchHistory(query : RideQueryDto, skip : number = 0, count : number = 10) : void {
     const queryParams : HttpParams = this.extractParams(query, skip, count);
-    let userId : number = query.userId ?? this.currentUser.id;
-    console.log(queryParams)
-    this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/history/${userId}`, {params: queryParams}).subscribe((value : RideCardDto[]) => {
-      this.history.next(value);
+    this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
+      let userId : number = query.userId ?? currentUser.id;
+      if (currentUser.role === Role.ADMIN && query.userId === null)
+        this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/history`, {params: queryParams}).subscribe((value : RideCardDto[]) => {
+          this.history.next(value);
+        })
+      else
+        this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/history/${userId}`, {params: queryParams}).subscribe((value : RideCardDto[]) => {
+          this.history.next(value);
+        })
     })
   }
 
@@ -55,8 +50,9 @@ export class RideService {
 
   fetchFavorites(query : RideQueryDto, skip : number = 0, count : number = 10) : void {
     const params : HttpParams = this.extractParams(query, skip, count);
-    let userId : number = this.currentUser.id;
-    this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/${userId}/favorites`, {params})
+    this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
+      this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/${currentUser.id}/favorites`, {params})
+    })
   }
 
   clearFavorites() {
@@ -64,41 +60,43 @@ export class RideService {
   }
 
   addToFavorites(id: number): void {
-    let userId : number = this.currentUser.id;
-    this.http.put<void>(`${this.BASE_URL}rides/33/favorites/${id}`, null).subscribe({
-      next: () => {
-        let updatedHistory = this.history.value
-        updatedHistory = updatedHistory.map((ride : RideCardDto) => {
-          if (ride.id == id)
-            return { ...ride, favorite: true };
-          return ride;
-        })
-        this.history.next(updatedHistory)
-      },
-      error: err => {
-        if (err.status === 404) alert('Ride not found');
-      },
+    this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
+      this.http.put<void>(`${this.BASE_URL}rides/${currentUser.id}/favorites/${id}`, null).subscribe({
+        next: () => {
+          let updatedHistory = this.history.value
+          updatedHistory = updatedHistory.map((ride : RideCardDto) => {
+            if (ride.id == id)
+              return { ...ride, favorite: true };
+            return ride;
+          })
+          this.history.next(updatedHistory)
+        },
+        error: err => {
+          if (err.status === 404) alert('Ride not found');
+        },
+      })
     })
   }
 
   removeFromFavorites(id: number): void {
-    let userId : number = this.currentUser.id;
-    this.http.delete<void>(`${this.BASE_URL}rides/33/favorites/${id}`).subscribe({
-      next: () => {
-        let updatedHistory = this.history.value
-        updatedHistory = updatedHistory.map((ride : RideCardDto) => {
-          if (ride.id == id)
-            return { ...ride, favorite: false };
-          return ride;
-        })
-        this.history.next(updatedHistory)
+    this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
+      this.http.delete<void>(`${this.BASE_URL}rides/${currentUser.id}/favorites/${id}`).subscribe({
+        next: () => {
+          let updatedHistory = this.history.value
+          updatedHistory = updatedHistory.map((ride : RideCardDto) => {
+            if (ride.id == id)
+              return { ...ride, favorite: false };
+            return ride;
+          })
+          this.history.next(updatedHistory)
 
-        let updatedFavorites = this.favorites.value.filter((ride : RideCardDto) => ride.id != id)
-        this.favorites.next(updatedFavorites);
-      },
-      error: err => {
-        if (err.status === 404) alert('Ride not found');
-      },
+          let updatedFavorites = this.favorites.value.filter((ride : RideCardDto) => ride.id != id)
+          this.favorites.next(updatedFavorites);
+        },
+        error: err => {
+          if (err.status === 404) alert('Ride not found');
+        },
+      })
     })
   }
 
@@ -118,11 +116,5 @@ export class RideService {
     params = params.set('count', count)
 
     return params;
-  }
-
-  ngOnInit() {
-    this.userService.getCurrentUser().subscribe((user : UserDto) => {
-      this.currentUser = user;
-    })
   }
 }

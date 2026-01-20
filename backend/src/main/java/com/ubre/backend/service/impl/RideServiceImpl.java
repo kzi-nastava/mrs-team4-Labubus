@@ -203,7 +203,8 @@ public class RideServiceImpl implements RideService {
         rides.add(rideDto);
         return rideDto;
     }
-    public List<RideCardDto> getRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query) {
+
+    public List<RideCardDto> getMyRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
@@ -219,6 +220,14 @@ public class RideServiceImpl implements RideService {
         if (query != null && query.getDate() != null)
             return rideRepository.findByCreatorAndStatusInAndStartTimeBetween(user.get(), List.of(RideStatus.COMPLETED, RideStatus.CANCELLED), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
         return rideRepository.findByCreatorAndStatusIn(user.get(), List.of(RideStatus.COMPLETED, RideStatus.CANCELLED), pageable).stream().map(RideCardDto::new).toList();
+    }
+
+    public List<RideCardDto> getRideHistory(Integer skip, Integer count, RideQueryDto query) {
+        Pageable pageable = parseToPageable(skip, count, query);
+
+        if (query != null && query.getDate() != null)
+            return rideRepository.findByStatusInAndStartTimeBetween(List.of(RideStatus.COMPLETED, RideStatus.CANCELLED), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
+        return rideRepository.findByStatusIn(List.of(RideStatus.COMPLETED, RideStatus.CANCELLED), pageable).stream().map(RideCardDto::new).toList();
     }
 
     @Override

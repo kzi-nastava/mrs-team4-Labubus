@@ -26,8 +26,9 @@ public interface RideService {
     void removeRideFromFavorites(Long userId, Long rideId);
     List<UserDto> getAvailableDrivers(RideDto rideDto);
     RideDto scheduleRide(Long userId, RideDto rideDto);
-    
-    List<RideCardDto> getRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query);
+
+    List<RideCardDto> getRideHistory(Integer skip, Integer count, RideQueryDto query);
+    List<RideCardDto> getMyRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query);
     List<RideCardDto> getScheduledRides(Long driverId, Integer skip, Integer count, RideQueryDto query);
     void trackRide(Long id);
 }

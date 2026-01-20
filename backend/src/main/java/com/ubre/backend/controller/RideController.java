@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -109,8 +110,20 @@ public class RideController {
             @RequestParam(required = false) Integer skip,
             @RequestParam(required = false) Integer count,
             @ModelAttribute RideQueryDto query) {
-        List<RideCardDto> createdRide = rideService.getRideHistory(userId, skip, count, query);
-        return ResponseEntity.status(HttpStatus.OK).body(createdRide);
+        List<RideCardDto> rides = rideService.getMyRideHistory(userId, skip, count, query);
+        return ResponseEntity.status(HttpStatus.OK).body(rides);
+    }
+
+    @GetMapping(
+            value = "/history"
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<RideCardDto>> getRideHistory(
+            @RequestParam(required = false) Integer skip,
+            @RequestParam(required = false) Integer count,
+            @ModelAttribute RideQueryDto query) {
+        List<RideCardDto> rides = rideService.getRideHistory(skip, count, query);
+        return ResponseEntity.status(HttpStatus.OK).body(rides);
     }
 
     @GetMapping(

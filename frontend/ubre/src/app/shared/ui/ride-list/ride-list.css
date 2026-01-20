@@ -72,6 +72,8 @@
   flex-direction: column;
   gap: 8px;
   animation: shrink 0.2s ease forwards;
+  max-height: calc(30px + calc(5 * 21px));
+  overflow-y: scroll;
 }
 
 :host .sort .fieldSelection .field:hover {
