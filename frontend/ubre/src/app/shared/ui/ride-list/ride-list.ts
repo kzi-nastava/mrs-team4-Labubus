@@ -24,18 +24,9 @@ export class RideList {
   @Input() rides : RideCardDto[] | null = [];
   @Input() title : string = "";
   @Input() open : boolean = false;
-  @Input() user : UserDto = {
-      email: '',
-      name: '',
-      surname: '',
-      avatarUrl: '',
-      role: Role.GUEST,
-      id: 0,
-      phone: "",
-      address: ""
-    };
   @Output() onClose = new EventEmitter<void>();
   @Output() onQueryChange = new EventEmitter<RideQueryDto>();
+  @Output() onScrollToBottom = new EventEmitter<RideQueryDto>();
 
   rideService : RideService = inject(RideService);
   userService : UserService = inject(UserService);
@@ -65,11 +56,13 @@ export class RideList {
         createdBy: -1
       },);
   detailsOpen = signal<boolean>(false)
+  user = signal<UserDto>({ email: '', name: 'Guest', surname: '', avatarUrl: '', role: Role.GUEST, id: 0, phone: '', address: '' })
 
   query : RideQueryDto = new RideQueryDto(null, "", false, null);
+  page : number = 0;
 
   filterDate : Date = new Date();
-  filterUser : string = "";
+  filterUser = signal<string>("");
   userList = signal<UserDto[]>([]);
   sortOpen : boolean = false;
   selectedField : string = "";
@@ -117,7 +110,7 @@ export class RideList {
   }
 
   onInputUser(event : Event, id : number) {
-    this.filterUser = (event.target as HTMLElement).innerText
+    this.filterUser.set((event.target as HTMLElement).innerText)
     this.query.userId = id;
     this.onQueryChange.emit(this.query);
     this.userList.set([]);
@@ -126,8 +119,11 @@ export class RideList {
   onInputFilter(event : Event) {
     let filter : string = (event.target as HTMLInputElement).value;
     this.userService.getUsersByFullName(filter).subscribe((users : UserDto[]) => {
-        if (filter == "")
+        if (filter == "") {
           this.userList.set([])
+          this.query.userId = null
+          this.onQueryChange.emit(this.query);
+        }
         else
           this.userList.set(users)
     })
@@ -135,5 +131,17 @@ export class RideList {
 
   onBack() {
     this.onClose.emit();
+  }
+
+  onScroll(event : Event) {
+    let container : HTMLElement = event.target as HTMLElement
+    if (container.offsetHeight + container.scrollTop >= container.scrollHeight - 1)
+      this.onScrollToBottom.emit(this.query)
+  }
+
+  ngOnInit() {
+    this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
+      this.user.set(currentUser)
+    })
   }
 }

@@ -24,28 +24,18 @@ export class RideHistory {
   userService : UserService = inject(UserService)
 
   rides$ : Observable<RideCardDto[]> = of([]);
-  currentUser : UserDto = {
-        email: '',
-        name: '',
-        surname: '',
-        avatarUrl: '',
-        role: Role.GUEST,
-        id: 0,
-        phone: "",
-        address: ""
-      };
 
   onQueryChange(qurey : RideQueryDto) {
     this.rideService.clearHistory();
-    console.log(qurey)
-    this.rideService.fetchHistory(qurey)
+    this.rideService.fetchHistory(qurey, Math.ceil((window.screen.height * 0.7 - 126) / window.devicePixelRatio / 171))
+  }
+
+  onScrollToBottom(qurey : RideQueryDto) {
+    this.rideService.fetchHistory(qurey, Math.ceil((window.screen.height * 0.7 - 126) / window.devicePixelRatio / 171))
   }
 
   ngOnInit() {
     this.rides$ = this.rideService.history$;
-    this.userService.getCurrentUser().subscribe((user : UserDto) => {
-      this.currentUser = user;
-    })
 
     this.onQueryChange(new RideQueryDto(null, "", false, null));
   }

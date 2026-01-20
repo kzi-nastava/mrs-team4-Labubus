@@ -1,4 +1,4 @@
-<app-modal-container class="list" [class.move-up]="open" (backPressed)="onBack()" [title]="title">
+<app-modal-container class="list" [class.move-up]="open" (backPressed)="onBack()" [title]="title" (onScrollContent)="onScroll($event)">
       @for (ride of rides; track ride.id) {
         <app-ride-card [selected]="detailsOpen() && selectedRide().id === ride.id" [ride]="ride" [iconUrl]="ride.favorite ? 'favorite-red.svg' : 'favorite-grey.svg'" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card>
       }
@@ -8,8 +8,8 @@
   <div class="sort">
     <app-modal-container [showTitleBar] = false>
         <input type="datetime-local" placeholder="Date created" (input)="onSelectDate($event)">
-        @if (user.role === 'ADMIN') {
-          <input type="text" placeholder="User" (input)="onInputFilter($event)">
+        @if (user().role === 'ADMIN') {
+          <input type="text" placeholder="User" [value]="filterUser()" (input)="onInputFilter($event)">
           @if (userList().length > 1) {
           <div class="fieldSelection">
               @for (user of userList(); track user.id) {
@@ -38,6 +38,6 @@
     </app-modal-container>
   </div>
   @if (detailsOpen()) {
-    <app-ride-details class="details" [ride]="selectedRide()" [user]="user"></app-ride-details>
+    <app-ride-details class="details" [ride]="selectedRide()" [user]="user()"></app-ride-details>
   }
 </div>
