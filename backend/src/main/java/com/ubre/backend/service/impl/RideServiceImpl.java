@@ -257,4 +257,20 @@ public class RideServiceImpl implements RideService {
 
         return pageable;
     };
+
+
+    // most complex method
+    // TODO: make changes later if necessary
+    @Override
+    public RideDto orderRide(RideOrderDto rideDto) {
+        // if there are no waypoints throw error
+        if (rideDto.getWaypoints() == null || rideDto.getWaypoints().size() == 1 || rideDto.getWaypoints().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one waypoint is required to order a ride");
+        }
+        // if creator id is null or zero throw error
+        if (rideDto.getCreatorId() == null || rideDto.getCreatorId() == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Creator id is required to order a ride");
+        }
+
+    }
 }

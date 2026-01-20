@@ -3,6 +3,8 @@ import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable, of } from "rxjs";
 import { VehicleType } from "../../enums/vehicle-type";
+import { RideOrderDto } from "../../dtos/ride-order";
+import { RideDto } from "../../dtos/ride-dto";
 
 @Injectable({ providedIn: 'root' })
 export class OrderingService {
@@ -13,5 +15,9 @@ export class OrderingService {
     estimatePrice(distance: number, vehicleType: VehicleType): Observable<number> {
         const num : number = vehicleType === VehicleType.STANDARD ? 0 : vehicleType === VehicleType.VAN ? 1 : 2;
         return this.http.post<number>(`${this.api}/rides/price-estimate`, { distance, vehicleType: num });
+    }
+
+    orderRide(rideOrderDto: RideOrderDto): Observable<RideDto> {
+        return this.http.post<RideDto>(`${this.api}/rides/order`, rideOrderDto);
     }
 }

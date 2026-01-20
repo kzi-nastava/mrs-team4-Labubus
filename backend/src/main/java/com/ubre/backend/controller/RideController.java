@@ -68,17 +68,17 @@ public class RideController {
     }
 
     // kreiranje voznje
-    @PostMapping(
-            value = "/{userId}",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<RideDto> createRide(
-            @PathVariable Long userId,
-            @RequestBody RideDto rideDto) {
-        RideDto createdRide = rideService.createRide(userId, rideDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdRide);
-    }
+//    @PostMapping(
+//            value = "/{userId}",
+//            consumes = MediaType.APPLICATION_JSON_VALUE,
+//            produces = MediaType.APPLICATION_JSON_VALUE
+//    )
+//    public ResponseEntity<RideDto> createRide(
+//            @PathVariable Long userId,
+//            @RequestBody RideDto rideDto) {
+//        RideDto createdRide = rideService.createRide(userId, rideDto);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(createdRide);
+//    }
 
     // check wether there are drivers available for a ride
     @GetMapping(
@@ -282,5 +282,20 @@ public class RideController {
         // rounding to 2 decimal places
         price = Math.round(price * 100.0) / 100.0;
         return ResponseEntity.status(HttpStatus.OK).body(price);
+    }
+
+
+
+
+    // order a ride endpoint, should be protected later by hasRole('USER') or similar, for now ignore
+    // TODO: protect this endpoint later
+    @PostMapping(
+            value = "/order",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<RideDto> orderRide(@RequestBody RideOrderDto rideOrder) {
+        RideDto orederedRide = rideService.orderRide(rideOrder);
+        return ResponseEntity.status(HttpStatus.CREATED).body(orederedRide);
     }
 }

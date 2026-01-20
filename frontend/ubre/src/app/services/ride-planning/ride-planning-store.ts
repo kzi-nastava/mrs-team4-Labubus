@@ -276,8 +276,10 @@ export class RidePlanningStore {
             price: this.price ?? 0,
         };
 
-        // 
+        // there could be multiple errors that could happen, so we need to handle them
+        // if there is a error, briefly propagate the error to the user layout to show in toast
 
+        
 
 
 
