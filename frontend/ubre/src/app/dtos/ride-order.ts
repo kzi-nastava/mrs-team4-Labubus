@@ -10,11 +10,12 @@ export class RideOrderDto {
     public vehicleType : VehicleType;
     public babyFriendly : boolean;
     public petFriendly : boolean;
-    public scheduledTime : Date; // null if not scheduled
+    public scheduledTime : string; // null if not scheduled
     public distance : number; // the distance of the ride in meters
     public requiredTime : number; // the required time of the ride in seconds
+    public price : number; // the price of the ride in euros
 
-    constructor(id : number, creatorId : number, passengerEmails : string[], waypoints : WaypointDto[], vehicleType : VehicleType, babyFriendly : boolean, petFriendly : boolean, scheduledTime : Date, distance : number, requiredTime : number) {
+    constructor(id : number, creatorId : number, passengerEmails : string[], waypoints : WaypointDto[], vehicleType : VehicleType, babyFriendly : boolean, petFriendly : boolean, scheduledTime : string, distance : number, requiredTime : number, price : number) {
         this.id = id;
         this.creatorId = creatorId;
         this.passengerEmails = passengerEmails;
@@ -25,6 +26,7 @@ export class RideOrderDto {
         this.scheduledTime = scheduledTime;
         this.distance = distance;
         this.requiredTime = requiredTime;
+        this.price = price;
     }
 }
 

@@ -261,11 +261,11 @@ public class RideController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Double> estimateRidePrice(@RequestBody Map<String, Double> options) {
-        Double standard = 5.0; // base fare for standard vehicle (in euros)
+    public ResponseEntity<Double> estimatePrice(@RequestBody Map<String, Double> options) {
+        Double standard = 5.0; // base fare for standard vehicle (in dollars)
         Double van = 8.0; // base fare for van vehicle
         Double luxury = 20.0; // base fare for luxury vehicle
-        Double perKm = 1.2; // per kilometer rate (in euros)
+        Double perKm = 1.2; // per kilometer rate (in dollars)
 
         Double dist = options.get("distance"); // in meters
         Double vehicleType = options.get("vehicleType"); // 0 - standard, 1 - van, 2 - luxury
@@ -279,6 +279,8 @@ public class RideController {
             baseFare = luxury;
         }
         double price = baseFare + (perKm * (dist / 1000));
+        // rounding to 2 decimal places
+        price = Math.round(price * 100.0) / 100.0;
         return ResponseEntity.status(HttpStatus.OK).body(price);
     }
 }

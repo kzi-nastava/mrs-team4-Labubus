@@ -135,7 +135,7 @@
     <!-- CHECKOUT MODAL -->
     @if (ui.checkoutModalOpen) {
       <app-modal-container class="checkout-modal" title="Checkout" [showTitleBar]="true" (backPressed)="onCheckoutModalBack()">
-        <app-stat-card value="$12.50" label="Estimated price" variant="dark"></app-stat-card>
+        <app-stat-card [value]="'$' + (ridePlanningStore.ridePlanningState$ | async)?.price" label="Estimated price" variant="dark"></app-stat-card> <!-- in euro -->
         <app-button width="290px" (click)="onConfirmRide()">Confirm ride</app-button>
       </app-modal-container>
     }

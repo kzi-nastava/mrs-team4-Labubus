@@ -695,13 +695,16 @@ import { RideOptionsDto } from '../../dtos/ride-options-dto';
   onInvitePassengersProceed(emails: string[]) {
     this.ui.invitePassengersOpen = false;
     this.ui.checkoutModalOpen = true;
-    // TODO: Store emails for later use in checkout
+    this.ridePlanningStore.setPassengerEmails(emails);
+    this.ridePlanningStore.estimatePrice();
   }
 
   onConfirmRide() {
-    // TODO: API call za potvrdu vožnje
+    this.showToast('Ride ordered', 'Your ride has been ordered successfully.');
     this.ui.checkoutModalOpen = false;
-    this.showToast('Ride confirmed', 'Your ride has been confirmed successfully.');
+
+    // TODO: API call za potvrdu vožnje
+    
   }
 
 
