@@ -1,6 +1,7 @@
 package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.*;
+import com.ubre.backend.enums.VehicleType;
 import com.ubre.backend.service.RideService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/rides")
@@ -135,22 +137,6 @@ public class RideController {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    // guest or registered user can estimate ride details based on provided waypoints and options
-    @PostMapping(
-            value = "/estimate",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<RideEstimationsDto> estimateRide(@RequestBody RideDto rideDto) {
-        double estimatedPrice = rideService.estimateRidePrice(rideDto);
-        RideEstimationsDto estimationsDto = new RideEstimationsDto(
-                new ArrayList<>(List.of(rideDto.getWaypoints())),
-                estimatedPrice,
-                15
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(estimationsDto);
-    }
-
     // cancel an already scheduled ride with optional reason
     @PutMapping(
             value = "/{id}/cancel",
@@ -269,13 +255,30 @@ public class RideController {
 //        }
 //    }
 //
-//    @PostMapping(value = "/estimate", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<Double> estimatePrice(@RequestBody CreateRideDTO createRideDTO) {
-//        try {
-//            double price = rideService.estimateRidePrice(createRideDTO);
-//            return new ResponseEntity<>(price, HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//        }
-//    }
+
+    // TODO: implement price fetching from database later
+    @PostMapping(value = "/price-estimate",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Double> estimateRidePrice(@RequestBody Map<String, Double> options) {
+        Double standard = 5.0; // base fare for standard vehicle (in euros)
+        Double van = 8.0; // base fare for van vehicle
+        Double luxury = 20.0; // base fare for luxury vehicle
+        Double perKm = 1.2; // per kilometer rate (in euros)
+
+        Double dist = options.get("distance"); // in meters
+        Double vehicleType = options.get("vehicleType"); // 0 - standard, 1 - van, 2 - luxury
+
+        double baseFare;
+        if (vehicleType == 0) {
+            baseFare = standard;
+        } else if (vehicleType == 1) {
+            baseFare = van;
+        } else {
+            baseFare = luxury;
+        }
+        double price = baseFare + (perKm * (dist / 1000));
+        return ResponseEntity.status(HttpStatus.OK).body(price);
+    }
 }

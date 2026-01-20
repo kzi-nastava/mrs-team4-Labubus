@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { VehicleType } from '../../../enums/vehicle-type';
+import { RideOptionsDto } from '../../../dtos/ride-options-dto';
 
 @Component({
   selector: 'app-ride-options',
@@ -10,8 +11,8 @@ import { VehicleType } from '../../../enums/vehicle-type';
 })
 export class RideOptions {
 
-  rideOptions = {
-    rideType: VehicleType.STANDARD,
+  rideOptions : RideOptionsDto = {
+    vehicleType: VehicleType.STANDARD,
     babyFriendly: false,
     petFriendly: false,
   };
@@ -20,10 +21,10 @@ export class RideOptions {
 
   @Output() back = new EventEmitter<void>();
   @Output() scheduleRide = new EventEmitter<void>();
-  @Output() proceed = new EventEmitter<{ rideType: VehicleType; babyFriendly: boolean; petFriendly: boolean }>();
+  @Output() proceed = new EventEmitter<RideOptionsDto>();
 
   setRideType(type: VehicleType) {
-    this.rideOptions.rideType = type;
+    this.rideOptions.vehicleType = type;
   }
 
   toggleRideBaby() {
@@ -43,10 +44,6 @@ export class RideOptions {
   }
 
   onProceed() {
-    this.proceed.emit({
-      rideType: this.rideOptions.rideType,
-      babyFriendly: this.rideOptions.babyFriendly,
-      petFriendly: this.rideOptions.petFriendly,
-    });
+    this.proceed.emit(this.rideOptions);
   }
 }

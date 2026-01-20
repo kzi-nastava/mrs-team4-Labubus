@@ -9,19 +9,19 @@
 
     <div class="rd-pills">
       <button type="button" class="rd-pill"
-              [class.active]="rideOptions.rideType === VehicleType.STANDARD"
+              [class.active]="rideOptions.vehicleType === VehicleType.STANDARD"
               (click)="setRideType(VehicleType.STANDARD)">
         Standard
       </button>
 
       <button type="button" class="rd-pill"
-              [class.active]="rideOptions.rideType === VehicleType.LUXURY"
+              [class.active]="rideOptions.vehicleType === VehicleType.LUXURY"
               (click)="setRideType(VehicleType.LUXURY)">
         Luxury
       </button>
 
       <button type="button" class="rd-pill"
-              [class.active]="rideOptions.rideType === VehicleType.VAN"
+              [class.active]="rideOptions.vehicleType === VehicleType.VAN"
               (click)="setRideType(VehicleType.VAN)">
         Van
       </button>

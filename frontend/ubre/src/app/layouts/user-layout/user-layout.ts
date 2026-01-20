@@ -668,10 +668,18 @@ import { RideOptionsDto } from '../../dtos/ride-options-dto';
   }
 
 
+
+
+
   onCheckoutModalBack() {
     this.ui.checkoutModalOpen = false;
     this.ui.invitePassengersOpen = true;
   }
+
+
+
+
+
 
   onInvitePassengersBack() {
     this.ui.invitePassengersOpen = false;
