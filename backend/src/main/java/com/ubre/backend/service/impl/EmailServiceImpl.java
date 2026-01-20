@@ -90,13 +90,39 @@ public class EmailServiceImpl implements EmailService {
         </div>
         """.formatted(activationLink);
     }
+  
+   @Override
+   public void sendPassengerActivationEmail(String recipientEmail, String activationToken) {
+
+        String activationLink = "http://localhost:8080/api/auth/activate?token=" + activationToken;
+        String subject = "Activate your Ubre account";
+        String body = buildPassengerActivationEmailBody(activationLink);
+     
+        MimeMessage message = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name()
+            );
+            helper.setTo(recipientEmail);
+            helper.setSubject(subject);
+            helper.setText(body, true);
+            helper.setFrom("Ubre <" + fromAddress + ">");
+            mailSender.send(message);
+        } catch (MessagingException ex) {
+            throw new IllegalStateException("Failed to send activation email.", ex);
+        }
+   }
+
+
 
     @Override
     public void sendPasswordResetEmail(String email, String token) {
         String resetLink = "http://localhost:4200/reset-password?token=" + token;
         String subject = "Reset your password";
         String body = buildPasswordResetEmailBody(resetLink);
-
+   
         MimeMessage message = mailSender.createMimeMessage();
         try {
             MimeMessageHelper helper = new MimeMessageHelper(
@@ -145,5 +171,38 @@ public class EmailServiceImpl implements EmailService {
       </p>
     </div>
     """.formatted(resetLink);
+    }
+     
+    private String buildPassengerActivationEmailBody(String activationLink) {
+        return """
+                <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; max-width:600px; margin:0 auto; background:#ffffff; padding:24px; border-radius:8px;">
+                  
+                  <h2 style="color:#111827; margin-bottom:12px;">Welcome to Ubre!</h2>
+                  
+                  <p>
+                    Thank you for joining <strong>Ubre</strong>! To start booking rides,
+                    please confirm your email address by clicking the button below.
+                  </p>
+
+                  <div style="text-align:center; margin:24px 0;">
+                    <a href="%s"
+                       style="background:#2563eb; color:#ffffff; padding:12px 20px; text-decoration:none; border-radius:6px; font-weight:600; display:inline-block;">
+                      Activate Account
+                    </a>
+                  </div>
+
+                  <p style="font-size:14px; color:#374151;">
+                    This link can be used only once and is valid for 24 hours.
+                    If you did not request this account, you can safely ignore this email.
+                  </p>
+
+                  <hr style="border:none; border-top:1px solid #e5e7eb; margin:24px 0;"/>
+
+                  <p style="font-size:14px; color:#6b7280;">
+                    Thank you,<br/>
+                    <strong>Ubre Team</strong>
+                  </p>
+                </div>
+                """.formatted(activationLink);
     }
 }

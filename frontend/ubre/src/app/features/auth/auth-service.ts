@@ -59,7 +59,7 @@ export class AuthService {
   }
 
   register(user: UserRegistrationDto): Observable<UserDto> {
-    return this.http.post<UserDto>(this.apiHost + 'api/user/register', user);
+    return this.http.post<UserDto>(this.apiHost + 'api/users/register', user);
   }
 
   forgotPassword(email: string) {

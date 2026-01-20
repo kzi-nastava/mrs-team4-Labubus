@@ -6,6 +6,7 @@ import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.*;
 import com.ubre.backend.repository.ActivationTokenRepository;
 import com.ubre.backend.repository.UserRepository;
+import com.ubre.backend.service.EmailService;
 import com.ubre.backend.repository.UserStatusRecordRepository;
 import com.ubre.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -110,9 +114,7 @@ public class UserServiceImpl implements UserService {
         user.setAddress(dto.getAddress());
         user.setCreatedAt(LocalDateTime.now());
         user.setIsBlocked(false);
-        //user.setRole(Role.REGISTERED_USER);
-        // activate endpoint
-        user.setIsActivated(true);
+        user.setIsActivated(false);
         User savedUser = userRepository.save(user);
 
 
@@ -124,8 +126,7 @@ public class UserServiceImpl implements UserService {
 
         tokenRepository.save(token);
 
-        // email service for sending the token
-
+        emailService.sendPassengerActivationEmail(savedUser.getEmail(), token.getToken());
         return new UserDto(savedUser);
     }
 
