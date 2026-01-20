@@ -30,7 +30,7 @@ public class Ride {
     private LocalDateTime endTime;
 
     @Column(name = "distance")
-    private Double distance; // in kilometers
+    private Double distance; // in meters
 
     @Column(name = "price")
     private Double price;

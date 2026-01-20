@@ -102,7 +102,7 @@ export class RidePlanningStore {
 
     addFromSuggestion(suggestion: NominatimItem) {
         const wp: WaypointDto = {
-            id: Number(suggestion.place_id),
+            id: Number(Date.now()), // this is a unique id for the waypoint (we could use the place_id, but it is not consistent - its OSRM database id) 
             label: this.geocodingService.toLatin(suggestion.display_name),
             latitude: Number(suggestion.lat),
             longitude: Number(suggestion.lon),
@@ -117,7 +117,7 @@ export class RidePlanningStore {
     addFromMapClick(lat: number, lon: number) {
         if (!this.destOpen) return;
         const id = Date.now();
-        const fallback = `${lat.toFixed(5)}, ${lon.toFixed(5)}`; // fallback is a fallback for the label, if the label is not found
+        const fallback = `${lat.toFixed(6)}, ${lon.toFixed(6)}`; // fallback is a fallback for the label, if the label is not found
 
         this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: [...this.waypoints, { id: Number(id), label: fallback, latitude: lat, longitude: lon }] });
         
@@ -280,7 +280,7 @@ export class RidePlanningStore {
         // if there is a error, briefly propagate the error to the user layout to show in toast
 
         
-
+    }
 
 
 

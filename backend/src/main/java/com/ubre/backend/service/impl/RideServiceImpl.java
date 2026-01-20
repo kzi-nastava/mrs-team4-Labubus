@@ -7,6 +7,7 @@ import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.Driver;
 import com.ubre.backend.model.Ride;
 import com.ubre.backend.model.User;
+import com.ubre.backend.model.Waypoint;
 import com.ubre.backend.repository.DriverRepository;
 import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.UserRepository;
@@ -262,13 +263,13 @@ public class RideServiceImpl implements RideService {
     // most complex method
     // TODO: make changes later if necessary
     @Override
-    public RideDto orderRide(RideOrderDto rideDto) {
+    public RideDto orderRide(RideOrderDto rideOrderDto) {
         // if there are no waypoints throw error
-        if (rideDto.getWaypoints() == null || rideDto.getWaypoints().size() == 1 || rideDto.getWaypoints().isEmpty()) {
+        if (rideOrderDto.getWaypoints() == null || rideOrderDto.getWaypoints().size() == 1 || rideDto.getWaypoints().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one waypoint is required to order a ride");
         }
         // if creator id is null or zero throw error
-        if (rideDto.getCreatorId() == null || rideDto.getCreatorId() == 0) {
+        if (rideOrderDto.getCreatorId() == null || rideOrderDto.getCreatorId() == 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Creator id is required to order a ride");
         }
 
@@ -285,20 +286,83 @@ public class RideServiceImpl implements RideService {
         // first try to find active driver
         Driver assignedDriver = null;
         List<Driver> activeDrivers = driverRepository.findByStatus(UserStatus.ACTIVE);
-        // eliminate all drivers that have active time in past 24 hours more than 8 hours (that is 8 * 60 = 480 minutes)
+        List<Driver> eligibleDrivers = activeDrivers.stream()
+                .filter(d -> d.getStats() != null && d.getStats().getActivePast24Hours() <= 480 && d.getVehicle() != null // at most 8 hours active in past 24 hours
+                        && d.getVehicle().getType() == rideOrderDto.getVehicleType()
+                        && rideOrderDto.getBabyFriendly() == d.getVehicle().getBabyFriendly() // if baby friendly is required, vehicle must be baby friendly
+                        && rideOrderDto.getPetFriendly() == d.getVehicle().getPetFriendly() // if pet friendly is required, vehicle must be pet friendly
+                ).toList();
 
         if (!activeDrivers.isEmpty()) {
             // assign the first active driver found
             assignedDriver = activeDrivers.get(0); // we should actually calculate driver distance from starting point, but right now i don't have that data (where vehicle waypoints are stored)
             // TODO: implement distance calculation later
         } else {
-            // from drivers that are on ride, and has no pending rides, find one that
+            // from drivers that are on ride, and has no pending rides, find one that is on ride that has closes end time to now
+            List<Driver> onRideDrivers = driverRepository.findByStatus(UserStatus.ON_RIDE);
+           // eliminate all that has a ride that has scheduled time in future
+            List<Ride> pendingRides = rideRepository.findByStatus(RideStatus.ACCEPTED);
+            // for every ride, if driver is in onRideDrivers, remove him from onRideDrivers
+            for (Ride ride : pendingRides) {
+                onRideDrivers.removeIf(d -> d.getId().equals(ride.getDriver().getId()));
+            }
+
+            // now filter elgible by vehicle type and baby/pet friendly
+            eligibleDrivers = onRideDrivers.stream()
+                    .filter(d -> d.getVehicle() != null && d.getVehicle().getType() == rideOrderDto.getVehicleType()
+                            && rideOrderDto.getBabyFriendly() == d.getVehicle().getBabyFriendly()
+                            && rideOrderDto.getPetFriendly() == d.getVehicle().getPetFriendly()
+                            && d.getStats() != null && d.getStats().getActivePast24Hours() <= 480 // at most 8 hours active in past 24 hours
+                    ).toList();
+
+            // TODO: assign by least time to current time from ride end time
+            assignedDriver = eligibleDrivers.get(0); // placeholder
         }
 
+        if (assignedDriver == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable drivers found for the ride");
+        }
 
+        // create ride entity and save to database
+        Ride newRide = new Ride();
+        User creator = userRepository.findById(rideOrderDto.getCreatorId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Creator user not found"));
+        // start time comes from frontend in string format ready for conversion in LocalDateTime
+        newRide.setStartTime(rideOrderDto.getScheduledTime() != null ? LocalDateTime.parse(rideOrderDto.getScheduledTime()) : LocalDateTime.now());
+        // we have required time in seconds, so append on start time (if end time changes in the future, we will update it later)
+        newRide.setEndTime(newRide.getStartTime().plusSeconds(rideOrderDto.getRequiredTime().longValue()));
+        newRide.setCreator(creator);
+        newRide.setDistance(rideOrderDto.getDistance());
+        newRide.setPrice(rideOrderDto.getPrice());
+        newRide.setStatus(RideStatus.PENDING); // initially pending (accepted is sufficient in my opinion)
+        newRide.setDriver(assignedDriver);
 
+        // go through passengers emails and find users
+        List<User> passengers = new ArrayList<>();
+
+        for (String email : rideOrderDto.getPassengersEmails()) {
+            userRepository.findByEmail(email)
+                    .ifPresent(passengers::add);
+        }
+
+        newRide.setPassengers(passengers);
+
+        // go through waypoints and create waypoint entities
+        List<WaypointDto> waypointDtos = rideOrderDto.getWaypoints();
+        List<Waypoint> waypoints = new ArrayList<>();
+        for (WaypointDto waypointDto : waypointDtos) {
+            Waypoint waypoint = new Waypoint();
+            waypoint.setLabel(waypointDto.getLabel());
+            waypoint.setLatitude(waypointDto.getLatitude());
+            waypoint.setLongitude(waypointDto.getLongitude());
+            waypoints.add(waypoint);
+        }
+
+        newRide.setWaypoints(waypoints);
+        rideRepository.save(newRide);
+
+        RideDto createdRideDto = new RideDto();
+        createdRideDto.setId(newRide.getId());
 
 
     }
-
 }
