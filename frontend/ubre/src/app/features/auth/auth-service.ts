@@ -63,11 +63,11 @@ export class AuthService {
   }
 
   forgotPassword(email: string) {
-    return this.http.post(this.apiHost + "api/auth/forgot-password", email);
+    return this.http.post(this.apiHost + "api/auth/forgot-password", email, { responseType: 'text' });
   }
 
   resetPassword(dto: ResetPasswordDto): Observable<any> {
-  return this.http.post(this.apiHost + "/reset-password", dto, { responseType: 'text' });
+  return this.http.post(this.apiHost + "api/auth/reset-password", dto, { responseType: 'text' });
   }
 }
 

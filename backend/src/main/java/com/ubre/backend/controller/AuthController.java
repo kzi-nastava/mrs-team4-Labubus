@@ -89,6 +89,6 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDto dto) {
         authService.resetPassword(dto);
-        return ResponseEntity.ok("Account successfully activated");
+        return ResponseEntity.ok("Password successfully updated.");
     }
 }

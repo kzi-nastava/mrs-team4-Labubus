@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -22,10 +22,17 @@ import { AuthService, ResetPasswordDto } from '../auth-service';
 export class ResetPassword implements OnInit{
   showPassword = false;
   showConfirmPassword = false;
-  showSuccessModal = false;
   token!: string;
 
-  constructor(private route: ActivatedRoute, private router: Router, private authService: AuthService) {}
+  modalConfig = {
+    title: '',
+    message: '',
+    buttonText: 'OK',
+  };
+
+  showModal = false;
+
+  constructor(private route: ActivatedRoute, private router: Router, private authService: AuthService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.token = this.route.snapshot.queryParamMap.get('token') || '';
@@ -62,11 +69,18 @@ export class ResetPassword implements OnInit{
       };
       this.authService.resetPassword(resetDto).subscribe({
         next: (res) => {
-          console.log('Password successfully reset!');
-          this.showSuccessModal = true;
+          this.showSuccess("Your password has been successfully updated.")
         },
         error: (err) => {
-          console.error(err);
+          let errorMessage = 'An unexpected error occurred.';
+    
+          if (err.error && err.error.message) {
+            errorMessage = err.error.message;
+          } else if (typeof err.error === 'string') {
+            errorMessage = err.error;
+          }
+
+          this.showError(errorMessage);
         }
       });
     } else {
@@ -74,6 +88,27 @@ export class ResetPassword implements OnInit{
     }
   }
   onCdModalAction() {
-    this.showSuccessModal = false;
+    this.showModal = false;
+    this.router.navigate(['/login'])
+  }
+  showSuccess(message: string) {
+    this.modalConfig = {
+      title: 'Reset password success',
+      message,
+      buttonText: 'OK',
+    };
+    this.showModal = true;
+    this.cdr.detectChanges();
+
+  }
+  showError(message: string) {
+    this.modalConfig = {
+      title: 'Reset password failed',
+      message,
+      buttonText: 'Close',
+    };
+    this.showModal = true;
+    this.cdr.detectChanges();
+
   }
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Button } from '../../../shared/ui/button/button';
@@ -13,8 +13,10 @@ import { AuthService } from '../auth-service';
 })
 export class ForgotPassword {
   showSuccessModal = false;
+  showErrorModal = false;
+  message = '';
 
-  constructor(private authService: AuthService){}
+  constructor(private authService: AuthService, private cdr: ChangeDetectorRef){}
 
   forgotForm = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -30,10 +32,14 @@ export class ForgotPassword {
       const email = this.forgotForm.value.email!;
       this.authService.forgotPassword(email).subscribe({
       next: (response) => {
+        this.message = response;
         this.showSuccessModal = true;
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error:', err);
+        this.message = "Unexpected error";
+        this.showSuccessModal = true;
+        this.cdr.detectChanges();
       }
     });
     } else {

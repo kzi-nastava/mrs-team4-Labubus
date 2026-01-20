@@ -12,6 +12,7 @@ import com.ubre.backend.repository.PasswordResetTokenRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.AuthService;
 import com.ubre.backend.service.EmailService;
+import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -105,14 +106,16 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void createPasswordResetToken(String email) {
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
 
-            String token = UUID.randomUUID().toString();
-            PasswordResetToken resetToken = new PasswordResetToken();
+            PasswordResetToken resetToken = passwordResetTokenRepository.findByUser(user)
+                        .orElse(new PasswordResetToken());
 
+            String token = UUID.randomUUID().toString();
             resetToken.setToken(token);
             resetToken.setUser(user);
             resetToken.setExpiresAt(LocalDateTime.now().plusMinutes(30));
@@ -124,6 +127,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public void resetPassword(ResetPasswordDto dto) {
         PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(dto.getToken())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid password reset token."));

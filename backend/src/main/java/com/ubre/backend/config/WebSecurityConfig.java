@@ -71,7 +71,7 @@ public class WebSecurityConfig {
             // CORS preflight
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-            .requestMatchers("/api/auth/login", "/api/user/register").permitAll()
+            .requestMatchers("/api/auth/login", "/api/user/register", "/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
             .requestMatchers("/error").permitAll()
             .requestMatchers(
                 "/",
