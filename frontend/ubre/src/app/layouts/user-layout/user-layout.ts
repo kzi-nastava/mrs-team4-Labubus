@@ -39,6 +39,7 @@ import { RidePlanningStore } from '../../services/ride-planning/ride-planning-st
 import { ScheduleTimer } from '../../shared/ui/schedule-timer/schedule-timer';
 import { InvitePassengers } from '../../shared/ui/invite-passengers/invite-passengers';
 import { RideOptions } from '../../shared/ui/ride-options/ride-options';
+import { RideOptionsDto } from '../../dtos/ride-options-dto';
 
 @Component({
   selector: 'app-user-layout',
@@ -596,6 +597,39 @@ import { RideOptions } from '../../shared/ui/ride-options/ride-options';
     this.showRideHistory = false;
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // RIDE OPTIONS SHEET LOGIC
 
   closeRideOptions() {
@@ -614,10 +648,10 @@ import { RideOptions } from '../../shared/ui/ride-options/ride-options';
     this.ui.scheduleTimerOpen = true;
   }
 
-  onRideOptionsProceed(options: { rideType: VehicleType; babyFriendly: boolean; petFriendly: boolean }) {
-    // Store ride options for later use
+  onRideOptionsProceed(options: RideOptionsDto) {
     this.closeRideOptions();
     this.previousScreenBeforeInvite = 'ride-options';
+    this.ridePlanningStore.setRideOptions(options);
     this.ui.invitePassengersOpen = true;
   }
 
@@ -630,6 +664,7 @@ import { RideOptions } from '../../shared/ui/ride-options/ride-options';
     this.ui.scheduleTimerOpen = false;
     this.previousScreenBeforeInvite = 'schedule-timer';
     this.ui.invitePassengersOpen = true;
+    this.ridePlanningStore.setScheduledTime(timeData);
   }
 
 

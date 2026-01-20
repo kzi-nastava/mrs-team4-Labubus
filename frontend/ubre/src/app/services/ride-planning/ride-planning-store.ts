@@ -13,6 +13,8 @@ import { RidePlanningState, NominatimItem } from "./ride-types";
 import { WaypointDto } from "../../dtos/waypoint-dto";
 import { take } from "rxjs";
 import { RoutingService } from "./routing-service";
+import { VehicleType } from "../../enums/vehicle-type";
+import { RideOptionsDto } from "../../dtos/ride-options-dto";
 
 @Injectable({ providedIn: 'root' })
 export class RidePlanningStore {
@@ -25,6 +27,13 @@ export class RidePlanningStore {
         suggestions: [],
         destOpen: false,
         routeInfo: null, // null if no route info is available
+        rideOptions: {
+            vehicleType: VehicleType.STANDARD,
+            babyFriendly: false,
+            petFriendly: false,
+        },
+        scheduledTime: '',
+        passengerEmails: [],
     });
 
 
@@ -59,7 +68,7 @@ export class RidePlanningStore {
         this.onQueryChange();
     }
 
-    // on query change, we need to clear the suggestions and fetch new suggestions
+    // on query change, we need to clear the suggestions and fetch new suggestions  
     private onQueryChange() {
         const q = this.query.trim();
         if (this.suggestionTimer) clearTimeout(this.suggestionTimer);
@@ -164,7 +173,24 @@ export class RidePlanningStore {
     }
 
     resetDest() {
-        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: [], suggestions: [], query: '', destOpen: false, routeInfo: null });
+        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: [], suggestions: [], query: '', destOpen: false, routeInfo: null, rideOptions: { vehicleType: VehicleType.STANDARD, babyFriendly: false, petFriendly: false }, scheduledTime: '', passengerEmails: [] });
+    }
+
+    setRideOptions(options: RideOptionsDto) {
+        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, rideOptions: options });
+    }
+
+    setScheduledTime(timeData: { hours: number; minutes: number; isAM: boolean }) {
+        // now we are receiving time data in 12 hour format, we need to convert it to 24 hour format for the backend
+        let hours = timeData.hours;
+
+        if (!timeData.isAM && hours < 12) hours += 12;
+        if (timeData.isAM && hours === 12) hours = 0;
+
+        const now = new Date();
+        const pad = (num: number) => num.toString().padStart(2, '0');
+
+        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, scheduledTime: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(hours)}:${pad(timeData.minutes)}:00` });
     }
 
     private clearSuggestions() {

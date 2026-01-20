@@ -1,3 +1,4 @@
+import { RideOptionsDto } from "../../dtos/ride-options-dto";
 import { WaypointDto } from "../../dtos/waypoint-dto";
 
 // NOTE: this is the response from the nominatim api, 
@@ -16,6 +17,9 @@ export type RidePlanningState = {
   suggestions: NominatimItem[];
   destOpen: boolean;
   routeInfo: RouteInfo | null;
+  rideOptions: RideOptionsDto;
+  scheduledTime: string; // will be in LocalDateTime format "yyyy-MM-dd'T'HH:mm:ss"
+  passengerEmails: string[];
 };
 
 export type RouteInfo = { 
