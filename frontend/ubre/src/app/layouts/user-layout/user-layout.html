@@ -1,14 +1,15 @@
 <div class="screen">
   <app-map
     class="map"
-    [waypoints]="mapService.waypoints"
-    (mapClick)="mapService.addFromMapClick($event.lat, $event.lon)">
+    [waypoints]="(ridePlanningStore.ridePlanningState$ | async)?.waypoints ?? []"
+    [routeGeometry]="(ridePlanningStore.ridePlanningState$ | async)?.routeInfo?.geometry ?? null"
+    (mapClick)="ridePlanningStore.addFromMapClick($event.lat, $event.lon)">
   </app-map>
 
   <div class="overlay">
 
     <!-- MAP CHOOSE A DESTINATION OVERLAY -->
-    @if (mapService.destOpen) {
+    @if (ridePlanningStore.destOpen) {
       <div class="dest-card show">
         <div class="dest-header">
           <button type="button" class="dest-back" (click)="onDestBack()">
@@ -17,11 +18,11 @@
           <div class="dest-title">Choose a destination</div>
         </div>
 
-        @for (w of mapService.waypoints; track w.id) {
+        @for (w of ridePlanningStore.waypoints; track w.id) {
           <div class="wp-row">
             <img src="waypoint.svg" alt="pin" class="wp-ico">
             <span class="wp-text">{{ w.label }}</span>
-            <button type="button" class="wp-x" (click)="mapService.removeWaypoint(w.id)">
+            <button type="button" class="wp-x" (click)="ridePlanningStore.removeWaypoint(w.id)">
               <img src="cancel_16dp_999999_FILL0_wght400_GRAD0_opsz20.svg" alt="remove waypoint">
             </button>
           </div>
@@ -31,14 +32,21 @@
           <input
             class="wp-input"
             type="text"
-            [(ngModel)]="mapService.query"
-            (ngModelChange)="mapService.setQuery($event)"
+            [(ngModel)]="ridePlanningStore.query"
+            (ngModelChange)="ridePlanningStore.setQuery($event)"
             placeholder="Enter destination">
         </div>
 
+        @if (((ridePlanningStore.ridePlanningState$ | async)?.waypoints?.length ?? 0) === 0) {
+          <button type="button" class="s-item include-location" (click)="ridePlanningStore.addCurrentLocationAsFirstWaypoint()">
+            <img src="location.svg" alt="pin" class="s-ico">
+            <span class="s-text-medium">From my location</span>
+          </button>
+        }
+
         <div class="suggestions">
-          @for (s of mapService.suggestions; track s.place_id) {
-            <button type="button" class="s-item" (click)="mapService.addFromSuggestion(s)">
+          @for (s of ridePlanningStore.suggestions; track s.place_id) {
+            <button type="button" class="s-item" (click)="ridePlanningStore.addFromSuggestion(s)">
               <img src="location.svg" alt="pin" class="s-ico">
               <span class="s-text">{{ s.display_name }}</span>
             </button>
@@ -46,77 +54,38 @@
         </div>
 
         <div class="dest-footer">
-          <app-button (clicked)="onCdProceed()" width="100%">Proceed</app-button>
+          <button type="button" class="dest-btn dest-btn-filled" (click)="onCdProceed()">Proceed</button>
         </div>
       </div>
     }
-
-
 
     <!-- RIDE OPTIONS MODAL -->
     @if (ui.rideOptionsOpen) {
-      <div class="ro-modal show" role="dialog" aria-label="Ride options">
-        <div class="rd-wrap">
-          <div class="ro-header">
-            <button type="button" class="ro-back" (click)="onRideOptionsBack()">
-              <img src="arrow_back_28dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg" alt="back">
-            </button>
-            <div class="ro-title">Ride options</div>
-          </div>
-
-          <div class="rd-pills">
-            <button type="button" class="rd-pill"
-                    [class.active]="rideOptions.rideType === 'Standard'"
-                    (click)="setRideType('Standard')">
-              Standard
-            </button>
-
-            <button type="button" class="rd-pill"
-                    [class.active]="rideOptions.rideType === 'Luxury'"
-                    (click)="setRideType('Luxury')">
-              Luxury
-            </button>
-
-            <button type="button" class="rd-pill"
-                    [class.active]="rideOptions.rideType === 'Van'"
-                    (click)="setRideType('Van')">
-              Van
-            </button>
-          </div>
-
-          <div class="rd-row">
-            <div class="rd-row-label">Baby-friendly</div>
-            <button type="button" class="rd-switch"
-                    [class.on]="rideOptions.babyFriendly"
-                    (click)="toggleRideBaby()">
-              <span class="rd-knob"></span>
-            </button>
-          </div>
-
-          <div class="rd-row">
-            <div class="rd-row-label">Pet-friendly</div>
-            <button type="button" class="rd-switch"
-                    [class.on]="rideOptions.petFriendly"
-                    (click)="toggleRidePet()">
-              <span class="rd-knob"></span>
-            </button>
-          </div>
-
-          <div class="ro-actions">
-            <button type="button" class="ro-btn ro-btn-outline" (click)="onScheduleRide()">
-              Schedule ride
-            </button>
-
-            <button type="button" class="ro-btn ro-btn-filled" (click)="onCheckout()">
-              Checkout
-            </button>
-          </div>
-        </div>
-      </div>
+      <app-ride-options 
+        class="ride-options"
+        (back)="onRideOptionsBack()"
+        (scheduleRide)="onRideOptionsScheduleRide($event)"
+        (proceed)="onRideOptionsProceed($event)">
+      </app-ride-options>
     }
 
+    <!-- SCHEDULE TIMER -->
+    @if (ui.scheduleTimerOpen) {
+      <app-schedule-timer 
+        class="schedule-timer"
+        (back)="onScheduleTimerBack()"
+        (checkout)="onScheduleTimerCheckout($event)">
+      </app-schedule-timer>
+    }
 
-
+    <!-- INVITE PASSENGERS -->
+    @if (ui.invitePassengersOpen) {
+      <app-invite-passengers 
+        class="invite-passengers show"
+        (back)="onInvitePassengersBack()"
+        (proceed)="onInvitePassengersProceed($event)">
+      </app-invite-passengers>
+    }
 
     <!-- MAIN OVERLAY CONTENT -->
 
@@ -166,7 +135,7 @@
     <!-- CHECKOUT MODAL -->
     @if (ui.checkoutModalOpen) {
       <app-modal-container class="checkout-modal" title="Checkout" [showTitleBar]="true" (backPressed)="onCheckoutModalBack()">
-        <app-stat-card value="$12.50" label="Estimated price" variant="dark"></app-stat-card>
+        <app-stat-card [value]="'$' + (ridePlanningStore.ridePlanningState$ | async)?.price" label="Estimated price" variant="dark"></app-stat-card> <!-- in euro -->
         <app-button width="290px" (click)="onConfirmRide()">Confirm ride</app-button>
       </app-modal-container>
     }

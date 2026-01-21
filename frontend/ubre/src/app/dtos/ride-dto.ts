@@ -5,8 +5,8 @@ import { WaypointDto } from "./waypoint-dto";
 
 export class RideDto {
     public id : number;
-    public startTime : Date;
-    public endTime : Date;
+    public startTime : string;
+    public endTime : string;
     public waypoints : WaypointDto[];
     public driver : UserDto;
     public vehicle : VehicleDto;
@@ -17,7 +17,7 @@ export class RideDto {
     public canceledBy : number | null = null;
     public status : RideStatus;
 
-    constructor(id : number, startTime : Date, endTime : Date, waypoints : WaypointDto[], driver : UserDto, vehicle : VehicleDto, passengers : UserDto[], distance : number = 0, price : number, panic : boolean = false, canceledBy : number | null = null, status : RideStatus) {
+    constructor(id : number, startTime : string, endTime : string, waypoints : WaypointDto[], driver : UserDto, vehicle : VehicleDto, passengers : UserDto[], distance : number = 0, price : number, panic : boolean = false, canceledBy : number | null = null, status : RideStatus) {
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;

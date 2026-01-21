@@ -1,0 +1,42 @@
+<div class="schedule-timer-card">
+  <div class="header">
+    <button type="button" class="back-button" (click)="onBack()">
+      <img src="arrow_back_28dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg" alt="back">
+    </button>
+    <div class="title">Schedule ride</div>
+  </div>
+
+  <div class="time-selector-wrapper">
+    <div class="time-selector">
+      <div class="time-box hours" (click)="incrementHours()">
+        {{ displayHours }}
+      </div>
+      <div class="separator">:</div>
+      <div class="time-box minutes" (click)="incrementMinutes()">
+        {{ formatTime(minutes) }}
+      </div>
+      <div class="ampm-selector">
+        <button 
+          type="button" 
+          class="ampm-button am" 
+          [class.active]="isAM"
+          (click)="toggleAMPM()">
+          AM
+        </button>
+        <button 
+          type="button" 
+          class="ampm-button pm" 
+          [class.active]="!isAM"
+          (click)="toggleAMPM()">
+          PM
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <app-button width="100%" (clicked)="onCheckout()">
+      Checkout
+    </app-button>
+  </div>
+</div>

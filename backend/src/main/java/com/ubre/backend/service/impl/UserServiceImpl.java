@@ -279,7 +279,10 @@ public class UserServiceImpl implements UserService {
 
         UserStats stats = user.getStats();
         if (stats == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User stats not found");
+            // that means user has no stats yet, so create empty stats for them
+            stats = new UserStats(user);
+            user.setStats(stats);
+            userRepository.save(user);
         }
 
         UserStatsDto statsDto = new UserStatsDto();

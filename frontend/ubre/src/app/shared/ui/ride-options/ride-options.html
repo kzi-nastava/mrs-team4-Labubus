@@ -1,0 +1,58 @@
+<div class="ro-modal show" role="dialog" aria-label="Ride options">
+  <div class="rd-wrap">
+    <div class="ro-header">
+      <button type="button" class="ro-back" (click)="onBack()">
+        <img src="arrow_back_28dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg" alt="back">
+      </button>
+      <div class="ro-title">Ride options</div>
+    </div>
+
+    <div class="rd-pills">
+      <button type="button" class="rd-pill"
+              [class.active]="rideOptions.vehicleType === VehicleType.STANDARD"
+              (click)="setRideType(VehicleType.STANDARD)">
+        Standard
+      </button>
+
+      <button type="button" class="rd-pill"
+              [class.active]="rideOptions.vehicleType === VehicleType.LUXURY"
+              (click)="setRideType(VehicleType.LUXURY)">
+        Luxury
+      </button>
+
+      <button type="button" class="rd-pill"
+              [class.active]="rideOptions.vehicleType === VehicleType.VAN"
+              (click)="setRideType(VehicleType.VAN)">
+        Van
+      </button>
+    </div>
+
+    <div class="rd-row">
+      <div class="rd-row-label">Baby-friendly</div>
+      <button type="button" class="rd-switch"
+              [class.on]="rideOptions.babyFriendly"
+              (click)="toggleRideBaby()">
+        <span class="rd-knob"></span>
+      </button>
+    </div>
+
+    <div class="rd-row">
+      <div class="rd-row-label">Pet-friendly</div>
+      <button type="button" class="rd-switch"
+              [class.on]="rideOptions.petFriendly"
+              (click)="toggleRidePet()">
+        <span class="rd-knob"></span>
+      </button>
+    </div>
+
+    <div class="ro-actions">
+      <button type="button" class="ro-btn ro-btn-outline" (click)="onScheduleRide()">
+        Schedule ride
+      </button>
+
+      <button type="button" class="ro-btn ro-btn-filled" (click)="onProceed()">
+        Proceed
+      </button>
+    </div>
+  </div>
+</div>

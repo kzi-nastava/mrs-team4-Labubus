@@ -1,0 +1,149 @@
+.invite-passengers-card {
+  width: 360px;
+  background: var(--color-surface);
+  border-radius: var(--border-radius-icons);
+  padding: 14px 18px 18px;
+  box-shadow: var(--drop-shadow);
+  font-family: var(--font-family);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: calc(100vw - 32px);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+.invite-passengers-card.show {
+  animation: slideUp 0.3s ease forwards;
+}
+
+@keyframes slideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 4px;
+  margin-top: 6px;
+  padding-bottom: 6px;
+}
+
+.back-button {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.back-button img {
+  width: var(--icon-width-tiny);
+  height: var(--icon-width-tiny);
+}
+
+.title {
+  font-size: var(--font-size-large);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.content {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.email-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.email-row:first-child {
+  border-top: none;
+}
+
+.email-row.input {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.email-text {
+  flex: 1;
+  font-family: var(--font-family);
+  font-size: var(--font-size-regular);
+  color: var(--color-neutral-dark-gray);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.email-input {
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--font-family);
+  font-size: var(--font-size-regular);
+  color: var(--color-neutral-dark-gray);
+}
+
+.email-input::placeholder {
+  color: var(--color-neutral-dark-gray);
+  opacity: 0.6;
+}
+
+.remove-button,
+.add-button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.remove-button:hover,
+.add-button:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.remove-button img,
+.add-button img {
+  width: 20px;
+  height: 20px;
+}
+
+.footer {
+  width: calc(100% + 36px);
+  margin-left: -18px;
+  margin-right: -18px;
+  margin-bottom: -18px;
+  margin-top: 8px;
+  padding: 0 18px 18px;
+  box-sizing: border-box;
+}
+
+.footer app-button {
+  width: 100%;
+  box-sizing: border-box;
+}
