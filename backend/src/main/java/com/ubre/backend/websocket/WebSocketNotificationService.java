@@ -8,6 +8,7 @@ public class WebSocketNotificationService {
 
     private static final String PROFILE_CHANGE_TOPIC_PREFIX = "/topic/profile-changes/";
     private static final String RIDE_ASSIGNMENT_TOPIC_PREFIX = "/topic/ride-assignments/";
+    private static final String RIDE_REMINDER_TOPIC_PREFIX = "/topic/ride-reminders/";
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -27,5 +28,11 @@ public class WebSocketNotificationService {
     public void sendRideAssigned(Long driverId, RideAssignmentNotification notification) {
         messagingTemplate.convertAndSend(RIDE_ASSIGNMENT_TOPIC_PREFIX + driverId, notification);
     }
+
+    // notitication for ride reminder (user receives this notification at scheduled rate)
+    public void sendRideReminder(Long userId, RideReminderNotification notification) {
+        messagingTemplate.convertAndSend(RIDE_REMINDER_TOPIC_PREFIX + userId, notification);
+    }
+
 
 }

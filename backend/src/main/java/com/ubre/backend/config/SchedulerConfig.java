@@ -8,7 +8,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 @Configuration
 public class SchedulerConfig {
 
-    @Bean
+    @Bean(name = "rideTaskScheduler")
     public TaskScheduler taskScheduler() {
         ThreadPoolTaskScheduler s = new ThreadPoolTaskScheduler();
         s.setPoolSize(4);

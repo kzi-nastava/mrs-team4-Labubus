@@ -5,6 +5,7 @@ import SockJS from 'sockjs-client/dist/sockjs';
 import { AuthService } from '../features/auth/auth-service';
 import { ProfileChangeNotification } from '../notifications/profile-change-notification';
 import { RideAssignmentNotification } from '../notifications/ride-assignment-noitfications';
+import { RideReminderNotification } from '../notifications/ride-reminder-notification';
 
 export type WebSocketConnectionState = 'disconnected' | 'connecting' | 'connected';
 
@@ -121,6 +122,25 @@ export class WebSocketService {
         next: (message) => {
           try {
             const payload = JSON.parse(message.body) as RideAssignmentNotification;
+            this.zone.run(() => subscriber.next(payload));
+          } catch (error) {
+            this.zone.run(() => subscriber.error(error));
+          }
+        },
+        error: (error) => this.zone.run(() => subscriber.error(error)),
+      });
+      return () => subscription.unsubscribe();
+    });
+  }
+
+  rideReminderNotifications(userId: number): Observable<RideReminderNotification> {
+    const topic = `/topic/ride-reminders/${userId}`;
+    return new Observable<RideReminderNotification>((subscriber) => {
+      const topic$ = this.listenToTopic(topic);
+      const subscription = topic$.subscribe({
+        next: (message) => {
+          try {
+            const payload = JSON.parse(message.body) as RideReminderNotification;
             this.zone.run(() => subscriber.next(payload));
           } catch (error) {
             this.zone.run(() => subscriber.error(error));

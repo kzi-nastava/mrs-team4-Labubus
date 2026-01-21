@@ -74,6 +74,7 @@ import { NotificationType } from '../../enums/notification-type';
   private websocketUserId: number | null = null;
   private profileChangeSubscription?: Subscription;
   private rideAssignmentSubscription?: Subscription;
+  private rideReminderSubscription?: Subscription;
 
   ngOnInit() {
     const userId = this.authService.getId();
@@ -126,13 +127,23 @@ import { NotificationType } from '../../enums/notification-type';
           }
         },
       });
+
+    this.rideReminderSubscription = this.webSocketService
+      .rideReminderNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          if (notification.status === NotificationType.RIDE_REMINDER && notification.time) {
+            this.showToast('Ride reminder', 'You have a ride scheduled at ' + notification.time + '.');
+          }
+        },
+      });
   }
 
 
-  
   ngOnDestroy() {
     this.profileChangeSubscription?.unsubscribe();
     this.rideAssignmentSubscription?.unsubscribe();
+    this.rideReminderSubscription?.unsubscribe();
     this.webSocketService.disconnect();
   }
   ui = {

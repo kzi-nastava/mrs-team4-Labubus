@@ -1,36 +1,46 @@
+package com.ubre.backend.service.impl;
+
+import com.ubre.backend.enums.NotificationType;
+import com.ubre.backend.websocket.RideReminderNotification;
 import com.ubre.backend.websocket.WebSocketNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
+
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class RideReminderService {
 
     @Autowired
-    private final ThreadPoolTaskScheduler scheduler;
+    @Qualifier("rideTaskScheduler")
+    private TaskScheduler scheduler;
     @Autowired
-    private final WebSocketNotificationService webSocketNotificationService;
+    private WebSocketNotificationService webSocketNotificationService;
 
-    public void start(long userId, long rideId, Instant startTime) {
-        scheduleNext(userId, rideId, startTime);
+    public void start(long userId, LocalDateTime startTime) {
+        scheduleNext(userId, startTime);
     }
 
-    private void scheduleNext(long userId, long rideId, Instant startTime) {
-        long minutesLeft = Duration.between(Instant.now(), startTime).toMinutes();
+    private void scheduleNext(long userId, LocalDateTime startTime) {
+        long minutesLeft = Duration.between(LocalDateTime.now(), startTime).toMinutes();
 
         if (minutesLeft <= 0) return; // STOP
 
-        // pošalji notifikaciju
-        ws.convertAndSend(
-                "/topic/notifications/" + userId,
-                Map.of("type", "RIDE_REMINDER", "rideId", rideId, "minutesLeft", minutesLeft)
-        );
+        // convert start time in string format HH:mm
+        String startTimeStr = startTime.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm"));
+
+        webSocketNotificationService.sendRideReminder(userId, new RideReminderNotification(
+                NotificationType.RIDE_REMINDER.name(), startTimeStr));
+        System.out.println("Sent ride reminder to user " + userId + " for ride at " + startTimeStr + ". Minutes left: " + minutesLeft);
 
         // odredi sledeći interval
-        long nextDelayMinutes = minutesLeft > 15 ? 15 : 5;
+        long nextDelayMinutes = minutesLeft > 15 ? 15 : 1;
 
         scheduler.schedule(
-                () -> scheduleNext(userId, rideId, startTime),
+                () -> scheduleNext(userId, startTime),
                 Instant.now().plus(Duration.ofMinutes(nextDelayMinutes))
         );
     }

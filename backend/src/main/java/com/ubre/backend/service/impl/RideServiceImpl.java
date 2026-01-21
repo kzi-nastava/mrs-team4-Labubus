@@ -37,6 +37,8 @@ public class RideServiceImpl implements RideService {
     private DriverRepository driverRepository;
     @Autowired
     private WebSocketNotificationService webSocketNotificationService;
+    @Autowired
+    private RideReminderService rideReminderService;
 
     // Mock data for rides
     List<RideDto> rides = new ArrayList<RideDto>();
@@ -387,6 +389,12 @@ public class RideServiceImpl implements RideService {
         webSocketNotificationService.sendRideAssigned(assignedDriver.getId(), new RideAssignmentNotification(
                 NotificationType.RIDE_ASSIGNED.name(),
                 createdRideDto));
+
+        // if ride is scheduled, start a reminder process
+        if (newRide.getStartTime().isAfter(LocalDateTime.now())) {
+            rideReminderService.start(rideOrderDto.getCreatorId(), newRide.getStartTime());
+        }
+
 
         return createdRideDto;
     }
