@@ -24,5 +24,8 @@ public class WebSocketNotificationService {
     }
 
     // notification for drivers for ride assignments
+    public void sendRideAssigned(Long driverId, RideAssignmentNotification notification) {
+        messagingTemplate.convertAndSend(RIDE_ASSIGNMENT_TOPIC_PREFIX + driverId, notification);
+    }
 
 }

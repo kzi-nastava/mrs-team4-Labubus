@@ -1,6 +1,7 @@
 package com.ubre.backend.service.impl;
 
 import com.ubre.backend.dto.*;
+import com.ubre.backend.enums.NotificationType;
 import com.ubre.backend.enums.RideStatus;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
@@ -12,6 +13,9 @@ import com.ubre.backend.repository.DriverRepository;
 import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.RideService;
+import com.ubre.backend.websocket.ProfileChangeNotification;
+import com.ubre.backend.websocket.RideAssignmentNotification;
+import com.ubre.backend.websocket.WebSocketNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +35,8 @@ public class RideServiceImpl implements RideService {
     private UserRepository userRepository;
     @Autowired
     private DriverRepository driverRepository;
+    @Autowired
+    private WebSocketNotificationService webSocketNotificationService;
 
     // Mock data for rides
     List<RideDto> rides = new ArrayList<RideDto>();
@@ -377,6 +383,10 @@ public class RideServiceImpl implements RideService {
         createdRideDto.setPassengers(passengers.stream().map(UserDto::new).toList());
         createdRideDto.setDistance(newRide.getDistance());
         createdRideDto.setPrice(newRide.getPrice());
+
+        webSocketNotificationService.sendRideAssigned(assignedDriver.getId(), new RideAssignmentNotification(
+                NotificationType.RIDE_ASSIGNED.name(),
+                createdRideDto));
 
         return createdRideDto;
     }

@@ -302,7 +302,6 @@ export class RidePlanningStore {
             take(1),
             tap((ride: RideDto) => {
                 this.orderedRideSubject$.next(ride);
-                alert(JSON.stringify(ride));
             }),
             catchError((err: HttpErrorResponse) => {
                 return throwError(() => err);

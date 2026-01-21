@@ -73,6 +73,7 @@ import { NotificationType } from '../../enums/notification-type';
 
   private websocketUserId: number | null = null;
   private profileChangeSubscription?: Subscription;
+  private rideAssignmentSubscription?: Subscription;
 
   ngOnInit() {
     const userId = this.authService.getId();
@@ -110,20 +111,28 @@ import { NotificationType } from '../../enums/notification-type';
           if (notification.status === NotificationType.PROFILE_CHANGE_REJECTED && notification.user) {
             this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
           }
-
-          // for driver, info that he has been assigned t a ride
-          if (notification.status === NotificationType.RIDE_ASSIGNED && notification.user) {
-            this.showToast('New ride assigned', 'Check your notifications for more details.');
-          }
         },
         error: () => {
           this.showToast('Connection error', 'Could not receive profile change updates.');
         },
       });
+    
+    this.rideAssignmentSubscription = this.webSocketService
+      .rideAssignmentNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          if (notification.status === NotificationType.RIDE_ASSIGNED && notification.ride) {
+            this.showToast('New ride assigned', 'Check your notifications for more details.');
+          }
+        },
+      });
   }
+
+
   
   ngOnDestroy() {
     this.profileChangeSubscription?.unsubscribe();
+    this.rideAssignmentSubscription?.unsubscribe();
     this.webSocketService.disconnect();
   }
   ui = {
