@@ -1,7 +1,7 @@
 <app-modal-container [showTitleBar] = false>
       <div class="time">
             <img src="clock-primary.svg" alt="" class="icon">
-            <p class="start-time">{{ ride.start | date: 'd MMM yyyy h:mm a' }}</p>
+            <p class="start-time">{{ start | date: 'd MMM yyyy h:mm a' }}</p>
 
             <div class="dots">
                   <div class="dot"></div>
@@ -13,7 +13,7 @@
             <div class="separator"></div>
             
             <img src="clock-primary.svg" alt="" class="icon">
-            <p class="end-time">{{ ride.end | date: 'd MMM yyyy h:mm a' }}</p>
+            <p class="end-time">{{ end | date: 'd MMM yyyy h:mm a' }}</p>
       </div>
 
       <app-route-table [waypoints]="ride.waypoints"></app-route-table>

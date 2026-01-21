@@ -9,7 +9,6 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -91,7 +90,7 @@ public class Ride {
 
     public Ride(RideDto dto) {
         this.id = dto.getId();
-        this.startTime = LocalDateTime.parse(dto.getStart());
+        this.startTime = LocalDateTime.parse(dto.getStartTime());
         this.waypoints = dto.getWaypoints().stream().map(Waypoint::new).toList();
         this.panic = false;
         this.favorite = false;

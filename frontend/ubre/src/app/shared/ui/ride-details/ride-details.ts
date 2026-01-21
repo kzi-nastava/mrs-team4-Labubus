@@ -35,6 +35,9 @@ export class RideDetails {
   reviewService : ReviewService = inject(ReviewService);
   userService : UserService = inject(UserService);
 
+  start : Date = new Date();
+  end : Date = new Date();
+
   onOpenReview(rideId : number) {
     this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
       if (currentUser.id == this.ride.createdBy)
@@ -42,5 +45,11 @@ export class RideDetails {
       else
         this.onError.emit(new Error("You can only review your rides"))
     })
+  }
+  
+  ngOnInit() {
+    console.log(this.ride)
+    this.start = new Date(this.ride.startTime)
+    this.end = new Date(this.ride.endTime)
   }
 }

@@ -20,8 +20,8 @@ export class RideDto {
 
     constructor(id : number, startTime : string, endTime : string, waypoints : WaypointDto[], driver : UserDto, vehicle : VehicleDto, passengers : UserDto[], distance : number = 0, price : number, panic : boolean = false, canceledBy : number | null = null, status : RideStatus, createdBy : number) {
         this.id = id;
-        this.start = startTime;
-        this.end = endTime;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.waypoints = waypoints;
         this.driver = driver;
         this.vehicle = vehicle;

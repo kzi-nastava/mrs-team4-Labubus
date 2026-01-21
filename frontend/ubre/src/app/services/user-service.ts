@@ -1,7 +1,5 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, take } from 'rxjs';
 import { UserDto } from '../dtos/user-dto';
 import { UserStatsDto } from '../dtos/user-stats-dto';

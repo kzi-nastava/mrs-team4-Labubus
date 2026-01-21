@@ -35,8 +35,8 @@ export class RideList {
 
   selectedRide = signal<RideDto>({
         id: -1,
-        start: new Date(),
-        end: new Date(),
+        startTime: new Date().toISOString(),
+        endTime: new Date().toISOString(),
         waypoints: [],
         driver: {
           email: 'pera@peric.com',
