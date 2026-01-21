@@ -328,7 +328,13 @@ public class RideServiceImpl implements RideService {
         Ride newRide = new Ride();
         User creator = userRepository.findById(rideOrderDto.getCreatorId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Creator user not found"));
         // start time comes from frontend in string format ready for conversion in LocalDateTime
-        newRide.setStartTime(rideOrderDto.getScheduledTime() != null ? LocalDateTime.parse(rideOrderDto.getScheduledTime()) : LocalDateTime.now());
+        String t = rideOrderDto.getScheduledTime();
+
+        newRide.setStartTime(
+                (t == null || t.isBlank())
+                        ? LocalDateTime.now().withNano(0)
+                        : LocalDateTime.parse(t)
+        );
         // we have required time in seconds, so append on start time (if end time changes in the future, we will update it later)
         newRide.setEndTime(newRide.getStartTime().plusSeconds(rideOrderDto.getRequiredTime().longValue()));
         newRide.setCreator(creator);
@@ -337,7 +343,6 @@ public class RideServiceImpl implements RideService {
         newRide.setStatus(RideStatus.PENDING); // initially pending (accepted is sufficient in my opinion)
         newRide.setDriver(assignedDriver);
 
-        // go through passengers emails and find users
         List<User> passengers = new ArrayList<>();
 
         for (String email : rideOrderDto.getPassengersEmails()) {
