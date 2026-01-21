@@ -19,6 +19,7 @@ import { AsyncPipe } from '@angular/common';
 export class RideHistory {
   @Input() open : boolean = false;
   @Output() onClose = new EventEmitter<void>();
+  @Output() onError = new EventEmitter<Error>();
 
   rideService : RideService = inject(RideService)
   userService : UserService = inject(UserService)
@@ -36,7 +37,7 @@ export class RideHistory {
 
   ngOnInit() {
     this.rides$ = this.rideService.history$;
-
+    
     this.onQueryChange(new RideQueryDto(null, "", false, null));
   }
 }

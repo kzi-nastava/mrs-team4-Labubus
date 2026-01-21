@@ -119,7 +119,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User jwtUser = (User) auth.getPrincipal();
-        if (!jwtUser.getId().equals(reviewDto.getUserId()))
+        if (!jwtUser.getId().equals(review.get().getUser().getId()))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator may review the ride");
 
         Review updatedReview = review.get();
@@ -133,6 +133,11 @@ public class ReviewServiceImpl implements ReviewService {
         Optional<Review> review = reviewRepository.findById(id);
         if (review.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found");
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if (!review.get().getUser().getId().equals(jwtUser.getId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the author of the review can delete it");
 
         reviewRepository.delete(review.get());
         return new ReviewDto(review.get());

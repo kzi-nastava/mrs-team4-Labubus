@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, Observer, of } from 'rxjs';
 import { RideCardDto } from '../dtos/ride-card-dto';
 import { RideDto } from '../dtos/ride-dto';
 import { RideStatus } from '../enums/ride-status';
@@ -105,7 +105,7 @@ export class RideService {
     this.favoritesPage = 0;
   }
 
-  addToFavorites(id: number): void {
+  addToFavorites(id: number, callback : Partial<Observer<void>> | ((value: void) => void) | undefined = undefined): void {
     this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
       this.http.put<void>(`${this.BASE_URL}rides/${currentUser.id}/favorites/${id}`, null).subscribe({
         next: () => {
@@ -116,15 +116,30 @@ export class RideService {
             return ride;
           })
           this.history.next(updatedHistory)
+          if (callback !== undefined) {
+            if (typeof callback != "function") {
+              let typedCallback : Partial<Observer<void>> = callback as Partial<Observer<void>>
+              if (typedCallback.next)
+                typedCallback.next();
+            }
+            else
+              callback()
+          }
         },
         error: err => {
-          if (err.status === 404) alert('Ride not found');
+          if (callback !== undefined) {
+            if (typeof callback != "function") {
+              let typedCallback : Partial<Observer<void>> = callback as Partial<Observer<void>>
+              if (typedCallback.error)
+                typedCallback.error(err);
+            }
+          }
         },
       })
     })
   }
 
-  removeFromFavorites(id: number): void {
+  removeFromFavorites(id: number, callback : Partial<Observer<void>> | ((value: void) => void) | undefined = undefined): void {
     this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
       this.http.delete<void>(`${this.BASE_URL}rides/${currentUser.id}/favorites/${id}`).subscribe({
         next: () => {
@@ -138,9 +153,26 @@ export class RideService {
 
           let updatedFavorites = this.favorites.value.filter((ride : RideCardDto) => ride.id != id)
           this.favorites.next(updatedFavorites);
+          if (callback !== undefined) {
+            if (typeof callback != "function") {
+              let typedCallback : Partial<Observer<void>> = callback as Partial<Observer<void>>
+              if (typedCallback.next)
+                typedCallback.next();
+            }
+            else
+              callback()
+          }
         },
         error: err => {
-          if (err.status === 404) alert('Ride not found');
+          if (callback !== undefined) {
+            if (typeof callback != "function") {
+              let typedCallback : Partial<Observer<void>> = callback as Partial<Observer<void>>
+              if (typedCallback.error)
+                typedCallback.error(err);
+            }
+            else
+              callback()
+          }
         },
       })
     })

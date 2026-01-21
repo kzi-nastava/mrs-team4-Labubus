@@ -14,6 +14,26 @@
   padding-bottom: calc();
 }
 
+:host .ride-list-placeholder {
+  display: flex;
+  flex-direction: column;
+  place-content: center;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  color: var(--color-neutral-dark-gray);
+  font-family: var(--font-family);
+  align-self: center;
+}
+
+:host .ride-list-placeholder .placeholder-title {
+    font-size: var(--font-size-medium);
+}
+
+:host .ride-list-placeholder .placeholder-subtitle {
+    font-size: var(--font-size-small);
+}
+
 :host .list {
   left: 16px;
   box-shadow: var(--drop-shadow);

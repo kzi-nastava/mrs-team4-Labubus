@@ -1,4 +1,4 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { ModalContainer } from '../modal-container/modal-container';
 import { ProfileCard } from '../profile-card/profile-card';
 import { VehicleCard } from '../vehicle-card/vehicle-card';
@@ -30,15 +30,17 @@ export class RideDetails {
         phone: "",
         address: ""
       };
+  @Output() onError = new EventEmitter<Error>();
 
   reviewService : ReviewService = inject(ReviewService);
   userService : UserService = inject(UserService);
 
   onOpenReview(rideId : number) {
     this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
-      // if (currentUser.id == this.ride.createdBy)
+      if (currentUser.id == this.ride.createdBy)
         this.reviewService.newReview(rideId)
-      console.log("Hmmm")
+      else
+        this.onError.emit(new Error("You can only review your rides"))
     })
   }
 }

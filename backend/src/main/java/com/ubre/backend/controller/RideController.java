@@ -48,6 +48,7 @@ public class RideController {
     @PutMapping(
             value = "/{userId}/favorites/{rideId}"
     )
+    @PreAuthorize("#userId == @securityUtil.currentUserId()")
     public ResponseEntity<Void> addRideToFavorites(
             @PathVariable Long userId,
             @PathVariable Long rideId) {
@@ -59,6 +60,7 @@ public class RideController {
     @DeleteMapping(
             value = "/{userId}/favorites/{rideId}"
     )
+    @PreAuthorize("#userId == @securityUtil.currentUserId()")
     public ResponseEntity<Void> removeRideFromFavorites(
             @PathVariable Long userId,
             @PathVariable Long rideId) {
@@ -105,6 +107,7 @@ public class RideController {
     @GetMapping(
             value = "/history/{userId}"
     )
+    @PreAuthorize("#userId == @securityUtil.currentUserId() || hasRole('ADMIN')")
     public ResponseEntity<List<RideCardDto>> getRideHistory(
             @PathVariable Long userId,
             @RequestParam(required = false) Integer skip,
@@ -130,6 +133,7 @@ public class RideController {
             value = "/scheduled/{driverId}",
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
+    @PreAuthorize("#driverId == @securityUtil.currentUserId() || hasRole('ADMIN')")
     public ResponseEntity<List<RideCardDto>> getScheduledRides(
             @PathVariable Long driverId,
             @RequestParam(required = false) Integer skip,

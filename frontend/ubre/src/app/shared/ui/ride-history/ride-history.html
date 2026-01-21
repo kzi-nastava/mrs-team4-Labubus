@@ -1,1 +1,1 @@
-<app-ride-list class="ride-history" (onClose)="onClose.emit()" (onScrollToBottom)="onScrollToBottom($event)" [open]="open" [rides]="rides$ | async" (onQueryChange)="onQueryChange($event)" title="Ride history"></app-ride-list>
+<app-ride-list class="ride-history" (onClose)="onClose.emit()" (onScrollToBottom)="onScrollToBottom($event)" [open]="open" [rides]="rides$ | async" (onQueryChange)="onQueryChange($event)" title="Ride history" (onError)="onError.emit($event)"></app-ride-list>

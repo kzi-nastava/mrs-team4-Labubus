@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Observer } from 'rxjs';
 import { ReviewDto } from '../dtos/review-dto';
 import { HttpClient } from '@angular/common/http';
 import { UserService } from './user-service';
@@ -21,27 +21,17 @@ export class ReviewService {
   public newReview(rideId : number) : void {
     this.rideId = rideId;
     this.showReviewModal.next(true);
-    console.log(this.showReviewModal.value)
   }
 
   public cancelReview() {
     this.rideId = undefined;
     this.showReviewModal.next(false);
-    console.log(this.showReviewModal.value)
   }
 
-  public submitReview(review : ReviewDto) : void {
+  public submitReview(review : ReviewDto, callback : Partial<Observer<ReviewDto>> | ((value: ReviewDto) => void) | undefined) : void {
     this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
       review.userId = currentUser.id;
-      this.http.post<ReviewDto>(`${this.BASE_URL}reviews/ride/${this.rideId}`, review).subscribe({
-        next: (value : ReviewDto) => {
-          this.rideId = undefined;
-          this.cancelReview();
-        },
-        error: (err) => {
-          console.log(err)
-        }
-      })
+      this.http.post<ReviewDto>(`${this.BASE_URL}reviews/ride/${this.rideId}`, review).subscribe(callback)
     })
   } 
 }

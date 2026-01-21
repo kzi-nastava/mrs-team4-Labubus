@@ -614,6 +614,10 @@ import { ReviewModal } from '../../shared/ui/review-modal/review-modal';
     this.showRideHistory = false;
   }
 
+  onEmmitError(error : Error) {
+    this.showToast(error.name, error.message)
+  }
+
   // RIDE OPTIONS SHEET LOGIC
 
   rideOptions = {

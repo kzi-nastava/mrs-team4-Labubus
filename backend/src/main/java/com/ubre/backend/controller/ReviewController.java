@@ -46,7 +46,7 @@ public class ReviewController {
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @PreAuthorize("#createReviewDto.getUserId() == @securityUtil.currentUserId()")
+    @PreAuthorize("#updateReviewDto.getUserId() == @securityUtil.currentUserId()")
     public ResponseEntity<ReviewDto> updateReview(
             @PathVariable Long id,
             @RequestBody ReviewDto updateReviewDto) {
@@ -55,7 +55,6 @@ public class ReviewController {
     }
 
     @DeleteMapping(value = "/{id}")
-    @PreAuthorize("#createReviewDto.getUserId() == @securityUtil.currentUserId()")
     public ResponseEntity<ReviewDto> deleteReview(@PathVariable Long id) {
         ReviewDto review = ReviewService.deleteReview(id);
         return new ResponseEntity<>(review, HttpStatus.OK);

@@ -151,7 +151,7 @@ public class RideServiceImpl implements RideService {
 
         Ride ride = rideOptional.get();
         if (!Objects.equals(ride.getCreator().getId(), userId))
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User may only favorite their rides");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Users may only favorite their rides");
 
         ride.setFavorite(true);
         rideRepository.save(ride);
@@ -165,7 +165,7 @@ public class RideServiceImpl implements RideService {
 
         Ride ride = rideOptional.get();
         if (!Objects.equals(ride.getCreator().getId(), userId))
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User may only unfavorite their rides");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Users may only unfavorite their rides");
 
         ride.setFavorite(false);
         rideRepository.save(ride);

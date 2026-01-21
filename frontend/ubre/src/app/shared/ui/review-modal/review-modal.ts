@@ -1,9 +1,10 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { ReviewDto } from '../../../dtos/review-dto';
 import { ReviewService } from '../../../services/review-service';
 import { ModalContainer } from '../modal-container/modal-container';
 import { Observable, of } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-review-modal',
@@ -13,6 +14,7 @@ import { AsyncPipe } from '@angular/common';
 })
 export class ReviewModal {
   @Input() show : Observable<boolean> = of(false);
+  @Output() onError = new EventEmitter<Error>();
 
   private reviewService : ReviewService = inject(ReviewService)
 
@@ -48,6 +50,13 @@ export class ReviewModal {
       return;
     }
 
-    this.reviewService.submitReview(this.review)
+    this.reviewService.submitReview(this.review, {
+        next: (value : ReviewDto) => {
+          this.reviewService.cancelReview();
+        },
+        error: (err : HttpErrorResponse) => {
+          this.onError.emit(new Error(err.error))
+        }
+      })
   }
 }

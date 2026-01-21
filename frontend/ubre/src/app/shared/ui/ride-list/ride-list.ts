@@ -12,6 +12,7 @@ import { RideQueryDto } from '../../../dtos/ride-query';
 import { VehicleType } from '../../../enums/vehicle-type';
 import { RideStatus } from '../../../enums/ride-status';
 import { UserService } from '../../../services/user-service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 
 @Component({
@@ -27,6 +28,7 @@ export class RideList {
   @Output() onClose = new EventEmitter<void>();
   @Output() onQueryChange = new EventEmitter<RideQueryDto>();
   @Output() onScrollToBottom = new EventEmitter<RideQueryDto>();
+  @Output() onError = new EventEmitter<Error>();
 
   rideService : RideService = inject(RideService);
   userService : UserService = inject(UserService);
@@ -73,7 +75,6 @@ export class RideList {
       this.detailsOpen.set(false);
     else {
         this.rideService.getRide(rideCard.id).subscribe((ride : RideDto) => {
-        console.log(ride)
         this.selectedRide.set(ride);
         this.detailsOpen.set(true)
       })
@@ -82,9 +83,9 @@ export class RideList {
 
   onRideAction(ride : RideCardDto) {
     if (ride.favorite)
-      this.rideService.removeFromFavorites(ride.id)
+      this.rideService.removeFromFavorites(ride.id, {error: (err : HttpErrorResponse) => { this.onError.emit(new Error(err.error))}})
     else
-      this.rideService.addToFavorites(ride.id)
+      this.rideService.addToFavorites(ride.id, {error: (err : HttpErrorResponse) => { this.onError.emit(new Error(err.error))}})
   }
 
   onToggleSort() {

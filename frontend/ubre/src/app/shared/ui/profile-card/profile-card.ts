@@ -20,7 +20,6 @@ export class ProfileCard {
 
   constructor() {
     effect(() => {
-      console.log(this.icon(), this.user())
       this.userService.getUserAvatar(this.user().id).subscribe({
         next: blob => this.avatarUrl.set(URL.createObjectURL(blob))
       });
