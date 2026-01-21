@@ -40,6 +40,7 @@ import { ScheduleTimer } from '../../shared/ui/schedule-timer/schedule-timer';
 import { InvitePassengers } from '../../shared/ui/invite-passengers/invite-passengers';
 import { RideOptions } from '../../shared/ui/ride-options/ride-options';
 import { RideOptionsDto } from '../../dtos/ride-options-dto';
+import { NotificationType } from '../../enums/notification-type';
 
 @Component({
   selector: 'app-user-layout',
@@ -98,7 +99,7 @@ import { RideOptionsDto } from '../../dtos/ride-options-dto';
       .profileChangeNotifications(userId)
       .subscribe({
         next: (notification) => {
-          if (notification.status === 'APPROVED' && notification.user) {
+          if (notification.status === NotificationType.PROFILE_CHANGE_APPROVED && notification.user) {
             this.userService.setCurrentUserById(notification.user.id);
             this.showToast('Profile change approved', 'Your profile change request has been approved.');
             this.cdr.detectChanges();
@@ -106,8 +107,13 @@ import { RideOptionsDto } from '../../dtos/ride-options-dto';
             return;
           }
 
-          if (notification.status === 'REJECTED') {
+          if (notification.status === NotificationType.PROFILE_CHANGE_REJECTED && notification.user) {
             this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
+          }
+
+          // for driver, info that he has been assigned t a ride
+          if (notification.status === NotificationType.RIDE_ASSIGNED && notification.user) {
+            this.showToast('New ride assigned', 'Check your notifications for more details.');
           }
         },
         error: () => {

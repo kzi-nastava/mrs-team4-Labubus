@@ -3,7 +3,7 @@ import { Client, IMessage, StompHeaders, StompSubscription } from '@stomp/stompj
 import { BehaviorSubject, filter, Observable, Subject, take } from 'rxjs';
 import SockJS from 'sockjs-client/dist/sockjs';
 import { AuthService } from '../features/auth/auth-service';
-import { ProfileChangeNotification } from '../dtos/profile-change-notification';
+import { ProfileChangeNotification } from '../notifications/profile-change-notification';
 
 export type WebSocketConnectionState = 'disconnected' | 'connecting' | 'connected';
 

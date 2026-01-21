@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 public class WebSocketNotificationService {
 
     private static final String PROFILE_CHANGE_TOPIC_PREFIX = "/topic/profile-changes/";
+    private static final String RIDE_ASSIGNMENT_TOPIC_PREFIX = "/topic/ride-assignments/";
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -21,4 +22,7 @@ public class WebSocketNotificationService {
     public void sendProfileChangeRejected(Long userId, ProfileChangeNotification notification) {
         messagingTemplate.convertAndSend(PROFILE_CHANGE_TOPIC_PREFIX + userId, notification);
     }
+
+    // notification for drivers for ride assignments
+
 }
