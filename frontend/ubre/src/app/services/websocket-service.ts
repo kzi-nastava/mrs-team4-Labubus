@@ -3,7 +3,9 @@ import { Client, IMessage, StompHeaders, StompSubscription } from '@stomp/stompj
 import { BehaviorSubject, filter, Observable, Subject, take } from 'rxjs';
 import SockJS from 'sockjs-client/dist/sockjs';
 import { AuthService } from '../features/auth/auth-service';
-import { ProfileChangeNotification } from '../dtos/profile-change-notification';
+import { ProfileChangeNotification } from '../notifications/profile-change-notification';
+import { RideAssignmentNotification } from '../notifications/ride-assignment-noitfications';
+import { RideReminderNotification } from '../notifications/ride-reminder-notification';
 
 export type WebSocketConnectionState = 'disconnected' | 'connecting' | 'connected';
 
@@ -108,6 +110,44 @@ export class WebSocketService {
         error: (error) => this.zone.run(() => subscriber.error(error)),
       });
 
+      return () => subscription.unsubscribe();
+    });
+  }
+
+  rideAssignmentNotifications(userId: number): Observable<RideAssignmentNotification> {
+    const topic = `/topic/ride-assignments/${userId}`;
+    return new Observable<RideAssignmentNotification>((subscriber) => {
+      const topic$ = this.listenToTopic(topic);
+      const subscription = topic$.subscribe({
+        next: (message) => {
+          try {
+            const payload = JSON.parse(message.body) as RideAssignmentNotification;
+            this.zone.run(() => subscriber.next(payload));
+          } catch (error) {
+            this.zone.run(() => subscriber.error(error));
+          }
+        },
+        error: (error) => this.zone.run(() => subscriber.error(error)),
+      });
+      return () => subscription.unsubscribe();
+    });
+  }
+
+  rideReminderNotifications(userId: number): Observable<RideReminderNotification> {
+    const topic = `/topic/ride-reminders/${userId}`;
+    return new Observable<RideReminderNotification>((subscriber) => {
+      const topic$ = this.listenToTopic(topic);
+      const subscription = topic$.subscribe({
+        next: (message) => {
+          try {
+            const payload = JSON.parse(message.body) as RideReminderNotification;
+            this.zone.run(() => subscriber.next(payload));
+          } catch (error) {
+            this.zone.run(() => subscriber.error(error));
+          }
+        },
+        error: (error) => this.zone.run(() => subscriber.error(error)),
+      });
       return () => subscription.unsubscribe();
     });
   }

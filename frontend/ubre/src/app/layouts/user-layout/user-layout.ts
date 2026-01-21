@@ -40,6 +40,7 @@ import { ScheduleTimer } from '../../shared/ui/schedule-timer/schedule-timer';
 import { InvitePassengers } from '../../shared/ui/invite-passengers/invite-passengers';
 import { RideOptions } from '../../shared/ui/ride-options/ride-options';
 import { RideOptionsDto } from '../../dtos/ride-options-dto';
+import { NotificationType } from '../../enums/notification-type';
 
 @Component({
   selector: 'app-user-layout',
@@ -72,6 +73,8 @@ import { RideOptionsDto } from '../../dtos/ride-options-dto';
 
   private websocketUserId: number | null = null;
   private profileChangeSubscription?: Subscription;
+  private rideAssignmentSubscription?: Subscription;
+  private rideReminderSubscription?: Subscription;
 
   ngOnInit() {
     const userId = this.authService.getId();
@@ -98,7 +101,7 @@ import { RideOptionsDto } from '../../dtos/ride-options-dto';
       .profileChangeNotifications(userId)
       .subscribe({
         next: (notification) => {
-          if (notification.status === 'APPROVED' && notification.user) {
+          if (notification.status === NotificationType.PROFILE_CHANGE_APPROVED && notification.user) {
             this.userService.setCurrentUserById(notification.user.id);
             this.showToast('Profile change approved', 'Your profile change request has been approved.');
             this.cdr.detectChanges();
@@ -106,7 +109,7 @@ import { RideOptionsDto } from '../../dtos/ride-options-dto';
             return;
           }
 
-          if (notification.status === 'REJECTED') {
+          if (notification.status === NotificationType.PROFILE_CHANGE_REJECTED && notification.user) {
             this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
           }
         },
@@ -114,10 +117,33 @@ import { RideOptionsDto } from '../../dtos/ride-options-dto';
           this.showToast('Connection error', 'Could not receive profile change updates.');
         },
       });
+    
+    this.rideAssignmentSubscription = this.webSocketService
+      .rideAssignmentNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          if (notification.status === NotificationType.RIDE_ASSIGNED && notification.ride) {
+            this.showToast('New ride assigned', 'Check your notifications for more details.');
+          }
+        },
+      });
+
+    this.rideReminderSubscription = this.webSocketService
+      .rideReminderNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          if (notification.status === NotificationType.RIDE_REMINDER && notification.time) {
+            this.showToast('Ride reminder', 'You have a ride scheduled at ' + notification.time + '.');
+          }
+        },
+      });
   }
-  
+
+
   ngOnDestroy() {
     this.profileChangeSubscription?.unsubscribe();
+    this.rideAssignmentSubscription?.unsubscribe();
+    this.rideReminderSubscription?.unsubscribe();
     this.webSocketService.disconnect();
   }
   ui = {

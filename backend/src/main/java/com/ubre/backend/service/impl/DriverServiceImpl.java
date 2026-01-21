@@ -4,6 +4,7 @@ import com.ubre.backend.dto.DriverRegistrationDto;
 import com.ubre.backend.dto.ProfileChangeDto;
 import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.dto.UserDto;
+import com.ubre.backend.enums.NotificationType;
 import com.ubre.backend.enums.ProfileChangeStatus;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
@@ -320,7 +321,7 @@ public class DriverServiceImpl implements DriverService {
         driverRepository.save(driver); // by saving driver, profileChange is also saved because of cascade
 
         webSocketNotificationService.sendProfileChangeApproved(driver.getId(), new ProfileChangeNotification(
-                ProfileChangeStatus.APPROVED.name(),
+                NotificationType.PROFILE_CHANGE_APPROVED.name(),
                 new UserDto(
                 driver.getId(),
                 driver.getRole(),
@@ -346,7 +347,7 @@ public class DriverServiceImpl implements DriverService {
         driverRepository.save(driver); // by saving driver, profileChange is also saved because of cascade
 
         webSocketNotificationService.sendProfileChangeRejected(driver.getId(), new ProfileChangeNotification(
-                ProfileChangeStatus.REJECTED.name(),
+                NotificationType.PROFILE_CHANGE_REJECTED.name(),
                 null
         ));
     }

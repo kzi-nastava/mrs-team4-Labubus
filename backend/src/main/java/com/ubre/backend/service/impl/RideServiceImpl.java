@@ -1,6 +1,7 @@
 package com.ubre.backend.service.impl;
 
 import com.ubre.backend.dto.*;
+import com.ubre.backend.enums.NotificationType;
 import com.ubre.backend.enums.RideStatus;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
@@ -12,6 +13,9 @@ import com.ubre.backend.repository.DriverRepository;
 import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.RideService;
+import com.ubre.backend.websocket.ProfileChangeNotification;
+import com.ubre.backend.websocket.RideAssignmentNotification;
+import com.ubre.backend.websocket.WebSocketNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +35,10 @@ public class RideServiceImpl implements RideService {
     private UserRepository userRepository;
     @Autowired
     private DriverRepository driverRepository;
+    @Autowired
+    private WebSocketNotificationService webSocketNotificationService;
+    @Autowired
+    private RideReminderService rideReminderService;
 
     // Mock data for rides
     List<RideDto> rides = new ArrayList<RideDto>();
@@ -328,7 +336,13 @@ public class RideServiceImpl implements RideService {
         Ride newRide = new Ride();
         User creator = userRepository.findById(rideOrderDto.getCreatorId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Creator user not found"));
         // start time comes from frontend in string format ready for conversion in LocalDateTime
-        newRide.setStartTime(rideOrderDto.getScheduledTime() != null ? LocalDateTime.parse(rideOrderDto.getScheduledTime()) : LocalDateTime.now());
+        String t = rideOrderDto.getScheduledTime();
+
+        newRide.setStartTime(
+                (t == null || t.isBlank())
+                        ? LocalDateTime.now().withNano(0)
+                        : LocalDateTime.parse(t)
+        );
         // we have required time in seconds, so append on start time (if end time changes in the future, we will update it later)
         newRide.setEndTime(newRide.getStartTime().plusSeconds(rideOrderDto.getRequiredTime().longValue()));
         newRide.setCreator(creator);
@@ -337,7 +351,6 @@ public class RideServiceImpl implements RideService {
         newRide.setStatus(RideStatus.PENDING); // initially pending (accepted is sufficient in my opinion)
         newRide.setDriver(assignedDriver);
 
-        // go through passengers emails and find users
         List<User> passengers = new ArrayList<>();
 
         for (String email : rideOrderDto.getPassengersEmails()) {
@@ -372,6 +385,16 @@ public class RideServiceImpl implements RideService {
         createdRideDto.setPassengers(passengers.stream().map(UserDto::new).toList());
         createdRideDto.setDistance(newRide.getDistance());
         createdRideDto.setPrice(newRide.getPrice());
+
+        webSocketNotificationService.sendRideAssigned(assignedDriver.getId(), new RideAssignmentNotification(
+                NotificationType.RIDE_ASSIGNED.name(),
+                createdRideDto));
+
+        // if ride is scheduled, start a reminder process
+        if (newRide.getStartTime().isAfter(LocalDateTime.now())) {
+            rideReminderService.start(rideOrderDto.getCreatorId(), newRide.getStartTime());
+        }
+
 
         return createdRideDto;
     }
