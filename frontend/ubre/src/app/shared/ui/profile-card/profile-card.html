@@ -4,6 +4,6 @@
         <div class="name">{{ user().name + " " + user().surname }}</div>
     </div>
     @if (icon()) {
-        <img [src]="icon()" alt="" class="action-icon">
+        <img [src]="icon()" alt="" class="action-icon" (click)="onIconClick()">
     }
 </div>

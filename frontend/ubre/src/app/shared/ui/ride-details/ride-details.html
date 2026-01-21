@@ -40,7 +40,7 @@
       @if (user.role === 'REGISTERED_USER' || user.role === 'ADMIN') {
             <div class="section">
                   <div class="section-title"> Driver</div>
-                  <app-profile-card [user]="ride.driver" icon="review-primary-text.svg"></app-profile-card>
+                  <app-profile-card [user]="ride.driver" icon="review-primary-text.svg" (onAction)="onOpenReview(ride.id)"></app-profile-card>
             </div>
             <div class="section">
                   <div class="section-title"> Vehicle</div>

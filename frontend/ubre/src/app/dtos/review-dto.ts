@@ -1,7 +1,7 @@
 export class ReviewDto {
-    public id : number;
-    public driverId : number;
-    public userId : number;
+    public id : number | null;
+    public driverId : number | null;
+    public userId : number | null;
     public rating : 1 | 2 | 3 | 4 | 5;
     public text : String;
 

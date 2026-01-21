@@ -23,7 +23,7 @@ import { VehicleDto } from '../../dtos/vehicle-dto';
 import { Role } from '../../enums/role';
 import { VehicleType } from '../../enums/vehicle-type';
 import { MapService } from '../../services/map-service';
-import { Subscription, forkJoin, take } from 'rxjs';
+import { Observable, Subscription, forkJoin, of, take } from 'rxjs';
 import { DriverRegistrationService } from '../../services/driver-registration-service';
 import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
@@ -34,6 +34,8 @@ import { AuthService } from '../../features/auth/auth-service';
 import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 import { WebSocketService } from '../../services/websocket-service';
 import { StatItemDto } from '../../dtos/stat-item-dto';
+import { ReviewService } from '../../services/review-service';
+import { ReviewModal } from '../../shared/ui/review-modal/review-modal';
 
 @Component({
   selector: 'app-user-layout',
@@ -41,7 +43,7 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
   imports: [Map,IconButton,SideMenu,Toast,
     Modal,ModalContainer,StatCard,Button,
     Sheet,FormsModule,RideHistory,ProfileChangeCard,
-    AsyncPipe],
+    AsyncPipe,ReviewModal],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -50,6 +52,7 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
     
     public userService = inject(UserService);
     private authService = inject(AuthService);
+    private reviewService : ReviewService = inject(ReviewService)
     public driverRegistrationService = inject(DriverRegistrationService);
     public mapService = inject(MapService);
     private confetti = inject(ConfettiService);
@@ -66,6 +69,7 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
 
   private websocketUserId: number | null = null;
   private profileChangeSubscription?: Subscription;
+
 
   ngOnInit() {
     const userId = this.authService.getId();
@@ -132,6 +136,7 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
         });
     });
 
+    this.ui.reviewModalOpen = this.reviewService.showReviewModal$;
   }
   
   ngOnDestroy() {
@@ -150,6 +155,7 @@ import { StatItemDto } from '../../dtos/stat-item-dto';
     checkoutModalOpen: false,
     toastOpen: false,
     profileChangesOpen: false,
+    reviewModalOpen: of(false)
   };
 
 

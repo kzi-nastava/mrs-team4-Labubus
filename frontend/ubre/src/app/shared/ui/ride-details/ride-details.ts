@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, inject, Input } from '@angular/core';
 import { ModalContainer } from '../modal-container/modal-container';
 import { ProfileCard } from '../profile-card/profile-card';
 import { VehicleCard } from '../vehicle-card/vehicle-card';
@@ -9,6 +9,8 @@ import { RideDto } from '../../../dtos/ride-dto';
 import { DatePipe } from '@angular/common';
 import { UserDto } from '../../../dtos/user-dto';
 import { Role } from '../../../enums/role';
+import { ReviewService } from '../../../services/review-service';
+import { UserService } from '../../../services/user-service';
 
 @Component({
   selector: 'app-ride-details',
@@ -28,4 +30,15 @@ export class RideDetails {
         phone: "",
         address: ""
       };
+
+  reviewService : ReviewService = inject(ReviewService);
+  userService : UserService = inject(UserService);
+
+  onOpenReview(rideId : number) {
+    this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
+      // if (currentUser.id == this.ride.createdBy)
+        this.reviewService.newReview(rideId)
+      console.log("Hmmm")
+    })
+  }
 }

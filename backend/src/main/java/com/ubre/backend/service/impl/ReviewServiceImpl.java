@@ -13,10 +13,14 @@ import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -80,24 +84,28 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public ReviewDto createReview(Long rideId, ReviewDto reviewDto) {
-        Optional<Driver> driver = driverRepository.findById(reviewDto.getDriverId());
-        if (driver.isEmpty())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found");
-
         Optional<User> user = userRepository.findById(reviewDto.getUserId());
-        if (user.isEmpty() /*|| user.get().getRole() != Role.REGISTERED_USER*/)
+        if (user.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
         Optional<Ride> ride = rideRepository.findById(rideId);
         if (ride.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
 
+        if (ChronoUnit.DAYS.between(ride.get().getEndTime(), LocalDateTime.now()) > 3)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Review may only be made within 3 days of ride completion");
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if (!ride.get().getCreator().getId().equals(reviewDto.getUserId()) || !jwtUser.getId().equals(reviewDto.getUserId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator may review the ride");
+
         Optional<Review> review = reviewRepository.findByRide(ride.get());
         if (review.isPresent())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Review already exists");
 
         Review newReview = new Review(reviewDto);
-        newReview.setDriver(driver.get());
+        newReview.setDriver(ride.get().getDriver());
         newReview.setUser(user.get());
         newReview.setRide(ride.get());
         return new ReviewDto(reviewRepository.save(newReview));
@@ -108,6 +116,11 @@ public class ReviewServiceImpl implements ReviewService {
         Optional<Review> review = reviewRepository.findById(id);
         if (review.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found");
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if (!jwtUser.getId().equals(reviewDto.getUserId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the creator may review the ride");
 
         Review updatedReview = review.get();
         updatedReview.setText(reviewDto.getText());
