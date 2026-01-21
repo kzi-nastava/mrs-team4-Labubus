@@ -4,6 +4,7 @@ import com.ubre.backend.dto.DriverRegistrationDto;
 import com.ubre.backend.dto.ProfileChangeDto;
 import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.dto.UserDto;
+import com.ubre.backend.enums.NotificationType;
 import com.ubre.backend.enums.ProfileChangeStatus;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
@@ -12,6 +13,7 @@ import com.ubre.backend.model.ProfileChange;
 import com.ubre.backend.model.UserStats;
 import com.ubre.backend.model.Vehicle;
 import com.ubre.backend.repository.DriverRepository;
+import com.ubre.backend.repository.ProfileChangeRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.repository.VehicleRepository;
 import com.ubre.backend.service.DriverService;
@@ -27,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DriverServiceImpl implements DriverService {
@@ -48,6 +51,9 @@ public class DriverServiceImpl implements DriverService {
 
     @Autowired
     private WebSocketNotificationService webSocketNotificationService;
+
+    @Autowired
+    private ProfileChangeRepository profileChangeRepository;
 
     @Override
     public List<UserDto> getAllDrivers() {
@@ -239,6 +245,13 @@ public class DriverServiceImpl implements DriverService {
         Driver driver = driverRepository.findById(driverId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found"));
 
+        // find by driver, if there is a pending profile change, revome it and create a new one
+        List<ProfileChange> existingChanges =
+                profileChangeRepository.findByDriverAndStatus(driver, ProfileChangeStatus.PENDING);
+
+        profileChangeRepository.deleteAll(existingChanges);
+
+
         ProfileChange profileChange = new ProfileChange();
         profileChange.setDriver(driver);
 
@@ -265,30 +278,23 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public List<ProfileChangeDto> getPendingProfileChanges() {
-        List<Driver> drivers = driverRepository.findAll();
+        List<ProfileChange> pendingProfileChanges = profileChangeRepository.findByStatus(ProfileChangeStatus.PENDING);
         List<ProfileChangeDto> pendingChanges = new ArrayList<>();
-
-        for (Driver driver : drivers) {
-            for (ProfileChange change : driver.getProfileChanges()) {
-                if (change.getStatus() == ProfileChangeStatus.PENDING) {
-                    ProfileChangeDto dto = new ProfileChangeDto();
-
-                    dto.setId(change.getId());
-                    dto.setUserId(driver.getId());
-                    dto.setOldName(change.getOldName());
-                    dto.setNewName(change.getNewName());
-                    dto.setOldSurname(change.getOldSurname());
-                    dto.setNewSurname(change.getNewSurname());
-                    dto.setOldPhone(change.getOldPhone());
-                    dto.setNewPhone(change.getNewPhone());
-                    dto.setOldAddress(change.getOldAddress());
-                    dto.setNewAddress(change.getNewAddress());
-                    dto.setOldAvatarUrl(change.getOldAvatarUrl());
-                    dto.setNewAvatarUrl(change.getNewAvatarUrl());
-
-                    pendingChanges.add(dto);
-                }
-            }
+        for (ProfileChange pc : pendingProfileChanges) {
+            ProfileChangeDto dto = new ProfileChangeDto();
+            dto.setId(pc.getId());
+            dto.setUserId(pc.getDriver().getId());
+            dto.setOldName(pc.getOldName());
+            dto.setNewName(pc.getNewName());
+            dto.setOldSurname(pc.getOldSurname());
+            dto.setNewSurname(pc.getNewSurname());
+            dto.setOldPhone(pc.getOldPhone());
+            dto.setNewPhone(pc.getNewPhone());
+            dto.setOldAddress(pc.getOldAddress());
+            dto.setNewAddress(pc.getNewAddress());
+            dto.setOldAvatarUrl(pc.getOldAvatarUrl());
+            dto.setNewAvatarUrl(pc.getNewAvatarUrl());
+            pendingChanges.add(dto);
         }
 
         return pendingChanges;
@@ -297,26 +303,10 @@ public class DriverServiceImpl implements DriverService {
     // approve profile change
     @Override
     public void approveProfileChange(Long profileChangeId) {
-        ProfileChange profileChange = null;
-        Driver driver = null;
+        ProfileChange profileChange = profileChangeRepository.findById(profileChangeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile change request not found"));
 
-        List<Driver> drivers = driverRepository.findAll();
-        for (Driver d : drivers) {
-            for (ProfileChange pc : d.getProfileChanges()) {
-                if (pc.getId().equals(profileChangeId)) {
-                    profileChange = pc;
-                    driver = d;
-                    break;
-                }
-            }
-            if (profileChange != null) {
-                break;
-            }
-        }
-
-        if (profileChange == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile change request not found");
-        }
+        Driver driver = profileChange.getDriver();
 
         // Apply changes to driver
         driver.setName(profileChange.getNewName());
@@ -331,7 +321,7 @@ public class DriverServiceImpl implements DriverService {
         driverRepository.save(driver); // by saving driver, profileChange is also saved because of cascade
 
         webSocketNotificationService.sendProfileChangeApproved(driver.getId(), new ProfileChangeNotification(
-                ProfileChangeStatus.APPROVED.name(),
+                NotificationType.PROFILE_CHANGE_APPROVED.name(),
                 new UserDto(
                 driver.getId(),
                 driver.getRole(),
@@ -348,31 +338,16 @@ public class DriverServiceImpl implements DriverService {
     // reject profile change
     @Override
     public void rejectProfileChange(Long profileChangeId) {
-        ProfileChange profileChange = null;
-        Driver driver = null;
-        List<Driver> drivers = driverRepository.findAll();
-        for (Driver d : drivers) {
-            for (ProfileChange pc : d.getProfileChanges()) {
-                if (pc.getId().equals(profileChangeId)) {
-                    profileChange = pc;
-                    driver = d;
-                    break;
-                }
-            }
-            if (profileChange != null) {
-                break;
-            }
-        }
-        if (profileChange == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile change request not found");
-        }
+        ProfileChange profileChange = profileChangeRepository.findById(profileChangeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profile change request not found"));
+        Driver driver = profileChange.getDriver();
 
         // Update profile change status
         profileChange.setStatus(ProfileChangeStatus.REJECTED);
         driverRepository.save(driver); // by saving driver, profileChange is also saved because of cascade
 
         webSocketNotificationService.sendProfileChangeRejected(driver.getId(), new ProfileChangeNotification(
-                ProfileChangeStatus.REJECTED.name(),
+                NotificationType.PROFILE_CHANGE_REJECTED.name(),
                 null
         ));
     }

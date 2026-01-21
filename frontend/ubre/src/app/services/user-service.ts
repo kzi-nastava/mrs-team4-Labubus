@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, of, take } from 'rxjs';
 import { UserDto } from '../dtos/user-dto';
 import { UserStatsDto } from '../dtos/user-stats-dto';
 import { VehicleDto } from '../dtos/vehicle-dto';
@@ -12,7 +14,7 @@ export class UserService {
   private readonly http = inject(HttpClient);
   private readonly api = 'http://localhost:8080/api';
 
-  private readonly currentUserSubject = new BehaviorSubject<UserDto>({ email: '', name: 'Guest', surname: '', avatarUrl: '', role: Role.GUEST, id: 0, phone: '', address: '' });
+  private readonly currentUserSubject = new BehaviorSubject<UserDto>({ email: '', name: 'Guest', surname: '', avatarUrl: 'default-avatar.jpg', role: Role.GUEST, id: 0, phone: '', address: '' });
   readonly currentUser$ = this.currentUserSubject.asObservable();
 
   private readonly avatarSrcSubject = new BehaviorSubject<string>('default-avatar.jpg');
@@ -49,12 +51,16 @@ export class UserService {
 
   // --- actions ---
   setCurrentUserById(id: number) {
-    this.getUserById(id).subscribe({
+    if (id === 0 || id === null) {
+      this.currentUserSubject.next({ id: 0, role: Role.GUEST, name: 'Guest', surname: '', email: '', avatarUrl: 'default-avatar.jpg', phone: '', address: '' });
+      return;
+    }
+    this.getUserById(id).pipe(take(1)).subscribe({
       next: user => {
         this.currentUserSubject.next(user);
-        this.loadAvatar(user.id); // automatski učitaj avatar kad se postavi user
+        this.loadAvatar(user.id); 
         if (user.role === Role.DRIVER) {
-          this.loadUserVehicle(user.id); // automatski učitaj vehicle kad se postavi user (koji je driver)
+          this.loadUserVehicle(user.id); 
         }
       },
       error: err => {
@@ -64,14 +70,14 @@ export class UserService {
   }
 
   loadAvatar(userId: number) {
-    this.getUserAvatar(userId).subscribe({
+    this.getUserAvatar(userId).pipe(take(1)).subscribe({
       next: blob => this.avatarSrcSubject.next(URL.createObjectURL(blob)),
       error: () => this.avatarSrcSubject.next('default-avatar.jpg'),
     });
   }
 
   loadUserVehicle(userId: number) {
-    this.getVehicleByDriver(userId).subscribe({
+    this.getVehicleByDriver(userId).pipe(take(1)).subscribe({
       next: vehicle => this.currentUserVehicleSubject.next(vehicle),
       error: err => {
         if (err.status === 404) alert('Vehicle not found');
@@ -87,7 +93,13 @@ export class UserService {
 
   // GETTER ZA RIDE HISTORY (MOŽE DA SE IZBACI - ne diram ništa sam)
   getCurrentUser(): Observable<UserDto> {
-    return this.currentUser$;
+    return this.currentUser$
+  }
+
+
+  // get current user id
+  getCurrentUserId(): number {
+    return this.currentUserSubject.value.id;
   }
 
   getUsersByFullName(fullName : string) : Observable<UserDto[]> {

@@ -22,7 +22,7 @@ public class Driver extends User {
     @Column(name = "activation_token_expiry")
     private LocalDateTime activationTokenExpiry;
 
-    @OneToOne(mappedBy = "driver", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "driver", cascade = CascadeType.ALL, orphanRemoval = true)
     private Vehicle vehicle;
 
     @OneToMany(mappedBy = "driver", cascade = CascadeType.ALL)

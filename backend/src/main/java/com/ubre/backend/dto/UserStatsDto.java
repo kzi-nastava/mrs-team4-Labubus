@@ -15,6 +15,8 @@ public class UserStatsDto { // extend later with other attributes
     private Double moneySpent;
     private Double moneyEarned;
 
+    public UserStatsDto() {
+    }
 
     public UserStatsDto(Long userId, int activePast24Hours, int numberOfRides, double distanceTraveled, double moneySpent, double moneyEarned) {
         this.userId = userId;

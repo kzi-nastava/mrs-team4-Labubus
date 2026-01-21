@@ -3,26 +3,17 @@ package com.ubre.backend.service.impl;
 import com.ubre.backend.dto.*;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
-import com.ubre.backend.model.Admin;
-import com.ubre.backend.model.User;
-import com.ubre.backend.model.UserStats;
-import com.ubre.backend.repository.AdminRepository;
-import com.ubre.backend.model.ActivationToken;
-import com.ubre.backend.model.Driver;
-import com.ubre.backend.model.Passenger;
+import com.ubre.backend.model.*;
 import com.ubre.backend.repository.ActivationTokenRepository;
 import com.ubre.backend.repository.UserRepository;
+import com.ubre.backend.service.EmailService;
+import com.ubre.backend.repository.UserStatusRecordRepository;
 import com.ubre.backend.service.UserService;
-import jakarta.persistence.EntityNotFoundException;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -60,7 +51,13 @@ public class UserServiceImpl implements UserService {
     private ActivationTokenRepository tokenRepository;
 
     @Autowired
+    private UserStatusRecordRepository userStatusRecordRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -117,9 +114,7 @@ public class UserServiceImpl implements UserService {
         user.setAddress(dto.getAddress());
         user.setCreatedAt(LocalDateTime.now());
         user.setIsBlocked(false);
-        //user.setRole(Role.REGISTERED_USER);
-        // activate endpoint
-        user.setIsActivated(true);
+        user.setIsActivated(false);
         User savedUser = userRepository.save(user);
 
 
@@ -131,8 +126,7 @@ public class UserServiceImpl implements UserService {
 
         tokenRepository.save(token);
 
-        // email service for sending the token
-
+        emailService.sendPassengerActivationEmail(savedUser.getEmail(), token.getToken());
         return new UserDto(savedUser);
     }
 
@@ -277,23 +271,38 @@ public class UserServiceImpl implements UserService {
         // todo: same sh
     }
 
+    // get user stats by id
     @Override
     public UserStatsDto getUserStats(Long id) {
-        UserDto user = getUserById(id);
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        UserStats stats = user.getStats();
+        if (stats == null) {
+            // that means user has no stats yet, so create empty stats for them
+            stats = new UserStats(user);
+            user.setStats(stats);
+            userRepository.save(user);
         }
-        // Mock stats for demonstration purposes
-        return new UserStatsDto(id,450, 42, 128, 4.5, 15);
+
+        UserStatsDto statsDto = new UserStatsDto();
+        statsDto.setUserId(user.getId());
+        statsDto.setActivePast24Hours(stats.getActivePast24Hours()); // minutes
+        statsDto.setNumberOfRides(stats.getNumberOfRides());
+        statsDto.setDistanceTraveled(stats.getDistanceTraveled()); // kilometers, float
+        statsDto.setMoneySpent(stats.getMoneySpent()); // float
+        statsDto.setMoneyEarned(stats.getMoneyEarned()); // float
+
+        return statsDto;
     }
 
     @Override
     public void changePassword(PasswordChangeDto passwordChangeDto) {
-        UserDto user = getUserById(passwordChangeDto.getUserId()); // takodje radimo sa pravim objektom koji je model ustvari, nema šta sde se primeti sada
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }
-        // todo: implement password change logic
+        User user = userRepository.findById(passwordChangeDto.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        user.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
+        userRepository.save(user);
     }
 
     @Override
@@ -366,5 +375,18 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getUsersByFullName(String fullName) {
         List<User> users = userRepository.searchByFullName(fullName);
         return users.stream().map(UserDto::new).toList();
+    }
+  
+    // this is only for recording user status, not for updating user status
+    @Override
+    public void recordUserStatus(Long userId, UserStatus status) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        UserStatusRecord statusRecord = new UserStatusRecord();
+        statusRecord.setUser(user);
+        statusRecord.setStatus(status);
+        statusRecord.setValidFrom(LocalDateTime.now());
+        userStatusRecordRepository.save(statusRecord);
     }
 }

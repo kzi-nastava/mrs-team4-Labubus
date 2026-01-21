@@ -35,4 +35,7 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
 //
 //    @Query("SELECT r FROM Ride r WHERE r.driver = :driver AND r.startTime BETWEEN :start AND :end")
 //    List<Ride> findDriverRidesBetween(@Param("driver") Driver driver, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    // find rides by ride status
+    List<Ride> findByStatus(RideStatus status);
 }

@@ -1,0 +1,192 @@
+/* RIDE OPTIONS MODAL */
+.ro-modal {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  background: var(--color-surface);
+  border-radius: var(--border-radius-icons);
+  box-shadow: var(--drop-shadow);
+  overflow: hidden;
+  z-index: 2600;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(100%);
+}
+
+.ro-modal.show {
+  animation: slideUp 0.3s ease forwards;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.ro-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 6px;
+  padding-left: 4px;
+  margin-top: 6px;
+}
+
+.ro-back {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ro-title {
+  font-size: var(--font-size-large);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+/* Pills, rows, and switches - shared styles */
+.rd-wrap {
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-family: var(--font-family);
+}
+
+.rd-pills {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rd-pill {
+  height: 54px;
+  border-radius: 18px;
+  border: 1px solid var(--color-neutral-light-gray);
+  background: #fff;
+  text-align: left;
+  padding: 0 16px;
+  font-family: var(--font-family);
+  cursor: pointer;
+  color: var(--color-neutral-dark-gray);
+
+  transition:
+    border-color 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.18s ease,
+    background 0.18s ease;
+  will-change: transform, box-shadow;
+  box-shadow: none;
+}
+
+.rd-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--drop-shadow);
+  border-color: var(--color-neutral-light-gray);
+}
+
+.rd-pill.active {
+  border: 2px solid var(--color-primary-dark);
+  color: var(--color-primary-dark);
+  box-shadow: var(--drop-shadow);
+  transform: translateY(-2px);
+  font-weight: var(--font-weight-medium);
+}
+
+.rd-pill:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(10, 42, 102, 0.18), 0 10px 22px rgba(0, 0, 0, 0.08);
+}
+
+.rd-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.rd-row-label {
+  font-size: var(--font-size-regular);
+  color: var(--color-text-primary);
+}
+
+.rd-switch {
+  width: 135px;
+  height: 40px;
+  border-radius: 999px;
+  background: #e6e6e6;
+  border: none;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.25s ease;
+}
+
+.rd-switch .rd-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 54px;
+  height: 34px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.25),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+  transition: left 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rd-switch.on {
+  background: var(--color-primary-dark);
+}
+
+.rd-switch.on .rd-knob {
+  left: 78px;
+}
+
+.rd-switch:hover .rd-knob {
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+}
+
+.ro-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.ro-btn {
+  height: 44px;
+  border-radius: 12px;
+  font-family: var(--font-family);
+  font-size: var(--font-size-regular);
+  cursor: pointer;
+}
+
+.ro-btn-outline {
+  background: #fff;
+  border: 1px solid var(--color-primary-dark);
+  color: var(--color-primary-dark);
+}
+
+.ro-btn-filled {
+  background: var(--color-primary-dark);
+  border: 1px solid var(--color-primary-dark);
+  color: var(--color-surface);
+}
