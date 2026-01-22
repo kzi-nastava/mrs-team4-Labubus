@@ -282,15 +282,17 @@ export class RidePlanningStore {
 
     // for a driver, it represents the ride that is currently ongoing.
     // for a user, it represents a ride that is currently being driven, or scheduled for the future.
+    // this is hard to name because it is initially empty, when receiven its pending until it is accepted by a driver.
+    // TODO: find a better name for this subject.
 
-    public inprogressRideSubject$ = new BehaviorSubject<RideDto | null>(null);  // this subject represents current ride, for user and for a driver. 
-    public inprogressRide$ = this.inprogressRideSubject$.asObservable();
+    public currentRideSubject$ = new BehaviorSubject<RideDto | null>(null);  // this subject represents current ride, for user and for a driver. 
+    public currentRide$ = this.currentRideSubject$.asObservable();
 
-    public getInProgressRide() {
-        return this.inprogressRideSubject$.value;
+    public getCurrentRide() {
+        return this.currentRideSubject$.value;
     }
-    public clearInProgressRide() {
-        this.inprogressRideSubject$.next(null);
+    public clearCurrentRide() {
+        this.currentRideSubject$.next(null);
     }
 
     // ORDER RIDE LOGIC
@@ -312,7 +314,7 @@ export class RidePlanningStore {
         return this.orderingService.orderRide(rideOrderDto).pipe(
             take(1),
             tap((ride: RideDto) => {
-                this.inprogressRideSubject$.next(ride);
+                this.currentRideSubject$.next(ride);
                 this.clearRidePlanningState();
             }),
             catchError((err: HttpErrorResponse) => {
