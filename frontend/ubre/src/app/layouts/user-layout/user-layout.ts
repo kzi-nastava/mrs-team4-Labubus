@@ -162,14 +162,6 @@ import { NotificationType } from '../../enums/notification-type';
   };
 
   private previousScreenBeforeInvite: 'schedule-timer' | 'ride-options' | null = null;
-
-
-  
-  
-  
-  
-  
-  
   
   onDestBack() {
     this.ridePlanningStore.resetDest();
