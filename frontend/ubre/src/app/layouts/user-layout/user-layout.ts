@@ -104,6 +104,7 @@ import { NotificationType } from '../../enums/notification-type';
           if (notification.status === NotificationType.PROFILE_CHANGE_APPROVED && notification.user) {
             this.userService.setCurrentUserById(notification.user.id);
             this.showToast('Profile change approved', 'Your profile change request has been approved.');
+            this.playNotificationSound();
             this.cdr.detectChanges();
             this.userService.loadAvatar(notification.user.id);
             return;
@@ -124,6 +125,7 @@ import { NotificationType } from '../../enums/notification-type';
         next: (notification) => {
           if (notification.status === NotificationType.RIDE_ASSIGNED && notification.ride) {
             this.showToast('New ride assigned', 'Check your notifications for more details.');
+            this.playNotificationSound();
           }
         },
       });
@@ -134,6 +136,7 @@ import { NotificationType } from '../../enums/notification-type';
         next: (notification) => {
           if (notification.status === NotificationType.RIDE_REMINDER && notification.time) {
             this.showToast('Ride reminder', 'You have a ride scheduled at ' + notification.time + '.');
+            this.playNotificationSound();
           }
         },
       });
@@ -626,7 +629,24 @@ import { NotificationType } from '../../enums/notification-type';
 
 
 
-
+  playNotificationSound() {
+    try {
+      const audio = new Audio('/smooth-simple-notification-274738.mp3');
+      
+      audio.volume = 0.3;
+      
+      audio.play().catch((error) => {
+        console.warn('Failed to play notification sound:', error);
+        const audioAlt = new Audio('smooth-simple-notification-274738.mp3');
+        audioAlt.volume = 0.3;
+        audioAlt.play().catch((err) => {
+          console.warn('Failed to play notification sound with alternative path:', err);
+        });
+      });
+    } catch (error) {
+      console.warn('Error creating audio element:', error);
+    }
+  }
 
 
 
@@ -723,6 +743,7 @@ import { NotificationType } from '../../enums/notification-type';
     this.ridePlanningStore.orderRide().subscribe({
       next: () => {
         this.showToast('Ride ordered', 'Your ride has been ordered successfully.');
+        this.playNotificationSound();
       },
       error: (err: HttpErrorResponse) => {
         let errorMessage = 'Failed to order ride';
@@ -736,6 +757,17 @@ import { NotificationType } from '../../enums/notification-type';
         this.showToast('Error ordering ride', errorMessage);
       }
     });
+  }
+
+  onStartRideClick() {
+    const currentRide = this.ridePlanningStore.getCurrentRide();
+    if (!currentRide) {
+      this.showToast('No ride available', 'There is no ride available to start.');
+    } else {
+      // TODO: Implement start ride functionality
+      // For now, just show a message that ride can be started
+      this.showToast('Starting ride', 'Ride is being started...');
+    }
   }
 
 

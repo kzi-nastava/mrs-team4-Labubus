@@ -43,6 +43,15 @@ export class RidePlanningStore {
         passengersEmails: [],
         price: null,
     });
+    readonly ridePlanningState$ = this.ridePlanningStateSubject$.asObservable();
+
+    public clearRidePlanningState() {
+        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: [], suggestions: [], query: '', destOpen: false, routeInfo: null, rideOptions: { vehicleType: VehicleType.STANDARD, babyFriendly: false, petFriendly: false }, scheduledTime: '', passengersEmails: [], price: null });
+    }
+
+    public clearAllExceptRouteAndWaypoints() {
+        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, suggestions: [], query: '', destOpen: false, rideOptions: { vehicleType: VehicleType.STANDARD, babyFriendly: false, petFriendly: false }, scheduledTime: '', passengersEmails: [], price: null });
+    }
 
 
     // there should be also be a subject for ongoing, or schedulded rides. TODO: implement this
@@ -53,7 +62,6 @@ export class RidePlanningStore {
 
 
 
-    readonly ridePlanningState$ = this.ridePlanningStateSubject$.asObservable();
     private suggestionTimer: any = null; // this is a timer for the suggestions, it is used to debounce the suggestions, it is used to prevent the suggestions from being fetched too often
     private suggestionRequestId = 0; // this is a request id for the suggestions, it is used to prevent the suggestions from being fetched too often
     private routingRequestId = 0;  // for preventing old routing requests from being executed
@@ -272,14 +280,17 @@ export class RidePlanningStore {
 
     // ============ RIDE ORDERING LOGIC ============
 
-    public orderedRideSubject$ = new BehaviorSubject<RideDto | null>(null);
-    public orderedRide$ = this.orderedRideSubject$.asObservable();
+    // for a driver, it represents the ride that is currently ongoing.
+    // for a user, it represents a ride that is currently being driven, or scheduled for the future.
 
-    public getOrderedRide() {
-        return this.orderedRideSubject$.value;
+    public inprogressRideSubject$ = new BehaviorSubject<RideDto | null>(null);  // this subject represents current ride, for user and for a driver. 
+    public inprogressRide$ = this.inprogressRideSubject$.asObservable();
+
+    public getInProgressRide() {
+        return this.inprogressRideSubject$.value;
     }
-    public clearOrderedRide() {
-        this.orderedRideSubject$.next(null);
+    public clearInProgressRide() {
+        this.inprogressRideSubject$.next(null);
     }
 
     // ORDER RIDE LOGIC
@@ -301,9 +312,11 @@ export class RidePlanningStore {
         return this.orderingService.orderRide(rideOrderDto).pipe(
             take(1),
             tap((ride: RideDto) => {
-                this.orderedRideSubject$.next(ride);
+                this.inprogressRideSubject$.next(ride);
+                this.clearRidePlanningState();
             }),
             catchError((err: HttpErrorResponse) => {
+                this.clearAllExceptRouteAndWaypoints();
                 return throwError(() => err);
             })
         );
