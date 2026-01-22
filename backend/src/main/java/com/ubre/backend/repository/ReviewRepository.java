@@ -17,5 +17,5 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByUser(User user);
 
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.driver = :driver")
-    Double getAverageDriverRating(Driver driver);
+    Double findAverageDriverRating(Driver driver);
 }

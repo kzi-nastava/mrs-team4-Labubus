@@ -165,7 +165,7 @@ public class UserController {
 
     @GetMapping(value="", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Collection<UserDto>> getUsersByFullName(@RequestParam(defaultValue = "") String fullName) {
+    public ResponseEntity<List<UserDto>> getUsersByFullName(@RequestParam(defaultValue = "") String fullName) {
         fullName = fullName.replaceAll("[^a-zA-Z\\s]+", "");
         if (fullName.isEmpty())
             return ResponseEntity.status(HttpStatus.OK).body(new ArrayList<UserDto>());

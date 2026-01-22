@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.List;
 
 
 @RestController
@@ -34,14 +35,14 @@ public class ReviewController {
     }
 
     @GetMapping(value = "/driver/{driverId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<ReviewDto>> getDriverReviews(@PathVariable Long driverId) {
-        Collection<ReviewDto> reviews = ReviewService.getDriverReviews(driverId);
+    public ResponseEntity<List<ReviewDto>> getDriverReviews(@PathVariable Long driverId) {
+        List<ReviewDto> reviews = ReviewService.getDriverReviews(driverId);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 
     @GetMapping(value = "/user/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<ReviewDto>> getUserReviews(@PathVariable Long userId) {
-        Collection<ReviewDto> reviews = ReviewService.getUserReviews(userId);
+    public ResponseEntity<List<ReviewDto>> getUserReviews(@PathVariable Long userId) {
+        List<ReviewDto> reviews = ReviewService.getUserReviews(userId);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 

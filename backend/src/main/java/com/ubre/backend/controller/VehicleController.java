@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/vehicles")
@@ -60,8 +61,8 @@ public class VehicleController {
     }
 
     @GetMapping(value = "/locations", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<VehicleIndicatorDto>> getVehicleIndicators() {
-        Collection<VehicleIndicatorDto> locations = vehicleService.getVehicleIndicators();
+    public ResponseEntity<List<VehicleIndicatorDto>> getVehicleIndicators() {
+        List<VehicleIndicatorDto> locations = vehicleService.getVehicleIndicators();
         return new ResponseEntity<>(locations, HttpStatus.OK);
     }
 

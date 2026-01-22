@@ -373,7 +373,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public List<UserDto> getUsersByFullName(String fullName) {
-        List<User> users = userRepository.searchByFullName(fullName);
+        List<User> users = userRepository.findByFullName(fullName);
         return users.stream().map(UserDto::new).toList();
     }
   

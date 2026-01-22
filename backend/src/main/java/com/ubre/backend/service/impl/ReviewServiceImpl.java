@@ -1,7 +1,6 @@
 package com.ubre.backend.service.impl;
 
 import com.ubre.backend.dto.ReviewDto;
-import com.ubre.backend.enums.Role;
 import com.ubre.backend.model.Driver;
 import com.ubre.backend.model.Review;
 import com.ubre.backend.model.Ride;
@@ -16,12 +15,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.ErrorResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,7 +51,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Collection<ReviewDto> getDriverReviews(Long driverId) {
+    public List<ReviewDto> getDriverReviews(Long driverId) {
         Optional<Driver> driver = driverRepository.findById(driverId);
         if (driver.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found");
@@ -64,7 +61,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Collection<ReviewDto> getUserReviews(Long userId) {
+    public List<ReviewDto> getUserReviews(Long userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty() /*|| user.get().getRole() != Role.REGISTERED_USER*/)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
@@ -79,7 +76,7 @@ public class ReviewServiceImpl implements ReviewService {
         if (driver.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found");
 
-        return reviewRepository.getAverageDriverRating(driver.get());
+        return reviewRepository.findAverageDriverRating(driver.get());
     }
 
     @Override

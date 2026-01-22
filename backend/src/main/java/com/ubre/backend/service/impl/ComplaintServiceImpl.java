@@ -42,7 +42,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    public Collection<ComplaintDto> getComplaint(Long userId, Long driverId) {
+    public List<ComplaintDto> getComplaint(Long userId, Long driverId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
@@ -56,7 +56,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    public Collection<ComplaintDto> getDriverComplaints(Long driverId) {
+    public List<ComplaintDto> getDriverComplaints(Long driverId) {
         Optional<Driver> driver = driverRepository.findById(driverId);
         if (driver.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found");
@@ -66,7 +66,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    public Collection<ComplaintDto> getUserComplaints(Long userId) {
+    public List<ComplaintDto> getUserComplaints(Long userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
