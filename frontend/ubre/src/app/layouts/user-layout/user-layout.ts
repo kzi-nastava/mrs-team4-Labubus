@@ -139,7 +139,6 @@ import { NotificationType } from '../../enums/notification-type';
       });
   }
 
-
   ngOnDestroy() {
     this.profileChangeSubscription?.unsubscribe();
     this.rideAssignmentSubscription?.unsubscribe();
