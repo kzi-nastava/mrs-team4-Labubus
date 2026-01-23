@@ -13,7 +13,6 @@ import com.ubre.backend.repository.DriverRepository;
 import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.RideService;
-import com.ubre.backend.websocket.ProfileChangeNotification;
 import com.ubre.backend.websocket.RideAssignmentNotification;
 import com.ubre.backend.websocket.WebSocketNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,14 +57,13 @@ public class RideServiceImpl implements RideService {
 
     @Override
     public RideDto getRideById(Long id) {
-        RideDto ride = rides.stream()
-                .filter(r -> r.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
+        Optional<Ride> ride = rideRepository.findById(id);
+        if (ride.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
 
         // neophodno je proveriti takodje da li je ride prihvaćen, onda može da se startuje
         // tada vraćamo kod 400
-        return ride;
+        return new RideDto(ride.get());
     }
 
     @Override
@@ -117,7 +115,7 @@ public class RideServiceImpl implements RideService {
                 new UserDto(3L, Role.REGISTERED_USER, "", "passenger2@ubre.com", "Passenger2", "Passenger2", "1231234132", "Adress 123", UserStatus.ACTIVE)
         };
 
-        return new RideDto(1L, LocalDateTime.now().toString(), LocalDateTime.now().toString(), Arrays.asList(waypoints), driver, Arrays.stream(passengers).toList(), true, null, 12.34, 7.3);
+        return new RideDto(1L, LocalDateTime.now().toString(), LocalDateTime.now().toString(), Arrays.asList(waypoints), driver, Arrays.stream(passengers).toList(), true, null, 12.34, 7.3, null);
     }
 
     @Override
@@ -162,7 +160,7 @@ public class RideServiceImpl implements RideService {
 
         Ride ride = rideOptional.get();
         if (!Objects.equals(ride.getCreator().getId(), userId))
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User may only favorite their rides");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Users may only favorite their rides");
 
         ride.setFavorite(true);
         rideRepository.save(ride);
@@ -176,7 +174,7 @@ public class RideServiceImpl implements RideService {
 
         Ride ride = rideOptional.get();
         if (!Objects.equals(ride.getCreator().getId(), userId))
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User may only unfavorite their rides");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Users may only unfavorite their rides");
 
         ride.setFavorite(false);
         rideRepository.save(ride);
@@ -211,8 +209,7 @@ public class RideServiceImpl implements RideService {
         return mock;
     }
 
-
-    public List<RideCardDto> getRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query) {
+    public List<RideCardDto> getMyRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
@@ -228,6 +225,14 @@ public class RideServiceImpl implements RideService {
         if (query != null && query.getDate() != null)
             return rideRepository.findByCreatorAndStatusInAndStartTimeBetween(user.get(), List.of(RideStatus.COMPLETED, RideStatus.CANCELLED), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
         return rideRepository.findByCreatorAndStatusIn(user.get(), List.of(RideStatus.COMPLETED, RideStatus.CANCELLED), pageable).stream().map(RideCardDto::new).toList();
+    }
+
+    public List<RideCardDto> getRideHistory(Integer skip, Integer count, RideQueryDto query) {
+        Pageable pageable = parseToPageable(skip, count, query);
+
+        if (query != null && query.getDate() != null)
+            return rideRepository.findByStatusInAndStartTimeBetween(List.of(RideStatus.COMPLETED, RideStatus.CANCELLED), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
+        return rideRepository.findByStatusIn(List.of(RideStatus.COMPLETED, RideStatus.CANCELLED), pageable).stream().map(RideCardDto::new).toList();
     }
 
     @Override
@@ -378,8 +383,8 @@ public class RideServiceImpl implements RideService {
 
         RideDto createdRideDto = new RideDto();
         createdRideDto.setId(newRide.getId());
-        createdRideDto.setStart(newRide.getStartTime().toString());
-        createdRideDto.setEnd(newRide.getEndTime().toString());
+        createdRideDto.setStartTime(newRide.getStartTime().toString());
+        createdRideDto.setEndTime(newRide.getEndTime().toString());
         createdRideDto.setWaypoints(newRide.getWaypoints().stream().map(WaypointDto::new).toList());
         createdRideDto.setDriver(new UserDto(assignedDriver));
         createdRideDto.setPassengers(passengers.stream().map(UserDto::new).toList());

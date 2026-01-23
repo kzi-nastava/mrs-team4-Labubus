@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.List;
 
 
 @RestController
@@ -18,6 +20,7 @@ public class ReviewController {
     private ReviewService ReviewService;
 
     @PostMapping(value = "/ride/{rideId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("#createReviewDto.getUserId() == @securityUtil.currentUserId()")
     public ResponseEntity<ReviewDto> createReview(
             @PathVariable Long rideId,
             @RequestBody ReviewDto createReviewDto) {
@@ -32,18 +35,19 @@ public class ReviewController {
     }
 
     @GetMapping(value = "/driver/{driverId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<ReviewDto>> getDriverReviews(@PathVariable Long driverId) {
-        Collection<ReviewDto> reviews = ReviewService.getDriverReviews(driverId);
+    public ResponseEntity<List<ReviewDto>> getDriverReviews(@PathVariable Long driverId) {
+        List<ReviewDto> reviews = ReviewService.getDriverReviews(driverId);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 
     @GetMapping(value = "/user/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<ReviewDto>> getUserReviews(@PathVariable Long userId) {
-        Collection<ReviewDto> reviews = ReviewService.getUserReviews(userId);
+    public ResponseEntity<List<ReviewDto>> getUserReviews(@PathVariable Long userId) {
+        List<ReviewDto> reviews = ReviewService.getUserReviews(userId);
         return new ResponseEntity<>(reviews, HttpStatus.OK);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("#updateReviewDto.getUserId() == @securityUtil.currentUserId()")
     public ResponseEntity<ReviewDto> updateReview(
             @PathVariable Long id,
             @RequestBody ReviewDto updateReviewDto) {

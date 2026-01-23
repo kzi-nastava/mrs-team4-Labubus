@@ -372,6 +372,11 @@ public class UserServiceImpl implements UserService {
         );
     }
 
+    public List<UserDto> getUsersByFullName(String fullName) {
+        List<User> users = userRepository.findByFullName(fullName);
+        return users.stream().map(UserDto::new).toList();
+    }
+  
     // this is only for recording user status, not for updating user status
     @Override
     public void recordUserStatus(Long userId, UserStatus status) {

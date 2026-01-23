@@ -547,8 +547,7 @@
     }
 
     <!-- RIDE HISTORY SHEET -->
-    <app-ride-history class="ride-history" (onClose)="onRideHistoryBack()" [open]="showRideHistory"></app-ride-history>
-
+    <app-ride-history class="ride-history" (onClose)="onRideHistoryBack()" [open]="showRideHistory" (onError)="onEmmitError($event)"></app-ride-history>
 
     <!-- PROFILE CHANGES SHEET -->
     @if ((userService.currentUser$ | async)?.role === Role.ADMIN) {
@@ -574,4 +573,6 @@
   }
 
   </div>
+
+  <app-review-modal [show]="ui.reviewModalOpen" (onError)="onEmmitError($event)"></app-review-modal>
 </div>

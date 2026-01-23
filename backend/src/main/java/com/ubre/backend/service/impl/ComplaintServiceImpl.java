@@ -12,6 +12,8 @@ import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.ComplaintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -40,7 +42,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    public Collection<ComplaintDto> getComplaint(Long userId, Long driverId) {
+    public List<ComplaintDto> getComplaint(Long userId, Long driverId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
@@ -54,7 +56,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    public Collection<ComplaintDto> getDriverComplaints(Long driverId) {
+    public List<ComplaintDto> getDriverComplaints(Long driverId) {
         Optional<Driver> driver = driverRepository.findById(driverId);
         if (driver.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found");
@@ -64,7 +66,7 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
-    public Collection<ComplaintDto> getUserComplaints(Long userId) {
+    public List<ComplaintDto> getUserComplaints(Long userId) {
         Optional<User> user = userRepository.findById(userId);
         if (user.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
@@ -79,18 +81,19 @@ public class ComplaintServiceImpl implements ComplaintService {
         if (user.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
-        Optional<Driver> driver = driverRepository.findById(complaintDto.getDriverId());
-        if (driver.isEmpty())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Driver not found");
-
         Optional<Ride> ride = rideRepository.findById(rideId);
         if (ride.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if (!ride.get().getCreator().getId().equals(complaintDto.getUserId()) || !jwtUser.getId().equals(complaintDto.getUserId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the customer may submit a complaint");
+
         complaintDto.setId(null);
         Complaint complaint = new Complaint(complaintDto);
         complaint.setUser(user.get());
-        complaint.setDriver(driver.get());
+        complaint.setDriver(ride.get().getDriver());
         complaint.setRide(ride.get());
         return new ComplaintDto(complaintRepository.save(complaint));
     }
@@ -100,6 +103,11 @@ public class ComplaintServiceImpl implements ComplaintService {
         Optional<Complaint> complaint = complaintRepository.findById(id);
         if (complaint.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Complaint not found");
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if (!complaint.get().getUser().getId().equals(jwtUser.getId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the customer may edit their complaint");
 
         Complaint updatedComplaint = complaint.get();
         updatedComplaint.setText(complaintDto.getText());
@@ -111,6 +119,11 @@ public class ComplaintServiceImpl implements ComplaintService {
         Optional<Complaint> complaint = complaintRepository.findById(id);
         if (complaint.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Complaint not found");
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if (!complaint.get().getUser().getId().equals(jwtUser.getId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You may only delete your complaints");
 
         complaintRepository.delete(complaint.get());
         return new ComplaintDto(complaint.get());

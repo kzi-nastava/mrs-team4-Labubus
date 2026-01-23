@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, take } from 'rxjs';
 import { UserDto } from '../dtos/user-dto';
 import { UserStatsDto } from '../dtos/user-stats-dto';
@@ -98,5 +98,10 @@ export class UserService {
   // get current user id
   getCurrentUserId(): number {
     return this.currentUserSubject.value.id;
+  }
+
+  getUsersByFullName(fullName : string) : Observable<UserDto[]> {
+    const params : HttpParams = new HttpParams().set("fullName", fullName);
+    return this.http.get<UserDto[]>(`${this.api}/users`, {params: params});
   }
 }
