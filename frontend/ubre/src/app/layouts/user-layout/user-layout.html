@@ -60,7 +60,6 @@
       </div>
     }
 
-    @if (isLoggedIn()) {
       <!-- RIDE OPTIONS MODAL -->
       @if (ui.rideOptionsOpen) {
         <app-ride-options 
@@ -88,7 +87,7 @@
           (proceed)="onInvitePassengersProceed($event)">
         </app-invite-passengers>
       }
-    }
+    
 
     <!-- MAIN OVERLAY CONTENT -->
 
