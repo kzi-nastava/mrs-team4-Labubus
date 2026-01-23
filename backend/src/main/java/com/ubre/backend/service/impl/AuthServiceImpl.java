@@ -1,20 +1,29 @@
 package com.ubre.backend.service.impl;
 
+import com.ubre.backend.dto.ResetPasswordDto;
 import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.ActivationToken;
 import com.ubre.backend.model.Driver;
+import com.ubre.backend.model.PasswordResetToken;
 import com.ubre.backend.model.User;
 import com.ubre.backend.repository.ActivationTokenRepository;
 import com.ubre.backend.repository.DriverRepository;
+import com.ubre.backend.repository.PasswordResetTokenRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.AuthService;
+import com.ubre.backend.service.EmailService;
+import jakarta.transaction.Transactional;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -22,9 +31,14 @@ public class AuthServiceImpl implements AuthService {
     private UserRepository userRepository;
     @Autowired
     private DriverRepository driverRepository;
-
     @Autowired
     private ActivationTokenRepository tokenRepository;
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public User save(User user) {
@@ -89,6 +103,46 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public Optional<User> findByEmail(String trim) {
         return userRepository.findByEmail(trim);
+    }
+
+    @Override
+    @Transactional
+    public void createPasswordResetToken(String email) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            PasswordResetToken resetToken = passwordResetTokenRepository.findByUser(user)
+                        .orElse(new PasswordResetToken());
+
+            String token = UUID.randomUUID().toString();
+            resetToken.setToken(token);
+            resetToken.setUser(user);
+            resetToken.setExpiresAt(LocalDateTime.now().plusMinutes(30));
+
+            passwordResetTokenRepository.save(resetToken);
+
+            emailService.sendPasswordResetEmail(user.getEmail(), token);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(ResetPasswordDto dto) {
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(dto.getToken())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid password reset token."));
+
+        if (resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            passwordResetTokenRepository.delete(resetToken);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Reset token has expired.");
+        }
+
+        User user = resetToken.getUser();
+
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+
+        passwordResetTokenRepository.delete(resetToken);
     }
 
 

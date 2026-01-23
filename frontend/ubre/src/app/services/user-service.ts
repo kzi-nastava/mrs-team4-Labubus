@@ -9,6 +9,7 @@ import { VehicleType } from '../enums/vehicle-type';
 
 @Injectable({ providedIn: 'root' })
 export class UserService {
+  
   private readonly http = inject(HttpClient);
   private readonly api = 'http://localhost:8080/api';
 
@@ -100,6 +101,10 @@ export class UserService {
     return this.currentUserSubject.value.id;
   }
 
+  resetAvatar() {
+    this.avatarSrcSubject.next('default-avatar.jpg');
+  }
+  
   getUsersByFullName(fullName : string) : Observable<UserDto[]> {
     const params : HttpParams = new HttpParams().set("fullName", fullName);
     return this.http.get<UserDto[]>(`${this.api}/users`, {params: params});

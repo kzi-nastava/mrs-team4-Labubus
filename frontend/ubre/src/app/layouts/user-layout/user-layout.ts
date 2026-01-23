@@ -232,6 +232,7 @@ import { NotificationType } from '../../enums/notification-type';
     if (action === 'logout') {
       this.userService.setCurrentUserById(0);     // set current user to guest
       this.authService.logout();
+      this.userService.resetAvatar();
     }
     if (action === 'account-settings') {
       this.openAccountSettings();
