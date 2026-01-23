@@ -90,18 +90,9 @@ public class RideServiceImpl implements RideService {
 
     @Override
     public RideDto startRide(Long rideId) {
-        // prolazimo kroz vožnje (koje su inicijalno modeli i onda startujemo vožnju
-        boolean found = false;
-        if (!found) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found");
-        }
-        boolean accepted = false;
-        if (!accepted) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride not accepted");
-        }
-        RideDto startedRide = new RideDto();
+        boolean rideExists = rideRepository.existsById(rideId);
+        if (!rideExists) { throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"); }
 
-        return startedRide;
     }
 
     @Override
@@ -393,6 +384,19 @@ public class RideServiceImpl implements RideService {
         // if ride is scheduled, start a reminder process
         if (newRide.getStartTime().isAfter(LocalDateTime.now())) {
             rideReminderService.start(rideOrderDto.getCreatorId(), newRide.getStartTime());
+            rideReminderService.triggerScheduledRide(
+                    rideOrderDto.getCreatorId(),
+                    createdRideDto,
+                    newRide.getStartTime()
+            );
+            rideReminderService.triggerScheduledRide(
+                    assignedDriver.getId(),
+                    createdRideDto,
+                    newRide.getStartTime()
+            );
+        } else {
+            webSocketNotificationService.sendRideTrigger(rideOrderDto.getCreatorId(), createdRideDto);
+            webSocketNotificationService.sendRideTrigger(assignedDriver.getId(), createdRideDto);
         }
 
 

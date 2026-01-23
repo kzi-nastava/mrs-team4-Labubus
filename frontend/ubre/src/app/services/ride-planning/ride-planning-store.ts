@@ -295,6 +295,10 @@ export class RidePlanningStore {
         this.currentRideSubject$.next(null);
     }
 
+    public setCurrentRide(ride: RideDto) {
+        this.currentRideSubject$.next(ride);
+    }
+
     // ORDER RIDE LOGIC
     public orderRide(): Observable<RideDto> {
         const rideOrderDto: RideOrderDto = {
@@ -323,4 +327,7 @@ export class RidePlanningStore {
             })
         );
     }
+
+    // when ride is started, request is sent to backend to change status from PENDING to IN_PROGRESS
+    public startRide(): Observable<void> {
 }

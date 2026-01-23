@@ -1,5 +1,6 @@
 package com.ubre.backend.service.impl;
 
+import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.enums.NotificationType;
 import com.ubre.backend.websocket.RideReminderNotification;
 import com.ubre.backend.websocket.WebSocketNotificationService;
@@ -42,6 +43,15 @@ public class RideReminderService {
         scheduler.schedule(
                 () -> scheduleNext(userId, startTime),
                 Instant.now().plus(Duration.ofMinutes(nextDelayMinutes))
+        );
+    }
+
+    // one time trigger that is sent via websocket, to user, ride dto
+    public void triggerScheduledRide(Long userId, RideDto rideDto, LocalDateTime scheduledTime) {
+        // send notification via websocket, at a scheduled time
+        scheduler.schedule(
+                () -> webSocketNotificationService.sendRideTrigger(userId, rideDto),
+                Instant.from(scheduledTime.atZone(ZoneId.systemDefault()))
         );
     }
 }

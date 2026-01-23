@@ -75,6 +75,7 @@ import { NotificationType } from '../../enums/notification-type';
   private profileChangeSubscription?: Subscription;
   private rideAssignmentSubscription?: Subscription;
   private rideReminderSubscription?: Subscription;
+  private currentRideSubscription?: Subscription; // this subscription represents a current ride, for user and for a driver
 
   ngOnInit() {
     const userId = this.authService.getId();
@@ -103,8 +104,8 @@ import { NotificationType } from '../../enums/notification-type';
         next: (notification) => {
           if (notification.status === NotificationType.PROFILE_CHANGE_APPROVED && notification.user) {
             this.userService.setCurrentUserById(notification.user.id);
-            this.showToast('Profile change approved', 'Your profile change request has been approved.');
             this.playNotificationSound();
+            this.showToast('Profile change approved', 'Your profile change request has been approved.');
             this.cdr.detectChanges();
             this.userService.loadAvatar(notification.user.id);
             return;
@@ -124,8 +125,8 @@ import { NotificationType } from '../../enums/notification-type';
       .subscribe({
         next: (notification) => {
           if (notification.status === NotificationType.RIDE_ASSIGNED && notification.ride) {
-            this.showToast('New ride assigned', 'Check your notifications for more details.');
             this.playNotificationSound();
+            this.showToast('New ride assigned', 'Check your notifications for more details.');
           }
         },
       });
@@ -135,9 +136,19 @@ import { NotificationType } from '../../enums/notification-type';
       .subscribe({
         next: (notification) => {
           if (notification.status === NotificationType.RIDE_REMINDER && notification.time) {
-            this.showToast('Ride reminder', 'You have a ride scheduled at ' + notification.time + '.');
             this.playNotificationSound();
+            this.showToast('Ride reminder', 'You have a ride scheduled at ' + notification.time + '.');
           }
+        },
+      });
+
+    // this subscription receives notifications for a current ride via websocket
+    this.currentRideSubscription = this.webSocketService
+      .currentRideNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          // notification that time for a ride has come
+          this.showToast('Get ready', 'Your ride is starting soon...');
         },
       });
   }
@@ -146,6 +157,7 @@ import { NotificationType } from '../../enums/notification-type';
     this.profileChangeSubscription?.unsubscribe();
     this.rideAssignmentSubscription?.unsubscribe();
     this.rideReminderSubscription?.unsubscribe();
+    this.currentRideSubscription?.unsubscribe();
     this.webSocketService.disconnect();
   }
   ui = {
@@ -631,13 +643,13 @@ import { NotificationType } from '../../enums/notification-type';
 
   playNotificationSound() {
     try {
-      const audio = new Audio('/smooth-simple-notification-274738.mp3');
+      const audio = new Audio('/new-notification-07-210334.mp3');
       
       audio.volume = 0.3;
       
       audio.play().catch((error) => {
         console.warn('Failed to play notification sound:', error);
-        const audioAlt = new Audio('smooth-simple-notification-274738.mp3');
+        const audioAlt = new Audio('new-notification-07-210334.mp3');
         audioAlt.volume = 0.3;
         audioAlt.play().catch((err) => {
           console.warn('Failed to play notification sound with alternative path:', err);
@@ -766,7 +778,7 @@ import { NotificationType } from '../../enums/notification-type';
     } else {
       // TODO: Implement start ride functionality
       // For now, just show a message that ride can be started
-      this.showToast('Starting ride', 'Ride is being started...');
+      this.showToast('Starting ride', 'Make sure all passengers are in the vehicle.');
     }
   }
 

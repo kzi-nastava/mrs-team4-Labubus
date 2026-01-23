@@ -1,5 +1,6 @@
 package com.ubre.backend.websocket;
 
+import com.ubre.backend.dto.RideDto;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
