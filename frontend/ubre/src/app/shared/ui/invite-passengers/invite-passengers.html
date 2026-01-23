@@ -1,0 +1,37 @@
+<div class="invite-passengers-card show">
+  <div class="header">
+    <button type="button" class="back-button" (click)="onBack()">
+      <img src="arrow_back_28dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg" alt="back">
+    </button>
+    <div class="title">Invite passengers</div>
+  </div>
+
+  <div class="content">
+    @for (email of emails; track $index) {
+      <div class="email-row">
+        <span class="email-text">{{ email }}</span>
+        <button type="button" class="remove-button" (click)="removeEmail($index)">
+          <img src="cancel_16dp_999999_FILL0_wght400_GRAD0_opsz20.svg" alt="remove">
+        </button>
+      </div>
+    }
+
+    <div class="email-row input">
+      <input
+        class="email-input"
+        type="email"
+        [(ngModel)]="currentEmail"
+        (keypress)="onEmailKeyPress($event)"
+        placeholder="Enter email">
+      <button type="button" class="add-button" (click)="addEmail()">
+        <img src="person_add_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="add">
+      </button>
+    </div>
+  </div>
+
+  <div class="footer">
+    <app-button width="100%" (clicked)="onProceed()">
+      Checkout
+    </app-button>
+  </div>
+</div>

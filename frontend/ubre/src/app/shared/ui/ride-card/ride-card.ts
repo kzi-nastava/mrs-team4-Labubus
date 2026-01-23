@@ -15,6 +15,8 @@ export class RideCard {
   @Output() select = new EventEmitter<any>();
   @Output() action = new EventEmitter<any>();
 
+  start : Date = new Date();
+
   onSelect(event : MouseEvent) {
     const clickedElement = event.target as Element;
     if (!clickedElement.matches('.action-icon'))
@@ -23,5 +25,10 @@ export class RideCard {
 
   onAction() {
     this.action.emit(this.ride)
+  }
+  
+  ngOnInit() {
+    if (this.ride)
+      this.start = new Date(this.ride.startTime)
   }
 }

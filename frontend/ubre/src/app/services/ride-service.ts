@@ -1,402 +1,198 @@
 import { Injectable, inject } from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import { BehaviorSubject, Observable, Observer, of } from 'rxjs';
 import { RideCardDto } from '../dtos/ride-card-dto';
 import { RideDto } from '../dtos/ride-dto';
 import { RideStatus } from '../enums/ride-status';
 import { VehicleType } from '../enums/vehicle-type';
 import { Role } from '../enums/role';
+import { RideQueryDto } from '../dtos/ride-query';
+import { UserService } from './user-service';
+import { UserDto } from '../dtos/user-dto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RideService {
-  private rides: RideDto[] = [
-    {
-      id: 1,
-      startTime: new Date(),
-      endTime: new Date(),
-      waypoints: [
-        {
-          id: 1,
-          label: 'Narodnog fronta',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 2,
-          label: 'Bulevar oslobodjenja',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 3,
-          label: 'Bulevar despota Stefana',
-          latitude: 19.45,
-          longitude: 48.21
-        }
-      ],
-      driver: {
-        email: 'pera@peric.com',
-        name: 'Pera',
-        surname: 'Peric',
-        avatarUrl: '',
-        role: Role.DRIVER,
-        id: 1,
-        phone: "1251323523",
-        address: "Test adress 123"
-      },
-      vehicle: { model: 'Toyota Carolla 2021', type: VehicleType.STANDARD, id: 1, seats: 5, babyFriendly: true, petFriendly: false, plates: "123123123" },
-      passengers: [
-        {
-          email: 'mika@mikic.com',
-          name: 'Mika',
-          surname: 'Mikic',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 1,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-        {
-          email: 'djura@djuric.com',
-          name: 'Djura',
-          surname: 'Djuric',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 1,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-      ],
-      price: 16.13,
-      distance: 10.3,
-      panic: false,
-      canceledBy: null,
-      status: RideStatus.ACCEPTED
-    },
-    {
-      id: 2,
-      startTime: new Date(),
-      endTime: new Date(),
-      waypoints: [
-        {
-          id: 6,
-          label: 'Temerinski put',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 7,
-          label: 'Most slobode',
-          latitude: 19.45,
-          longitude: 48.21
-        }
-      ],
-      driver: {
-        email: 'pera@peric.com',
-        name: 'Pera',
-        surname: 'Peric',
-        avatarUrl: '',
-        role: Role.DRIVER,
-        id: 1,
-        phone: "1251323523",
-        address: "Test adress 123"
-      },
-      vehicle: { model: 'Toyota Carolla 2021', type: VehicleType.STANDARD, id: 1, seats: 5, babyFriendly: true, petFriendly: false, plates: "123123123" },
-      passengers: [
-        {
-          email: 'mika@mikic.com',
-          name: 'Mika',
-          surname: 'Mikic',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 1,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-        {
-          email: 'djura@djuric.com',
-          name: 'Djura',
-          surname: 'Djuric',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 1,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-      ],
-      price: 16.13,
-      distance: 10.3,
-      panic: false,
-      canceledBy: null,
-      status: RideStatus.ACCEPTED
-    },
-    {
-      id: 3,
-      startTime: new Date(),
-      endTime: new Date(),
-      waypoints: [
-        {
-          id: 5,
-          label: 'Bulevar cara Lazara',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 3,
-          label: 'Bulevar despota Stefana',
-          latitude: 19.45,
-          longitude: 48.21
-        }
-      ],
-      driver: {
-        email: 'pera@peric.com',
-        name: 'Pera',
-        surname: 'Peric',
-        avatarUrl: '',
-        role: Role.DRIVER,
-        id: 1,
-        phone: "1251323523",
-        address: "Test adress 123"
-      },
-      vehicle: { model: 'Toyota Carolla 2021', type: VehicleType.STANDARD, id: 1, seats: 5, babyFriendly: true, petFriendly: false, plates: "123123123" },
-      passengers: [
-        {
-          email: 'mika@mikic.com',
-          name: 'Mika',
-          surname: 'Mikic',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 1,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-        {
-          email: 'djura@djuric.com',
-          name: 'Djura',
-          surname: 'Djuric',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 1,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-      ],
-      price: 10.74,
-      distance: 5.6,
-      panic: false,
-      canceledBy: 2,
-      status: RideStatus.ACCEPTED
-    },
-    {
-      id: 4,
-      startTime: new Date(),
-      endTime: new Date(),
-      waypoints: [
-        {
-          id: 1,
-          label: 'Narodnog fronta',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 3,
-          label: 'Bulevar despota Stefana',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 4,
-          label: 'Trg mladenaca',
-          latitude: 19.45,
-          longitude: 48.21
-        }
-      ],
-      driver: {
-        email: 'pera@peric.com',
-        name: 'Pera',
-        surname: 'Peric',
-        avatarUrl: '',
-        role: Role.DRIVER,
-        id: 1,
-        phone: "1251323523",
-        address: "Test adress 123"
-      },
-      vehicle: { model: 'Toyota Carolla 2021', type: VehicleType.STANDARD, id: 1, seats: 5, babyFriendly: true, petFriendly: false, plates: "123123123" },
-      passengers: [
-        {
-          email: 'mika@mikic.com',
-          name: 'Mika',
-          surname: 'Mikic',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 2,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-        {
-          email: 'djura@djuric.com',
-          name: 'Djura',
-          surname: 'Djuric',
-          avatarUrl: '',
-          role: Role.REGISTERED_USER,
-          id: 3,
-          phone: "1251323523",
-          address: "Test adress 123"
-        },
-      ],
-      price: 20.84,
-      distance: 17.1,
-      panic: true,
-      canceledBy: 2,
-      status: RideStatus.ACCEPTED
-    }
-  ];
-
-  private cards: RideCardDto[] = [
-    {
-      rideId: 1,
-      startTime: new Date(),
-      waypoints: [
-                {
-          id: 1,
-          label: 'Narodnog fronta',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 2,
-          label: 'Bulevar oslobodjenja',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 3,
-          label: 'Bulevar despota Stefana',
-          latitude: 19.45,
-          longitude: 48.21
-        }
-      ],
-      favorite: true
-    },
-    {
-      rideId: 2,
-      startTime: new Date(),
-      waypoints: [
-        {
-          id: 6,
-          label: 'Temerinski put',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 7,
-          label: 'Most slobode',
-          latitude: 19.45,
-          longitude: 48.21
-        }
-      ],
-      favorite: false
-    },
-    {
-      rideId: 3,
-      startTime: new Date(),
-      waypoints: [
-        {
-          id: 5,
-          label: 'Bulevar cara Lazara',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 3,
-          label: 'Bulevar despota Stefana',
-          latitude: 19.45,
-          longitude: 48.21
-        }
-      ],
-      favorite: false
-    },
-    {
-      rideId: 4,
-      startTime: new Date(),
-      waypoints: [
-        {
-          id: 1,
-          label: 'Narodnog fronta',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 3,
-          label: 'Bulevar despota Stefana',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 4,
-          label: 'Trg mladenaca',
-          latitude: 19.45,
-          longitude: 48.21
-        }
-      ],
-      favorite: false
-    },
-  ];
-
-  private favorite: RideCardDto[] = [
-    {
-      rideId: 1,
-      startTime: new Date(),
-      waypoints: [
-                {
-          id: 1,
-          label: 'Narodnog fronta',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 2,
-          label: 'Bulevar oslobodjenja',
-          latitude: 19.45,
-          longitude: 48.21
-        },
-        {
-          id: 3,
-          label: 'Bulevar despota Stefana',
-          latitude: 19.45,
-          longitude: 48.21
-        }
-      ],
-      favorite: true
-    }
-  ];
-
+  private readonly BASE_URL : string = "http://localhost:8080/api/";
+  private readonly userService : UserService = inject(UserService);
   private readonly http = inject(HttpClient);
 
-  getHistory(): Observable<RideCardDto[]> {
-    return of(this.cards);
-  }
 
-  getRide(id: number): Observable<RideDto | undefined> {
-    let ride: RideDto | undefined = this.rides.filter(r => r.id == id).length == 0 ? undefined : this.rides.filter(r => r.id == id)[0];
-    return of(ride);
-  }
+  private history : BehaviorSubject<RideCardDto[]> = new BehaviorSubject<RideCardDto[]>([]);
+  public history$ : Observable<RideCardDto[]> = this.history.asObservable();
+  private historyPage : number = 0;
+  private fetchingHistory : boolean = false;
 
-  getFavorite(userId: number): Observable<RideCardDto[]> {
-    return of(this.favorite);
-  }
+  private favorites : BehaviorSubject<RideCardDto[]> = new BehaviorSubject<RideCardDto[]>([]);
+  public favorites$ : Observable<RideCardDto[]> = this.favorites.asObservable();
+  private favoritesPage : number = 0;
+  private fetchingFavorites : boolean = false;
 
-  toggleFavorite(userId: number, id: number): void {
-    let card : RideCardDto | undefined = this.cards.filter(r => r.rideId == id).length == 0 ? undefined : this.cards.filter(r => r.rideId == id)[0];
-    if (card !== undefined) {
-      card.favorite = !card.favorite
-      this.cards.map(c => {if (c.rideId == id) return {...c, favorite: !c.favorite}; return c})
-      if (card.favorite == true)
-        this.favorite.push(card);
+  fetchHistory(query : RideQueryDto, count : number = 3) : void {
+    if (this.fetchingHistory)
+      return;
+
+    this.fetchingHistory = true;
+    const queryParams : HttpParams = this.extractParams(query, this.historyPage, count);
+    this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
+      let userId : number = query.userId ?? currentUser.id;
+      if (currentUser.role === Role.ADMIN && query.userId === null)
+        this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/history`, {params: queryParams}).subscribe({
+          next: (value : RideCardDto[]) => {
+            this.fetchingHistory = false;
+            if (value.length == 0)
+              return;
+
+            this.history.next([...this.history.value, ...value]);
+            this.historyPage++;
+          },
+          error: (err) => {
+            this.fetchingHistory = false;
+          }
+        }
+      )
       else
-        this.favorite = this.favorite.filter((c) => c.rideId == card.rideId);
-    }
+        this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/history/${userId}`, {params: queryParams}).subscribe({
+          next: (value : RideCardDto[]) => {
+            this.fetchingHistory = false;
+            if (value.length == 0)
+              return;
+
+            this.history.next([...this.history.value, ...value]);
+            this.historyPage++;
+          },
+          error: (err) => {
+            this.fetchingHistory = false;
+          }
+        })
+    })
+  }
+
+  clearHistory() {
+    this.history.next([]);
+    this.historyPage = 0;
+  }
+
+  getRide(id: number): Observable<RideDto> {
+    return this.http.get<RideDto>(`${this.BASE_URL}rides/${id}`);
+  }
+
+  fetchFavorites(query : RideQueryDto, count : number = 3) : void {
+    if (this.fetchingFavorites)
+      return;
+
+    this.fetchingFavorites = true;
+    const params : HttpParams = this.extractParams(query, this.favoritesPage, count);
+    this.userService.getCurrentUser().subscribe({
+      next: (currentUser : UserDto) => {
+      this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/${currentUser.id}/favorites`, {params}).subscribe((value : RideCardDto[]) => {
+        this.fetchingFavorites = false;
+        if (value.length == 0)
+              return;
+
+        this.favorites.next([...this.favorites.value, ...value]);
+        this.favoritesPage++;
+      })},
+      error : (err) => {
+        this.fetchingFavorites = false;
+      }
+    })
+  }
+
+  clearFavorites() {
+    this.favorites.next([]);
+    this.favoritesPage = 0;
+  }
+
+  addToFavorites(id: number, callback : Partial<Observer<void>> | ((value: void) => void) | undefined = undefined): void {
+    this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
+      this.http.put<void>(`${this.BASE_URL}rides/${currentUser.id}/favorites/${id}`, null).subscribe({
+        next: () => {
+          let updatedHistory = this.history.value
+          updatedHistory = updatedHistory.map((ride : RideCardDto) => {
+            if (ride.id == id)
+              return { ...ride, favorite: true };
+            return ride;
+          })
+          this.history.next(updatedHistory)
+          if (callback !== undefined) {
+            if (typeof callback != "function") {
+              let typedCallback : Partial<Observer<void>> = callback as Partial<Observer<void>>
+              if (typedCallback.next)
+                typedCallback.next();
+            }
+            else
+              callback()
+          }
+        },
+        error: err => {
+          if (callback !== undefined) {
+            if (typeof callback != "function") {
+              let typedCallback : Partial<Observer<void>> = callback as Partial<Observer<void>>
+              if (typedCallback.error)
+                typedCallback.error(err);
+            }
+          }
+        },
+      })
+    })
+  }
+
+  removeFromFavorites(id: number, callback : Partial<Observer<void>> | ((value: void) => void) | undefined = undefined): void {
+    this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
+      this.http.delete<void>(`${this.BASE_URL}rides/${currentUser.id}/favorites/${id}`).subscribe({
+        next: () => {
+          let updatedHistory = this.history.value
+          updatedHistory = updatedHistory.map((ride : RideCardDto) => {
+            if (ride.id == id)
+              return { ...ride, favorite: false };
+            return ride;
+          })
+          this.history.next(updatedHistory)
+
+          let updatedFavorites = this.favorites.value.filter((ride : RideCardDto) => ride.id != id)
+          this.favorites.next(updatedFavorites);
+          if (callback !== undefined) {
+            if (typeof callback != "function") {
+              let typedCallback : Partial<Observer<void>> = callback as Partial<Observer<void>>
+              if (typedCallback.next)
+                typedCallback.next();
+            }
+            else
+              callback()
+          }
+        },
+        error: err => {
+          if (callback !== undefined) {
+            if (typeof callback != "function") {
+              let typedCallback : Partial<Observer<void>> = callback as Partial<Observer<void>>
+              if (typedCallback.error)
+                typedCallback.error(err);
+            }
+            else
+              callback()
+          }
+        },
+      })
+    })
+  }
+
+  private extractParams(query : RideQueryDto, skip : number, count : number) : HttpParams {
+    let params : HttpParams = new HttpParams();
+
+    if (query.sortBy != "" && query.sortBy != null)
+      params = params.set('sortBy', query.sortBy.valueOf());
+
+    if (query.sortBy != "" && query.sortBy != null && query.ascending != null)
+      params = params.set('ascending', query.ascending);
+
+    if (query.date != null)
+      params = params.set('date', query.date.toISOString().slice(0, 10) + 'T00:00:00');
+
+    params = params.set('skip', skip)
+    params = params.set('count', count)
+
+    return params;
   }
 }

@@ -1,15 +1,18 @@
 package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.*;
+import com.ubre.backend.enums.VehicleType;
 import com.ubre.backend.service.RideService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/rides")
@@ -47,6 +50,7 @@ public class RideController {
     @PutMapping(
             value = "/{userId}/favorites/{rideId}"
     )
+    @PreAuthorize("#userId == @securityUtil.currentUserId()")
     public ResponseEntity<Void> addRideToFavorites(
             @PathVariable Long userId,
             @PathVariable Long rideId) {
@@ -58,6 +62,7 @@ public class RideController {
     @DeleteMapping(
             value = "/{userId}/favorites/{rideId}"
     )
+    @PreAuthorize("#userId == @securityUtil.currentUserId()")
     public ResponseEntity<Void> removeRideFromFavorites(
             @PathVariable Long userId,
             @PathVariable Long rideId) {
@@ -66,17 +71,17 @@ public class RideController {
     }
 
     // kreiranje voznje
-    @PostMapping(
-            value = "/{userId}",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<RideDto> createRide(
-            @PathVariable Long userId,
-            @RequestBody RideDto rideDto) {
-        RideDto createdRide = rideService.createRide(userId, rideDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdRide);
-    }
+//    @PostMapping(
+//            value = "/{userId}",
+//            consumes = MediaType.APPLICATION_JSON_VALUE,
+//            produces = MediaType.APPLICATION_JSON_VALUE
+//    )
+//    public ResponseEntity<RideDto> createRide(
+//            @PathVariable Long userId,
+//            @RequestBody RideDto rideDto) {
+//        RideDto createdRide = rideService.createRide(userId, rideDto);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(createdRide);
+//    }
 
     // check wether there are drivers available for a ride
     @GetMapping(
@@ -104,19 +109,33 @@ public class RideController {
     @GetMapping(
             value = "/history/{userId}"
     )
+    @PreAuthorize("#userId == @securityUtil.currentUserId() || hasRole('ADMIN')")
     public ResponseEntity<List<RideCardDto>> getRideHistory(
             @PathVariable Long userId,
             @RequestParam(required = false) Integer skip,
             @RequestParam(required = false) Integer count,
             @ModelAttribute RideQueryDto query) {
-        List<RideCardDto> createdRide = rideService.getRideHistory(userId, skip, count, query);
-        return ResponseEntity.status(HttpStatus.OK).body(createdRide);
+        List<RideCardDto> rides = rideService.getMyRideHistory(userId, skip, count, query);
+        return ResponseEntity.status(HttpStatus.OK).body(rides);
+    }
+
+    @GetMapping(
+            value = "/history"
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<RideCardDto>> getRideHistory(
+            @RequestParam(required = false) Integer skip,
+            @RequestParam(required = false) Integer count,
+            @ModelAttribute RideQueryDto query) {
+        List<RideCardDto> rides = rideService.getRideHistory(skip, count, query);
+        return ResponseEntity.status(HttpStatus.OK).body(rides);
     }
 
     @GetMapping(
             value = "/scheduled/{driverId}",
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
+    @PreAuthorize("#driverId == @securityUtil.currentUserId() || hasRole('ADMIN')")
     public ResponseEntity<List<RideCardDto>> getScheduledRides(
             @PathVariable Long driverId,
             @RequestParam(required = false) Integer skip,
@@ -133,22 +152,6 @@ public class RideController {
     public ResponseEntity<Void> getScheduledRides(@PathVariable Long id) {
         rideService.trackRide(id);
         return ResponseEntity.status(HttpStatus.OK).body(null);
-    }
-
-    // guest or registered user can estimate ride details based on provided waypoints and options
-    @PostMapping(
-            value = "/estimate",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<RideEstimationsDto> estimateRide(@RequestBody RideDto rideDto) {
-        double estimatedPrice = rideService.estimateRidePrice(rideDto);
-        RideEstimationsDto estimationsDto = new RideEstimationsDto(
-                new ArrayList<>(List.of(rideDto.getWaypoints())),
-                estimatedPrice,
-                15
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(estimationsDto);
     }
 
     // cancel an already scheduled ride with optional reason
@@ -185,15 +188,11 @@ public class RideController {
 //        }
 //    }
 //
-//    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<RideDTO> getRideById(@PathVariable Long id) {
-//        try {
-//            RideDTO ride = rideService.getRideById(id);
-//            return new ResponseEntity<>(ride, HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<RideDto> getRideById(@PathVariable Long id) {
+        RideDto ride = rideService.getRideById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(ride);
+    }
 //
 //    @GetMapping(value = "/user/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
 //    public ResponseEntity<List<RideDTO>> getUserRides(@PathVariable Long userId) {
@@ -269,13 +268,47 @@ public class RideController {
 //        }
 //    }
 //
-//    @PostMapping(value = "/estimate", produces = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<Double> estimatePrice(@RequestBody CreateRideDTO createRideDTO) {
-//        try {
-//            double price = rideService.estimateRidePrice(createRideDTO);
-//            return new ResponseEntity<>(price, HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//        }
-//    }
+
+    // TODO: implement price fetching from database later
+    @PostMapping(value = "/price-estimate",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Double> estimatePrice(@RequestBody Map<String, Double> options) {
+        Double standard = 5.0; // base fare for standard vehicle (in dollars)
+        Double van = 8.0; // base fare for van vehicle
+        Double luxury = 20.0; // base fare for luxury vehicle
+        Double perKm = 1.2; // per kilometer rate (in dollars)
+
+        Double dist = options.get("distance"); // in meters
+        Double vehicleType = options.get("vehicleType"); // 0 - standard, 1 - van, 2 - luxury
+
+        double baseFare;
+        if (vehicleType == 0) {
+            baseFare = standard;
+        } else if (vehicleType == 1) {
+            baseFare = van;
+        } else {
+            baseFare = luxury;
+        }
+        double price = baseFare + (perKm * (dist / 1000));
+        // rounding to 2 decimal places
+        price = Math.round(price * 100.0) / 100.0;
+        return ResponseEntity.status(HttpStatus.OK).body(price);
+    }
+
+
+
+
+    // order a ride endpoint, should be protected later by hasRole('USER') or similar, for now ignore
+    // TODO: protect this endpoint later
+    @PostMapping(
+            value = "/order",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<RideDto> orderRide(@RequestBody RideOrderDto rideOrder) {
+        RideDto orederedRide = rideService.orderRide(rideOrder);
+        return ResponseEntity.status(HttpStatus.CREATED).body(orederedRide);
+    }
 }

@@ -8,6 +8,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 // Ride history, active rides, my favourites
 
@@ -17,7 +18,7 @@ import java.util.Collection;
 public class RideCardDto {
     private Long id;
     private LocalDateTime startTime;
-    public Collection<WaypointDto> waypoints;
+    public List<WaypointDto> waypoints;
     public Boolean favorite;
 
     public RideCardDto(Long id, LocalDateTime startTime, ArrayList<WaypointDto> waypoints, Boolean favorite) {

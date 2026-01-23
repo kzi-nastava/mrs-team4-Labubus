@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Map } from '../../features/map/map';
+import { Map } from '../../services/ride-planning/map/map';
 import { IconButton } from '../../shared/ui/icon-button/icon-button';
 import { SideMenu } from '../../shared/ui/side-menu/side-menu';
 import { Toast } from '../../shared/ui/toast/toast';
@@ -12,7 +12,7 @@ import { Sheet } from '../../shared/ui/sheet/sheet';
 import { FormsModule } from '@angular/forms';
 import { ConfettiService } from '../../services/confetti';
 import { inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { RideHistory } from '../../shared/ui/ride-history/ride-history';
 import { OnInit } from '@angular/core';
@@ -22,8 +22,7 @@ import { UserStatsDto } from '../../dtos/user-stats-dto';
 import { VehicleDto } from '../../dtos/vehicle-dto';
 import { Role } from '../../enums/role';
 import { VehicleType } from '../../enums/vehicle-type';
-import { MapService } from '../../services/map-service';
-import { Subscription, forkJoin, take } from 'rxjs';
+import { Observable, Subscription, forkJoin, of, take } from 'rxjs';
 import { DriverRegistrationService } from '../../services/driver-registration-service';
 import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
@@ -34,8 +33,16 @@ import { AuthService } from '../../features/auth/auth-service';
 import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 import { WebSocketService } from '../../services/websocket-service';
 import { StatItemDto } from '../../dtos/stat-item-dto';
+import { ReviewService } from '../../services/review-service';
+import { ReviewModal } from '../../shared/ui/review-modal/review-modal';
 import { ChangePasswordService } from '../../services/change-password-service';
 import { UserStatsService } from '../../services/user-stats-service';
+import { RidePlanningStore } from '../../services/ride-planning/ride-planning-store';
+import { ScheduleTimer } from '../../shared/ui/schedule-timer/schedule-timer';
+import { InvitePassengers } from '../../shared/ui/invite-passengers/invite-passengers';
+import { RideOptions } from '../../shared/ui/ride-options/ride-options';
+import { RideOptionsDto } from '../../dtos/ride-options-dto';
+import { NotificationType } from '../../enums/notification-type';
 
 @Component({
   selector: 'app-user-layout',
@@ -43,7 +50,7 @@ import { UserStatsService } from '../../services/user-stats-service';
   imports: [Map,IconButton,SideMenu,Toast,
     Modal,ModalContainer,StatCard,Button,
     Sheet,FormsModule,RideHistory,ProfileChangeCard,
-    AsyncPipe],
+    AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,RideOptions],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -52,8 +59,9 @@ import { UserStatsService } from '../../services/user-stats-service';
     
     public userService = inject(UserService);
     private authService = inject(AuthService);
+    private reviewService : ReviewService = inject(ReviewService)
     public driverRegistrationService = inject(DriverRegistrationService);
-    public mapService = inject(MapService);
+    public ridePlanningStore = inject(RidePlanningStore);
     private confetti = inject(ConfettiService);
     public profileChangeService = inject(ProfileChangeService); 
     public accountSettingsService = inject(AccountSettingsService);
@@ -68,6 +76,9 @@ import { UserStatsService } from '../../services/user-stats-service';
 
   private websocketUserId: number | null = null;
   private profileChangeSubscription?: Subscription;
+  private rideAssignmentSubscription?: Subscription;
+  private rideReminderSubscription?: Subscription;
+
 
   ngOnInit() {
     const userId = this.authService.getId();
@@ -94,7 +105,7 @@ import { UserStatsService } from '../../services/user-stats-service';
       .profileChangeNotifications(userId)
       .subscribe({
         next: (notification) => {
-          if (notification.status === 'APPROVED' && notification.user) {
+          if (notification.status === NotificationType.PROFILE_CHANGE_APPROVED && notification.user) {
             this.userService.setCurrentUserById(notification.user.id);
             this.showToast('Profile change approved', 'Your profile change request has been approved.');
             this.cdr.detectChanges();
@@ -102,7 +113,7 @@ import { UserStatsService } from '../../services/user-stats-service';
             return;
           }
 
-          if (notification.status === 'REJECTED') {
+          if (notification.status === NotificationType.PROFILE_CHANGE_REJECTED && notification.user) {
             this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
           }
         },
@@ -110,10 +121,35 @@ import { UserStatsService } from '../../services/user-stats-service';
           this.showToast('Connection error', 'Could not receive profile change updates.');
         },
       });
+    
+    this.rideAssignmentSubscription = this.webSocketService
+      .rideAssignmentNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          if (notification.status === NotificationType.RIDE_ASSIGNED && notification.ride) {
+            this.showToast('New ride assigned', 'Check your notifications for more details.');
+          }
+        },
+      });
+
+    this.ui.reviewModalOpen = this.reviewService.showReviewModal$;
+    
+    this.rideReminderSubscription = this.webSocketService
+      .rideReminderNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          if (notification.status === NotificationType.RIDE_REMINDER && notification.time) {
+            this.showToast('Ride reminder', 'You have a ride scheduled at ' + notification.time + '.');
+          }
+        },
+      });
   }
-  
+
+
   ngOnDestroy() {
     this.profileChangeSubscription?.unsubscribe();
+    this.rideAssignmentSubscription?.unsubscribe();
+    this.rideReminderSubscription?.unsubscribe();
     this.webSocketService.disconnect();
   }
   ui = {
@@ -128,7 +164,12 @@ import { UserStatsService } from '../../services/user-stats-service';
     checkoutModalOpen: false,
     toastOpen: false,
     profileChangesOpen: false,
+    reviewModalOpen: of(false),
+    scheduleTimerOpen: false,
+    invitePassengersOpen: false,
   };
+
+  private previousScreenBeforeInvite: 'schedule-timer' | 'ride-options' | null = null;
 
 
   
@@ -139,20 +180,17 @@ import { UserStatsService } from '../../services/user-stats-service';
   
   
   onDestBack() {
-    this.mapService.resetDest();
+    this.ridePlanningStore.resetDest();
   }
 
   toggleDest() {
-    this.mapService.toggleDest();
-    if (this.mapService.destOpen) this.ui.cdModalOpen = false;
+    this.ridePlanningStore.toggleDestOpen();
+    if (this.ridePlanningStore.destOpen) this.ui.cdModalOpen = false;
   }
 
   onCdProceed() {
-    if (this.mapService.waypoints.length === 0) {
-      this.showToast('No destination', 'Please add at least one destination waypoint.');
-      return;
-    }
-    this.mapService.closeDest();
+    // close destination card
+    this.ridePlanningStore.closeDest();
     this.ui.rideOptionsOpen = true;
   }
 
@@ -185,7 +223,7 @@ import { UserStatsService } from '../../services/user-stats-service';
     this.closeChangePassword();
     this.closeVehicleInfo();
     this.closeRegisterDriver();
-    this.mapService.closeDest();
+    this.ridePlanningStore.closeDest();
     this.closeRideHistory();
     this.closeProfileChanges();
   }
@@ -252,7 +290,7 @@ import { UserStatsService } from '../../services/user-stats-service';
 
   onCdModalAction() {
     this.ui.cdModalOpen = false;
-    this.mapService.openDest();
+    this.ridePlanningStore.openDest();
   }
 
   openChat() {
@@ -593,24 +631,43 @@ import { UserStatsService } from '../../services/user-stats-service';
     this.showRideHistory = false;
   }
 
+  onEmmitError(error : Error) {
+    this.showToast(error.name, error.message)
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   // RIDE OPTIONS SHEET LOGIC
-
-  rideOptions = {
-    rideType: 'Standard' as 'Standard' | 'Luxury' | 'Van',
-    babyFriendly: false,
-    petFriendly: false,
-  };
-
-  setRideType(type: 'Standard' | 'Luxury' | 'Van') {
-    this.rideOptions.rideType = type;
-  }
-
-  toggleRideBaby() {
-    this.rideOptions.babyFriendly = !this.rideOptions.babyFriendly;
-  }
-  toggleRidePet() {
-    this.rideOptions.petFriendly = !this.rideOptions.petFriendly;
-  }
 
   closeRideOptions() {
     this.ui.rideOptionsOpen = false;
@@ -620,30 +677,87 @@ import { UserStatsService } from '../../services/user-stats-service';
   }
   onRideOptionsBack() {
     this.ui.rideOptionsOpen = false;
-    this.mapService.openDest();
+    this.ridePlanningStore.openDest();
   }
 
-  onScheduleRide() {
+  onRideOptionsScheduleRide(options: RideOptionsDto) {
     this.closeRideOptions();
-    // TODO: API call za zakazivanje vožnje
-    this.showToast('Ride scheduled', 'Your ride has been scheduled successfully.');
+    this.ridePlanningStore.setRideOptions(options);
+    this.ui.scheduleTimerOpen = true;
   }
 
-  onCheckout() {
+  onRideOptionsProceed(options: RideOptionsDto) {
     this.closeRideOptions();
-    this.ui.checkoutModalOpen = true;
+    this.previousScreenBeforeInvite = 'ride-options';
+    this.ridePlanningStore.setRideOptions(options);
+    this.ui.invitePassengersOpen = true;
   }
+
+  onScheduleTimerBack() {
+    this.ui.scheduleTimerOpen = false;
+    this.ui.rideOptionsOpen = true;
+    this.ridePlanningStore.clearScheduledTime();
+  }
+
+  onScheduleTimerCheckout(timeData: { hours: number; minutes: number; isAM: boolean }) {
+    this.ui.scheduleTimerOpen = false;
+    this.previousScreenBeforeInvite = 'schedule-timer';
+    this.ui.invitePassengersOpen = true;
+    this.ridePlanningStore.setScheduledTime(timeData);
+  }
+
+
+
+
 
   onCheckoutModalBack() {
     this.ui.checkoutModalOpen = false;
-    this.ui.rideOptionsOpen = true;
+    this.ui.invitePassengersOpen = true;
+  }
+
+
+
+
+
+
+  onInvitePassengersBack() {
+    this.ui.invitePassengersOpen = false;
+    // Go back to previous screen - either schedule timer or ride options
+    if (this.previousScreenBeforeInvite === 'schedule-timer') {
+      this.ui.scheduleTimerOpen = true;
+    } else if (this.previousScreenBeforeInvite === 'ride-options') {
+      this.ui.rideOptionsOpen = true;
+    }
+    this.previousScreenBeforeInvite = null;
+  }
+
+  onInvitePassengersProceed(emails: string[]) {
+    this.ui.invitePassengersOpen = false;
+    this.ui.checkoutModalOpen = true;
+    this.ridePlanningStore.setPassengersEmails(emails);
+    this.ridePlanningStore.estimatePrice();
   }
 
   onConfirmRide() {
-    // TODO: API call za potvrdu vožnje
     this.ui.checkoutModalOpen = false;
-    this.showToast('Ride confirmed', 'Your ride has been confirmed successfully.');
+    this.ridePlanningStore.orderRide().subscribe({
+      next: () => {
+        this.showToast('Ride ordered', 'Your ride has been ordered successfully.');
+      },
+      error: (err: HttpErrorResponse) => {
+        let errorMessage = 'Failed to order ride';
+        if (err.error && typeof err.error === 'string') {
+          errorMessage = err.error;
+        } else if (err.error && err.error.message && typeof err.error.message === 'string') {
+          errorMessage = err.error.message;
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+        this.showToast('Error ordering ride', errorMessage);
+      }
+    });
   }
+
 
 
 

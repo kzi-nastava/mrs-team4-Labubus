@@ -5,13 +5,14 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 // By providing ride estimations when or before ordering (guest can see it too)
 
 @Getter
 @Setter
 public class RideEstimationsDto {
-    private Collection<WaypointDto> waypoints;
+    private List<WaypointDto> waypoints;
     private Double price;
     private Integer duration; // in minutes
 

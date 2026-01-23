@@ -9,7 +9,6 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -30,7 +29,7 @@ public class Ride {
     private LocalDateTime endTime;
 
     @Column(name = "distance")
-    private Double distance; // in kilometers
+    private Double distance; // in meters
 
     @Column(name = "price")
     private Double price;
@@ -53,10 +52,10 @@ public class Ride {
         joinColumns = @JoinColumn(name = "ride_id"),
         inverseJoinColumns = @JoinColumn(name = "passenger_id")
     )
-    private List<User> passengers = new ArrayList<>();
+    private List<User> passengers;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Waypoint> waypoints = new ArrayList<>();
+    private List<Waypoint> waypoints;
 
     @OneToOne(mappedBy = "ride", cascade = CascadeType.ALL)
     private Review review;
@@ -91,8 +90,8 @@ public class Ride {
 
     public Ride(RideDto dto) {
         this.id = dto.getId();
-        this.startTime = dto.getStart();
-        this.waypoints = Arrays.stream(dto.getWaypoints()).map(Waypoint::new).toList();
+        this.startTime = LocalDateTime.parse(dto.getStartTime());
+        this.waypoints = dto.getWaypoints().stream().map(Waypoint::new).toList();
         this.panic = false;
         this.favorite = false;
         this.canceledBy = null;

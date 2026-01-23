@@ -1,29 +1,48 @@
-<app-modal-container class="list" [class.move-up]="open" (backPressed)="onBack()" [title]="title">
-      @for (ride of rides; track ride.rideId) {
-        <app-ride-card [selected]="!(selectedRide === undefined) && selectedRide.id === ride.rideId" [ride]="ride" [iconUrl]="ride.favorite ? 'favorite-red.svg' : 'favorite-grey.svg'" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card>
+<app-modal-container class="list" [class.move-up]="open" (backPressed)="onBack()" [title]="title" (onScrollContent)="onScroll($event)">
+      @if (rides != null && rides.length > 0) {
+        @for (ride of rides; track ride.id) {
+          <app-ride-card [selected]="detailsOpen() && selectedRide().id === ride.id" [ride]="ride" [iconUrl]="ride.favorite ? 'favorite-red.svg' : 'favorite-grey.svg'" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card>
+        }
+      }
+      @else {
+        <div class="ride-list-placeholder">
+          <div class="placeholder-title">No rides found</div>
+          <div class="placeholder-subtitle">Might take a second to load</div>
+        </div>
       }
 </app-modal-container>
 
 <div class="options" [class.move-up]="open">
   <div class="sort">
     <app-modal-container [showTitleBar] = false>
-        <input type="datetime-local" placeholder="Date created" [(ngModel)]="filterDate">
-        @if (user.role === 'ADMIN') {<input type="text" placeholder="Driver" [(ngModel)]="filterDriver">}
+        <input type="datetime-local" placeholder="Date created" (input)="onSelectDate($event)">
+        @if (user().role === 'ADMIN') {
+          <input type="text" placeholder="User" [value]="filterUser()" (input)="onInputFilter($event)">
+          @if (userList().length >= 1) {
+          <div class="fieldSelection">
+              @for (user of userList(); track user.id) {
+                <div class="field" (click)="onInputUser($event, user.id)">{{ user.name + ' ' + user.surname }}</div>
+              }
+          </div>
+          }
+        }
          <div class="selectedField">
            <input readonly placeholder="Sort by" [value]="selectedField">
            <img [class.flip]="sortOpen" src="arrow-down-surface.svg" alt="" class="drop-down" (click)="onToggleSort()">
-           <img [class.flip]="ascending" src="sort-direction-primary-text.svg" alt="" class="sort-direction" (click)="onToggleSortDirection()">
+           <img [class.flip]="query.ascending" src="sort-direction-primary-text.svg" alt="" class="sort-direction" (click)="onToggleSortDirection()">
          </div>
          @if (sortOpen) {
           <div class="fieldSelection">
-              @for (field of rides[0] | keyvalue; track field.key) {
-                <div class="field" (click)="onSelectField(field.key)">{{ field.key.charAt(0).toUpperCase() + field.key.slice(1) }}</div>
-              }
+                <div class="field" (click)="onSelectField($event, 'startTime')">Start time</div>
+                <div class="field" (click)="onSelectField($event, 'endTime')">End time</div>
+                <div class="field" (click)="onSelectField($event, 'price')">Price</div>
+                <div class="field" (click)="onSelectField($event, 'distance')">Distance</div>
+                <div class="field" (click)="onSelectField($event, 'driver')">Driver</div>
           </div>
           }
     </app-modal-container>
   </div>
-  @if (selectedRide != undefined) {
-    <app-ride-details class="details" [ride]="selectedRide" [user]="user"></app-ride-details>
+  @if (detailsOpen()) {
+    <app-ride-details class="details" [ride]="selectedRide()" [user]="user()" (onError)="onError.emit($event)"></app-ride-details>
   }
 </div>
