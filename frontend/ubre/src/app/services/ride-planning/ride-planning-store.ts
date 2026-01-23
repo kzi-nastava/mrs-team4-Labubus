@@ -20,6 +20,7 @@ import { RideOrderDto } from "../../dtos/ride-order";
 import { UserService } from "../user-service";
 import { RideDto } from "../../dtos/ride-dto";
 import { HttpErrorResponse } from "@angular/common/http";
+import { AuthService } from "../../features/auth/auth-service";
 
 @Injectable({ providedIn: 'root' })
 export class RidePlanningStore {
@@ -27,6 +28,8 @@ export class RidePlanningStore {
     private routingService = inject(RoutingService);
     private orderingService = inject(OrderingService);
     private userService = inject(UserService);
+    private authService = inject(AuthService);
+
     
     private ridePlanningStateSubject$ = new BehaviorSubject<RidePlanningState>({ // this represents from now on the state of the ride planning process
         waypoints: [],  // types come implicitly from the RidePlanningState type
@@ -118,6 +121,9 @@ export class RidePlanningStore {
 
     addFromMapClick(lat: number, lon: number) {
         if (!this.destOpen) return;
+        if (!this.authService.isLoggedIn() && this.waypoints.length >= 2) {
+            return;
+        }
         const id = Date.now();
         const fallback = `${lat.toFixed(6)}, ${lon.toFixed(6)}`; // fallback is a fallback for the label, if the label is not found
 
@@ -308,4 +314,18 @@ export class RidePlanningStore {
             })
         );
     }
+
+    getDurationMinutes() : number {
+        const durationSeconds = this.ridePlanningStateSubject$.value.routeInfo?.duration ?? 0;
+        const durationMinutes = durationSeconds / 60;
+        return Math.round(durationMinutes);
+    }
+
+    clearRoute() {
+        this.ridePlanningStateSubject$.next({
+            ...this.ridePlanningStateSubject$.value,
+            routeInfo: null
+        });
+    }
+
 }

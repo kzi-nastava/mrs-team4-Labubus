@@ -27,15 +27,16 @@
             </button>
           </div>
         }
-
-        <div class="wp-row input">
-          <input
-            class="wp-input"
-            type="text"
-            [(ngModel)]="ridePlanningStore.query"
-            (ngModelChange)="ridePlanningStore.setQuery($event)"
-            placeholder="Enter destination">
-        </div>
+        @if (isLoggedIn() || getWaypointCount() < 2) {
+          <div class="wp-row input">
+            <input
+              class="wp-input"
+              type="text"
+              [(ngModel)]="ridePlanningStore.query"
+              (ngModelChange)="ridePlanningStore.setQuery($event)"
+              placeholder="Enter destination">
+          </div>
+        }
 
         @if (((ridePlanningStore.ridePlanningState$ | async)?.waypoints?.length ?? 0) === 0) {
           <button type="button" class="s-item include-location" (click)="ridePlanningStore.addCurrentLocationAsFirstWaypoint()">
@@ -59,32 +60,34 @@
       </div>
     }
 
-    <!-- RIDE OPTIONS MODAL -->
-    @if (ui.rideOptionsOpen) {
-      <app-ride-options 
-        class="ride-options"
-        (back)="onRideOptionsBack()"
-        (scheduleRide)="onRideOptionsScheduleRide($event)"
-        (proceed)="onRideOptionsProceed($event)">
-      </app-ride-options>
-    }
+    @if (isLoggedIn()) {
+      <!-- RIDE OPTIONS MODAL -->
+      @if (ui.rideOptionsOpen) {
+        <app-ride-options 
+          class="ride-options"
+          (back)="onRideOptionsBack()"
+          (scheduleRide)="onRideOptionsScheduleRide($event)"
+          (proceed)="onRideOptionsProceed($event)">
+        </app-ride-options>
+      }
 
-    <!-- SCHEDULE TIMER -->
-    @if (ui.scheduleTimerOpen) {
-      <app-schedule-timer 
-        class="schedule-timer"
-        (back)="onScheduleTimerBack()"
-        (checkout)="onScheduleTimerCheckout($event)">
-      </app-schedule-timer>
-    }
+      <!-- SCHEDULE TIMER -->
+      @if (ui.scheduleTimerOpen) {
+        <app-schedule-timer 
+          class="schedule-timer"
+          (back)="onScheduleTimerBack()"
+          (checkout)="onScheduleTimerCheckout($event)">
+        </app-schedule-timer>
+      }
 
-    <!-- INVITE PASSENGERS -->
-    @if (ui.invitePassengersOpen) {
-      <app-invite-passengers 
-        class="invite-passengers show"
-        (back)="onInvitePassengersBack()"
-        (proceed)="onInvitePassengersProceed($event)">
-      </app-invite-passengers>
+      <!-- INVITE PASSENGERS -->
+      @if (ui.invitePassengersOpen) {
+        <app-invite-passengers 
+          class="invite-passengers show"
+          (back)="onInvitePassengersBack()"
+          (proceed)="onInvitePassengersProceed($event)">
+        </app-invite-passengers>
+      }
     }
 
     <!-- MAIN OVERLAY CONTENT -->
@@ -137,6 +140,14 @@
       <app-modal-container class="checkout-modal" title="Checkout" [showTitleBar]="true" (backPressed)="onCheckoutModalBack()">
         <app-stat-card [value]="'$' + (ridePlanningStore.ridePlanningState$ | async)?.price" label="Estimated price" variant="dark"></app-stat-card> <!-- in euro -->
         <app-button width="290px" (click)="onConfirmRide()">Confirm ride</app-button>
+      </app-modal-container>
+    }
+
+    <!-- CHECKOUT FOR UNREGISTERED USER -->
+    @if (ui.timeEstimate) {
+      <app-modal-container class="checkout-modal" title="Checkout" [showTitleBar]="true" (backPressed)="onEstimateTime()">
+        <app-stat-card [value]="calculateEstimatedTime() +'min'" label="Estimated time" variant="dark"></app-stat-card> <!-- in minutes -->
+        <app-button width="290px" (click)="onEstimateTime()">OK</app-button>
       </app-modal-container>
     }
 

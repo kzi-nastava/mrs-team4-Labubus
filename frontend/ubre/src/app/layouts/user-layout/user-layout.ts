@@ -55,6 +55,8 @@ import { NotificationType } from '../../enums/notification-type';
     styleUrl: './user-layout.css',
   })
   export class UserLayout implements OnInit {
+
+
     constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
     
     public userService = inject(UserService);
@@ -167,6 +169,7 @@ import { NotificationType } from '../../enums/notification-type';
     reviewModalOpen: of(false),
     scheduleTimerOpen: false,
     invitePassengersOpen: false,
+    timeEstimate: false
   };
 
   private previousScreenBeforeInvite: 'schedule-timer' | 'ride-options' | null = null;
@@ -191,6 +194,13 @@ import { NotificationType } from '../../enums/notification-type';
   onCdProceed() {
     // close destination card
     this.ridePlanningStore.closeDest();
+
+    //if user isn't logged in, proceed to time estimate
+    if (!this.isLoggedIn()) {
+      this.ui.timeEstimate = true;
+      return
+    }
+
     this.ui.rideOptionsOpen = true;
   }
 
@@ -813,4 +823,24 @@ import { NotificationType } from '../../enums/notification-type';
   rejectProfileChange(id: number) {
     this.profileChangeService.reject(id);
   }
+
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  getWaypointCount(): number {
+    return this.ridePlanningStore.waypoints.length;
+  }
+
+  onEstimateTime() {
+    this.ui.timeEstimate = false;
+    this.ui.cdModalOpen = true;
+    this.ridePlanningStore.setWaypoints([]);
+    this.ridePlanningStore.clearRoute();
+  }
+
+  calculateEstimatedTime() {
+    return this.ridePlanningStore.getDurationMinutes();
+  }
+
 }
