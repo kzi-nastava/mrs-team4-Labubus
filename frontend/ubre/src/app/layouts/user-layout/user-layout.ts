@@ -163,7 +163,6 @@ import { RideStatus } from '../../enums/ride-status';
           if (notification.status === NotificationType.RIDE_STARTED && notification.ride) {
             this.showToast('Ride started', 'Your ride has been started successfully.');
             this.ridePlanningStore.currentRideSubject$.next(notification.ride);
-            alert(notification.ride.status);
           }
         },
       });
