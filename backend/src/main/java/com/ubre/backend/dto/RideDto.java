@@ -2,9 +2,14 @@ package com.ubre.backend.dto;
 
 import com.ubre.backend.enums.RideStatus;
 import com.ubre.backend.model.Ride;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.List;
@@ -14,16 +19,23 @@ import java.util.List;
 @NoArgsConstructor
 public class RideDto implements Serializable {
     private Long id;
+    @NotNull(message = "Start time cannot be null")
     private String startTime; // ISO 8601 format
     private String endTime;
+    @NotEmpty(message = "Waypoints cannot be empty")
+    @Size(min = 2)
     private List<WaypointDto> waypoints;
+    @NotNull(message = "Driver cannot be null")
     private UserDto driver;
     private List<UserDto> passengers;
     private Boolean panic;
     private Long canceledBy;
     private Double price;
+    @NotNull(message = "Distance cannot be null")
     private Double distance;
+    @NotNull(message = "Ride status cannot be null")
     private RideStatus status;
+    @NotNull(message = "Creator ID cannot be null")
     private Long createdBy;
 
     public RideDto(Long id, String startTime, String endTime, List<WaypointDto> waypoints, UserDto driver, List<UserDto> passengers, Boolean panic, Long canceledBy, Double price, Double distance, RideStatus status, Long createdBy) {

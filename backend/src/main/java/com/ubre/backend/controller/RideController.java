@@ -3,6 +3,7 @@ package com.ubre.backend.controller;
 import com.ubre.backend.dto.*;
 import com.ubre.backend.enums.VehicleType;
 import com.ubre.backend.service.RideService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -41,7 +42,7 @@ public class RideController {
             @PathVariable Long userId,
             @RequestParam(required = false) Integer skip,
             @RequestParam(required = false) Integer count,
-            @ModelAttribute RideQueryDto query) {
+            @Valid @ModelAttribute RideQueryDto query) {
         List<RideCardDto> favoriteRides = rideService.getFavoriteRides(userId, skip, count, query);
         return ResponseEntity.status(HttpStatus.OK).body(favoriteRides);
     }
@@ -101,7 +102,7 @@ public class RideController {
     )
     public ResponseEntity<RideDto> scheduleRide(
             @PathVariable Long userId,
-            @RequestBody RideDto rideDto) {
+            @Valid @RequestBody RideDto rideDto) {
         RideDto scheduledRide = rideService.scheduleRide(userId, rideDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(scheduledRide);
     }
@@ -114,7 +115,7 @@ public class RideController {
             @PathVariable Long userId,
             @RequestParam(required = false) Integer skip,
             @RequestParam(required = false) Integer count,
-            @ModelAttribute RideQueryDto query) {
+            @Valid @ModelAttribute RideQueryDto query) {
         List<RideCardDto> rides = rideService.getMyRideHistory(userId, skip, count, query);
         return ResponseEntity.status(HttpStatus.OK).body(rides);
     }
@@ -126,7 +127,7 @@ public class RideController {
     public ResponseEntity<List<RideCardDto>> getRideHistory(
             @RequestParam(required = false) Integer skip,
             @RequestParam(required = false) Integer count,
-            @ModelAttribute RideQueryDto query) {
+            @Valid @ModelAttribute RideQueryDto query) {
         List<RideCardDto> rides = rideService.getRideHistory(skip, count, query);
         return ResponseEntity.status(HttpStatus.OK).body(rides);
     }
@@ -140,7 +141,7 @@ public class RideController {
             @PathVariable Long driverId,
             @RequestParam(required = false) Integer skip,
             @RequestParam(required = false) Integer count,
-            @ModelAttribute RideQueryDto query) {
+            @Valid @ModelAttribute RideQueryDto query) {
         List<RideCardDto> createdRide = rideService.getScheduledRides(driverId, skip, count, query);
         return ResponseEntity.status(HttpStatus.OK).body(createdRide);
     }
@@ -159,7 +160,7 @@ public class RideController {
             value = "/{id}/cancel",
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Void> cancelRide(@PathVariable Long id, @RequestBody CancellationDto cancellationDto) {
+    public ResponseEntity<Void> cancelRide(@PathVariable Long id, @Valid @RequestBody CancellationDto cancellationDto) {
         rideService.cancelRide(id, cancellationDto.getReason());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -307,7 +308,7 @@ public class RideController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<RideDto> orderRide(@RequestBody RideOrderDto rideOrder) {
+    public ResponseEntity<RideDto> orderRide(@Valid @RequestBody RideOrderDto rideOrder) {
         RideDto orederedRide = rideService.orderRide(rideOrder);
         return ResponseEntity.status(HttpStatus.CREATED).body(orederedRide);
     }

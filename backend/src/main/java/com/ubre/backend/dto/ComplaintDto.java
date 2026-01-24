@@ -3,6 +3,8 @@ package com.ubre.backend.dto;
 // For handling complaints made by users against drivers
 
 import com.ubre.backend.model.Complaint;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +15,9 @@ import lombok.Setter;
 public class ComplaintDto {
     private Long id;
     private Long driverId;
+    @NotNull(message = "User ID cannot be null")
     private Long userId;
+    @NotBlank(message = "Complaint text cannot be blank")
     private String text;
 
     public ComplaintDto(Long id, Long driverId, Long userId, String text) {

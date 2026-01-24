@@ -4,6 +4,8 @@ package com.ubre.backend.dto;
 // Used to represent a geographical waypoint with an ID, label, latitude, and longitude
 
 import com.ubre.backend.model.Waypoint;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,7 +18,9 @@ import java.io.Serializable;
 public class WaypointDto implements Serializable {
     private Long id;
     private String label;
+    @NotNull(message = "Latitude cannot be null")
     private Double latitude;
+    @NotNull(message = "Longitude cannot be null")
     private Double longitude;
 
     public WaypointDto(Long id, String label, double latitude, double longitude) {

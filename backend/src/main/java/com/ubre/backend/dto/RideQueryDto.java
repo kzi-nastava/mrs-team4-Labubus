@@ -15,8 +15,7 @@ import java.time.LocalDateTime;
 public class RideQueryDto {
     private String sortBy;
     private Boolean ascending;
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private LocalDateTime date;
+    private LocalDateTime date; // very questionable fix later or convert to string
 
     public RideQueryDto(Long userId, String sortBy, Boolean ascending, LocalDateTime date) {
         this.sortBy = sortBy;

@@ -1,6 +1,9 @@
 package com.ubre.backend.dto;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -11,13 +14,14 @@ import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class RideEstimationsDto {
+    @NotEmpty
+    @Size(min = 2)
     private List<WaypointDto> waypoints;
     private Double price;
     private Integer duration; // in minutes
 
-    public RideEstimationsDto() {
-    }
     public RideEstimationsDto(ArrayList<WaypointDto> waypoints, double price, int duration) {
         this.waypoints = waypoints;
         this.price = price;
