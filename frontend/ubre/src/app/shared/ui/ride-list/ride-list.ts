@@ -29,6 +29,7 @@ export class RideList {
   @Output() onQueryChange = new EventEmitter<RideQueryDto>();
   @Output() onScrollToBottom = new EventEmitter<RideQueryDto>();
   @Output() onError = new EventEmitter<Error>();
+  @Output() onReorder = new EventEmitter<RideDto>();
 
   rideService : RideService = inject(RideService);
   userService : UserService = inject(UserService);

@@ -31,6 +31,7 @@ export class RideDetails {
         address: ""
       };
   @Output() onError = new EventEmitter<Error>();
+  @Output() onReorder = new EventEmitter<RideDto>();
 
   reviewService : ReviewService = inject(ReviewService);
   userService : UserService = inject(UserService);
@@ -51,5 +52,9 @@ export class RideDetails {
     console.log(this.ride)
     this.start = new Date(this.ride.startTime)
     this.end = new Date(this.ride.endTime)
+  }
+
+  onReorderClick() {
+    this.onReorder.emit(this.ride);
   }
 }

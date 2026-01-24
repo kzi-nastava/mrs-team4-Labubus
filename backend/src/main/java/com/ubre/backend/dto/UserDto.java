@@ -13,6 +13,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class UserDto implements Serializable {
     private Long id;
     private Role role;
