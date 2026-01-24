@@ -43,6 +43,11 @@
     </app-modal-container>
   </div>
   @if (detailsOpen()) {
-    <app-ride-details class="details" [ride]="selectedRide()" [user]="user()" (onError)="onError.emit($event)"></app-ride-details>
+    <app-ride-details
+      class="details"
+      [ride]="selectedRide()"
+      [user]="user()"
+      (onError)="onError.emit($event)"
+      (onReorder)="onReorder.emit($event)"></app-ride-details>
   }
 </div>

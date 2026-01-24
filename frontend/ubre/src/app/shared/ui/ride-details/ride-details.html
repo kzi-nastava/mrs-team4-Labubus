@@ -49,5 +49,7 @@
       }
 
       <app-stat-card [value]="'$' + ride.price" label="Final price" variant="dark"></app-stat-card>
-      @if (ride.passengers.length > 0 && user.id === ride.passengers[0].id) {<app-button width="290px">Reorder ride</app-button>}
+      @if (ride.passengers.length > 0 && user.id === ride.passengers[0].id) {
+            <app-button width="290px" (clicked)="onReorderClick()">Reorder ride</app-button>
+      }
 </app-modal-container>

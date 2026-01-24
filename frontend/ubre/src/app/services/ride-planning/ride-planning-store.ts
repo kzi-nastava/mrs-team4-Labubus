@@ -240,7 +240,7 @@ export class RidePlanningStore {
 
 
     // RECALCULATE ROUTE LOGIC
-    private recalculateRoute() {
+    public recalculateRoute() {
         const wps = this.waypoints;
         if (wps.length < 2) {
             this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, routeInfo: null });

@@ -6,6 +6,7 @@ import { RideCardDto } from '../../../dtos/ride-card-dto';
 import { RideQueryDto } from '../../../dtos/ride-query';
 import { RideList } from '../ride-list/ride-list';
 import { AsyncPipe } from '@angular/common';
+import { RideDto } from '../../../dtos/ride-dto';
 
 @Component({
   selector: 'app-favorite-rides',
@@ -18,6 +19,7 @@ export class FavoriteRides {
   @Input() set open(value : boolean) {this._open = value; if (value) this.onQueryChange(this.lastQuery);} get open() {return this._open}
   @Output() onClose = new EventEmitter<void>();
   @Output() onError = new EventEmitter<Error>();
+  @Output() onReorder = new EventEmitter<RideDto>();
 
   rideService : RideService = inject(RideService)
   userService : UserService = inject(UserService)

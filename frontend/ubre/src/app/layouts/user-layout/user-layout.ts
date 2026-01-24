@@ -45,6 +45,7 @@ import { RideOptionsDto } from '../../dtos/ride-options-dto';
 import { NotificationType } from '../../enums/notification-type';
 import { FavoriteRides } from '../../shared/ui/favorite-rides/favorite-rides';
 import { RideStatus } from '../../enums/ride-status';
+import { RideDto } from '../../dtos/ride-dto';
 
 @Component({
   selector: 'app-user-layout',
@@ -831,6 +832,21 @@ import { RideStatus } from '../../enums/ride-status';
         }
       });
     }
+  }
+
+
+  // REORDER RIDE FROM FAVORITES
+  onFavoriteReorder(ride: RideDto) {
+    // close favourites sheet
+    this.closeFavourites();
+    // close initial choose-destination modal
+    this.ui.cdModalOpen = false;
+    // prepare state for new ride using existing waypoints
+    this.ridePlanningStore.clearRidePlanningState();
+    this.ridePlanningStore.setWaypoints(ride.waypoints);
+    // open destination card and recalculate route
+    this.ridePlanningStore.openDest();
+    this.ridePlanningStore.recalculateRoute();
   }
 
 
