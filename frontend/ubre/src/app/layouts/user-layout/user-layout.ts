@@ -43,6 +43,7 @@ import { InvitePassengers } from '../../shared/ui/invite-passengers/invite-passe
 import { RideOptions } from '../../shared/ui/ride-options/ride-options';
 import { RideOptionsDto } from '../../dtos/ride-options-dto';
 import { NotificationType } from '../../enums/notification-type';
+import { FavoriteRides } from '../../shared/ui/favorite-rides/favorite-rides';
 
 @Component({
   selector: 'app-user-layout',
@@ -50,7 +51,8 @@ import { NotificationType } from '../../enums/notification-type';
   imports: [Map,IconButton,SideMenu,Toast,
     Modal,ModalContainer,StatCard,Button,
     Sheet,FormsModule,RideHistory,ProfileChangeCard,
-    AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,RideOptions],
+    AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
+    RideOptions, FavoriteRides],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -167,6 +169,8 @@ import { NotificationType } from '../../enums/notification-type';
     reviewModalOpen: of(false),
     scheduleTimerOpen: false,
     invitePassengersOpen: false,
+    showRideHistory: false,
+    showFavourites: false
   };
 
   private previousScreenBeforeInvite: 'schedule-timer' | 'ride-options' | null = null;
@@ -225,6 +229,7 @@ import { NotificationType } from '../../enums/notification-type';
     this.closeRegisterDriver();
     this.ridePlanningStore.closeDest();
     this.closeRideHistory();
+    this.closeFavourites();
     this.closeProfileChanges();
   }
 
@@ -233,6 +238,7 @@ import { NotificationType } from '../../enums/notification-type';
       this.userService.setCurrentUserById(0);     // set current user to guest
       this.authService.logout();
       this.userService.resetAvatar();
+      this.closeAllSidePanels();
     }
     if (action === 'account-settings') {
       this.openAccountSettings();
@@ -242,6 +248,9 @@ import { NotificationType } from '../../enums/notification-type';
     }
     if (action === 'ride-history') {
       this.openRideHistory();
+    }
+    if (action === 'favourites') {
+      this.openFavourites();
     }
     if (action === 'login') {
       this.router.navigate(['/login']);
@@ -615,24 +624,41 @@ import { NotificationType } from '../../enums/notification-type';
 
 
   // Ride HISTORY SHEET LOGIC
-  showRideHistory = false;
-
   onRideHistoryBack() {
-    this.showRideHistory = false;
+    this.ui.showRideHistory = false;
     this.ui.menuOpen = true;
   }
 
   openRideHistory() {
-    this.showRideHistory = true;
+    this.ui.showFavourites = false;
+    this.ui.showRideHistory = true;
     this.ui.menuOpen = false;
   }
 
   closeRideHistory() {
-    this.showRideHistory = false;
+    this.ui.showRideHistory = false;
   }
 
   onEmmitError(error : Error) {
     this.showToast(error.name, error.message)
+  }
+
+
+
+  // Favourites SHEET LOGIC
+  onFavouritesBack() {
+    this.ui.showFavourites = false;
+    this.ui.menuOpen = true;
+  }
+
+  openFavourites() {
+    this.ui.showRideHistory = false;
+    this.ui.showFavourites = true;
+    this.ui.menuOpen = false;
+  }
+
+  closeFavourites() {
+    this.ui.showFavourites = false;
   }
 
 
