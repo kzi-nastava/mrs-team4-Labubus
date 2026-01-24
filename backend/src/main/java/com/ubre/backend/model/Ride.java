@@ -91,7 +91,7 @@ public class Ride {
 
     public Ride(RideDto dto) {
         this.id = dto.getId();
-        this.startTime = LocalDateTime.parse(dto.getStart());
+        this.startTime = LocalDateTime.parse(dto.getStartTime());
         this.waypoints = dto.getWaypoints().stream().map(Waypoint::new).toList();
         this.panic = false;
         this.favorite = false;
