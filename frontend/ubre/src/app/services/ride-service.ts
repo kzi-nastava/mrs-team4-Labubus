@@ -52,7 +52,7 @@ export class RideService {
           }
         }
       )
-      else
+      else if (currentUser.role != Role.GUEST)
         this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/history/${userId}`, {params: queryParams}).subscribe({
           next: (value : RideCardDto[]) => {
             this.fetchingHistory = false;
@@ -86,14 +86,15 @@ export class RideService {
     const params : HttpParams = this.extractParams(query, this.favoritesPage, count);
     this.userService.getCurrentUser().subscribe({
       next: (currentUser : UserDto) => {
-      this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/${currentUser.id}/favorites`, {params}).subscribe((value : RideCardDto[]) => {
-        this.fetchingFavorites = false;
-        if (value.length == 0)
-              return;
-
-        this.favorites.next([...this.favorites.value, ...value]);
-        this.favoritesPage++;
-      })},
+        if (currentUser.role == Role.REGISTERED_USER) { 
+          this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/${currentUser.id}/favorites`, {params}).subscribe((value : RideCardDto[]) => {
+            this.fetchingFavorites = false;
+            if (value.length == 0)
+                  return;
+    
+            this.favorites.next([...this.favorites.value, ...value]);
+            this.favoritesPage++; 
+      })}},
       error : (err) => {
         this.fetchingFavorites = false;
       }

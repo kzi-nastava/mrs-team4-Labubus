@@ -32,6 +32,7 @@ public class RideController {
     }
 
     // dobijanje omiljenih voznji korisnika
+    @PreAuthorize("#userId == @securityUtil.currentUserId()")
     @GetMapping(
             value = "/{userId}/favorites",
             produces = MediaType.APPLICATION_JSON_VALUE
