@@ -13,12 +13,17 @@
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.icon:hover{
+.icon:hover:not(:disabled){
   transform: translateY(-2px) scale(1.03);
 }
 
-.icon:active{
+.icon:active:not(:disabled){
   transform: translateY(0) scale(0.98);
+}
+
+.icon:disabled{
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .icon.red {

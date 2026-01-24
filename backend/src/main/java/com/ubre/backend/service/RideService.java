@@ -12,7 +12,7 @@ public interface RideService {
     List<RideDto> getDriverRides(Long driverId);
     void acceptRide(Long rideId, Long driverId);
     void rejectRide(Long rideId, String reason);
-    RideDto startRide(Long rideId);
+    void startRide(Long rideId);
     RideDto endRide(Long rideId);
     void cancelRide(Long rideId, String reason);
     void stopRideInProgress(Long rideId);

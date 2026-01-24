@@ -1,4 +1,4 @@
-<button class="icon" [ngClass]="type" [attr.aria-label]="ariaLabel">
+<button class="icon" [ngClass]="type" [attr.aria-label]="ariaLabel" [disabled]="disabled">
   @if (iconUrl) {
     <img [src]="iconUrl" />
   } @else {
