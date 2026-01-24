@@ -20,4 +20,9 @@ export class OrderingService {
     orderRide(rideOrderDto: RideOrderDto): Observable<RideDto> {
         return this.http.post<RideDto>(`${this.api}/rides/order`, rideOrderDto);
     }
+
+    // start a current ride (maybe its not a best idea to be here honestly), return nothing absolutely
+    public startCurrentRide(rideId: number): Observable<void> {
+        return this.http.post<void>(`${this.api}/rides/${rideId}/start`, {});
+    }
 }

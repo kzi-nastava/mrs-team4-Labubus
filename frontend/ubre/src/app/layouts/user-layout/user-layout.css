@@ -104,6 +104,56 @@
   left: 116px;
 }
 
+.start-ride-button {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  width: 300px;
+  height: var(--icon-width-regular);
+  padding: 0 24px;
+  background: var(--color-primary-dark);
+  color: var(--color-surface);
+  border: none;
+  border-radius: var(--border-radius-icons);
+  font: 28px var(--font-family);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  box-shadow: var(--drop-shadow);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2100;
+  pointer-events: auto;
+}
+
+.start-ride-button:hover:not(.disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 8px 0px rgba(0, 0, 0, 0.3);
+}
+
+.start-ride-button:active:not(.disabled) {
+  transform: translateY(0);
+  box-shadow: var(--drop-shadow);
+}
+
+.start-ride-button.disabled {
+  background: #9E9E9E;
+  color: #E0E0E0;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.start-ride-button.disabled:hover {
+  transform: none;
+  box-shadow: var(--drop-shadow);
+}
+
+.start-ride-text {
+  white-space: nowrap;
+  user-select: none;
+}
+
 
 
 

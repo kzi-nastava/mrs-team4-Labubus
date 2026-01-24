@@ -13,4 +13,5 @@ export class IconButton {
   @Input() badge = false;
   @Input() iconUrl: string | null = null;
   @Input() type: 'red' | 'yellow' | null = null;
+  @Input() disabled: boolean = false;
 }

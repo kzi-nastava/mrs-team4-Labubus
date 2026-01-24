@@ -22,14 +22,13 @@ public class RideController {
     @Autowired
     private RideService rideService;
 
-    // start a ride
+    // just change status of a ride from pending to a in progress
     @PostMapping(value = "/{id}/start",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<RideDto> startRide(@PathVariable Long id) {
-        RideDto ride = rideService.startRide(id);
+    public ResponseEntity<Void> startRide(@PathVariable Long id) { // this represents ride id
+        rideService.startRide(id);
         return ResponseEntity.status(HttpStatus.OK).body(null);
-        // verovatno ćemo morati da pošaljemo mnogo više podataka nazad sem riddto
     }
 
     // dobijanje omiljenih voznji korisnika
