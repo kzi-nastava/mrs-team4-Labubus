@@ -4,20 +4,31 @@ package com.ubre.backend.dto;
 
 import com.ubre.backend.enums.VehicleType;
 import com.ubre.backend.model.Vehicle;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.AnyDiscriminator;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class VehicleDto implements java.io.Serializable {
     private Long id;
+    @NotBlank(message = "Model is required")
     private String model;
+    @NotNull(message = "Type is required")
     private VehicleType type;
+    @NotBlank(message = "Plates are required")
     private String plates;
+    @NotNull(message = "Seats are required")
+    @Min(value = 2, message = "There must be at least 2 seats")
     private Integer seats;
+    @NotNull(message = "Baby friendly field is required")
     private Boolean babyFriendly;
+    @NotNull(message = "Pet friendly field is required")
     private Boolean petFriendly;
 
     public VehicleDto(Long id, String model, VehicleType type, String plates, Integer seats, Boolean babyFriendly, Boolean petFriendly) {

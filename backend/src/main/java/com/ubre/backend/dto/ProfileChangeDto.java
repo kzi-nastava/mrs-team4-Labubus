@@ -3,13 +3,17 @@ package com.ubre.backend.dto;
 // Made by driver ---> and then is sent to admin for approval
 // For changing profile data: name, surname, address, phone, avatarUrl
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class ProfileChangeDto {
     public Long id;
+    @NotNull(message = "User ID cannot be null")
     public Long userId;
 
     public String oldName;
@@ -26,10 +30,6 @@ public class ProfileChangeDto {
 
     public String oldAvatarUrl;
     public String newAvatarUrl;
-
-    public ProfileChangeDto() {
-
-    }
 
     public ProfileChangeDto(String newSurname, Long requestId, Long userId, String oldName, String newName, String oldSurname, String oldAddress, String newAddress, String oldPhone, String newPhone, String oldAvatarUrl, String newAvatarUrl) {
         this.newSurname = newSurname;

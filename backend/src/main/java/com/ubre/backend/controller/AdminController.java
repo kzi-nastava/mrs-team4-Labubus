@@ -6,6 +6,7 @@ import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.Admin;
 import com.ubre.backend.service.EmailService;
 import com.ubre.backend.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -39,7 +40,7 @@ public class AdminController {
 
     // create a new administrator profile
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserDto> createAdmin(@RequestBody UserDto adminDto) {
+    public ResponseEntity<UserDto> createAdmin(@Valid @RequestBody UserDto adminDto) {
         UserDto createdAdministrator = userService.createAdmin(adminDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAdministrator);
     }

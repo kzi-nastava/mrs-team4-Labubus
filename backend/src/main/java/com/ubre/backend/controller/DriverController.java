@@ -6,6 +6,7 @@ import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.dto.UserDto;
 import com.ubre.backend.service.DriverService;
 import com.ubre.backend.service.EmailService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -33,7 +34,7 @@ public class DriverController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserDto> createDriver(@RequestBody DriverRegistrationDto driverRegistrationDto) {
+    public ResponseEntity<UserDto> createDriver(@Valid @RequestBody DriverRegistrationDto driverRegistrationDto) {
         UserDto createdDriver = driverService.createDriver(driverRegistrationDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdDriver);
     }
@@ -123,7 +124,7 @@ public class DriverController {
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
     @PreAuthorize("hasRole('DRIVER')")
-    public ResponseEntity<Void> requestProfileChange(@RequestBody ProfileChangeDto profileChange) {
+    public ResponseEntity<Void> requestProfileChange(@Valid @RequestBody ProfileChangeDto profileChange) {
         driverService.requestProfileChange(profileChange);
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }

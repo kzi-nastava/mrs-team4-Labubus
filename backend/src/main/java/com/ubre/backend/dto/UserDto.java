@@ -5,6 +5,9 @@ import java.io.Serializable;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.User;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,12 +19,19 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserDto implements Serializable {
     private Long id;
+    @NotNull(message = "Role cannot be null")
     private Role role;
     private String avatarUrl;
+    @NotNull(message = "Email cannot be null")
+    @Email(message = "Email format is invalid")
     private String email;
+    @NotBlank(message = "Name cannot be blank")
     private String name;
+    @NotBlank(message = "Surname cannot be blank")
     private String surname;
+    @NotBlank(message = "Phone number cannot be blank")
     private String phone;
+    @NotBlank(message = "Address cannot be blank")
     private String address;
     private UserStatus status;
 

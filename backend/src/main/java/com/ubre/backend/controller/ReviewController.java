@@ -2,6 +2,7 @@ package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.ReviewDto;
 import com.ubre.backend.service.ReviewService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,7 +24,7 @@ public class ReviewController {
     @PreAuthorize("#createReviewDto.getUserId() == @securityUtil.currentUserId()")
     public ResponseEntity<ReviewDto> createReview(
             @PathVariable Long rideId,
-            @RequestBody ReviewDto createReviewDto) {
+            @Valid @RequestBody ReviewDto createReviewDto) {
         ReviewDto review = ReviewService.createReview(rideId, createReviewDto);
         return new ResponseEntity<>(review, HttpStatus.CREATED);
     }
@@ -50,7 +51,7 @@ public class ReviewController {
     @PreAuthorize("#updateReviewDto.getUserId() == @securityUtil.currentUserId()")
     public ResponseEntity<ReviewDto> updateReview(
             @PathVariable Long id,
-            @RequestBody ReviewDto updateReviewDto) {
+            @Valid @RequestBody ReviewDto updateReviewDto) {
         ReviewDto Review = ReviewService.updateReview(id, updateReviewDto);
         return new ResponseEntity<>(Review, HttpStatus.OK);
     }

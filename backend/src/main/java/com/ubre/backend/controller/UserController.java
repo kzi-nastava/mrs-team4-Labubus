@@ -77,7 +77,7 @@ public class UserController {
             value = "/change-password",
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Void> changePassword(@RequestBody PasswordChangeDto passwordChangeDto) {
+    public ResponseEntity<Void> changePassword(@Valid @RequestBody PasswordChangeDto passwordChangeDto) {
         userService.changePassword(passwordChangeDto);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
@@ -117,7 +117,7 @@ public class UserController {
     // this endpoint only updates userdto fields, not password or avatar
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("#id == @securityUtil.currentUserId()")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto updateUserDto) {
+    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserDto updateUserDto) {
         UserDto user = userService.updateUser(updateUserDto);
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }

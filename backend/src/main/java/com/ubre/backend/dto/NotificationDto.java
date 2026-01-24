@@ -1,13 +1,17 @@
 package com.ubre.backend.dto;
 
 import com.ubre.backend.enums.NotificationType;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Normalized;
 
 // For system notifications
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class NotificationDto {
     private Long id;
     private Long userId;
@@ -16,8 +20,6 @@ public class NotificationDto {
     private Boolean read;
     private NotificationType type;
 
-    public NotificationDto() {
-    }
     public NotificationDto(Long id, Long userId, String title, String message, boolean read, NotificationType type) {
         this.id = id;
         this.userId = userId;

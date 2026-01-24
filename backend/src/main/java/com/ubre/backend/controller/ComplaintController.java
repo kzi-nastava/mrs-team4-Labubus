@@ -2,6 +2,7 @@ package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.ComplaintDto;
 import com.ubre.backend.service.ComplaintService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,7 +23,7 @@ public class ComplaintController {
     @PreAuthorize("#createComplaintDto.getUserId() == @securityUtil.currentUserId()")
     public ResponseEntity<ComplaintDto> createComplaint(
             @PathVariable Long rideId,
-            @RequestBody ComplaintDto createComplaintDto) {
+            @Valid @RequestBody ComplaintDto createComplaintDto) {
         ComplaintDto Complaint = ComplaintService.createComplaint(rideId, createComplaintDto);
         return new ResponseEntity<>(Complaint, HttpStatus.CREATED);
     }
@@ -50,7 +51,7 @@ public class ComplaintController {
     @PreAuthorize("#updateComplaint.getUserId() == @securityUtil.currentUserId()")
     public ResponseEntity<ComplaintDto> updateComplaint(
             @PathVariable Long id,
-            @RequestBody ComplaintDto updateComplaintDto) {
+            @Valid @RequestBody ComplaintDto updateComplaintDto) {
         ComplaintDto complaint = ComplaintService.updateComplaint(id, updateComplaintDto);
         return new ResponseEntity<>(complaint, HttpStatus.OK);
     }
