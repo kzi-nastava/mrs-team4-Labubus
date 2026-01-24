@@ -43,6 +43,8 @@ import { InvitePassengers } from '../../shared/ui/invite-passengers/invite-passe
 import { RideOptions } from '../../shared/ui/ride-options/ride-options';
 import { RideOptionsDto } from '../../dtos/ride-options-dto';
 import { NotificationType } from '../../enums/notification-type';
+import { FavoriteRides } from '../../shared/ui/favorite-rides/favorite-rides';
+import { RideStatus } from '../../enums/ride-status';
 
 @Component({
   selector: 'app-user-layout',
@@ -50,7 +52,8 @@ import { NotificationType } from '../../enums/notification-type';
   imports: [Map,IconButton,SideMenu,Toast,
     Modal,ModalContainer,StatCard,Button,
     Sheet,FormsModule,RideHistory,ProfileChangeCard,
-    AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,RideOptions],
+    AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
+    RideOptions, FavoriteRides],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -73,6 +76,7 @@ import { NotificationType } from '../../enums/notification-type';
 
   Role = Role;
   VehicleType = VehicleType;
+  RideStatus = RideStatus;
 
   userStats!: UserStatsDto;
 
@@ -80,6 +84,7 @@ import { NotificationType } from '../../enums/notification-type';
   private profileChangeSubscription?: Subscription;
   private rideAssignmentSubscription?: Subscription;
   private rideReminderSubscription?: Subscription;
+  private currentRideSubscription?: Subscription; // this subscription represents a current ride, for user and for a driver
 
 
   ngOnInit() {
@@ -109,6 +114,7 @@ import { NotificationType } from '../../enums/notification-type';
         next: (notification) => {
           if (notification.status === NotificationType.PROFILE_CHANGE_APPROVED && notification.user) {
             this.userService.setCurrentUserById(notification.user.id);
+            this.playNotificationSound();
             this.showToast('Profile change approved', 'Your profile change request has been approved.');
             this.cdr.detectChanges();
             this.userService.loadAvatar(notification.user.id);
@@ -129,6 +135,7 @@ import { NotificationType } from '../../enums/notification-type';
       .subscribe({
         next: (notification) => {
           if (notification.status === NotificationType.RIDE_ASSIGNED && notification.ride) {
+            this.playNotificationSound();
             this.showToast('New ride assigned', 'Check your notifications for more details.');
           }
         },
@@ -141,17 +148,35 @@ import { NotificationType } from '../../enums/notification-type';
       .subscribe({
         next: (notification) => {
           if (notification.status === NotificationType.RIDE_REMINDER && notification.time) {
+            this.playNotificationSound();
             this.showToast('Ride reminder', 'You have a ride scheduled at ' + notification.time + '.');
+          }
+        },
+      });
+
+    // this subscription receives notifications for a current ride via websocket
+    this.currentRideSubscription = this.webSocketService
+      .currentRideNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          // notification that time for a ride has come
+          if (notification.status === NotificationType.TIME_FOR_A_RIDE && notification.ride) {
+            this.showToast('Get ready', 'Your ride is starting soon...');
+            this.ridePlanningStore.currentRideSubject$.next(notification.ride);
+          }
+          if (notification.status === NotificationType.RIDE_STARTED && notification.ride) {
+            this.showToast('Ride started', 'Your ride has been started successfully.');
+            this.ridePlanningStore.currentRideSubject$.next(notification.ride);
           }
         },
       });
   }
 
-
   ngOnDestroy() {
     this.profileChangeSubscription?.unsubscribe();
     this.rideAssignmentSubscription?.unsubscribe();
     this.rideReminderSubscription?.unsubscribe();
+    this.currentRideSubscription?.unsubscribe();
     this.webSocketService.disconnect();
   }
   ui = {
@@ -170,17 +195,11 @@ import { NotificationType } from '../../enums/notification-type';
     scheduleTimerOpen: false,
     invitePassengersOpen: false,
     timeEstimate: false
+    showRideHistory: false,
+    showFavourites: false
   };
 
   private previousScreenBeforeInvite: 'schedule-timer' | 'ride-options' | null = null;
-
-
-  
-  
-  
-  
-  
-  
   
   onDestBack() {
     this.ridePlanningStore.resetDest();
@@ -235,6 +254,7 @@ import { NotificationType } from '../../enums/notification-type';
     this.closeRegisterDriver();
     this.ridePlanningStore.closeDest();
     this.closeRideHistory();
+    this.closeFavourites();
     this.closeProfileChanges();
   }
 
@@ -243,6 +263,7 @@ import { NotificationType } from '../../enums/notification-type';
       this.userService.setCurrentUserById(0);     // set current user to guest
       this.authService.logout();
       this.userService.resetAvatar();
+      this.closeAllSidePanels();
     }
     if (action === 'account-settings') {
       this.openAccountSettings();
@@ -252,6 +273,9 @@ import { NotificationType } from '../../enums/notification-type';
     }
     if (action === 'ride-history') {
       this.openRideHistory();
+    }
+    if (action === 'favourites') {
+      this.openFavourites();
     }
     if (action === 'login') {
       this.router.navigate(['/login']);
@@ -625,20 +649,19 @@ import { NotificationType } from '../../enums/notification-type';
 
 
   // Ride HISTORY SHEET LOGIC
-  showRideHistory = false;
-
   onRideHistoryBack() {
-    this.showRideHistory = false;
+    this.ui.showRideHistory = false;
     this.ui.menuOpen = true;
   }
 
   openRideHistory() {
-    this.showRideHistory = true;
+    this.ui.showFavourites = false;
+    this.ui.showRideHistory = true;
     this.ui.menuOpen = false;
   }
 
   closeRideHistory() {
-    this.showRideHistory = false;
+    this.ui.showRideHistory = false;
   }
 
   onEmmitError(error : Error) {
@@ -647,6 +670,21 @@ import { NotificationType } from '../../enums/notification-type';
 
 
 
+  // Favourites SHEET LOGIC
+  onFavouritesBack() {
+    this.ui.showFavourites = false;
+    this.ui.menuOpen = true;
+  }
+
+  openFavourites() {
+    this.ui.showRideHistory = false;
+    this.ui.showFavourites = true;
+    this.ui.menuOpen = false;
+  }
+
+  closeFavourites() {
+    this.ui.showFavourites = false;
+  }
 
 
 
@@ -657,6 +695,26 @@ import { NotificationType } from '../../enums/notification-type';
 
 
 
+
+
+  playNotificationSound() {
+    try {
+      const audio = new Audio('/new-notification-07-210334.mp3');
+      
+      audio.volume = 0.3;
+      
+      audio.play().catch((error) => {
+        console.warn('Failed to play notification sound:', error);
+        const audioAlt = new Audio('new-notification-07-210334.mp3');
+        audioAlt.volume = 0.3;
+        audioAlt.play().catch((err) => {
+          console.warn('Failed to play notification sound with alternative path:', err);
+        });
+      });
+    } catch (error) {
+      console.warn('Error creating audio element:', error);
+    }
+  }
 
 
 
@@ -753,6 +811,7 @@ import { NotificationType } from '../../enums/notification-type';
     this.ridePlanningStore.orderRide().subscribe({
       next: () => {
         this.showToast('Ride ordered', 'Your ride has been ordered successfully.');
+        this.playNotificationSound();
       },
       error: (err: HttpErrorResponse) => {
         let errorMessage = 'Failed to order ride';
@@ -766,6 +825,22 @@ import { NotificationType } from '../../enums/notification-type';
         this.showToast('Error ordering ride', errorMessage);
       }
     });
+  }
+
+  onStartRideClick() {
+    const currentRide = this.ridePlanningStore.getCurrentRide();
+    if (!currentRide) {
+      this.showToast('No ride available', 'There is no ride available to start.');
+    } else {
+      this.ridePlanningStore.startCurrentRide().pipe(take(1)).subscribe({
+        next: () => {
+          this.showToast('Ride started', 'Please drive carefully and enjoy your ride.');
+        },
+        error: (err: HttpErrorResponse) => {
+          this.showToast('Error starting ride', err.error.message);
+        }
+      });
+    }
   }
 
 

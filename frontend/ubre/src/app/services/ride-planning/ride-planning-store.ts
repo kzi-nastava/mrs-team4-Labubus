@@ -21,6 +21,7 @@ import { UserService } from "../user-service";
 import { RideDto } from "../../dtos/ride-dto";
 import { HttpErrorResponse } from "@angular/common/http";
 import { AuthService } from "../../features/auth/auth-service";
+import { RideStatus } from "../../enums/ride-status";
 
 @Injectable({ providedIn: 'root' })
 export class RidePlanningStore {
@@ -46,6 +47,15 @@ export class RidePlanningStore {
         passengersEmails: [],
         price: null,
     });
+    readonly ridePlanningState$ = this.ridePlanningStateSubject$.asObservable();
+
+    public clearRidePlanningState() {
+        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: [], suggestions: [], query: '', destOpen: false, routeInfo: null, rideOptions: { vehicleType: VehicleType.STANDARD, babyFriendly: false, petFriendly: false }, scheduledTime: '', passengersEmails: [], price: null });
+    }
+
+    public clearAllExceptRouteAndWaypoints() {
+        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, suggestions: [], query: '', destOpen: false, rideOptions: { vehicleType: VehicleType.STANDARD, babyFriendly: false, petFriendly: false }, scheduledTime: '', passengersEmails: [], price: null });
+    }
 
 
     // there should be also be a subject for ongoing, or schedulded rides. TODO: implement this
@@ -56,7 +66,6 @@ export class RidePlanningStore {
 
 
 
-    readonly ridePlanningState$ = this.ridePlanningStateSubject$.asObservable();
     private suggestionTimer: any = null; // this is a timer for the suggestions, it is used to debounce the suggestions, it is used to prevent the suggestions from being fetched too often
     private suggestionRequestId = 0; // this is a request id for the suggestions, it is used to prevent the suggestions from being fetched too often
     private routingRequestId = 0;  // for preventing old routing requests from being executed
@@ -278,14 +287,23 @@ export class RidePlanningStore {
 
     // ============ RIDE ORDERING LOGIC ============
 
-    public orderedRideSubject$ = new BehaviorSubject<RideDto | null>(null);
-    public orderedRide$ = this.orderedRideSubject$.asObservable();
+    // for a driver, it represents the ride that is currently ongoing.
+    // for a user, it represents a ride that is currently being driven, or scheduled for the future.
+    // this is hard to name because it is initially empty, when receiven its pending until it is accepted by a driver.
+    // TODO: find a better name for this subject.
 
-    public getOrderedRide() {
-        return this.orderedRideSubject$.value;
+    public currentRideSubject$ = new BehaviorSubject<RideDto | null>(null);  // this subject represents current ride, for user and for a driver. 
+    public currentRide$ = this.currentRideSubject$.asObservable();
+
+    public getCurrentRide() {
+        return this.currentRideSubject$.value;
     }
-    public clearOrderedRide() {
-        this.orderedRideSubject$.next(null);
+    public clearCurrentRide() {
+        this.currentRideSubject$.next(null);
+    }
+
+    public setCurrentRide(ride: RideDto) {
+        this.currentRideSubject$.next(ride);
     }
 
     // ORDER RIDE LOGIC
@@ -307,7 +325,22 @@ export class RidePlanningStore {
         return this.orderingService.orderRide(rideOrderDto).pipe(
             take(1),
             tap((ride: RideDto) => {
-                this.orderedRideSubject$.next(ride);
+                this.currentRideSubject$.next(ride);
+                this.clearRidePlanningState();
+            }),
+            catchError((err: HttpErrorResponse) => {
+                this.clearAllExceptRouteAndWaypoints();
+                return throwError(() => err);
+            })
+        );
+    }
+
+    // when ride is started, request is sent to backend to change status from PENDING to IN_PROGRESS
+    public startCurrentRide(): Observable<void> {
+        return this.orderingService.startCurrentRide(this.currentRideSubject$.value?.id ?? 0).pipe(
+            take(1),
+            tap(() => {
+                this.currentRideSubject$.next({ ...this.currentRideSubject$.value!, status: RideStatus.IN_PROGRESS });
             }),
             catchError((err: HttpErrorResponse) => {
                 return throwError(() => err);

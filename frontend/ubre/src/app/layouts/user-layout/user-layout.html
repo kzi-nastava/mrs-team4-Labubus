@@ -115,8 +115,20 @@
 
     <app-icon-button class="map-button"
       iconUrl="map_search_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
+      [disabled]="(ridePlanningStore.currentRide$ | async)?.status === RideStatus.IN_PROGRESS"
       (click)="toggleDest()">
     </app-icon-button>
+
+    <!-- START RIDE BUTTON (DRIVERS ONLY) -->
+    @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
+      <button 
+        class="start-ride-button"
+        [class.disabled]="!(ridePlanningStore.currentRide$ | async)"
+        [disabled]="!(ridePlanningStore.currentRide$ | async)"
+        (click)="onStartRideClick()">
+        <span class="start-ride-text">Start this ride</span>
+      </button>
+    }
 
     <!-- TOAST NOTIFICATION -->
     @if (ui.toastOpen) {
@@ -557,7 +569,10 @@
     }
 
     <!-- RIDE HISTORY SHEET -->
-    <app-ride-history class="ride-history" (onClose)="onRideHistoryBack()" [open]="showRideHistory" (onError)="onEmmitError($event)"></app-ride-history>
+    <app-ride-history class="ride-history" (onClose)="onRideHistoryBack()" [open]="ui.showRideHistory" (onError)="onEmmitError($event)"></app-ride-history>
+
+    <!-- FAVORITE RIDES SHEET -->
+    <app-favorite-rides class="favorite-rides" (onClose)="onFavouritesBack()" [open]="ui.showFavourites" (onError)="onEmmitError($event)"></app-favorite-rides>
 
     <!-- PROFILE CHANGES SHEET -->
     @if ((userService.currentUser$ | async)?.role === Role.ADMIN) {

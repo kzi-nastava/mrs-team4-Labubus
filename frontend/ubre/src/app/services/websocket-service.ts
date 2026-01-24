@@ -6,6 +6,8 @@ import { AuthService } from '../features/auth/auth-service';
 import { ProfileChangeNotification } from '../notifications/profile-change-notification';
 import { RideAssignmentNotification } from '../notifications/ride-assignment-noitfications';
 import { RideReminderNotification } from '../notifications/ride-reminder-notification';
+import { RideDto } from '../dtos/ride-dto';
+import { CurrentRideNotification } from '../notifications/current-ride-notification';
 
 export type WebSocketConnectionState = 'disconnected' | 'connecting' | 'connected';
 
@@ -141,6 +143,25 @@ export class WebSocketService {
         next: (message) => {
           try {
             const payload = JSON.parse(message.body) as RideReminderNotification;
+            this.zone.run(() => subscriber.next(payload));
+          } catch (error) {
+            this.zone.run(() => subscriber.error(error));
+          }
+        },
+        error: (error) => this.zone.run(() => subscriber.error(error)),
+      });
+      return () => subscription.unsubscribe();
+    });
+  }
+
+  currentRideNotifications(userId: number): Observable<CurrentRideNotification> {
+    const topic = `/topic/current-rides/${userId}`;
+    return new Observable<CurrentRideNotification>((subscriber) => {
+      const topic$ = this.listenToTopic(topic);
+      const subscription = topic$.subscribe({
+        next: (message) => {
+          try {
+            const payload = JSON.parse(message.body) as CurrentRideNotification;
             this.zone.run(() => subscriber.next(payload));
           } catch (error) {
             this.zone.run(() => subscriber.error(error));

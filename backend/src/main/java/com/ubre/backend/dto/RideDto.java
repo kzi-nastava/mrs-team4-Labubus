@@ -1,5 +1,6 @@
 package com.ubre.backend.dto;
 
+import com.ubre.backend.enums.RideStatus;
 import com.ubre.backend.model.Ride;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,9 +23,10 @@ public class RideDto implements Serializable {
     private Long canceledBy;
     private Double price;
     private Double distance;
+    private RideStatus status;
     private Long createdBy;
 
-    public RideDto(Long id, String startTime, String endTime, List<WaypointDto> waypoints, UserDto driver, List<UserDto> passengers, Boolean panic, Long canceledBy, Double price, Double distance, Long createdBy) {
+    public RideDto(Long id, String startTime, String endTime, List<WaypointDto> waypoints, UserDto driver, List<UserDto> passengers, Boolean panic, Long canceledBy, Double price, Double distance, RideStatus status, Long createdBy) {
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -35,6 +37,7 @@ public class RideDto implements Serializable {
         this.canceledBy = canceledBy;
         this.price = price;
         this.distance = distance;
+        this.status = status;
         this.createdBy = createdBy;
     }
 
@@ -49,6 +52,7 @@ public class RideDto implements Serializable {
         this.canceledBy = model.getCanceledBy() != null ? model.getCanceledBy().getId() : null;
         this.price = model.getPrice();
         this.distance = model.getDistance();
+        this.status = model.getStatus();
         this.createdBy = model.getCreator() == null ? null : model.getCreator().getId();
     }
 }

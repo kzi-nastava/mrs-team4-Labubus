@@ -1,22 +1,19 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
-import { RideList } from '../ride-list/ride-list';
 import { RideService } from '../../../services/ride-service';
-import { RideCardDto } from '../../../dtos/ride-card-dto';
-import { UserDto } from '../../../dtos/user-dto';
 import { UserService } from '../../../services/user-service';
-import { Role } from '../../../enums/role';
-import { RideQueryDto } from '../../../dtos/ride-query';
 import { Observable, of } from 'rxjs';
+import { RideCardDto } from '../../../dtos/ride-card-dto';
+import { RideQueryDto } from '../../../dtos/ride-query';
+import { RideList } from '../ride-list/ride-list';
 import { AsyncPipe } from '@angular/common';
 
-
 @Component({
-  selector: 'app-ride-history',
+  selector: 'app-favorite-rides',
   imports: [RideList, AsyncPipe],
-  templateUrl: './ride-history.html',
-  styleUrl: './ride-history.css',
+  templateUrl: './favorite-rides.html',
+  styleUrl: './favorite-rides.css',
 })
-export class RideHistory {
+export class FavoriteRides {
   private _open : boolean = false;
   @Input() set open(value : boolean) {this._open = value; if (value) this.onQueryChange(this.lastQuery);} get open() {return this._open}
   @Output() onClose = new EventEmitter<void>();
@@ -29,18 +26,18 @@ export class RideHistory {
   lastQuery : RideQueryDto = new RideQueryDto(null, "", false, null)
 
   onQueryChange(qurey : RideQueryDto) {
-    this.rideService.clearHistory();
-    this.rideService.fetchHistory(qurey, Math.ceil((window.screen.height * 0.7 - 126) / window.devicePixelRatio / 171))
+    this.rideService.clearFavorites();
+    this.rideService.fetchFavorites(qurey, Math.ceil((window.screen.height * 0.7 - 126) / window.devicePixelRatio / 171))
     this.lastQuery = qurey
   }
 
   onScrollToBottom(qurey : RideQueryDto) {
-    this.rideService.fetchHistory(qurey, Math.ceil((window.screen.height * 0.7 - 126) / window.devicePixelRatio / 171))
+    this.rideService.fetchFavorites(qurey, Math.ceil((window.screen.height * 0.7 - 126) / window.devicePixelRatio / 171))
   }
 
   ngOnInit() {
-    this.rides$ = this.rideService.history$;
+    this.rides$ = this.rideService.favorites$;
     
-    this.onQueryChange(new RideQueryDto(null, "", false, null));
+    this.onQueryChange(this.lastQuery);
   }
 }
