@@ -5,7 +5,7 @@
             <h5 class="title">{{ title }}</h5>
         </div>
     }
-    <div class="content-wrapper">
+    <div class="content-wrapper" (scroll)="scroll($event)">
         <ng-content></ng-content>
     </div>
 </div>

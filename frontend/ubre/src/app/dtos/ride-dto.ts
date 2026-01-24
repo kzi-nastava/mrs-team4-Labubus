@@ -16,8 +16,9 @@ export class RideDto {
     public panic : boolean = false;
     public canceledBy : number | null = null;
     public status : RideStatus;
+    public createdBy : number;
 
-    constructor(id : number, startTime : string, endTime : string, waypoints : WaypointDto[], driver : UserDto, vehicle : VehicleDto, passengers : UserDto[], distance : number = 0, price : number, panic : boolean = false, canceledBy : number | null = null, status : RideStatus) {
+    constructor(id : number, startTime : string, endTime : string, waypoints : WaypointDto[], driver : UserDto, vehicle : VehicleDto, passengers : UserDto[], distance : number = 0, price : number, panic : boolean = false, canceledBy : number | null = null, status : RideStatus, createdBy : number) {
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -30,5 +31,6 @@ export class RideDto {
         this.panic = panic;
         this.canceledBy = canceledBy;
         this.status = status;
+        this.createdBy = createdBy;
     }
 }

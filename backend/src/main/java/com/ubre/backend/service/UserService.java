@@ -28,5 +28,7 @@ public interface UserService {
     UserDto registerUser(UserRegistrationDto registrationDto);
     void uploadAvatar(Long userId, MultipartFile avatar);
     UserDto createAdmin(UserDto adminDto);
+
+    List<UserDto> getUsersByFullName(String fullName);
     void recordUserStatus(Long userId, UserStatus status);
 }

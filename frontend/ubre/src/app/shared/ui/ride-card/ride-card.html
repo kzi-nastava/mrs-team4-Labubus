@@ -2,10 +2,10 @@
     <img [src]="iconUrl" alt="" class="action-icon icon" (click)="onAction()">
 
     <img [src]="selected ? 'clock-surface.svg' : 'clock-primary.svg'" alt="" class="time-icon icon">
-    <p class="time">{{ ride != null ? (ride.startTime | date: 'd MMM yyyy h:mm a') : '00 Jan 0000 00:00 AM'}}</p>
+    <p class="time">{{ ride != null ? (start | date: 'd MMM yyyy h:mm a') : '00 Jan 0000 00:00 AM'}}</p>
 
     <div class="start-icon icon"></div>
-    <p class="start">{{ ride != null ? ride.waypoints[0].label : '' }}</p>
+    <p class="start">{{ ride != null && ride.waypoints != null && ride.waypoints.length > 1 ? ride.waypoints[0].label : '' }}</p>
 
     <div class="dots">
         <div class="dot"></div>
@@ -17,5 +17,5 @@
     <div class="separator"></div>
     
     <img [src]="selected ? 'location-surface.svg' : 'location.svg'" alt="" class="destination-icon icon">
-    <p class="destination">{{ ride != null ? ride.waypoints[ride.waypoints.length - 1].label : '' }}</p>
+    <p class="destination">{{ ride != null && ride.waypoints != null && ride.waypoints.length > 1 ? ride.waypoints[ride.waypoints.length - 1].label : '' }}</p>
 </div>

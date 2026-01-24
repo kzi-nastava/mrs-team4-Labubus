@@ -5,11 +5,12 @@ import org.springframework.web.ErrorResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface ReviewService {
     ReviewDto getReview(Long id) throws ResponseStatusException;
-    Collection<ReviewDto> getDriverReviews(Long driverId);
-    Collection<ReviewDto> getUserReviews(Long userId);
+    List<ReviewDto> getDriverReviews(Long driverId);
+    List<ReviewDto> getUserReviews(Long userId);
     Double getDriverAverageRating(Long driverId);
     ReviewDto createReview(Long rideId, ReviewDto reviewDto) throws ResponseStatusException;
     ReviewDto updateReview(Long id, ReviewDto reviewDto) throws ResponseStatusException;

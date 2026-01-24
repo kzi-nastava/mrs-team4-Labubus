@@ -22,7 +22,7 @@ import { UserStatsDto } from '../../dtos/user-stats-dto';
 import { VehicleDto } from '../../dtos/vehicle-dto';
 import { Role } from '../../enums/role';
 import { VehicleType } from '../../enums/vehicle-type';
-import { Subscription, take } from 'rxjs';
+import { Observable, Subscription, forkJoin, of, take } from 'rxjs';
 import { DriverRegistrationService } from '../../services/driver-registration-service';
 import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
@@ -33,6 +33,8 @@ import { AuthService } from '../../features/auth/auth-service';
 import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
 import { WebSocketService } from '../../services/websocket-service';
 import { StatItemDto } from '../../dtos/stat-item-dto';
+import { ReviewService } from '../../services/review-service';
+import { ReviewModal } from '../../shared/ui/review-modal/review-modal';
 import { ChangePasswordService } from '../../services/change-password-service';
 import { UserStatsService } from '../../services/user-stats-service';
 import { RidePlanningStore } from '../../services/ride-planning/ride-planning-store';
@@ -49,7 +51,7 @@ import { RideStatus } from '../../enums/ride-status';
   imports: [Map,IconButton,SideMenu,Toast,
     Modal,ModalContainer,StatCard,Button,
     Sheet,FormsModule,RideHistory,ProfileChangeCard,
-    AsyncPipe,ScheduleTimer,InvitePassengers,RideOptions],
+    AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,RideOptions],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -58,6 +60,7 @@ import { RideStatus } from '../../enums/ride-status';
     
     public userService = inject(UserService);
     private authService = inject(AuthService);
+    private reviewService : ReviewService = inject(ReviewService)
     public driverRegistrationService = inject(DriverRegistrationService);
     public ridePlanningStore = inject(RidePlanningStore);
     private confetti = inject(ConfettiService);
@@ -78,6 +81,7 @@ import { RideStatus } from '../../enums/ride-status';
   private rideAssignmentSubscription?: Subscription;
   private rideReminderSubscription?: Subscription;
   private currentRideSubscription?: Subscription; // this subscription represents a current ride, for user and for a driver
+
 
   ngOnInit() {
     const userId = this.authService.getId();
@@ -133,6 +137,8 @@ import { RideStatus } from '../../enums/ride-status';
         },
       });
 
+    this.ui.reviewModalOpen = this.reviewService.showReviewModal$;
+    
     this.rideReminderSubscription = this.webSocketService
       .rideReminderNotifications(userId)
       .subscribe({
@@ -182,6 +188,7 @@ import { RideStatus } from '../../enums/ride-status';
     checkoutModalOpen: false,
     toastOpen: false,
     profileChangesOpen: false,
+    reviewModalOpen: of(false),
     scheduleTimerOpen: false,
     invitePassengersOpen: false,
   };
@@ -241,6 +248,7 @@ import { RideStatus } from '../../enums/ride-status';
     if (action === 'logout') {
       this.userService.setCurrentUserById(0);     // set current user to guest
       this.authService.logout();
+      this.userService.resetAvatar();
     }
     if (action === 'account-settings') {
       this.openAccountSettings();
@@ -639,6 +647,9 @@ import { RideStatus } from '../../enums/ride-status';
     this.showRideHistory = false;
   }
 
+  onEmmitError(error : Error) {
+    this.showToast(error.name, error.message)
+  }
 
 
 

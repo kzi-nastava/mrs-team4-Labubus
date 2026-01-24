@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 
 @Getter
@@ -26,8 +24,9 @@ public class RideDto implements Serializable {
     private Double price;
     private Double distance;
     private RideStatus status;
+    private Long createdBy;
 
-    public RideDto(Long id, String startTime, String endTime, List<WaypointDto> waypoints, UserDto driver, List<UserDto> passengers, Boolean panic, Long canceledBy, Double price, Double distance, RideStatus status) {
+    public RideDto(Long id, String startTime, String endTime, List<WaypointDto> waypoints, UserDto driver, List<UserDto> passengers, Boolean panic, Long canceledBy, Double price, Double distance, RideStatus status, Long createdBy) {
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -39,6 +38,7 @@ public class RideDto implements Serializable {
         this.price = price;
         this.distance = distance;
         this.status = status;
+        this.createdBy = createdBy;
     }
 
     public RideDto(Ride model) {
@@ -53,5 +53,6 @@ public class RideDto implements Serializable {
         this.price = model.getPrice();
         this.distance = model.getDistance();
         this.status = model.getStatus();
+        this.createdBy = model.getCreator() == null ? null : model.getCreator().getId();
     }
 }

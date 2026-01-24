@@ -88,7 +88,7 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public Collection<VehicleIndicatorDto> getVehicleIndicators() {
+    public List<VehicleIndicatorDto> getVehicleIndicators() {
         List<VehicleIndicatorDto> indicators = new ArrayList<>();
         List<Driver> activeDrivers = driverRepository.findActiveDrivers();
         for (Driver driver : activeDrivers) {

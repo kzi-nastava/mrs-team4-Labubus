@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -159,5 +161,16 @@ public class UserController {
         response.setHeader("X-Accel-Buffering", "no");
         response.setHeader("Content-Encoding", "identity");
         return sseService.connect(userId);
+    }
+
+    @GetMapping(value="", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserDto>> getUsersByFullName(@RequestParam(defaultValue = "") String fullName) {
+        fullName = fullName.replaceAll("[^a-zA-Z\\s]+", "");
+        if (fullName.isEmpty())
+            return ResponseEntity.status(HttpStatus.OK).body(new ArrayList<UserDto>());
+
+        List<UserDto> users = userService.getUsersByFullName(fullName);
+        return ResponseEntity.status(HttpStatus.OK).body(users);
     }
 }

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { ModalContainer } from '../modal-container/modal-container';
 import { ProfileCard } from '../profile-card/profile-card';
 import { VehicleCard } from '../vehicle-card/vehicle-card';
@@ -9,6 +9,8 @@ import { RideDto } from '../../../dtos/ride-dto';
 import { DatePipe } from '@angular/common';
 import { UserDto } from '../../../dtos/user-dto';
 import { Role } from '../../../enums/role';
+import { ReviewService } from '../../../services/review-service';
+import { UserService } from '../../../services/user-service';
 
 @Component({
   selector: 'app-ride-details',
@@ -27,5 +29,27 @@ export class RideDetails {
         id: 0,
         phone: "",
         address: ""
-      };;
+      };
+  @Output() onError = new EventEmitter<Error>();
+
+  reviewService : ReviewService = inject(ReviewService);
+  userService : UserService = inject(UserService);
+
+  start : Date = new Date();
+  end : Date = new Date();
+
+  onOpenReview(rideId : number) {
+    this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
+      if (currentUser.id == this.ride.createdBy)
+        this.reviewService.newReview(rideId)
+      else
+        this.onError.emit(new Error("You can only review your rides"))
+    })
+  }
+  
+  ngOnInit() {
+    console.log(this.ride)
+    this.start = new Date(this.ride.startTime)
+    this.end = new Date(this.ride.endTime)
+  }
 }

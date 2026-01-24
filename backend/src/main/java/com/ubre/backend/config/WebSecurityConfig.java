@@ -74,7 +74,9 @@ public class WebSecurityConfig {
             .requestMatchers("/api/auth/login",
                                             "/api/users/register",
                                             "/api/users/{id}/avatar",
-                                            "/api/auth/activate").permitAll()
+                                            "/api/auth/activate",
+                            "/api/auth/forgot-password", 
+                             "/api/auth/reset-password").permitAll()
             .requestMatchers("/error").permitAll()
             .requestMatchers(
                 "/",
