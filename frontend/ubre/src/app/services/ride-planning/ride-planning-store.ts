@@ -20,6 +20,7 @@ import { RideOrderDto } from "../../dtos/ride-order";
 import { UserService } from "../user-service";
 import { RideDto } from "../../dtos/ride-dto";
 import { HttpErrorResponse } from "@angular/common/http";
+import { RideStatus } from "../../enums/ride-status";
 
 @Injectable({ providedIn: 'root' })
 export class RidePlanningStore {
@@ -329,5 +330,15 @@ export class RidePlanningStore {
     }
 
     // when ride is started, request is sent to backend to change status from PENDING to IN_PROGRESS
-    public startRide(): Observable<void> {
+    public startCurrentRide(): Observable<void> {
+        return this.orderingService.startCurrentRide(this.currentRideSubject$.value?.id ?? 0).pipe(
+            take(1),
+            tap(() => {
+                this.currentRideSubject$.next({ ...this.currentRideSubject$.value!, status: RideStatus.IN_PROGRESS });
+            }),
+            catchError((err: HttpErrorResponse) => {
+                return throwError(() => err);
+            })
+        );
+    }
 }

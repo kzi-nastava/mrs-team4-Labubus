@@ -2,6 +2,7 @@ package com.ubre.backend.service.impl;
 
 import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.enums.NotificationType;
+import com.ubre.backend.websocket.CurrentRideNotification;
 import com.ubre.backend.websocket.RideReminderNotification;
 import com.ubre.backend.websocket.WebSocketNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,11 +47,12 @@ public class RideReminderService {
         );
     }
 
-    // one time trigger that is sent via websocket, to user, ride dto
-    public void triggerScheduledRide(Long userId, RideDto rideDto, LocalDateTime scheduledTime) {
+    // triggers for a current ride in both ways from front to backend and vice versa
+    public void sendCurrentRideUpdate(Long userId, RideDto rideDto, LocalDateTime scheduledTime) {
         // send notification via websocket, at a scheduled time
         scheduler.schedule(
-                () -> webSocketNotificationService.sendRideTrigger(userId, rideDto),
+                () -> webSocketNotificationService.sendCurrentRideUpdate(userId, new CurrentRideNotification(
+                        NotificationType.TIME_FOR_A_RIDE.name(), rideDto)),
                 Instant.from(scheduledTime.atZone(ZoneId.systemDefault()))
         );
     }

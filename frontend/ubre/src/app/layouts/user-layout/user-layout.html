@@ -113,6 +113,7 @@
 
     <app-icon-button class="map-button"
       iconUrl="map_search_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
+      [disabled]="(ridePlanningStore.currentRide$ | async)?.status === RideStatus.IN_PROGRESS"
       (click)="toggleDest()">
     </app-icon-button>
 

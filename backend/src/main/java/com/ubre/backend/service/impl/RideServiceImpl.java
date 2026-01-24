@@ -13,6 +13,7 @@ import com.ubre.backend.repository.DriverRepository;
 import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.RideService;
+import com.ubre.backend.websocket.CurrentRideNotification;
 import com.ubre.backend.websocket.ProfileChangeNotification;
 import com.ubre.backend.websocket.RideAssignmentNotification;
 import com.ubre.backend.websocket.WebSocketNotificationService;
@@ -89,26 +90,20 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    public RideDto startRide(Long rideId) {
-        boolean rideExists = rideRepository.existsById(rideId);
-        if (!rideExists) { throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"); }
-
+    public void startRide(Long rideId) {
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
+        ride.setStatus(RideStatus.IN_PROGRESS);
+        rideRepository.save(ride);
+        webSocketNotificationService.sendCurrentRideUpdate(ride.getCreator().getId(), new CurrentRideNotification(
+                NotificationType.RIDE_STARTED.name(),
+                new RideDto(ride)
+        ));
     }
 
     @Override
     public RideDto endRide(Long rideId) {
-        UserDto driver = new UserDto(1L, Role.DRIVER, "", "driver@ubre.com", "Driver", "Driver", "1231234132", "Adress 123", UserStatus.ACTIVE);
-        WaypointDto[] waypoints = new WaypointDto[] {
-                new WaypointDto(1L, "Bulevar oslobodjenja", 48.83, 19.32),
-                new WaypointDto(2L, "Trg mladenaca", 48.83, 19.32),
-                new WaypointDto(3L, "Bulevar despota Stefana", 48.83, 19.32)
-        };
-        UserDto[] passengers = {
-                new UserDto(2L, Role.REGISTERED_USER, "", "passenger1@ubre.com", "Passenger1", "Passenger1", "1231234132", "Adress 123", UserStatus.ACTIVE),
-                new UserDto(3L, Role.REGISTERED_USER, "", "passenger2@ubre.com", "Passenger2", "Passenger2", "1231234132", "Adress 123", UserStatus.ACTIVE)
-        };
-
-        return new RideDto(1L, LocalDateTime.now().toString(), LocalDateTime.now().toString(), Arrays.asList(waypoints), driver, Arrays.stream(passengers).toList(), true, null, 12.34, 7.3);
+        return new RideDto();
     }
 
     @Override
@@ -369,8 +364,8 @@ public class RideServiceImpl implements RideService {
 
         RideDto createdRideDto = new RideDto();
         createdRideDto.setId(newRide.getId());
-        createdRideDto.setStart(newRide.getStartTime().toString());
-        createdRideDto.setEnd(newRide.getEndTime().toString());
+        createdRideDto.setStartTime(newRide.getStartTime().toString());
+        createdRideDto.setEndTime(newRide.getEndTime().toString());
         createdRideDto.setWaypoints(newRide.getWaypoints().stream().map(WaypointDto::new).toList());
         createdRideDto.setDriver(new UserDto(assignedDriver));
         createdRideDto.setPassengers(passengers.stream().map(UserDto::new).toList());
@@ -384,20 +379,11 @@ public class RideServiceImpl implements RideService {
         // if ride is scheduled, start a reminder process
         if (newRide.getStartTime().isAfter(LocalDateTime.now())) {
             rideReminderService.start(rideOrderDto.getCreatorId(), newRide.getStartTime());
-            rideReminderService.triggerScheduledRide(
-                    rideOrderDto.getCreatorId(),
-                    createdRideDto,
-                    newRide.getStartTime()
-            );
-            rideReminderService.triggerScheduledRide(
-                    assignedDriver.getId(),
-                    createdRideDto,
-                    newRide.getStartTime()
-            );
-        } else {
-            webSocketNotificationService.sendRideTrigger(rideOrderDto.getCreatorId(), createdRideDto);
-            webSocketNotificationService.sendRideTrigger(assignedDriver.getId(), createdRideDto);
         }
+
+        // schedule a current ride upadte
+        rideReminderService.sendCurrentRideUpdate(rideOrderDto.getCreatorId(), createdRideDto, newRide.getStartTime());
+        rideReminderService.sendCurrentRideUpdate(assignedDriver.getId(), createdRideDto, newRide.getStartTime());
 
 
         return createdRideDto;

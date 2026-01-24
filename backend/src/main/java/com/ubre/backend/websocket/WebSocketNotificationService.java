@@ -10,6 +10,7 @@ public class WebSocketNotificationService {
     private static final String PROFILE_CHANGE_TOPIC_PREFIX = "/topic/profile-changes/";
     private static final String RIDE_ASSIGNMENT_TOPIC_PREFIX = "/topic/ride-assignments/";
     private static final String RIDE_REMINDER_TOPIC_PREFIX = "/topic/ride-reminders/";
+    private static final String CURRENT_RIDES_TOPIC_PREFIX = "/topic/current-rides/";
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -34,6 +35,13 @@ public class WebSocketNotificationService {
     public void sendRideReminder(Long userId, RideReminderNotification notification) {
         messagingTemplate.convertAndSend(RIDE_REMINDER_TOPIC_PREFIX + userId, notification);
     }
+
+    // notification for current rides (user receives this notification when ride iS triggered or driver receivres it also)
+    public void sendCurrentRideUpdate(Long userId, CurrentRideNotification notification) {
+        messagingTemplate.convertAndSend(CURRENT_RIDES_TOPIC_PREFIX + userId, notification);
+    }
+
+
 
 
 }

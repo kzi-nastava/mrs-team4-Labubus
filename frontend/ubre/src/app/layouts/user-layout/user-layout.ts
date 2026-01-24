@@ -41,6 +41,7 @@ import { InvitePassengers } from '../../shared/ui/invite-passengers/invite-passe
 import { RideOptions } from '../../shared/ui/ride-options/ride-options';
 import { RideOptionsDto } from '../../dtos/ride-options-dto';
 import { NotificationType } from '../../enums/notification-type';
+import { RideStatus } from '../../enums/ride-status';
 
 @Component({
   selector: 'app-user-layout',
@@ -68,6 +69,7 @@ import { NotificationType } from '../../enums/notification-type';
 
   Role = Role;
   VehicleType = VehicleType;
+  RideStatus = RideStatus;
 
   userStats!: UserStatsDto;
 
@@ -148,7 +150,15 @@ import { NotificationType } from '../../enums/notification-type';
       .subscribe({
         next: (notification) => {
           // notification that time for a ride has come
-          this.showToast('Get ready', 'Your ride is starting soon...');
+          if (notification.status === NotificationType.TIME_FOR_A_RIDE && notification.ride) {
+            this.showToast('Get ready', 'Your ride is starting soon...');
+            this.ridePlanningStore.currentRideSubject$.next(notification.ride);
+          }
+          if (notification.status === NotificationType.RIDE_STARTED && notification.ride) {
+            this.showToast('Ride started', 'Your ride has been started successfully.');
+            this.ridePlanningStore.currentRideSubject$.next(notification.ride);
+            alert(notification.ride.status);
+          }
         },
       });
   }
@@ -776,9 +786,14 @@ import { NotificationType } from '../../enums/notification-type';
     if (!currentRide) {
       this.showToast('No ride available', 'There is no ride available to start.');
     } else {
-      // TODO: Implement start ride functionality
-      // For now, just show a message that ride can be started
-      this.showToast('Starting ride', 'Make sure all passengers are in the vehicle.');
+      this.ridePlanningStore.startCurrentRide().pipe(take(1)).subscribe({
+        next: () => {
+          this.showToast('Ride started', 'Please drive carefully and enjoy your ride.');
+        },
+        error: (err: HttpErrorResponse) => {
+          this.showToast('Error starting ride', err.error.message);
+        }
+      });
     }
   }
 
