@@ -59,6 +59,8 @@ import { RideDto } from '../../dtos/ride-dto';
     styleUrl: './user-layout.css',
   })
   export class UserLayout implements OnInit {
+
+
     constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
     
     public userService = inject(UserService);
@@ -193,6 +195,7 @@ import { RideDto } from '../../dtos/ride-dto';
     reviewModalOpen: of(false),
     scheduleTimerOpen: false,
     invitePassengersOpen: false,
+    timeEstimate: false,
     showRideHistory: false,
     showFavourites: false
   };
@@ -211,6 +214,13 @@ import { RideDto } from '../../dtos/ride-dto';
   onCdProceed() {
     // close destination card
     this.ridePlanningStore.closeDest();
+
+    //if user isn't logged in, proceed to time estimate
+    if (!this.isLoggedIn()) {
+      this.ui.timeEstimate = true;
+      return
+    }
+
     this.ui.rideOptionsOpen = true;
   }
 
@@ -904,4 +914,24 @@ import { RideDto } from '../../dtos/ride-dto';
   rejectProfileChange(id: number) {
     this.profileChangeService.reject(id);
   }
+
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  getWaypointCount(): number {
+    return this.ridePlanningStore.waypoints.length;
+  }
+
+  onEstimateTime() {
+    this.ui.timeEstimate = false;
+    this.ui.cdModalOpen = true;
+    this.ridePlanningStore.setWaypoints([]);
+    this.ridePlanningStore.clearRoute();
+  }
+
+  calculateEstimatedTime() {
+    return this.ridePlanningStore.getDurationMinutes();
+  }
+
 }
