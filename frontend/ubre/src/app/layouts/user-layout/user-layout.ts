@@ -194,7 +194,7 @@ import { RideStatus } from '../../enums/ride-status';
     reviewModalOpen: of(false),
     scheduleTimerOpen: false,
     invitePassengersOpen: false,
-    timeEstimate: false
+    timeEstimate: false,
     showRideHistory: false,
     showFavourites: false
   };
