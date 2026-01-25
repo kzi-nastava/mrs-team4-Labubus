@@ -13,15 +13,14 @@ import com.ubre.backend.repository.DriverRepository;
 import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.RideService;
-import com.ubre.backend.websocket.CurrentRideNotification;
-import com.ubre.backend.websocket.ProfileChangeNotification;
-import com.ubre.backend.websocket.RideAssignmentNotification;
-import com.ubre.backend.websocket.WebSocketNotificationService;
+import com.ubre.backend.websocket.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -103,11 +102,6 @@ public class RideServiceImpl implements RideService {
     @Override
     public RideDto endRide(Long rideId) {
         return new RideDto();
-    }
-
-    @Override
-    public void cancelRide(Long rideId, String reason) {
-
     }
 
     @Override
@@ -393,5 +387,61 @@ public class RideServiceImpl implements RideService {
 
 
         return createdRideDto;
+    }
+
+    @Override
+    public RideDto cancelRideByDriver(Long rideId, String reason) {
+
+        if (reason == null || reason.trim().isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cancellation reason is required");
+
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User driver = (User) auth.getPrincipal();
+
+        if (!ride.getDriver().getId().equals(driver.getId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your ride");
+
+        if (ride.getStatus() != RideStatus.ACCEPTED)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride cannot be cancelled");
+
+        ride.setStatus(RideStatus.CANCELLED);
+        ride.setCanceledBy(driver);
+        ride = rideRepository.save(ride);
+        RideDto rideDto = new RideDto(ride);
+
+        CancelNotification cancelNotification = new CancelNotification(reason, rideDto);
+        webSocketNotificationService.sendRideCancelledToUser(ride.getCreator().getId(), cancelNotification);
+
+        return rideDto;
+
+    }
+
+    @Override
+    public RideDto cancelRide(Long rideId) {
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+
+        if (!ride.getCreator().getId().equals(user.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your ride");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (ride.getStartTime() != null && ride.getStartTime().minusMinutes(10).isBefore(now)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot cancel ride less than 10 minutes before start");
+        }
+
+        ride.setStatus(RideStatus.CANCELLED);
+        ride.setCanceledBy(user);
+        ride = rideRepository.save(ride);
+        RideDto rideDto = new RideDto(ride);
+
+        return rideDto;
     }
 }

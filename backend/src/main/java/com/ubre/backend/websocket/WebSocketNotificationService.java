@@ -1,5 +1,6 @@
 package com.ubre.backend.websocket;
 
+import com.ubre.backend.dto.CancellationDto;
 import com.ubre.backend.dto.RideDto;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,11 @@ public class WebSocketNotificationService {
 
     // notification for current rides (user receives this notification when ride iS triggered or driver receivres it also)
     public void sendCurrentRideUpdate(Long userId, CurrentRideNotification notification) {
+        messagingTemplate.convertAndSend(CURRENT_RIDES_TOPIC_PREFIX + userId, notification);
+    }
+
+    // cancel ride with reason from driver
+    public void sendRideCancelledToUser(Long userId, CancelNotification notification) {
         messagingTemplate.convertAndSend(CURRENT_RIDES_TOPIC_PREFIX + userId, notification);
     }
 

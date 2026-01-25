@@ -161,14 +161,20 @@ import { RideDto } from '../../dtos/ride-dto';
       .subscribe({
         next: (notification) => {
           // notification that time for a ride has come
-          if (notification.status === NotificationType.TIME_FOR_A_RIDE && notification.ride) {
+          if (notification.status === NotificationType.TIME_FOR_A_RIDE) 
             this.showToast('Get ready', 'Your ride is starting soon...');
-            this.ridePlanningStore.currentRideSubject$.next(notification.ride);
-          }
-          if (notification.status === NotificationType.RIDE_STARTED && notification.ride) {
+          
+          if (notification.status === NotificationType.RIDE_STARTED) 
             this.showToast('Ride started', 'Your ride has been started successfully.');
+          
+          if (notification.status === NotificationType.RIDE_CANCELLED) 
+            if (notification.reason)
+              this.showToast('Ride cancelled', notification.reason);
+            else
+              this.showToast('Ride cancelled', "Ride has been cancelled by the user.");
+
+          if (notification.ride)
             this.ridePlanningStore.currentRideSubject$.next(notification.ride);
-          }
         },
       });
   }
@@ -932,6 +938,10 @@ import { RideDto } from '../../dtos/ride-dto';
 
   calculateEstimatedTime() {
     return this.ridePlanningStore.getDurationMinutes();
+  }
+
+  onCancelRideClick() {
+    throw new Error('Method not implemented.');
   }
 
 }
