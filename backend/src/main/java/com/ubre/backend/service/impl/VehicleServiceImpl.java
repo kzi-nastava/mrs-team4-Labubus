@@ -3,21 +3,32 @@ package com.ubre.backend.service.impl;
 import com.ubre.backend.dto.VehicleDto;
 import com.ubre.backend.dto.VehicleIndicatorDto;
 import com.ubre.backend.dto.WaypointDto;
+import com.ubre.backend.enums.NotificationType;
+import com.ubre.backend.enums.RideStatus;
 import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.enums.VehicleType;
-import com.ubre.backend.model.Driver;
-import com.ubre.backend.model.Vehicle;
-import com.ubre.backend.model.Waypoint;
+import com.ubre.backend.model.*;
 import com.ubre.backend.repository.DriverRepository;
+import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.VehicleRepository;
 import com.ubre.backend.repository.WaypointRepository;
 import com.ubre.backend.service.VehicleService;
+import com.ubre.backend.websocket.VehicleLocationNotification;
+import com.ubre.backend.websocket.WebSocketNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -32,6 +43,10 @@ public class VehicleServiceImpl implements VehicleService {
     private WaypointRepository waypointRepository;
     @Autowired
     private DriverRepository driverRepository;
+    @Autowired
+    private RideRepository rideRepository;
+    @Autowired
+    private WebSocketNotificationService notificationService;
 
     @Override
     public VehicleDto createVehicle(VehicleDto createVehicleDto, Long driverId) {
@@ -92,13 +107,20 @@ public class VehicleServiceImpl implements VehicleService {
         List<VehicleIndicatorDto> indicators = new ArrayList<>();
         List<Driver> activeDrivers = driverRepository.findActiveDrivers();
         for (Driver driver : activeDrivers) {
-            if (driver.getVehicle() == null)
+            if (driver.getVehicle() == null || driver.getVehicle().getLocation() == null)
                 continue;
 
-            Optional<Waypoint> w = waypointRepository.findByVehicleId(driver.getVehicle().getId());
-            if (w.isPresent())
-                // TODO: Get the actual panic status from ride if the driver status is ON_RIDE
+            Optional<Waypoint> w = waypointRepository.findById(driver.getVehicle().getLocation().getId());
+            if (w.isPresent()) {
+                if (driver.getStatus().equals(UserStatus.ON_RIDE)) {
+                    Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeDesc(driver, RideStatus.IN_PROGRESS);
+                    if (!ride.isEmpty()) {
+                        indicators.add(new VehicleIndicatorDto(driver.getId(), new WaypointDto(w.get()), driver.getStatus(), ride.get().getPanic()));
+                        continue;
+                    }
+                }
                 indicators.add(new VehicleIndicatorDto(driver.getId(), new WaypointDto(w.get()), driver.getStatus(), false));
+            }
         }
         return indicators;
     }
@@ -113,7 +135,12 @@ public class VehicleServiceImpl implements VehicleService {
         Vehicle vehicle = vehicleOptional.get();
         if (vehicle.getLocation() == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Location not set");
-        // TODO: Get the actual panic status from ride if the driver status is ON_RIDE
+
+        if (vehicle.getDriver().getStatus().equals(UserStatus.ON_RIDE)) {
+            Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeDesc(vehicle.getDriver(), RideStatus.IN_PROGRESS);
+            if (!ride.isEmpty())
+                return new VehicleIndicatorDto(vehicle.getDriver().getId(), new WaypointDto(vehicle.getLocation()), vehicle.getDriver().getStatus(), ride.get().getPanic());
+        }
         return new VehicleIndicatorDto(vehicle.getDriver().getId(), new WaypointDto(vehicle.getLocation()), vehicle.getDriver().getStatus(), false);
     }
 
@@ -124,11 +151,27 @@ public class VehicleServiceImpl implements VehicleService {
         if (vehicleOptional.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Vehicle not found");
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if (!jwtUser.getId().equals(vehicleOptional.get().getDriver().getId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only update the location of your vehicle");
+
         Vehicle vehicle = vehicleOptional.get();
+        waypointDto.setLabel(vehicle.getDriver().getName() + " " + vehicle.getDriver().getSurname() + " - " + vehicle.getModel());
         Waypoint location = waypointRepository.save(new Waypoint(waypointDto));
         vehicle.setLocation(location);
         vehicle = vehicleRepository.save(vehicle);
-        // TODO: Get the actual panic status from ride if the driver status is ON_RIDE
+
+        if (vehicle.getDriver().getStatus().equals(UserStatus.ON_RIDE)) {
+            Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeDesc(vehicle.getDriver(), RideStatus.IN_PROGRESS);
+            if (!ride.isEmpty())
+                return new VehicleIndicatorDto(vehicle.getDriver().getId(), new WaypointDto(vehicle.getLocation()), vehicle.getDriver().getStatus(), ride.get().getPanic());
+        }
         return new VehicleIndicatorDto(vehicle.getDriver().getId(), new WaypointDto(vehicle.getLocation()), vehicle.getDriver().getStatus(), false);
+    }
+
+    @Scheduled(fixedDelay = 1000)
+    private void scheduleLocationUpdate() {
+        notificationService.sendVehicleLocations(new VehicleLocationNotification(NotificationType.VEHICLE_LOCATIONS.name(), this.getVehicleIndicators()));
     }
 }
