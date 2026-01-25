@@ -8,6 +8,7 @@ import { RideAssignmentNotification } from '../notifications/ride-assignment-noi
 import { RideReminderNotification } from '../notifications/ride-reminder-notification';
 import { RideDto } from '../dtos/ride-dto';
 import { CurrentRideNotification } from '../notifications/current-ride-notification';
+import { VehicleLocationNotification } from '../notifications/vehicle-location-notification';
 
 export type WebSocketConnectionState = 'disconnected' | 'connecting' | 'connected';
 
@@ -162,6 +163,25 @@ export class WebSocketService {
         next: (message) => {
           try {
             const payload = JSON.parse(message.body) as CurrentRideNotification;
+            this.zone.run(() => subscriber.next(payload));
+          } catch (error) {
+            this.zone.run(() => subscriber.error(error));
+          }
+        },
+        error: (error) => this.zone.run(() => subscriber.error(error)),
+      });
+      return () => subscription.unsubscribe();
+    });
+  }
+
+  vehicleLocations(): Observable<VehicleLocationNotification> {
+    const topic = `/topic/vehicle-locations`;
+    return new Observable<VehicleLocationNotification>((subscriber) => {
+      const topic$ = this.listenToTopic(topic);
+      const subscription = topic$.subscribe({
+        next: (message) => {
+          try {
+            const payload = JSON.parse(message.body) as VehicleLocationNotification;
             this.zone.run(() => subscriber.next(payload));
           } catch (error) {
             this.zone.run(() => subscriber.error(error));

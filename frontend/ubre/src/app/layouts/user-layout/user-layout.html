@@ -2,6 +2,7 @@
   <app-map
     class="map"
     [waypoints]="(ridePlanningStore.ridePlanningState$ | async)?.waypoints ?? []"
+    [vehicles]="(vehicleService.vehicleLocations$ | async) ?? []"
     [routeGeometry]="(ridePlanningStore.ridePlanningState$ | async)?.routeInfo?.geometry ?? null"
     (mapClick)="ridePlanningStore.addFromMapClick($event.lat, $event.lon)">
   </app-map>

@@ -11,6 +11,7 @@ public class WebSocketNotificationService {
     private static final String RIDE_ASSIGNMENT_TOPIC_PREFIX = "/topic/ride-assignments/";
     private static final String RIDE_REMINDER_TOPIC_PREFIX = "/topic/ride-reminders/";
     private static final String CURRENT_RIDES_TOPIC_PREFIX = "/topic/current-rides/";
+    private static final String VEHICLE_LOCATION_TOPIC_PREFIX = "/topic/vehicle-locations";
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -41,7 +42,8 @@ public class WebSocketNotificationService {
         messagingTemplate.convertAndSend(CURRENT_RIDES_TOPIC_PREFIX + userId, notification);
     }
 
-
-
-
+    // notification for location of currently active vehicles
+    public void sendVehicleLocations(VehicleLocationNotification notification) {
+        messagingTemplate.convertAndSend(VEHICLE_LOCATION_TOPIC_PREFIX, notification);
+    }
 }

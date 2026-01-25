@@ -46,6 +46,7 @@ import { NotificationType } from '../../enums/notification-type';
 import { FavoriteRides } from '../../shared/ui/favorite-rides/favorite-rides';
 import { RideStatus } from '../../enums/ride-status';
 import { RideDto } from '../../dtos/ride-dto';
+import { VehicleService } from '../../services/vehicle-service';
 
 @Component({
   selector: 'app-user-layout',
@@ -74,6 +75,7 @@ import { RideDto } from '../../dtos/ride-dto';
     public webSocketService = inject(WebSocketService);
     public changePasswordService = inject(ChangePasswordService);
     public userStatsService = inject(UserStatsService);
+    public vehicleService = inject(VehicleService)
 
   Role = Role;
   VehicleType = VehicleType;
@@ -93,11 +95,11 @@ import { RideDto } from '../../dtos/ride-dto';
 
     if (userId !== null && userId !== 0) {
       this.userService.setCurrentUserById(userId);
-    } 
+    }
       
     if (userId === 0 || userId === null) {
       this.profileChangeSubscription?.unsubscribe();
-      this.webSocketService.disconnect();
+      // this.webSocketService.disconnect();
       this.websocketUserId = null;
       return;
     }
