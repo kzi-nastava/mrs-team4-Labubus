@@ -99,9 +99,7 @@ import { VehicleService } from '../../services/vehicle-service';
       
     if (userId === 0 || userId === null) {
       this.profileChangeSubscription?.unsubscribe();
-      // CONSULT TEAM ABOUT THIS:
-      // Currentlly the websocket disconnects when the user is logged out. For vehicle tracking I would need it on even when the user is a GUEST.
-      this.webSocketService.disconnect();
+      // this.webSocketService.disconnect();
       this.websocketUserId = null;
       return;
     }

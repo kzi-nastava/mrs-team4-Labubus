@@ -34,8 +34,8 @@ export class Map implements AfterViewInit, OnChanges {
 
   private vehicleIcon = L.icon({
     iconUrl: 'car.svg',
-    iconSize: [this.vehicleIndicatorWidth, this.vehicleIndicatorHeight],
-    iconAnchor: [this.vehicleIndicatorWidth / 2, this.vehicleIndicatorHeight / 2],
+    iconSize: [Math.max(this.vehicleIndicatorWidth * Math.pow(2, -5), 17), Math.max(this.vehicleIndicatorHeight * Math.pow(2, -5), 30)],
+    iconAnchor: [Math.max(this.vehicleIndicatorWidth * Math.pow(2, -5), 17) / 2, Math.max(this.vehicleIndicatorHeight * Math.pow(2, -5), 30) / 2],
   });
 
   @Input() waypoints: WaypointDto[] = []; // waypoints to display on the map
@@ -53,9 +53,9 @@ export class Map implements AfterViewInit, OnChanges {
 
     this.map.on('zoomend', () => {
       // This scales the cars on zoom, but they end up being almost invisible on larger zooms
-      const newVehicleHeght = this.vehicleIndicatorHeight * Math.pow(2, this.map.getZoom() - 19)
-      const newVehiclWidth = this.vehicleIndicatorWidth * Math.pow(2, this.map.getZoom() - 19)
-      console.log(newVehiclWidth, newVehicleHeght, this.map.getZoom(), Math.pow(2, this.map.getZoom() - 19))
+      const newVehicleHeght = Math.max(this.vehicleIndicatorHeight * Math.pow(2, this.map.getZoom() - 19), 30)
+      const newVehiclWidth = Math.max(this.vehicleIndicatorWidth * Math.pow(2, this.map.getZoom() - 19), 17)
+      console.log(newVehiclWidth, newVehicleHeght)
       this.vehicleIcon = L.icon({
         iconUrl: 'car.svg',
         iconSize: [newVehiclWidth, newVehicleHeght],
