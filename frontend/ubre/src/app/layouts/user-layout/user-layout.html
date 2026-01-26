@@ -148,8 +148,8 @@
       @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
         <button 
           class="ride-button"
-          [class.disabled]="!canCancelRide()"
-          [disabled]="!canCancelRide()"
+          [class.disabled]="!canStopRide()"
+          [disabled]="!canStopRide()"
           (click)="onStopRideClick()">
           <span class="ride-text">Stop</span>
         </button> 
