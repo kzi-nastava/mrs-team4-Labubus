@@ -156,12 +156,10 @@ public class RideController {
     }
 
     // cancel an already scheduled ride with optional reason
-    @PutMapping(
-            value = "/{id}/cancel",
-            consumes = MediaType.APPLICATION_JSON_VALUE
-    )
-    public ResponseEntity<Void> cancelRide(@PathVariable Long id, @Valid @RequestBody CancellationDto cancellationDto) {
-        rideService.cancelRide(id, cancellationDto.getReason());
+    @PutMapping( "/{rideId}/cancel/user")
+    @PreAuthorize("hasRole('REGISTERED_USER')")
+    public ResponseEntity<Void> cancelRide(@PathVariable Long rideId) {
+        rideService.cancelRide(rideId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -312,4 +310,18 @@ public class RideController {
         RideDto orederedRide = rideService.orderRide(rideOrder);
         return ResponseEntity.status(HttpStatus.CREATED).body(orederedRide);
     }
+
+    @PutMapping("/{rideId}/cancel/driver")
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<RideDto> cancelRideByDriver(@PathVariable Long rideId, @Valid @RequestBody CancellationDto request) {
+        RideDto cancelledRide = rideService.cancelRideByDriver(rideId, request.getReason());
+        return ResponseEntity.status(HttpStatus.OK).body(cancelledRide);
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<RideDto> getActiveRide() {
+        RideDto activeRide = rideService.getActiveRide();
+        return ResponseEntity.ok(activeRide);
+    }
+
 }

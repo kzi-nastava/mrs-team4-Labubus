@@ -13,15 +13,14 @@ import com.ubre.backend.repository.DriverRepository;
 import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.RideService;
-import com.ubre.backend.websocket.CurrentRideNotification;
-import com.ubre.backend.websocket.ProfileChangeNotification;
-import com.ubre.backend.websocket.RideAssignmentNotification;
-import com.ubre.backend.websocket.WebSocketNotificationService;
+import com.ubre.backend.websocket.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -103,11 +102,6 @@ public class RideServiceImpl implements RideService {
     @Override
     public RideDto endRide(Long rideId) {
         return new RideDto();
-    }
-
-    @Override
-    public void cancelRide(Long rideId, String reason) {
-
     }
 
     @Override
@@ -394,4 +388,77 @@ public class RideServiceImpl implements RideService {
 
         return createdRideDto;
     }
+
+    @Override
+    public RideDto cancelRideByDriver(Long rideId, String reason) {
+
+        Ride ride = this.getRideOrThrow(rideId);
+
+        this.checkRidePrivilege(ride.getDriver().getId());
+
+        if (ride.getStatus() != RideStatus.PENDING)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride cannot be cancelled");
+
+        ride.setStatus(RideStatus.CANCELLED);
+        ride.setCanceledBy(ride.getDriver());
+        ride = rideRepository.save(ride);
+        RideDto rideDto = new RideDto(ride);
+
+        CancelNotification cancelNotification = new CancelNotification(reason, rideDto);
+        webSocketNotificationService.sendRideCancelledToUser(ride.getCreator().getId(), cancelNotification);
+
+        return rideDto;
+    }
+
+
+    @Override
+    public RideDto cancelRide(Long rideId) {
+        Ride ride = this.getRideOrThrow(rideId);
+
+        this.checkRidePrivilege(ride.getCreator().getId());
+
+        LocalDateTime now = LocalDateTime.now();
+        if (ride.getStartTime() != null && ride.getStartTime().minusMinutes(10).isBefore(now)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Cannot cancel ride less than 10 minutes before start");
+        }
+
+        ride.setStatus(RideStatus.CANCELLED);
+        ride.setCanceledBy(ride.getCreator());
+        ride = rideRepository.save(ride);
+        RideDto rideDto = new RideDto(ride);
+
+        CancelNotification cancelNotification = new CancelNotification(null, rideDto);
+        webSocketNotificationService.sendRideCancelledToUser(ride.getDriver().getId(), cancelNotification);
+
+        return rideDto;
+    }
+
+    private void checkRidePrivilege(Long userId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+
+        if (!userId.equals(user.getId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your ride");
+    }
+
+    private Ride getRideOrThrow(Long rideId) {
+        return rideRepository.findById(rideId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
+    }
+
+    @Override
+    public RideDto getActiveRide() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+        RideDto ride = null;
+
+        if (user.getRole() == Role.DRIVER)
+            ride = rideRepository.findDriverActiveRide(user.getId()).orElse(null);
+        else if (user.getRole() == Role.REGISTERED_USER)
+            ride = rideRepository.findUserActiveRide(user.getId()).orElse(null);
+
+        return ride;
+    }
+
 }

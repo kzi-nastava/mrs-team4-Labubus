@@ -46,6 +46,8 @@ import { NotificationType } from '../../enums/notification-type';
 import { FavoriteRides } from '../../shared/ui/favorite-rides/favorite-rides';
 import { RideStatus } from '../../enums/ride-status';
 import { RideDto } from '../../dtos/ride-dto';
+import { DriverCancelDialog } from '../../shared/ui/driver-cancel-dialog/driver-cancel-dialog';
+import { RideService } from '../../services/ride-service';
 import { VehicleService } from '../../services/vehicle-service';
 
 @Component({
@@ -55,11 +57,14 @@ import { VehicleService } from '../../services/vehicle-service';
     Modal,ModalContainer,StatCard,Button,
     Sheet,FormsModule,RideHistory,ProfileChangeCard,
     AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
-    RideOptions, FavoriteRides],
+    RideOptions, FavoriteRides, DriverCancelDialog],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
   export class UserLayout implements OnInit {
+// Ride HISTORY SHEET LOGIC
+
+
 
 
     constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
@@ -75,6 +80,8 @@ import { VehicleService } from '../../services/vehicle-service';
     public webSocketService = inject(WebSocketService);
     public changePasswordService = inject(ChangePasswordService);
     public userStatsService = inject(UserStatsService);
+    public rideService = inject(RideService);
+
     public vehicleService = inject(VehicleService)
 
   Role = Role;
@@ -95,7 +102,20 @@ import { VehicleService } from '../../services/vehicle-service';
 
     if (userId !== null && userId !== 0) {
       this.userService.setCurrentUserById(userId);
+
+      this.rideService.getActiveRide().subscribe({
+      next: (ride) => {
+        if (ride) {
+          this.ridePlanningStore.currentRideSubject$.next(ride);
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching active ride', err);
+      }
+    });
     }
+
+    
       
     if (userId === 0 || userId === null) {
       this.profileChangeSubscription?.unsubscribe();
@@ -163,14 +183,21 @@ import { VehicleService } from '../../services/vehicle-service';
       .subscribe({
         next: (notification) => {
           // notification that time for a ride has come
-          if (notification.status === NotificationType.TIME_FOR_A_RIDE && notification.ride) {
+          if (notification.status === NotificationType.TIME_FOR_A_RIDE) 
             this.showToast('Get ready', 'Your ride is starting soon...');
-            this.ridePlanningStore.currentRideSubject$.next(notification.ride);
-          }
-          if (notification.status === NotificationType.RIDE_STARTED && notification.ride) {
+          
+          if (notification.status === NotificationType.RIDE_STARTED) 
             this.showToast('Ride started', 'Your ride has been started successfully.');
+          
+          if (notification.status === NotificationType.RIDE_CANCELLED) 
+          
+            if (notification.reason)
+              this.showToast('Ride cancelled', notification.reason);
+            else
+              this.showToast('Ride cancelled', "Ride has been cancelled by the user.");
+
+          if (notification.ride)
             this.ridePlanningStore.currentRideSubject$.next(notification.ride);
-          }
         },
       });
   }
@@ -199,7 +226,8 @@ import { VehicleService } from '../../services/vehicle-service';
     invitePassengersOpen: false,
     timeEstimate: false,
     showRideHistory: false,
-    showFavourites: false
+    showFavourites: false,
+    showCancelModal: false,
   };
 
   private previousScreenBeforeInvite: 'schedule-timer' | 'ride-options' | null = null;
@@ -935,5 +963,48 @@ import { VehicleService } from '../../services/vehicle-service';
   calculateEstimatedTime() {
     return this.ridePlanningStore.getDurationMinutes();
   }
+
+  onCancelRideClick() {
+    this.ui.showCancelModal = true;
+  }
+
+  handleCancelRide(reason: string) {
+    const rideId = this.ridePlanningStore.currentRideSubject$.getValue()!.id;
+    this.rideService.cancelRideDriver(rideId, reason).subscribe({
+        next: () => {
+          this.ui.showCancelModal = false;
+          this.ridePlanningStore.currentRideSubject$.next(null);
+          this.showToast('Ride cancelled', 'Ride cancelled successfully.');
+        },
+        error: (err: any) => {
+          this.showToast('Error cancelling ride', err.error.message);
+        }
+      });
+  }
+
+  canCancelRide(): boolean {
+    const ride = this.ridePlanningStore.getCurrentRide();
+    return !!ride && ride.status === 'PENDING';
+  }
+
+  onStopRideClick() {
+    
+  }
+
+  onCancelUserClick() {
+    const rideId = this.ridePlanningStore.currentRideSubject$.getValue()!.id;
+    this.rideService.cancelRideUser(rideId).subscribe({
+        next: () => {
+          this.ui.showCancelModal = false;
+          this.ridePlanningStore.currentRideSubject$.next(null);
+          this.showToast('Ride cancelled', 'Ride cancelled successfully.');
+        },
+        error: (err: any) => {
+          this.showToast('Error cancelling ride', err.error.message);
+        }
+      });
+  }
+
+
 
 }

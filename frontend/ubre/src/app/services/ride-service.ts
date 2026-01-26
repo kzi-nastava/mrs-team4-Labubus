@@ -14,6 +14,8 @@ import { UserDto } from '../dtos/user-dto';
   providedIn: 'root',
 })
 export class RideService {
+
+
   private readonly BASE_URL : string = "http://localhost:8080/api/";
   private readonly userService : UserService = inject(UserService);
   private readonly http = inject(HttpClient);
@@ -196,4 +198,22 @@ export class RideService {
 
     return params;
   }
+
+  cancelRideDriver(rideId: number, reason: string): Observable<RideDto> {
+    return this.http.put<RideDto>(this.BASE_URL + 'rides/' + rideId + '/cancel/driver', { reason: reason });
+  }
+
+  cancelRideUser(rideId: number): Observable<RideDto> {
+    return this.http.put<RideDto>(this.BASE_URL + 'rides/' + rideId + '/cancel/user', {});
+  }
+
+  getActiveRide(): Observable<RideDto> {
+    return this.http.get<RideDto>(`${this.BASE_URL}rides/active`, {});  
+  }
+
+  stopRide(id: any, stopLocation: { lat: number; lng: number; address: string; }) {
+    throw new Error('Method not implemented.');
+  }
+
+
 }
