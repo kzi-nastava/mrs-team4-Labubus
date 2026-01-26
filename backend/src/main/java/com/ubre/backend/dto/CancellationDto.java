@@ -12,11 +12,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CancellationDto {
-    private Long rideId;
+    @NotBlank(message = "Cancellation reason cannot be blank")
     private String reason;
 
-    public CancellationDto(Long rideId, String reason) {
-        this.rideId = rideId;
-        this.reason = reason;
-    }
 }

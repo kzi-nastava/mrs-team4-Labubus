@@ -392,23 +392,15 @@ public class RideServiceImpl implements RideService {
     @Override
     public RideDto cancelRideByDriver(Long rideId, String reason) {
 
-        if (reason == null || reason.trim().isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cancellation reason is required");
+        Ride ride = this.getRideOrThrow(rideId);
 
-        Ride ride = rideRepository.findById(rideId)
-                .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
+        this.checkRidePrivilege(ride.getDriver().getId());
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User driver = (User) auth.getPrincipal();
-
-        if (!ride.getDriver().getId().equals(driver.getId()))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your ride");
-
-        if (ride.getStatus() != RideStatus.ACCEPTED)
+        if (ride.getStatus() != RideStatus.PENDING)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride cannot be cancelled");
 
         ride.setStatus(RideStatus.CANCELLED);
-        ride.setCanceledBy(driver);
+        ride.setCanceledBy(ride.getDriver());
         ride = rideRepository.save(ride);
         RideDto rideDto = new RideDto(ride);
 
@@ -416,20 +408,14 @@ public class RideServiceImpl implements RideService {
         webSocketNotificationService.sendRideCancelledToUser(ride.getCreator().getId(), cancelNotification);
 
         return rideDto;
-
     }
+
 
     @Override
     public RideDto cancelRide(Long rideId) {
-        Ride ride = rideRepository.findById(rideId)
-                .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
+        Ride ride = this.getRideOrThrow(rideId);
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) auth.getPrincipal();
-
-        if (!ride.getCreator().getId().equals(user.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your ride");
-        }
+        this.checkRidePrivilege(ride.getCreator().getId());
 
         LocalDateTime now = LocalDateTime.now();
         if (ride.getStartTime() != null && ride.getStartTime().minusMinutes(10).isBefore(now)) {
@@ -438,10 +424,41 @@ public class RideServiceImpl implements RideService {
         }
 
         ride.setStatus(RideStatus.CANCELLED);
-        ride.setCanceledBy(user);
+        ride.setCanceledBy(ride.getCreator());
         ride = rideRepository.save(ride);
         RideDto rideDto = new RideDto(ride);
 
+        CancelNotification cancelNotification = new CancelNotification(null, rideDto);
+        webSocketNotificationService.sendRideCancelledToUser(ride.getDriver().getId(), cancelNotification);
+
         return rideDto;
     }
+
+    private void checkRidePrivilege(Long userId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+
+        if (!userId.equals(user.getId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your ride");
+    }
+
+    private Ride getRideOrThrow(Long rideId) {
+        return rideRepository.findById(rideId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
+    }
+
+    @Override
+    public RideDto getActiveRide() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+        RideDto ride = null;
+
+        if (user.getRole() == Role.DRIVER)
+            ride = rideRepository.findDriverActiveRide(user.getId()).orElse(null);
+        else if (user.getRole() == Role.REGISTERED_USER)
+            ride = rideRepository.findUserActiveRide(user.getId()).orElse(null);
+
+        return ride;
+    }
+
 }
