@@ -1,5 +1,7 @@
 import { Component, AfterViewInit, Output, EventEmitter, Input, OnChanges, SimpleChanges, NgZone } from '@angular/core';
 import * as L from 'leaflet';
+import 'leaflet.marker.slideto';
+import 'leaflet-rotatedmarker';
 import { WaypointDto } from '../../../dtos/waypoint-dto';
 import { VehicleIndicatorDto } from '../../../dtos/vehicle-indicator-dto';
 
@@ -38,6 +40,12 @@ export class Map implements AfterViewInit, OnChanges {
     iconAnchor: [Math.max(this.vehicleIndicatorWidth * Math.pow(2, -5), 17) / 2, Math.max(this.vehicleIndicatorHeight * Math.pow(2, -5), 30) / 2],
   });
 
+  private vehiclePanicIcon = L.icon({
+    iconUrl: 'car_panic.svg',
+    iconSize: [Math.max(this.vehicleIndicatorWidth * Math.pow(2, -5), 17), Math.max(this.vehicleIndicatorHeight * Math.pow(2, -5), 30)],
+    iconAnchor: [Math.max(this.vehicleIndicatorWidth * Math.pow(2, -5), 17) / 2, Math.max(this.vehicleIndicatorHeight * Math.pow(2, -5), 30) / 2],
+  });
+
   @Input() waypoints: WaypointDto[] = []; // waypoints to display on the map
   @Input() vehicles : VehicleIndicatorDto[] = [];
   @Input() routeGeometry: GeoJSON.LineString | null = null; // route geometry to display on the map (if available)
@@ -55,15 +63,24 @@ export class Map implements AfterViewInit, OnChanges {
       // This scales the cars on zoom, but they end up being almost invisible on larger zooms
       const newVehicleHeght = Math.max(this.vehicleIndicatorHeight * Math.pow(2, this.map.getZoom() - 19), 30)
       const newVehiclWidth = Math.max(this.vehicleIndicatorWidth * Math.pow(2, this.map.getZoom() - 19), 17)
-      console.log(newVehiclWidth, newVehicleHeght)
       this.vehicleIcon = L.icon({
         iconUrl: 'car.svg',
         iconSize: [newVehiclWidth, newVehicleHeght],
         iconAnchor: [newVehiclWidth / 2, newVehicleHeght / 2],
       })
+      this.vehiclePanicIcon = L.icon({
+        iconUrl: 'car_panic.svg',
+        iconSize: [newVehiclWidth, newVehicleHeght],
+        iconAnchor: [newVehiclWidth / 2, newVehicleHeght / 2],
+      })
       this.vehicleLayer.getLayers().forEach((layer : L.Layer) => {
-        if (layer instanceof L.Marker)
-        layer.setIcon(this.vehicleIcon);
+        if (layer instanceof L.Marker) {
+          const vehicle : VehicleIndicatorDto | undefined = this.vehicles.find(v => v.driverId == (layer as any).driverId)
+          if (vehicle && vehicle.panic)
+            layer.setIcon(this.vehiclePanicIcon)
+          else
+            layer.setIcon(this.vehicleIcon);
+        }
       })
     })
   }
@@ -113,15 +130,38 @@ export class Map implements AfterViewInit, OnChanges {
   }
 
   private renderVehicles(): void {
-    this.vehicleLayer.clearLayers();
-
+    let existingMarkers : L.Marker[] = this.vehicleLayer.getLayers().filter(layer => layer instanceof L.Marker)
     for (const v of this.vehicles) {
-      const m = L.marker([v.location.latitude, v.location.longitude], {
-        icon: this.vehicleIcon,
-      }).addTo(this.vehicleLayer);
+      let found : boolean = false;
 
-      m.bindPopup(v.location.label);
+      for(const marker of existingMarkers) {
+        if ((marker as any).driverId == v.driverId) {
+          if (marker.getLatLng().lat != v.location.latitude || marker.getLatLng().lng != v.location.longitude) {
+            const bearing = this.calculateBearing(marker.getLatLng().lat, marker.getLatLng().lng, v.location.latitude, v.location.longitude);
+            (marker as any).setRotationAngle(bearing);
+          }
+          (marker as any).slideTo([v.location.latitude, v.location.longitude], {duration: 1000, keepAtCenter: false})
+          marker.setPopupContent(v.location.label + ` (${v.status})`)
+          marker.setIcon(v.panic ? this.vehiclePanicIcon : this.vehicleIcon)
+          found = true;
+          existingMarkers = existingMarkers.filter(marker => (marker as any).driverId != v.driverId)
+          break;
+        }
+      }
+
+      if (!found) {
+        const m = L.marker([v.location.latitude, v.location.longitude], {
+          icon: v.panic ? this.vehiclePanicIcon : this.vehicleIcon,
+        }).addTo(this.vehicleLayer);
+        (m as any).driverId = v.driverId;
+  
+        m.bindPopup(v.location.label + ` (${v.status})`);
+      }
     }
+
+    existingMarkers.forEach((marker : L.Marker) => {
+      this.vehicleLayer.removeLayer(marker);
+    })
   }
 
   private renderRoute(): void {
@@ -168,4 +208,31 @@ export class Map implements AfterViewInit, OnChanges {
       }
     );
   }
+
+  private toRad(degree: number): number {
+    return degree * Math.PI / 180;
+  }
+
+  private toDeg(radian: number): number {
+    return radian * 180 / Math.PI;
+  }
+
+  private calculateBearing(startLat: number, startLng: number, endLat: number, endLng: number): number {
+  const start = L.latLng(startLat, startLng);
+  const end = L.latLng(endLat, endLng);
+
+  const startLngRad = this.toRad(start.lng);
+  const startLatRad = this.toRad(start.lat);
+  const endLngRad = this.toRad(end.lng);
+  const endLatRad = this.toRad(end.lat);
+
+  const deltaLng = endLngRad - startLngRad;
+  const y = Math.sin(deltaLng) * Math.cos(endLatRad);
+  const x = Math.cos(startLatRad) * Math.sin(endLatRad) -
+            Math.sin(startLatRad) * Math.cos(endLatRad) * Math.cos(deltaLng);
+  const bearing = this.toDeg(Math.atan2(y, x));
+
+  // Normalize to 0-360 degrees
+  return (bearing + 360) % 360;
+}
 }
