@@ -34,6 +34,8 @@
     "canvas-confetti": "^1.9.4",
     "event-source-polyfill": "^1.0.31",
     "leaflet": "^1.9.4",
+    "leaflet-rotatedmarker": "^0.2.0",
+    "leaflet.marker.slideto": "^0.3.0",
     "rxjs": "~7.8.0",
     "sockjs-client": "^1.6.1",
     "tslib": "^2.3.0"

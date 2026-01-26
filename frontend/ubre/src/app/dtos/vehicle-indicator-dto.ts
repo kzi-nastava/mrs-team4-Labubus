@@ -4,13 +4,13 @@ import { WaypointDto } from "./waypoint-dto";
 export class VehicleIndicatorDto {
     public driverId : number;
     public location : WaypointDto;
-    public userStatus : UserStatus;
+    public status : UserStatus;
     public panic : boolean = false;
 
     constructor(driverId : number, location : WaypointDto, userStatus : UserStatus, panic : boolean = false) {
         this.driverId = driverId;
         this.location = location;
-        this.userStatus = userStatus;
+        this.status = userStatus;
         this.panic = panic;
     }
 }

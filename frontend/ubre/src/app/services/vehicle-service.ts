@@ -26,7 +26,6 @@ export class VehicleService {
         next: (notification : VehicleLocationNotification) => {
           if (notification.indicators)
             this.vehicleLocations.next(notification.indicators)
-          console.log(notification.indicators)
         }
       })
     }

@@ -49,7 +49,6 @@ export class RideDetails {
   }
   
   ngOnInit() {
-    console.log(this.ride)
     this.start = new Date(this.ride.startTime)
     this.end = new Date(this.ride.endTime)
   }
