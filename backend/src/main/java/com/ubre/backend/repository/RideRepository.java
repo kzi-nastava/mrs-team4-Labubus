@@ -26,6 +26,7 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     List<Ride> findByStatusInAndStartTimeBetween(Collection<RideStatus> statuses, LocalDateTime startStartTime, LocalDateTime endStartTime, Pageable pageable);
     List<Ride> findByCreatorAndFavoriteTrue(User creator, Pageable pageable);
     List<Ride> findByCreatorAndFavoriteTrueAndStartTimeBetween(User creator, LocalDateTime startStartTime, LocalDateTime endStartTime, Pageable pageable);
+    Optional<Ride> findFirstByDriverAndStatusOrderByStartTimeDesc(Driver driver, RideStatus status);
 
 //    List<Ride> findByRideStatus(RideStatus status);
     

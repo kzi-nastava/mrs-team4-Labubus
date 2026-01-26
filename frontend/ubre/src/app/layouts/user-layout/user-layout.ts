@@ -48,6 +48,7 @@ import { RideStatus } from '../../enums/ride-status';
 import { RideDto } from '../../dtos/ride-dto';
 import { DriverCancelDialog } from '../../shared/ui/driver-cancel-dialog/driver-cancel-dialog';
 import { RideService } from '../../services/ride-service';
+import { VehicleService } from '../../services/vehicle-service';
 
 @Component({
   selector: 'app-user-layout',
@@ -81,6 +82,7 @@ import { RideService } from '../../services/ride-service';
     public userStatsService = inject(UserStatsService);
     public rideService = inject(RideService);
 
+    public vehicleService = inject(VehicleService)
 
   Role = Role;
   VehicleType = VehicleType;
@@ -113,10 +115,11 @@ import { RideService } from '../../services/ride-service';
     });
     }
 
+    
       
     if (userId === 0 || userId === null) {
       this.profileChangeSubscription?.unsubscribe();
-      this.webSocketService.disconnect();
+      // this.webSocketService.disconnect();
       this.websocketUserId = null;
       return;
     }
