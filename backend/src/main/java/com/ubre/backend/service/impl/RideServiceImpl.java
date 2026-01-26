@@ -24,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -105,8 +106,53 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    public void stopRideInProgress(Long rideId) {
+    public Double stopRideInProgress(Long rideId, WaypointDto waypoint) {
+        Ride ride = this.getRideOrThrow(rideId);
 
+        this.checkRidePrivilege(ride.getDriver().getId());
+
+        if (ride.getStatus() != RideStatus.IN_PROGRESS)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride is not in progress");
+
+        Waypoint endLocation = new Waypoint(
+                waypoint.getLabel(),
+                waypoint.getLatitude(),
+                waypoint.getLongitude()
+        );
+
+        ride.setEndTime(LocalDateTime.now());
+        ride.getWaypoints().add(endLocation);
+        ride.setStatus(RideStatus.COMPLETED);
+
+        CurrentRideNotification currentRideNotification = new CurrentRideNotification(
+                NotificationType.RIDE_COMPLETED.name(),
+                null
+        );
+
+        this.webSocketNotificationService.sendCurrentRideUpdate(ride.getCreator().getId(), currentRideNotification);
+        return this.estimateNewPrice(ride);
+    }
+
+    private double estimateNewPrice(Ride ride) {
+        LocalDateTime start = ride.getStartTime();
+        LocalDateTime end = LocalDateTime.now();
+
+        long elapsedMinutes = Duration.between(start, end).toMinutes();
+
+        long standardMinutes = 20;
+
+        double factor = (double) elapsedMinutes / standardMinutes;
+
+        factor = Math.max(0.5, Math.min(factor, 1.0));
+
+        double price = ride.getPrice() * factor;
+
+        double finalPrice = Math.round(price * 100.0) / 100.0;
+
+        ride.setPrice(finalPrice);
+        rideRepository.save(ride);
+
+        return finalPrice;
     }
 
 

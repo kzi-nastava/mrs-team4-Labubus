@@ -52,4 +52,5 @@ public class WebSocketNotificationService {
     public void sendVehicleLocations(VehicleLocationNotification notification) {
         messagingTemplate.convertAndSend(VEHICLE_LOCATION_TOPIC_PREFIX, notification);
     }
+
 }

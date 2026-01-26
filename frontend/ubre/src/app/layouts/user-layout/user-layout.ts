@@ -49,6 +49,8 @@ import { RideDto } from '../../dtos/ride-dto';
 import { DriverCancelDialog } from '../../shared/ui/driver-cancel-dialog/driver-cancel-dialog';
 import { RideService } from '../../services/ride-service';
 import { VehicleService } from '../../services/vehicle-service';
+import { WaypointDto } from '../../dtos/waypoint-dto';
+import { GeocodingService } from '../../services/ride-planning/geocoding-service';
 
 @Component({
   selector: 'app-user-layout',
@@ -81,6 +83,8 @@ import { VehicleService } from '../../services/vehicle-service';
     public changePasswordService = inject(ChangePasswordService);
     public userStatsService = inject(UserStatsService);
     public rideService = inject(RideService);
+    public geocodingService = inject(GeocodingService);
+
 
     public vehicleService = inject(VehicleService)
 
@@ -195,6 +199,12 @@ import { VehicleService } from '../../services/vehicle-service';
               this.showToast('Ride cancelled', notification.reason);
             else
               this.showToast('Ride cancelled', "Ride has been cancelled by the user.");
+
+          if (notification.status === NotificationType.RIDE_COMPLETED) {
+            this.showToast('Ride completed', "Ride completed.");
+            this.ridePlanningStore.currentRideSubject$.next(null);
+          }
+
 
           if (notification.ride)
             this.ridePlanningStore.currentRideSubject$.next(notification.ride);
@@ -987,9 +997,55 @@ import { VehicleService } from '../../services/vehicle-service';
     return !!ride && ride.status === 'PENDING';
   }
 
-  onStopRideClick() {
-    
+  
+  canStopRide(): boolean {
+    const ride = this.ridePlanningStore.getCurrentRide();
+    return !!ride && ride.status === 'IN_PROGRESS';
   }
+
+  onStopRideClick() {
+        const ride = this.ridePlanningStore.getCurrentRide();
+
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+
+      this.geocodingService.reverse(lat, lon).subscribe({
+        next: (label: string | null) => {
+          if (label) {
+            const stopWaypoint: WaypointDto = {
+              latitude: lat,
+              longitude: lon,
+              label: label,
+              id: 0,
+            };
+
+            console.log("Stop waypoint DTO:", stopWaypoint);
+
+              this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
+                next: (price) => {
+                  const finalPrice = price;
+                  this.showToast("New price", finalPrice.toString());
+                  this.ridePlanningStore.currentRideSubject$.next(null);
+                },
+                error: (err) => {
+                }
+              });
+          } 
+        },
+        error: (err) => {
+          console.error("Error", err);
+        }
+      });
+    },
+    error => {
+      console.error("Geolocation error", error);
+    },
+    { enableHighAccuracy: true }
+  );
+}
+
 
   onCancelUserClick() {
     const rideId = this.ridePlanningStore.currentRideSubject$.getValue()!.id;

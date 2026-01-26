@@ -164,12 +164,11 @@ public class RideController {
     }
 
     // stop a ride that is currently in progress
-    @PutMapping(
-            value = "/{id}/stop"
-    )
-    public ResponseEntity<Void> stopRideInProgress(@PathVariable Long id) {
-        rideService.stopRideInProgress(id);
-        return ResponseEntity.status(HttpStatus.OK).build();
+    @PutMapping(value = "/{id}/stop")
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<Double>  stopRideInProgress(@PathVariable Long id, @Valid @RequestBody WaypointDto waypoint) {
+        Double price = rideService.stopRideInProgress(id, waypoint);
+        return ResponseEntity.status(HttpStatus.OK).body(price);
     }
 
 //    @Autowired

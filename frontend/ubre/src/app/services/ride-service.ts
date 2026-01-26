@@ -9,6 +9,7 @@ import { Role } from '../enums/role';
 import { RideQueryDto } from '../dtos/ride-query';
 import { UserService } from './user-service';
 import { UserDto } from '../dtos/user-dto';
+import { WaypointDto } from '../dtos/waypoint-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -211,8 +212,8 @@ export class RideService {
     return this.http.get<RideDto>(`${this.BASE_URL}rides/active`, {});  
   }
 
-  stopRide(id: any, stopLocation: { lat: number; lng: number; address: string; }) {
-    throw new Error('Method not implemented.');
+  stopRide(rideId: number, waypoint: WaypointDto): Observable<number> {
+    return this.http.put<number>(`${this.BASE_URL}rides/${rideId}/stop`, waypoint);
   }
 
 
