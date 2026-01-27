@@ -10,6 +10,7 @@ import { RideQueryDto } from '../dtos/ride-query';
 import { UserService } from './user-service';
 import { UserDto } from '../dtos/user-dto';
 import { WaypointDto } from '../dtos/waypoint-dto';
+import { PanicDto } from '../dtos/panic-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -216,5 +217,12 @@ export class RideService {
     return this.http.put<number>(`${this.BASE_URL}rides/${rideId}/stop`, waypoint);
   }
 
+  activatePanic(rideId: number): Observable<any> {
+    return this.http.post<any>(`${this.BASE_URL}rides/${rideId}/panic`, {});
+  }
+
+  getPanics(): Observable<PanicDto[]> {
+    return this.http.get<PanicDto[]>(`${this.BASE_URL}rides/panic`);
+  }
 
 }

@@ -5,11 +5,9 @@ import com.ubre.backend.enums.NotificationType;
 import com.ubre.backend.enums.RideStatus;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
-import com.ubre.backend.model.Driver;
-import com.ubre.backend.model.Ride;
-import com.ubre.backend.model.User;
-import com.ubre.backend.model.Waypoint;
+import com.ubre.backend.model.*;
 import com.ubre.backend.repository.DriverRepository;
+import com.ubre.backend.repository.PanicRepository;
 import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.RideService;
@@ -40,6 +38,8 @@ public class RideServiceImpl implements RideService {
     private WebSocketNotificationService webSocketNotificationService;
     @Autowired
     private RideReminderService rideReminderService;
+    @Autowired
+    private PanicRepository panicRepository;
 
     // Mock data for rides
     List<RideDto> rides = new ArrayList<RideDto>();
@@ -491,6 +491,34 @@ public class RideServiceImpl implements RideService {
         webSocketNotificationService.sendRideCancelledToUser(ride.getCreator().getId(), cancelNotification);
 
         return rideDto;
+    }
+
+    @Override
+    public void activatePanic(Long rideId) {
+        Ride ride = getRideOrThrow(rideId);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+
+        if (ride.getDriver().getId().equals(user.getId()) || ride.getCreator().getId().equals(user.getId())) {
+
+            PanicNotification panic = new PanicNotification();
+            panic.setRideId(rideId);
+            panic.setTimestamp(LocalDateTime.now());
+            panic.setTriggeredBy(user.getRole().name());
+            panicRepository.save(panic);
+
+            ride.setPanic(true);
+            rideRepository.save(ride);
+
+            webSocketNotificationService.sendPanicNotification(panic);
+        }
+        else
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your ride");
+    }
+
+    @Override
+    public List<PanicNotification> getPanics() {
+        return panicRepository.findAll();
     }
 
 
