@@ -60,14 +60,4 @@ export class VehicleService {
       return this.http.get<VehicleDto>(`${this.BASE_URL}vehicles/driver/${driverId}`);
     }
 
-    triggerPanic(driverId: number) {
-      const vehicles = this.vehicleLocations.getValue().map(v => {
-        if (v.driverId === driverId) { 
-          return { ...v, panic: true };
-        }
-        return v;
-      });
-      this.vehicleLocations.next(vehicles);
-    }
-
 }

@@ -69,16 +69,22 @@ export class Map implements AfterViewInit, OnChanges {
       // This scales the cars on zoom, but they end up being almost invisible on larger zooms
       const newVehicleHeght = Math.max(this.vehicleIndicatorHeight * Math.pow(2, this.map.getZoom() - 19), 30)
       const newVehiclWidth = Math.max(this.vehicleIndicatorWidth * Math.pow(2, this.map.getZoom() - 19), 17)
+
       this.vehicleIcon = L.icon({
         iconUrl: 'car.svg',
         iconSize: [newVehiclWidth, newVehicleHeght],
         iconAnchor: [newVehiclWidth / 2, newVehicleHeght / 2],
       })
+
+      const panicHeight = Math.max(this.vehicleIndicatorHeight * 1.5 * Math.pow(2, this.map.getZoom() - 19), 60);
+      const panicWidth  = Math.max(this.vehicleIndicatorWidth  * 1.5 * Math.pow(2, this.map.getZoom() - 19), 40);
+
       this.vehiclePanicIcon = L.icon({
         iconUrl: 'car_panic.svg',
-        iconSize: [newVehiclWidth, newVehicleHeght],
-        iconAnchor: [newVehiclWidth / 2, newVehicleHeght / 2],
-      })
+        iconSize: [panicWidth, panicHeight],
+        iconAnchor: [panicWidth / 2, panicHeight / 2],
+      });
+    
       this.vehicleLayer.getLayers().forEach((layer : L.Layer) => {
         if (layer instanceof L.Marker) {
           const vehicle : VehicleIndicatorDto | undefined = this.vehicles.find(v => v.driverId == (layer as any).driverId)

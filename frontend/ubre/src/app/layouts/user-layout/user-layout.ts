@@ -1160,6 +1160,7 @@ import { ComplaintService } from '../../services/complaint-service';
         .subscribe({
           next: (panic) => {
             this.panicToast.show(panic.rideId.toString());
+            this.playNotificationSound();
           },
           error: () => {
             this.showToast('Connection error', 'Could not receive panic updates.');
