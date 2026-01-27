@@ -18,8 +18,10 @@ export class Map implements AfterViewInit, OnChanges {
   private markersLayer = L.layerGroup(); // layer group for the markers (waypoints)
   private vehicleLayer = L.layerGroup(); // layer for vehicle indicators
   private routeLayer = L.geoJSON(); // layer group for the route (if available)
-  private rideWaypointsLayer = L.layerGroup(); // layer group for currently tracked ride waypoints
-  private rideRouteLayer = L.geoJSON(); // layer group for currently tracked ride route
+  private currentRideWaypointsLayer = L.layerGroup(); // layer group for currently tracked ride waypoints
+  private currentRideRouteLayer = L.geoJSON(); // layer group for currently tracked ride route
+  private selectedRideWaypointsLayer = L.layerGroup(); // layer group for currently tracked ride waypoints
+  private selectedRideRouteLayer = L.geoJSON(); // layer group for currently tracked ride route
   private userMarker!: L.Marker;
 
   private userEmitted: boolean = false;
@@ -53,8 +55,10 @@ export class Map implements AfterViewInit, OnChanges {
   @Input() waypoints: WaypointDto[] = []; // waypoints to display on the map
   @Input() vehicles : VehicleIndicatorDto[] = [];
   @Input() routeGeometry: GeoJSON.LineString | null = null; // route geometry to display on the map (if available)
-  @Input() displayedRideRoute: RouteInfo | null = null;
-  @Input() displayedRideWaypoints: WaypointDto[] = [];
+  @Input() currentRideRoute: RouteInfo | null = null;
+  @Input() currentRideWaypoints: WaypointDto[] = [];
+  @Input() selectedRideWaypoints : WaypointDto[] = [];
+  @Input() selectedRideRoute: RouteInfo | null = null;
   @Output() mapClick = new EventEmitter<{ lat: number; lon: number; }>();
 
   constructor(private zone: NgZone) {}
@@ -104,12 +108,20 @@ export class Map implements AfterViewInit, OnChanges {
       this.renderRoute();
     }
 
-    if (changes['displayedRideRoute'] && this.map) {
-      this.renderRideRoute()
+    if (changes['currentRideRoute'] && this.map) {
+      this.renderCurrentRideRoute()
     }
 
-    if (changes['displayedRideWaypoints'] && this.map) {
-      this.renderRideWaypoints()
+    if (changes['currentRideWaypoints'] && this.map) {
+      this.renderCurrentRideWaypoints()
+    }
+
+    if (changes['selectedRideRoute'] && this.map) {
+      this.renderSelectedRideRoute()
+    }
+
+    if (changes['selectedRideWaypoints'] && this.map) {
+      this.renderSelectedRideWaypoints()
     }
   }
 
@@ -120,8 +132,10 @@ export class Map implements AfterViewInit, OnChanges {
     this.markersLayer.addTo(this.map);
     this.routeLayer.addTo(this.map);
     this.vehicleLayer.addTo(this.map);
-    this.rideRouteLayer.addTo(this.map)
-    this.rideWaypointsLayer.addTo(this.map)
+    this.currentRideRouteLayer.addTo(this.map)
+    this.currentRideWaypointsLayer.addTo(this.map)
+    this.selectedRideRouteLayer.addTo(this.map)
+    this.selectedRideWaypointsLayer.addTo(this.map)
     
     this.setCurrentLocation(); 
     
@@ -160,8 +174,8 @@ export class Map implements AfterViewInit, OnChanges {
 
           if ((v as any).mapCenter) {
             this.followMarker(marker.getLatLng(), new L.LatLng(v.location.latitude, v.location.longitude), 1000);
-            if (this.displayedRideRoute != null)
-              marker.bindTooltip(`<b>~ ${Math.ceil(this.displayedRideRoute.duration / 60)} min left</b>`, {
+            if (this.currentRideRoute != null)
+              marker.bindTooltip(`<b>~ ${Math.ceil(this.currentRideRoute.duration / 60)} min left</b>`, {
                 permanent: true,
                 direction: 'left',
                 className: 'tracking-estimation'
@@ -188,8 +202,8 @@ export class Map implements AfterViewInit, OnChanges {
 
         if ((v as any).mapCenter) {
             this.map.setView([v.location.latitude, v.location.longitude])
-            if (this.displayedRideRoute != null)
-              m.bindTooltip(`<b>~ ${Math.ceil(this.displayedRideRoute.duration / 60)} min left</b>`, {
+            if (this.currentRideRoute != null)
+              m.bindTooltip(`<b>~ ${Math.ceil(this.currentRideRoute.duration / 60)} min left</b>`, {
                 permanent: true,
                 direction: 'left',
                 className: 'tracking-estimation'
@@ -217,23 +231,23 @@ export class Map implements AfterViewInit, OnChanges {
     this.map.fitBounds(this.routeLayer.getBounds(), { padding: [40, 40] });
   }
 
-  private renderRideRoute() {
-    this.rideRouteLayer.clearLayers();
-    if (!this.displayedRideRoute) return;
+  private renderCurrentRideRoute() {
+    this.currentRideRouteLayer.clearLayers();
+    if (!this.currentRideRoute) return;
 
-    this.rideRouteLayer.addData({ 
+    this.currentRideRouteLayer.addData({ 
       type: 'Feature',
       properties: {},
-      geometry: this.displayedRideRoute.geometry,
+      geometry: this.currentRideRoute.geometry,
     } as any);
 
     // this.map.fitBounds(this.rideRouteLayer.getBounds(), { padding: [40, 40] });
   }
 
-  private renderRideWaypoints() {
-    this.rideWaypointsLayer.clearLayers();
+  private renderCurrentRideWaypoints() {
+    this.currentRideWaypointsLayer.clearLayers();
 
-    if (this.displayedRideWaypoints.length < 1) {
+    if (this.currentRideWaypoints.length < 1) {
       this.map.dragging.enable()
       this.map.keyboard.enable()
     }
@@ -243,10 +257,10 @@ export class Map implements AfterViewInit, OnChanges {
       this.map.setZoom(19);
     }
 
-    for (const w of this.displayedRideWaypoints) {
+    for (const w of this.currentRideWaypoints) {
       const m = L.marker([w.latitude, w.longitude], {
         icon: this.waypointIcon,
-      }).addTo(this.rideWaypointsLayer);
+      }).addTo(this.currentRideWaypointsLayer);
 
       m.bindPopup(w.label);
     }
@@ -280,6 +294,31 @@ export class Map implements AfterViewInit, OnChanges {
         }
       }
     );
+  }
+
+  private renderSelectedRideWaypoints(): void {
+    this.selectedRideWaypointsLayer.clearLayers();
+
+    for (const w of this.selectedRideWaypoints) {
+      const m = L.marker([w.latitude, w.longitude], {
+        icon: this.waypointIcon,
+      }).addTo(this.selectedRideWaypointsLayer);
+
+      m.bindPopup(w.label);
+    }
+  }
+
+  private renderSelectedRideRoute(): void {
+    this.selectedRideRouteLayer.clearLayers();
+    if (!this.selectedRideRoute) return;
+
+    this.selectedRideRouteLayer.addData({ 
+      type: 'Feature',
+      properties: {},
+      geometry: this.selectedRideRoute.geometry,
+    } as any);
+
+      this.map.fitBounds(this.selectedRideRouteLayer.getBounds(), { padding: [40, 40] });
   }
 
   // Helper functions for calculations and animations

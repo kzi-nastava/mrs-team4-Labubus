@@ -19,7 +19,7 @@
       <app-route-table [waypoints]="ride.waypoints"></app-route-table>
 
       <div class="stats">
-            <div class="distance">{{ ride.distance + 'km' }}</div>
+            <div class="distance">{{ ride.distance + 'm' }}</div>
             @if (ride.panic) {<img src="warning_60dp_FFFFFF_FILL0_wght400_GRAD0_opsz48.svg" alt="" class="panic icon">}
             @if (ride.canceledBy !== null) {
                   @if (ride.canceledBy !== ride.driver.id) {<img src="cancel-surface.svg" alt="" class="user-canceled icon">}

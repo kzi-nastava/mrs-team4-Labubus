@@ -22,7 +22,7 @@ import { UserStatsDto } from '../../dtos/user-stats-dto';
 import { VehicleDto } from '../../dtos/vehicle-dto';
 import { Role } from '../../enums/role';
 import { VehicleType } from '../../enums/vehicle-type';
-import { Observable, Subscription, forkJoin, of, take } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, forkJoin, of, take } from 'rxjs';
 import { DriverRegistrationService } from '../../services/driver-registration-service';
 import { ProfileChangeService } from '../../services/profile-change-service';
 import { ProfileChangeDto } from '../../dtos/profile-change-dto';
@@ -52,6 +52,8 @@ import { VehicleService } from '../../services/vehicle-service';
 import { RideTrackingStore } from '../../services/ride-planning/ride-tracking-store';
 import { WaypointDto } from '../../dtos/waypoint-dto';
 import { GeocodingService } from '../../services/ride-planning/geocoding-service';
+import { RoutingService } from '../../services/ride-planning/routing-service';
+import { RouteInfo } from '../../services/ride-planning/ride-types';
 
 @Component({
   selector: 'app-user-layout',
@@ -65,10 +67,6 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
     styleUrl: './user-layout.css',
   })
   export class UserLayout implements OnInit {
-// Ride HISTORY SHEET LOGIC
-
-
-
 
     constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
     
@@ -709,6 +707,35 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
 
   onEmmitError(error : Error) {
     this.showToast(error.name, error.message)
+  }
+
+  // TODO: Move this logic outside user-layout
+  // This is probably not the right way to do it, but I cant fix it right now...
+  private selectedRideWaypoints = new BehaviorSubject<WaypointDto[]>([]);
+  selectedRideWaypoints$ = this.selectedRideWaypoints.asObservable()
+  private selectedRideRoute = new BehaviorSubject<RouteInfo | null>(null);
+  selectedRideRoute$  = this.selectedRideRoute.asObservable();
+
+  private routingService : RoutingService = inject(RoutingService)
+
+  onRenderWaypoints(waypoints : WaypointDto[]) {
+    if (waypoints.length < 1) {
+      this.selectedRideWaypoints.next([])
+      this.selectedRideRoute.next(null)
+      return
+    }
+
+    this.routingService.route(waypoints).pipe(take(1)).subscribe({
+      next: (routeInfo) => {
+          console.log(waypoints)
+          this.selectedRideWaypoints.next(waypoints)
+          console.log(this.selectedRideWaypoints.value)
+          this.selectedRideRoute.next(routeInfo)
+        },
+        error: (err) => {
+            console.log(err)
+        },
+    });
   }
 
 
