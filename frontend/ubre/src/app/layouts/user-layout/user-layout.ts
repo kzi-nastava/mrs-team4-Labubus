@@ -52,6 +52,8 @@ import { VehicleService } from '../../services/vehicle-service';
 import { RideTrackingStore } from '../../services/ride-planning/ride-tracking-store';
 import { WaypointDto } from '../../dtos/waypoint-dto';
 import { GeocodingService } from '../../services/ride-planning/geocoding-service';
+import { ComplaintModal } from '../../shared/ui/complaint-modal/complaint-modal';
+import { ComplaintService } from '../../services/complaint-service';
 
 @Component({
   selector: 'app-user-layout',
@@ -60,7 +62,8 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
     Modal,ModalContainer,StatCard,Button,
     Sheet,FormsModule,RideHistory,ProfileChangeCard,
     AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
-    RideOptions, FavoriteRides, DriverCancelDialog],
+    RideOptions, FavoriteRides, DriverCancelDialog,
+    ComplaintModal],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -75,6 +78,7 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
     public userService = inject(UserService);
     private authService = inject(AuthService);
     private reviewService : ReviewService = inject(ReviewService)
+    private complaintService : ComplaintService = inject(ComplaintService)
     public driverRegistrationService = inject(DriverRegistrationService);
     public ridePlanningStore = inject(RidePlanningStore);
     private confetti = inject(ConfettiService);
@@ -171,6 +175,7 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
       });
 
     this.ui.reviewModalOpen = this.reviewService.showReviewModal$;
+    this.ui.complaintModalOpen = this.complaintService.showComplaintModal$;
     
     this.rideReminderSubscription = this.webSocketService
       .rideReminderNotifications(userId)
@@ -204,7 +209,13 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
 
           if (notification.status === NotificationType.RIDE_COMPLETED) {
             this.showToast('Ride completed', "Ride completed.");
-            this.ridePlanningStore.currentRideSubject$.next(null);
+            this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
+              this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
+                if (user.role == Role.REGISTERED_USER && this.ridePlanningStore.currentRideSubject$.value != null)
+                  this.reviewService.newReview(this.ridePlanningStore.currentRideSubject$.value.id)
+              })
+              this.ridePlanningStore.currentRideSubject$.next(nextRide)
+            })
           }
 
 
@@ -234,6 +245,7 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
     toastOpen: false,
     profileChangesOpen: false,
     reviewModalOpen: of(false),
+    complaintModalOpen: of(false),
     scheduleTimerOpen: false,
     invitePassengersOpen: false,
     timeEstimate: false,
@@ -372,6 +384,13 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
 
   openChat() {
     // Open chat widget
+  }
+
+  openComplaintModal() {
+    this.ridePlanningStore.currentRide$.pipe(take(1)).subscribe((ride : RideDto | null) => {
+      if (ride != null)
+        this.complaintService.newComplaint(ride?.id)
+    })
   }
 
 
@@ -1025,15 +1044,21 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
 
               console.log("Stop waypoint DTO:", stopWaypoint);
 
-                this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
-                  next: (price) => {
-                    const finalPrice = price;
-                    this.showToast("New price", finalPrice.toString());
-                    this.ridePlanningStore.currentRideSubject$.next(null);
-                  },
-                  error: (err) => {
-                  }
-                });
+              this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
+                next: (price) => {
+                  const finalPrice = price;
+                  this.showToast("New price", finalPrice.toString());
+                  this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
+                    this.ridePlanningStore.currentRideSubject$.next(nextRide)
+                    this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
+                      if (user.role == Role.REGISTERED_USER && ride != null)
+                        this.reviewService.newReview(ride.id)
+                    })
+                  })
+                },
+                error: (err) => {
+                }
+              });
             } 
           },
           error: (err) => {
@@ -1060,15 +1085,21 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
 
               console.log("Stop waypoint DTO:", stopWaypoint);
 
-                this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
-                  next: (price) => {
-                    const finalPrice = price;
-                    this.showToast("New price", finalPrice.toString());
-                    this.ridePlanningStore.currentRideSubject$.next(null);
-                  },
-                  error: (err) => {
-                  }
-                });
+              this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
+                next: (price) => {
+                  const finalPrice = price;
+                  this.showToast("New price", finalPrice.toString());
+                  this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
+                    this.ridePlanningStore.currentRideSubject$.next(nextRide)
+                    this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
+                      if (user.role == Role.REGISTERED_USER && ride != null)
+                        this.reviewService.newReview(ride.id)
+                    })
+                  })
+                },
+                error: (err) => {
+                }
+              });
             } 
           },
           error: (err) => {

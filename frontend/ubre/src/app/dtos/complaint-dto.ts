@@ -1,7 +1,7 @@
 export class ComplaintDto {
-    public id : number;
-    public driverId : number;
-    public userId : number;
+    public id : number | null;
+    public driverId : number | null;
+    public userId : number | null;
     public text : String;
 
     constructor(id : number, driverId : number, userId : number, text : String) {
