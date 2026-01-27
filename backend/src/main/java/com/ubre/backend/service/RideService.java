@@ -1,6 +1,7 @@
 package com.ubre.backend.service;
 
 import com.ubre.backend.dto.*;
+import com.ubre.backend.model.PanicNotification;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,4 +33,7 @@ public interface RideService {
 
     RideDto orderRide(RideOrderDto rideDto);
     RideDto cancelRideByDriver(Long rideId, String reason);
+
+    void activatePanic(Long rideId);
+    List<PanicNotification> getPanics();
 }

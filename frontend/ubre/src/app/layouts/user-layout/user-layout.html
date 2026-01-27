@@ -131,6 +131,17 @@
 
     <!-- BUTTON CONTAINER -->
     <div class="ride-buttons">
+      
+      <!-- PANIC BUTTON -->
+      @if ((userService.currentUser$ | async)?.role === Role.REGISTERED_USER 
+         || (userService.currentUser$ | async)?.role === Role.DRIVER) {
+        <app-panic-button 
+          [class.disabled]="!(ridePlanningStore.currentRide$ | async)"
+          [disabled]="!(ridePlanningStore.currentRide$ | async)"
+          (click)="activatePanic()">
+        </app-panic-button> 
+      }
+      
       <!-- START RIDE BUTTON (DRIVERS ONLY) -->
       @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
         <button 
@@ -138,7 +149,7 @@
           [class.disabled]="(ridePlanningStore.currentRide$ | async)?.status != 'PENDING'"
           [disabled]="(ridePlanningStore.currentRide$ | async)?.status != 'PENDING'"
           (click)="onStartRideClick()">
-          <span class="start-ride-text">Start this ride</span>
+          <span class="ride-text">Start this ride</span>
         </button>
       }
 
@@ -181,6 +192,10 @@
     @if (ui.toastOpen) {
       <app-toast [title]="toastTitle" [message]="toastMessage"></app-toast>
     }
+
+    <!-- PANIC NOTIFICATION -->
+    <app-panic-toast ></app-panic-toast>
+    
 
     <!-- SIDE MENU -->
     <app-side-menu
@@ -649,6 +664,14 @@
     </app-sheet>
   }
 
+  @if ((userService.currentUser$ | async)?.role === Role.ADMIN) {
+    <app-sheet [open]="ui.panicListOpen"
+      title="Panic Notifications"
+      (back)="ui.panicListOpen=false; ui.menuOpen = true">
+      <app-panic-list></app-panic-list>
+    </app-sheet>
+  }
+
   </div>
 
   <app-review-modal [show]="ui.reviewModalOpen" (onError)="onEmmitError($event)"></app-review-modal>
@@ -660,4 +683,6 @@
       (confirmed)="handleCancelRide($event)">
     </app-driver-cancel-dialog>
   }
+
+
 </div>

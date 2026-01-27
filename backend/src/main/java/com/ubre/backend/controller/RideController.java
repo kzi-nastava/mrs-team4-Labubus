@@ -2,6 +2,7 @@ package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.*;
 import com.ubre.backend.enums.VehicleType;
+import com.ubre.backend.model.PanicNotification;
 import com.ubre.backend.service.RideService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -322,5 +323,19 @@ public class RideController {
     public ResponseEntity<RideDto> cancelRideByDriver(@PathVariable Long rideId, @Valid @RequestBody CancellationDto request) {
         RideDto cancelledRide = rideService.cancelRideByDriver(rideId, request.getReason());
         return ResponseEntity.status(HttpStatus.OK).body(cancelledRide);
+    }
+
+    @PostMapping("/{rideId}/panic")
+    @PreAuthorize("hasAnyRole('DRIVER','REGISTERED_USER')")
+    public ResponseEntity<?> activatePanic(@PathVariable Long rideId) {
+        rideService.activatePanic(rideId);
+        return ResponseEntity.ok(Map.of("message", "PANIC activated"));
+    }
+
+    @GetMapping("/panic")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<PanicNotification>> getPanics() {
+        List<PanicNotification> panics = rideService.getPanics();
+        return ResponseEntity.ok(panics);
     }
 }

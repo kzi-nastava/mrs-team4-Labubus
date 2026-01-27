@@ -84,7 +84,7 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
     { 
       label: 'Panic notifications', 
       icon: 'warning-primary-text.svg', 
-      action: 'admin-users' 
+      action: 'admin-panics' 
     },
     {
       label: 'Reports',

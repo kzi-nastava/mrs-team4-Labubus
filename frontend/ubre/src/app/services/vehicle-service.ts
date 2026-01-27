@@ -13,6 +13,7 @@ import { RideStatus } from '../enums/ride-status';
   providedIn: 'root',
 })
 export class VehicleService {
+  
     private readonly BASE_URL : string = "http://localhost:8080/api/";
     private readonly http = inject(HttpClient);
     private readonly webSocketService : WebSocketService = inject(WebSocketService);
@@ -58,4 +59,5 @@ export class VehicleService {
     public getVehicleByDriver(driverId : number) : Observable<VehicleDto> {
       return this.http.get<VehicleDto>(`${this.BASE_URL}vehicles/driver/${driverId}`);
     }
+
 }
