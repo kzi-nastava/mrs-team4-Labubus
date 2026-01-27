@@ -14,8 +14,8 @@ public interface RideService {
     void rejectRide(Long rideId, String reason);
     void startRide(Long rideId);
     RideDto endRide(Long rideId);
-    void cancelRide(Long rideId, String reason);
-    void stopRideInProgress(Long rideId);
+    RideDto cancelRide(Long rideId);
+    Double stopRideInProgress(Long rideId, WaypointDto waypoint);
     double estimateRidePrice(RideDto rideDto);
     List<RideDto> getRidesBetween(LocalDateTime start, LocalDateTime end);
     List<RideCardDto> getFavoriteRides(Long userId, Integer skip, Integer count, RideQueryDto queryDto);
@@ -31,4 +31,7 @@ public interface RideService {
     void trackRide(Long id);
 
     RideDto orderRide(RideOrderDto rideDto);
+    RideDto cancelRideByDriver(Long rideId, String reason);
+
+    RideDto getActiveRide();
 }

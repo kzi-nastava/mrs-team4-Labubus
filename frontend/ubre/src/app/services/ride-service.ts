@@ -9,11 +9,14 @@ import { Role } from '../enums/role';
 import { RideQueryDto } from '../dtos/ride-query';
 import { UserService } from './user-service';
 import { UserDto } from '../dtos/user-dto';
+import { WaypointDto } from '../dtos/waypoint-dto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RideService {
+
+
   private readonly BASE_URL : string = "http://localhost:8080/api/";
   private readonly userService : UserService = inject(UserService);
   private readonly http = inject(HttpClient);
@@ -196,4 +199,22 @@ export class RideService {
 
     return params;
   }
+
+  cancelRideDriver(rideId: number, reason: string): Observable<RideDto> {
+    return this.http.put<RideDto>(this.BASE_URL + 'rides/' + rideId + '/cancel/driver', { reason: reason });
+  }
+
+  cancelRideUser(rideId: number): Observable<RideDto> {
+    return this.http.put<RideDto>(this.BASE_URL + 'rides/' + rideId + '/cancel/user', {});
+  }
+
+  getActiveRide(): Observable<RideDto> {
+    return this.http.get<RideDto>(`${this.BASE_URL}rides/active`, {});  
+  }
+
+  stopRide(rideId: number, waypoint: WaypointDto): Observable<number> {
+    return this.http.put<number>(`${this.BASE_URL}rides/${rideId}/stop`, waypoint);
+  }
+
+
 }

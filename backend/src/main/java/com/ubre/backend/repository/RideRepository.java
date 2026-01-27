@@ -1,5 +1,6 @@
 package com.ubre.backend.repository;
 
+import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.model.Ride;
 import com.ubre.backend.model.Driver;
 import com.ubre.backend.enums.RideStatus;
@@ -40,4 +41,22 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
 
     // find rides by ride status
     List<Ride> findByStatus(RideStatus status);
+
+
+    @Query("""
+    select new com.ubre.backend.dto.RideDto(r)
+    from Ride r
+    where r.driver.id = :id
+      and (r.status = 'PENDING' or r.status = 'IN_PROGRESS')
+    """)
+    Optional<RideDto> findDriverActiveRide(Long id);
+
+    @Query("""
+    select new com.ubre.backend.dto.RideDto(r)
+    from Ride r
+    where r.creator.id = :id
+      and (r.status = 'PENDING' or r.status = 'IN_PROGRESS')
+    """)
+    Optional<RideDto> findUserActiveRide(Long id);
+
 }

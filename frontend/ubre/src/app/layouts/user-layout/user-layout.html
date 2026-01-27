@@ -122,16 +122,53 @@
       (click)="toggleDest()">
     </app-icon-button>
 
-    <!-- START RIDE BUTTON (DRIVERS ONLY) -->
-    @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
-      <button 
-        class="start-ride-button"
-        [class.disabled]="(ridePlanningStore.currentRide$ | async)?.status != 'PENDING'"
-        [disabled]="(ridePlanningStore.currentRide$ | async)?.status != 'PENDING'"
-        (click)="onStartRideClick()">
-        <span class="start-ride-text">Start this ride</span>
-      </button>
-    }
+    <!-- BUTTON CONTAINER -->
+    <div class="ride-buttons">
+      <!-- START RIDE BUTTON (DRIVERS ONLY) -->
+      @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
+        <button 
+          class="start-ride-button"
+          [class.disabled]="(ridePlanningStore.currentRide$ | async)?.status != 'PENDING'"
+          [disabled]="(ridePlanningStore.currentRide$ | async)?.status != 'PENDING'"
+          (click)="onStartRideClick()">
+          <span class="start-ride-text">Start this ride</span>
+        </button>
+      }
+
+      <!-- CANCEL RIDE BUTTON (DRIVERS ONLY) -->
+      @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
+        <button 
+          class="ride-button"
+          [class.disabled]="!canCancelRide()"
+          [disabled]="!canCancelRide()"
+          (click)="onCancelRideClick()">
+          <span class="ride-text">Cancel</span>
+        </button> 
+      }
+
+      <!-- STOP RIDE BUTTON (DRIVERS ONLY) -->
+      @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
+        <button 
+          class="ride-button"
+          [class.disabled]="!canStopRide()"
+          [disabled]="!canStopRide()"
+          (click)="onStopRideClick()">
+          <span class="ride-text">Stop</span>
+        </button> 
+      }
+
+      <!-- CANCEL RIDE BUTTON (USERS ONLY) -->
+      @if ((userService.currentUser$ | async)?.role === Role.REGISTERED_USER) {
+        <button 
+          class="ride-button"
+          [class.disabled]="!canCancelRide()"
+          [disabled]="!canCancelRide()"
+          (click)="onCancelUserClick()">
+          <span class="ride-text">Cancel</span>
+        </button> 
+      }
+
+    </div>
 
     <!-- TOAST NOTIFICATION -->
     @if (ui.toastOpen) {
@@ -608,4 +645,11 @@
   </div>
 
   <app-review-modal [show]="ui.reviewModalOpen" (onError)="onEmmitError($event)"></app-review-modal>
+
+  @if (ui.showCancelModal) {
+    <app-driver-cancel-dialog 
+      (close)="ui.showCancelModal = false" 
+      (confirmed)="handleCancelRide($event)">
+    </app-driver-cancel-dialog>
+  }
 </div>

@@ -1,0 +1,28 @@
+<div class="modal-overlay">
+  <div class="modal-card">
+    <h2 class="modal-title">Please specify the reason for cancelling the ride</h2>
+
+    <div class="options-container">
+      <label class="radio-pill">
+        <input type="radio" name="reason" value="User didn't show up." [(ngModel)]="selectedReason">
+        <span>User didn't show up</span>
+      </label>
+
+      <label class="radio-pill">
+        <input type="radio" name="reason" value="Vehicle issues." [(ngModel)]="selectedReason">
+        <span>Vehicle issue</span>
+      </label>
+
+      <label class="radio-pill">
+        <input type="radio" name="reason" value="Driver is unwell." [(ngModel)]="selectedReason">
+        <span>Driver feels unwell</span>
+    </label>
+
+    </div>
+
+    <div class="modal-actions">
+        <app-button width="200px" variant="outlined" (click)="onCancel()">Back</app-button>
+        <app-button width="200px" [disabled]="!selectedReason" variant="filled" (click)="onConfirm()">OK</app-button>
+    </div>
+  </div>
+</div>
