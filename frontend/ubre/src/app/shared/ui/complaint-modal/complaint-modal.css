@@ -1,0 +1,105 @@
+.modal-backdrop {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-wrap: wrap;
+    place-content: center;
+    background-color: rgba(0, 0, 0, 0.1);
+    --modal-height: fit-content;
+    opacity: 1;
+    pointer-events: all;
+    transition: 0.2s ease;
+    z-index: 4000;
+}
+
+.complaint-modal {
+    min-width: 200px;
+    display: flex;
+    flex-wrap: wrap;
+    place-content: center;
+    border-radius: var(--border-radius-regular);
+    overflow: hidden;
+    height: fit-content;
+    pointer-events: inherit;
+}
+
+.complaint-modal * {
+    pointer-events: inherit;
+}
+
+.fade {
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+}
+
+.fade * {
+    cursor: default !important;
+}
+
+.complaint-modal .inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    pointer-events: inherit;
+}
+
+.complaint-modal .title {
+    font-size: var(--font-size-large);
+    font-weight: bold;
+    pointer-events: inherit;
+    margin-bottom: 10px;
+}
+
+.complaint-modal .complaint-text {
+    resize: none;
+    width: 320px;
+    height: 100px;
+    font-size: var(--font-size-placeholder);
+    font-family: var(--font-family);
+    border:1px solid var(--color-neutral-light-gray); border-radius:12px; box-sizing:border-box;
+    outline:none; background:#fff;
+    padding: 9px 14px;
+    pointer-events: inherit;
+    transition: 0.2s ease;
+}
+
+.complaint-modal .error {
+    color: var(--color-error);
+    border-color: var(--color-error);
+}
+
+.complaint-modal .error::placeholder {
+    color: var(--color-error);
+}
+
+.complaint-modal .btn-group {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.complaint-modal .btn-group button {
+    cursor: pointer;
+    font: var(--font-size-regular) var(--font-family);
+    font-weight: var(--font-weight-medium);
+    padding: calc(var(--padding-regular) / 2) var(--padding-regular);
+    border-radius: var(--border-radius-buttons-small);
+    width: 100%;
+}
+
+.complaint-modal .btn-group .btn-outlined {
+    background-color: var(--color-surface);
+    color: var(--color-primary-dark);
+    border: 1px solid var(--color-primary-dark);
+}
+
+.complaint-modal .btn-group .btn-filled {
+    background-color: var(--color-primary-dark);
+    color: var(--color-surface);
+    border: 1px solid var(--color-primary-dark);
+}

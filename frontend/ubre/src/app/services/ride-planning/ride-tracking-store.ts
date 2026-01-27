@@ -27,6 +27,7 @@ export class RideTrackingStore {
 
     constructor() {
         this.ridePlanningStore.currentRide$.subscribe((ride : RideDto | null) => {
+            console.log(ride, "Rerender?")
             if (ride == null || ride.status != RideStatus.IN_PROGRESS) {
                 this.trackedRoute.next({
                     distance: 0,

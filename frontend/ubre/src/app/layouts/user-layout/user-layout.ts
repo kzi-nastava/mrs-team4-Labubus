@@ -55,15 +55,18 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
 import { PanicList } from '../../features/panic/panic-list/panic-list';
 import { PanicButton } from "../../shared/ui/panic-button/panic-button";
 import { PanicToast } from '../../features/panic/panic-toast/panic-toast';
+import { ComplaintModal } from '../../shared/ui/complaint-modal/complaint-modal';
+import { ComplaintService } from '../../services/complaint-service';
 
 @Component({
   selector: 'app-user-layout',
   standalone: true,
-  imports: [Map, IconButton, SideMenu, Toast,
-    Modal, ModalContainer, StatCard, Button,
-    Sheet, FormsModule, RideHistory, ProfileChangeCard,
-    AsyncPipe, ReviewModal, ScheduleTimer, InvitePassengers,
-    RideOptions, FavoriteRides, DriverCancelDialog, PanicList, PanicButton, PanicToast],
+  imports: [Map,IconButton,SideMenu,Toast,
+    Modal,ModalContainer,StatCard,Button,
+    Sheet,FormsModule,RideHistory,ProfileChangeCard,
+    AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
+    RideOptions, FavoriteRides, DriverCancelDialog,
+    ComplaintModal, PanicList, PanicButton, PanicToast,],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -78,6 +81,7 @@ import { PanicToast } from '../../features/panic/panic-toast/panic-toast';
     public userService = inject(UserService);
     private authService = inject(AuthService);
     private reviewService : ReviewService = inject(ReviewService)
+    private complaintService : ComplaintService = inject(ComplaintService)
     public driverRegistrationService = inject(DriverRegistrationService);
     public ridePlanningStore = inject(RidePlanningStore);
     private confetti = inject(ConfettiService);
@@ -177,6 +181,7 @@ import { PanicToast } from '../../features/panic/panic-toast/panic-toast';
       });
 
     this.ui.reviewModalOpen = this.reviewService.showReviewModal$;
+    this.ui.complaintModalOpen = this.complaintService.showComplaintModal$;
     
     this.rideReminderSubscription = this.webSocketService
       .rideReminderNotifications(userId)
@@ -210,7 +215,13 @@ import { PanicToast } from '../../features/panic/panic-toast/panic-toast';
 
           if (notification.status === NotificationType.RIDE_COMPLETED) {
             this.showToast('Ride completed', "Ride completed.");
-            this.ridePlanningStore.currentRideSubject$.next(null);
+            this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
+              this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
+                if (user.role == Role.REGISTERED_USER && this.ridePlanningStore.currentRideSubject$.value != null)
+                  this.reviewService.newReview(this.ridePlanningStore.currentRideSubject$.value.id)
+              })
+              this.ridePlanningStore.currentRideSubject$.next(nextRide)
+            })
           }
 
 
@@ -243,6 +254,7 @@ import { PanicToast } from '../../features/panic/panic-toast/panic-toast';
     toastOpen: false,
     profileChangesOpen: false,
     reviewModalOpen: of(false),
+    complaintModalOpen: of(false),
     scheduleTimerOpen: false,
     invitePassengersOpen: false,
     timeEstimate: false,
@@ -390,6 +402,13 @@ import { PanicToast } from '../../features/panic/panic-toast/panic-toast';
 
   openChat() {
     // Open chat widget
+  }
+
+  openComplaintModal() {
+    this.ridePlanningStore.currentRide$.pipe(take(1)).subscribe((ride : RideDto | null) => {
+      if (ride != null)
+        this.complaintService.newComplaint(ride?.id)
+    })
   }
 
 
@@ -1043,15 +1062,21 @@ import { PanicToast } from '../../features/panic/panic-toast/panic-toast';
 
               console.log("Stop waypoint DTO:", stopWaypoint);
 
-                this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
-                  next: (price) => {
-                    const finalPrice = price;
-                    this.showToast("New price", finalPrice.toString());
-                    this.ridePlanningStore.currentRideSubject$.next(null);
-                  },
-                  error: (err) => {
-                  }
-                });
+              this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
+                next: (price) => {
+                  const finalPrice = price;
+                  this.showToast("New price", finalPrice.toString());
+                  this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
+                    this.ridePlanningStore.currentRideSubject$.next(nextRide)
+                    this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
+                      if (user.role == Role.REGISTERED_USER && ride != null)
+                        this.reviewService.newReview(ride.id)
+                    })
+                  })
+                },
+                error: (err) => {
+                }
+              });
             } 
           },
           error: (err) => {
@@ -1078,15 +1103,21 @@ import { PanicToast } from '../../features/panic/panic-toast/panic-toast';
 
               console.log("Stop waypoint DTO:", stopWaypoint);
 
-                this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
-                  next: (price) => {
-                    const finalPrice = price;
-                    this.showToast("New price", finalPrice.toString());
-                    this.ridePlanningStore.currentRideSubject$.next(null);
-                  },
-                  error: (err) => {
-                  }
-                });
+              this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
+                next: (price) => {
+                  const finalPrice = price;
+                  this.showToast("New price", finalPrice.toString());
+                  this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
+                    this.ridePlanningStore.currentRideSubject$.next(nextRide)
+                    this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
+                      if (user.role == Role.REGISTERED_USER && ride != null)
+                        this.reviewService.newReview(ride.id)
+                    })
+                  })
+                },
+                error: (err) => {
+                }
+              });
             } 
           },
           error: (err) => {

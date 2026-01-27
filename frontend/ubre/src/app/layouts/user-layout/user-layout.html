@@ -116,6 +116,13 @@
       (click)="openChat()">
     </app-icon-button>
 
+    @if ((ridePlanningStore.currentRide$ | async)?.status === RideStatus.IN_PROGRESS && (userService.currentUser$ | async)?.role === Role.REGISTERED_USER) {
+      <app-icon-button class="complaint-button"
+        iconUrl="complaint.svg"
+        (click)="openComplaintModal()">
+      </app-icon-button>
+    }
+
     <app-icon-button class="map-button"
       iconUrl="map_search_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
       [disabled]="(ridePlanningStore.currentRide$ | async)?.status === RideStatus.IN_PROGRESS"
@@ -668,6 +675,7 @@
   </div>
 
   <app-review-modal [show]="ui.reviewModalOpen" (onError)="onEmmitError($event)"></app-review-modal>
+  <app-complaint-modal [show]="ui.complaintModalOpen" (onError)="onEmmitError($event)"></app-complaint-modal>
 
   @if (ui.showCancelModal) {
     <app-driver-cancel-dialog 
