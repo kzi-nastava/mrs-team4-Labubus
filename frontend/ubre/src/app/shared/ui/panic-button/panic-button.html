@@ -1,3 +1,7 @@
-<button class="panic-button">
+<button 
+  [disabled]="disabled" 
+  (click)="onClick()"
+  [class.disabled]="disabled"
+  class="panic-button">
   <img src="warning_60dp_FFFFFF_FILL0_wght400_GRAD0_opsz48.svg" alt="PANIC Alert" class="panic-icon">
 </button>

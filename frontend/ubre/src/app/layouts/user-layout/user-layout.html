@@ -129,6 +129,8 @@
       @if ((userService.currentUser$ | async)?.role === Role.REGISTERED_USER 
          || (userService.currentUser$ | async)?.role === Role.DRIVER) {
         <app-panic-button 
+          [class.disabled]="!(ridePlanningStore.currentRide$ | async)"
+          [disabled]="!(ridePlanningStore.currentRide$ | async)"
           (click)="activatePanic()">
         </app-panic-button> 
       }

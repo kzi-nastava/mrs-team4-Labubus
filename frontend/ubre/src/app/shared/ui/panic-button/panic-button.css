@@ -27,4 +27,10 @@
     height: 32px;
     filter: brightness(0) invert(1);
   }
+
+  &.disabled, &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
 }
