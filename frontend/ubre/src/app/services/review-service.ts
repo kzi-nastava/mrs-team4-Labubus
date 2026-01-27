@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Observer } from 'rxjs';
+import { BehaviorSubject, Observable, Observer, take } from 'rxjs';
 import { ReviewDto } from '../dtos/review-dto';
 import { HttpClient } from '@angular/common/http';
 import { UserService } from './user-service';
@@ -29,7 +29,7 @@ export class ReviewService {
   }
 
   public submitReview(review : ReviewDto, callback : Partial<Observer<ReviewDto>> | ((value: ReviewDto) => void) | undefined) : void {
-    this.userService.getCurrentUser().subscribe((currentUser : UserDto) => {
+    this.userService.getCurrentUser().pipe(take(1)).subscribe((currentUser : UserDto) => {
       review.userId = currentUser.id;
       this.http.post<ReviewDto>(`${this.BASE_URL}reviews/ride/${this.rideId}`, review).subscribe(callback)
     })

@@ -93,6 +93,12 @@
   right: 16px;
 }
 
+.complaint-button {
+  position: fixed;
+  bottom: 116px;
+  right: 16px;
+}
+
 .map-button {
   position: fixed;
   top: 16px;
@@ -768,3 +774,7 @@
   cursor: pointer;
 }
 
+.panic-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

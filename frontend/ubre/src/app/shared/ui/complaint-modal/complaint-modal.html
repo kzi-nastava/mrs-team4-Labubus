@@ -1,0 +1,12 @@
+<div class="modal-backdrop fade" [class.fade]="!(show | async)" id="complaint-modal-backdrop" (click)="onClose($event)">
+      <app-modal-container class="complaint-modal" [showTitleBar] = false>
+            <div class="inputs">
+                  <div class="title">Leave a complaint</div>
+                  <textarea class="complaint-text" placeholder="Write a complaint" (input)="onSetText($event)" [class.error]="error"></textarea>
+            </div>
+          <div class="btn-group">
+                <button class="cancel btn-outlined" (click)="onClose($event)">Cancel</button>
+                <button class="send btn-filled" (click)="onSubmit()">Send</button>
+          </div>
+      </app-modal-container>
+</div>

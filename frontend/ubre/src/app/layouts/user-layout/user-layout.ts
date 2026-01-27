@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Map } from '../../services/ride-planning/map/map';
 import { IconButton } from '../../shared/ui/icon-button/icon-button';
 import { SideMenu } from '../../shared/ui/side-menu/side-menu';
@@ -54,6 +54,11 @@ import { WaypointDto } from '../../dtos/waypoint-dto';
 import { GeocodingService } from '../../services/ride-planning/geocoding-service';
 import { RoutingService } from '../../services/ride-planning/routing-service';
 import { RouteInfo } from '../../services/ride-planning/ride-types';
+import { PanicList } from '../../features/panic/panic-list/panic-list';
+import { PanicButton } from "../../shared/ui/panic-button/panic-button";
+import { PanicToast } from '../../features/panic/panic-toast/panic-toast';
+import { ComplaintModal } from '../../shared/ui/complaint-modal/complaint-modal';
+import { ComplaintService } from '../../services/complaint-service';
 
 @Component({
   selector: 'app-user-layout',
@@ -62,7 +67,8 @@ import { RouteInfo } from '../../services/ride-planning/ride-types';
     Modal,ModalContainer,StatCard,Button,
     Sheet,FormsModule,RideHistory,ProfileChangeCard,
     AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
-    RideOptions, FavoriteRides, DriverCancelDialog],
+    RideOptions, FavoriteRides, DriverCancelDialog,
+    ComplaintModal, PanicList, PanicButton, PanicToast,],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -73,6 +79,7 @@ import { RouteInfo } from '../../services/ride-planning/ride-types';
     public userService = inject(UserService);
     private authService = inject(AuthService);
     private reviewService : ReviewService = inject(ReviewService)
+    private complaintService : ComplaintService = inject(ComplaintService)
     public driverRegistrationService = inject(DriverRegistrationService);
     public ridePlanningStore = inject(RidePlanningStore);
     private confetti = inject(ConfettiService);
@@ -98,7 +105,10 @@ import { RouteInfo } from '../../services/ride-planning/ride-types';
   private profileChangeSubscription?: Subscription;
   private rideAssignmentSubscription?: Subscription;
   private rideReminderSubscription?: Subscription;
+  private panicSubscription?: Subscription;
   private currentRideSubscription?: Subscription; // this subscription represents a current ride, for user and for a driver
+
+  @ViewChild(PanicToast) panicToast!: PanicToast;
 
 
   ngOnInit() {
@@ -169,6 +179,7 @@ import { RouteInfo } from '../../services/ride-planning/ride-types';
       });
 
     this.ui.reviewModalOpen = this.reviewService.showReviewModal$;
+    this.ui.complaintModalOpen = this.complaintService.showComplaintModal$;
     
     this.rideReminderSubscription = this.webSocketService
       .rideReminderNotifications(userId)
@@ -202,7 +213,13 @@ import { RouteInfo } from '../../services/ride-planning/ride-types';
 
           if (notification.status === NotificationType.RIDE_COMPLETED) {
             this.showToast('Ride completed', "Ride completed.");
-            this.ridePlanningStore.currentRideSubject$.next(null);
+            this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
+              this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
+                if (user.role == Role.REGISTERED_USER && this.ridePlanningStore.currentRideSubject$.value != null)
+                  this.reviewService.newReview(this.ridePlanningStore.currentRideSubject$.value.id)
+              })
+              this.ridePlanningStore.currentRideSubject$.next(nextRide)
+            })
           }
 
 
@@ -210,6 +227,8 @@ import { RouteInfo } from '../../services/ride-planning/ride-types';
             this.ridePlanningStore.currentRideSubject$.next(notification.ride);
         },
       });
+
+      this.subscribeToPanicNotifications();
     }
 
   ngOnDestroy() {
@@ -217,6 +236,7 @@ import { RouteInfo } from '../../services/ride-planning/ride-types';
     this.rideAssignmentSubscription?.unsubscribe();
     this.rideReminderSubscription?.unsubscribe();
     this.currentRideSubscription?.unsubscribe();
+    this.panicSubscription?.unsubscribe();
     this.webSocketService.disconnect();
   }
   ui = {
@@ -232,12 +252,15 @@ import { RouteInfo } from '../../services/ride-planning/ride-types';
     toastOpen: false,
     profileChangesOpen: false,
     reviewModalOpen: of(false),
+    complaintModalOpen: of(false),
     scheduleTimerOpen: false,
     invitePassengersOpen: false,
     timeEstimate: false,
     showRideHistory: false,
     showFavourites: false,
     showCancelModal: false,
+    panicListOpen: false,
+    toastPanicOpen: false,
   };
 
   private previousScreenBeforeInvite: 'schedule-timer' | 'ride-options' | null = null;
@@ -327,6 +350,13 @@ import { RouteInfo } from '../../services/ride-planning/ride-types';
     if (action === 'profile-changes') {
       this.openProfileChanges();
     }
+    if (action === 'admin-changes') {
+      this.openProfileChanges();
+    }
+    if (action === 'admin-panics') {
+      this.ui.panicListOpen = true;
+    }
+   
     this.closeMenu();
   }
   
@@ -370,6 +400,13 @@ import { RouteInfo } from '../../services/ride-planning/ride-types';
 
   openChat() {
     // Open chat widget
+  }
+
+  openComplaintModal() {
+    this.ridePlanningStore.currentRide$.pipe(take(1)).subscribe((ride : RideDto | null) => {
+      if (ride != null)
+        this.complaintService.newComplaint(ride?.id)
+    })
   }
 
 
@@ -1052,15 +1089,21 @@ import { RouteInfo } from '../../services/ride-planning/ride-types';
 
               console.log("Stop waypoint DTO:", stopWaypoint);
 
-                this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
-                  next: (price) => {
-                    const finalPrice = price;
-                    this.showToast("New price", finalPrice.toString());
-                    this.ridePlanningStore.currentRideSubject$.next(null);
-                  },
-                  error: (err) => {
-                  }
-                });
+              this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
+                next: (price) => {
+                  const finalPrice = price;
+                  this.showToast("New price", finalPrice.toString());
+                  this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
+                    this.ridePlanningStore.currentRideSubject$.next(nextRide)
+                    this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
+                      if (user.role == Role.REGISTERED_USER && ride != null)
+                        this.reviewService.newReview(ride.id)
+                    })
+                  })
+                },
+                error: (err) => {
+                }
+              });
             } 
           },
           error: (err) => {
@@ -1087,15 +1130,21 @@ import { RouteInfo } from '../../services/ride-planning/ride-types';
 
               console.log("Stop waypoint DTO:", stopWaypoint);
 
-                this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
-                  next: (price) => {
-                    const finalPrice = price;
-                    this.showToast("New price", finalPrice.toString());
-                    this.ridePlanningStore.currentRideSubject$.next(null);
-                  },
-                  error: (err) => {
-                  }
-                });
+              this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
+                next: (price) => {
+                  const finalPrice = price;
+                  this.showToast("New price", finalPrice.toString());
+                  this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
+                    this.ridePlanningStore.currentRideSubject$.next(nextRide)
+                    this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
+                      if (user.role == Role.REGISTERED_USER && ride != null)
+                        this.reviewService.newReview(ride.id)
+                    })
+                  })
+                },
+                error: (err) => {
+                }
+              });
             } 
           },
           error: (err) => {
@@ -1122,6 +1171,30 @@ import { RouteInfo } from '../../services/ride-planning/ride-types';
       });
   }
 
+  activatePanic() {
+    const rideId = this.ridePlanningStore.currentRideSubject$.getValue()!.id;
+    this.rideService.activatePanic(rideId).subscribe({
+      next: () => this.showToast('Panic activated', 'Admins are notified.'),
+      error: err => console.error(err)
+    });
+  }
 
+  subscribeToPanicNotifications() {
+    console.log(this.authService.getRole())
+    if (this.authService.getRole() === "ADMIN") { 
+        this.panicSubscription = this.webSocketService
+        .panicNotifications()
+        .subscribe({
+          next: (panic) => {
+            this.panicToast.show(panic.rideId.toString());
+            this.playNotificationSound();
+          },
+          error: () => {
+            this.showToast('Connection error', 'Could not receive panic updates.');
+          }
+        });
+      }
+    }
 
 }
+

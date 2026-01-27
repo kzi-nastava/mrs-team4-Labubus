@@ -118,6 +118,13 @@
       (click)="openChat()">
     </app-icon-button>
 
+    @if ((ridePlanningStore.currentRide$ | async)?.status === RideStatus.IN_PROGRESS && (userService.currentUser$ | async)?.role === Role.REGISTERED_USER) {
+      <app-icon-button class="complaint-button"
+        iconUrl="complaint.svg"
+        (click)="openComplaintModal()">
+      </app-icon-button>
+    }
+
     <app-icon-button class="map-button"
       iconUrl="map_search_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
       [disabled]="(ridePlanningStore.currentRide$ | async)?.status === RideStatus.IN_PROGRESS"
@@ -126,6 +133,17 @@
 
     <!-- BUTTON CONTAINER -->
     <div class="ride-buttons">
+      
+      <!-- PANIC BUTTON -->
+      @if ((userService.currentUser$ | async)?.role === Role.REGISTERED_USER 
+         || (userService.currentUser$ | async)?.role === Role.DRIVER) {
+        <app-panic-button 
+          [class.disabled]="!(ridePlanningStore.currentRide$ | async)"
+          [disabled]="!(ridePlanningStore.currentRide$ | async)"
+          (click)="activatePanic()">
+        </app-panic-button> 
+      }
+      
       <!-- START RIDE BUTTON (DRIVERS ONLY) -->
       @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
         <button 
@@ -133,7 +151,7 @@
           [class.disabled]="(ridePlanningStore.currentRide$ | async)?.status != 'PENDING'"
           [disabled]="(ridePlanningStore.currentRide$ | async)?.status != 'PENDING'"
           (click)="onStartRideClick()">
-          <span class="start-ride-text">Start this ride</span>
+          <span class="ride-text">Start this ride</span>
         </button>
       }
 
@@ -176,6 +194,10 @@
     @if (ui.toastOpen) {
       <app-toast [title]="toastTitle" [message]="toastMessage"></app-toast>
     }
+
+    <!-- PANIC NOTIFICATION -->
+    <app-panic-toast ></app-panic-toast>
+    
 
     <!-- SIDE MENU -->
     <app-side-menu
@@ -651,9 +673,18 @@
     </app-sheet>
   }
 
+  @if ((userService.currentUser$ | async)?.role === Role.ADMIN) {
+    <app-sheet [open]="ui.panicListOpen"
+      title="Panic Notifications"
+      (back)="ui.panicListOpen=false; ui.menuOpen = true">
+      <app-panic-list></app-panic-list>
+    </app-sheet>
+  }
+
   </div>
 
   <app-review-modal [show]="ui.reviewModalOpen" (onError)="onEmmitError($event)"></app-review-modal>
+  <app-complaint-modal [show]="ui.complaintModalOpen" (onError)="onEmmitError($event)"></app-complaint-modal>
 
   @if (ui.showCancelModal) {
     <app-driver-cancel-dialog 
@@ -661,4 +692,6 @@
       (confirmed)="handleCancelRide($event)">
     </app-driver-cancel-dialog>
   }
+
+
 </div>
