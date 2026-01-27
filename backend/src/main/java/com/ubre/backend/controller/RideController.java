@@ -298,6 +298,13 @@ public class RideController {
         return ResponseEntity.status(HttpStatus.OK).body(price);
     }
 
+    @GetMapping(value = "/current", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<RideDto> getCurrentRide() {
+        RideDto ride = rideService.getCurrentRide();
+        return ResponseEntity.status(HttpStatus.OK).body(ride);
+    }
+
 
 
 

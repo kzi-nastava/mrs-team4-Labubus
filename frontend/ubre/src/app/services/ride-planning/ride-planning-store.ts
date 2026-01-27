@@ -19,7 +19,7 @@ import { OrderingService } from "./ordering-service";
 import { RideOrderDto } from "../../dtos/ride-order";
 import { UserService } from "../user-service";
 import { RideDto } from "../../dtos/ride-dto";
-import { HttpErrorResponse } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { AuthService } from "../../features/auth/auth-service";
 import { RideStatus } from "../../enums/ride-status";
 
@@ -30,6 +30,8 @@ export class RidePlanningStore {
     private orderingService = inject(OrderingService);
     private userService = inject(UserService);
     private authService = inject(AuthService);
+    private readonly http = inject(HttpClient);
+    private readonly api = 'http://localhost:8080/api';
 
     
     private ridePlanningStateSubject$ = new BehaviorSubject<RidePlanningState>({ // this represents from now on the state of the ride planning process
@@ -81,6 +83,18 @@ export class RidePlanningStore {
     get scheduledTime() { return this.ridePlanningStateSubject$.value.scheduledTime; }
     get passengersEmails() { return this.ridePlanningStateSubject$.value.passengersEmails; }
     get rideOptions() { return this.ridePlanningStateSubject$.value.rideOptions; }
+
+    // Setting the current ride in constructor so that it loads in on aplication start
+    constructor() {
+        this.http.get<RideDto | null>(`${this.api}/rides/current`).subscribe({
+            next: (ride : RideDto | null) => {
+                this.currentRideSubject$.next(ride)
+            },
+            error: (err) => {
+                console.log(err)
+            }
+        });
+    }
 
     openDest() { this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, destOpen: true }); }
     closeDest() { this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, destOpen: false }); }

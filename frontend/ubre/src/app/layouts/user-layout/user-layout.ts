@@ -47,6 +47,7 @@ import { FavoriteRides } from '../../shared/ui/favorite-rides/favorite-rides';
 import { RideStatus } from '../../enums/ride-status';
 import { RideDto } from '../../dtos/ride-dto';
 import { VehicleService } from '../../services/vehicle-service';
+import { RideTrackingStore } from '../../services/ride-planning/ride-tracking-store';
 
 @Component({
   selector: 'app-user-layout',
@@ -76,6 +77,7 @@ import { VehicleService } from '../../services/vehicle-service';
     public changePasswordService = inject(ChangePasswordService);
     public userStatsService = inject(UserStatsService);
     public vehicleService = inject(VehicleService)
+    public rideTrackingStore = inject(RideTrackingStore)
 
   Role = Role;
   VehicleType = VehicleType;
@@ -165,6 +167,7 @@ import { VehicleService } from '../../services/vehicle-service';
           // notification that time for a ride has come
           if (notification.status === NotificationType.TIME_FOR_A_RIDE && notification.ride) {
             this.showToast('Get ready', 'Your ride is starting soon...');
+            console.log(notification, "Test")
             this.ridePlanningStore.currentRideSubject$.next(notification.ride);
           }
           if (notification.status === NotificationType.RIDE_STARTED && notification.ride) {

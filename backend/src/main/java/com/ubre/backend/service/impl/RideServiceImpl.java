@@ -14,7 +14,6 @@ import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.RideService;
 import com.ubre.backend.websocket.CurrentRideNotification;
-import com.ubre.backend.websocket.ProfileChangeNotification;
 import com.ubre.backend.websocket.RideAssignmentNotification;
 import com.ubre.backend.websocket.WebSocketNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -236,6 +237,42 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
+    public RideDto getCurrentRide() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to get current ride for unauthenticated user");
+
+        User jwtUser = (User) auth.getPrincipal();
+        if (jwtUser == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to get current ride for unauthenticated user");
+
+        if (jwtUser.getRole() == Role.DRIVER) {
+            Optional<Driver> driver = driverRepository.findById(jwtUser.getId());
+            if (driver.isEmpty())
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown user");
+
+            Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeAsc(driver.get(), RideStatus.IN_PROGRESS);
+            if (ride.isPresent())
+                return new RideDto(ride.get());
+
+            ride = rideRepository.findFirstByDriverAndStatusAndStartTimeBeforeOrderByStartTimeAsc(driver.get(), RideStatus.PENDING, LocalDateTime.now().plusMinutes(1));
+            return ride.map(RideDto::new).orElse(null);
+        }
+        else {
+            Optional<User> user = userRepository.findById(jwtUser.getId());
+            if (user.isEmpty())
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown user");
+
+            Optional<Ride> ride = rideRepository.findFirstByCreatorAndStatusOrderByStartTimeAsc(user.get(), RideStatus.IN_PROGRESS);
+            if (ride.isPresent())
+                return new RideDto(ride.get());
+
+            ride = rideRepository.findFirstByCreatorAndStatusAndStartTimeBeforeOrderByStartTimeAsc(user.get(), RideStatus.PENDING, LocalDateTime.now().plusMinutes(1));
+            return ride.map(RideDto::new).orElse(null);
+        }
+    }
+
+    @Override
     public void trackRide(Long id) {
 
     }
@@ -377,6 +414,7 @@ public class RideServiceImpl implements RideService {
         createdRideDto.setPassengers(passengers.stream().map(UserDto::new).toList());
         createdRideDto.setDistance(newRide.getDistance());
         createdRideDto.setPrice(newRide.getPrice());
+        createdRideDto.setStatus(newRide.getStatus());
 
         webSocketNotificationService.sendRideAssigned(assignedDriver.getId(), new RideAssignmentNotification(
                 NotificationType.RIDE_ASSIGNED.name(),

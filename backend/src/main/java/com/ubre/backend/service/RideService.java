@@ -27,6 +27,7 @@ public interface RideService {
     List<RideCardDto> getRideHistory(Integer skip, Integer count, RideQueryDto query);
     List<RideCardDto> getMyRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query);
     List<RideCardDto> getScheduledRides(Long driverId, Integer skip, Integer count, RideQueryDto query);
+    RideDto getCurrentRide();
     void trackRide(Long id);
 
     RideDto orderRide(RideOrderDto rideDto);
