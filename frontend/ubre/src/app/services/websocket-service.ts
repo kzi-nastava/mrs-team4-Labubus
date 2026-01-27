@@ -6,7 +6,6 @@ import { AuthService } from '../features/auth/auth-service';
 import { ProfileChangeNotification } from '../notifications/profile-change-notification';
 import { RideAssignmentNotification } from '../notifications/ride-assignment-noitfications';
 import { RideReminderNotification } from '../notifications/ride-reminder-notification';
-import { RideDto } from '../dtos/ride-dto';
 import { CurrentRideNotification } from '../notifications/current-ride-notification';
 import { VehicleLocationNotification } from '../notifications/vehicle-location-notification';
 

@@ -4,6 +4,8 @@
     [waypoints]="(ridePlanningStore.ridePlanningState$ | async)?.waypoints ?? []"
     [vehicles]="(vehicleService.vehicleLocations$ | async) ?? []"
     [routeGeometry]="(ridePlanningStore.ridePlanningState$ | async)?.routeInfo?.geometry ?? null"
+    [displayedRideRoute]="(rideTrackingStore.trackedRoute$ | async) ?? null"
+    [displayedRideWaypoints]="(rideTrackingStore.trackedWaypoints$ | async) ?? []"
     (mapClick)="ridePlanningStore.addFromMapClick($event.lat, $event.lon)">
   </app-map>
 
@@ -126,11 +128,11 @@
       @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
         <button 
           class="ride-button"
-          [class.disabled]="!(ridePlanningStore.currentRide$ | async)"
-          [disabled]="!(ridePlanningStore.currentRide$ | async)"
+          [class.disabled]="(ridePlanningStore.currentRide$ | async)?.status != 'PENDING'"
+          [disabled]="(ridePlanningStore.currentRide$ | async)?.status != 'PENDING'"
           (click)="onStartRideClick()">
-          <span class="ride-text">Start this ride</span>
-        </button> 
+          <span class="start-ride-text">Start this ride</span>
+        </button>
       }
 
       <!-- CANCEL RIDE BUTTON (DRIVERS ONLY) -->

@@ -276,6 +276,42 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
+    public RideDto getCurrentRide() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to get current ride for unauthenticated user");
+
+        User jwtUser = (User) auth.getPrincipal();
+        if (jwtUser == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to get current ride for unauthenticated user");
+
+        if (jwtUser.getRole() == Role.DRIVER) {
+            Optional<Driver> driver = driverRepository.findById(jwtUser.getId());
+            if (driver.isEmpty())
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown user");
+
+            Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeAsc(driver.get(), RideStatus.IN_PROGRESS);
+            if (ride.isPresent())
+                return new RideDto(ride.get());
+
+            ride = rideRepository.findFirstByDriverAndStatusAndStartTimeBeforeOrderByStartTimeAsc(driver.get(), RideStatus.PENDING, LocalDateTime.now().plusMinutes(1));
+            return ride.map(RideDto::new).orElse(null);
+        }
+        else {
+            Optional<User> user = userRepository.findById(jwtUser.getId());
+            if (user.isEmpty())
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown user");
+
+            Optional<Ride> ride = rideRepository.findFirstByCreatorAndStatusOrderByStartTimeAsc(user.get(), RideStatus.IN_PROGRESS);
+            if (ride.isPresent())
+                return new RideDto(ride.get());
+
+            ride = rideRepository.findFirstByCreatorAndStatusAndStartTimeBeforeOrderByStartTimeAsc(user.get(), RideStatus.PENDING, LocalDateTime.now().plusMinutes(1));
+            return ride.map(RideDto::new).orElse(null);
+        }
+    }
+
+    @Override
     public void trackRide(Long id) {
 
     }
@@ -417,6 +453,7 @@ public class RideServiceImpl implements RideService {
         createdRideDto.setPassengers(passengers.stream().map(UserDto::new).toList());
         createdRideDto.setDistance(newRide.getDistance());
         createdRideDto.setPrice(newRide.getPrice());
+        createdRideDto.setStatus(newRide.getStatus());
 
         webSocketNotificationService.sendRideAssigned(assignedDriver.getId(), new RideAssignmentNotification(
                 NotificationType.RIDE_ASSIGNED.name(),
@@ -492,19 +529,4 @@ public class RideServiceImpl implements RideService {
         return rideRepository.findById(rideId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
     }
-
-    @Override
-    public RideDto getActiveRide() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) auth.getPrincipal();
-        RideDto ride = null;
-
-        if (user.getRole() == Role.DRIVER)
-            ride = rideRepository.findDriverActiveRide(user.getId()).orElse(null);
-        else if (user.getRole() == Role.REGISTERED_USER)
-            ride = rideRepository.findUserActiveRide(user.getId()).orElse(null);
-
-        return ride;
-    }
-
 }

@@ -6,10 +6,8 @@ import com.ubre.backend.model.Driver;
 import com.ubre.backend.enums.RideStatus;
 import com.ubre.backend.model.User;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -26,7 +24,10 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     List<Ride> findByStatusInAndStartTimeBetween(Collection<RideStatus> statuses, LocalDateTime startStartTime, LocalDateTime endStartTime, Pageable pageable);
     List<Ride> findByCreatorAndFavoriteTrue(User creator, Pageable pageable);
     List<Ride> findByCreatorAndFavoriteTrueAndStartTimeBetween(User creator, LocalDateTime startStartTime, LocalDateTime endStartTime, Pageable pageable);
-    Optional<Ride> findFirstByDriverAndStatusOrderByStartTimeDesc(Driver driver, RideStatus status);
+    Optional<Ride> findFirstByDriverAndStatusOrderByStartTimeAsc(Driver driver, RideStatus status);
+    Optional<Ride> findFirstByCreatorAndStatusOrderByStartTimeAsc(User creator, RideStatus status);
+    Optional<Ride> findFirstByDriverAndStatusAndStartTimeBeforeOrderByStartTimeAsc(Driver driver, RideStatus status, LocalDateTime max);
+    Optional<Ride> findFirstByCreatorAndStatusAndStartTimeBeforeOrderByStartTimeAsc(User creator, RideStatus status, LocalDateTime max);
 
 //    List<Ride> findByRideStatus(RideStatus status);
     
@@ -41,22 +42,5 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
 
     // find rides by ride status
     List<Ride> findByStatus(RideStatus status);
-
-
-    @Query("""
-    select new com.ubre.backend.dto.RideDto(r)
-    from Ride r
-    where r.driver.id = :id
-      and (r.status = 'PENDING' or r.status = 'IN_PROGRESS')
-    """)
-    Optional<RideDto> findDriverActiveRide(Long id);
-
-    @Query("""
-    select new com.ubre.backend.dto.RideDto(r)
-    from Ride r
-    where r.creator.id = :id
-      and (r.status = 'PENDING' or r.status = 'IN_PROGRESS')
-    """)
-    Optional<RideDto> findUserActiveRide(Long id);
 
 }

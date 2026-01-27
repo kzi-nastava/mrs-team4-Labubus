@@ -6,7 +6,6 @@ import com.ubre.backend.dto.WaypointDto;
 import com.ubre.backend.enums.NotificationType;
 import com.ubre.backend.enums.RideStatus;
 import com.ubre.backend.enums.UserStatus;
-import com.ubre.backend.enums.VehicleType;
 import com.ubre.backend.model.*;
 import com.ubre.backend.repository.DriverRepository;
 import com.ubre.backend.repository.RideRepository;
@@ -16,21 +15,14 @@ import com.ubre.backend.service.VehicleService;
 import com.ubre.backend.websocket.VehicleLocationNotification;
 import com.ubre.backend.websocket.WebSocketNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.ErrorResponseException;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -113,7 +105,7 @@ public class VehicleServiceImpl implements VehicleService {
             Optional<Waypoint> w = waypointRepository.findById(driver.getVehicle().getLocation().getId());
             if (w.isPresent()) {
                 if (driver.getStatus().equals(UserStatus.ON_RIDE)) {
-                    Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeDesc(driver, RideStatus.IN_PROGRESS);
+                    Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeAsc(driver, RideStatus.IN_PROGRESS);
                     if (!ride.isEmpty()) {
                         indicators.add(new VehicleIndicatorDto(driver.getId(), new WaypointDto(w.get()), driver.getStatus(), ride.get().getPanic()));
                         continue;
@@ -137,7 +129,7 @@ public class VehicleServiceImpl implements VehicleService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Location not set");
 
         if (vehicle.getDriver().getStatus().equals(UserStatus.ON_RIDE)) {
-            Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeDesc(vehicle.getDriver(), RideStatus.IN_PROGRESS);
+            Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeAsc(vehicle.getDriver(), RideStatus.IN_PROGRESS);
             if (!ride.isEmpty())
                 return new VehicleIndicatorDto(vehicle.getDriver().getId(), new WaypointDto(vehicle.getLocation()), vehicle.getDriver().getStatus(), ride.get().getPanic());
         }
@@ -158,12 +150,13 @@ public class VehicleServiceImpl implements VehicleService {
 
         Vehicle vehicle = vehicleOptional.get();
         waypointDto.setLabel(vehicle.getDriver().getName() + " " + vehicle.getDriver().getSurname() + " - " + vehicle.getModel());
-        Waypoint location = waypointRepository.save(new Waypoint(waypointDto));
-        vehicle.setLocation(location);
-        vehicle = vehicleRepository.save(vehicle);
+        Waypoint newLocation = new Waypoint(waypointDto);
+        if (vehicle.getLocation() != null)
+            newLocation.setId(vehicle.getLocation().getId());
+        waypointRepository.save(newLocation);
 
         if (vehicle.getDriver().getStatus().equals(UserStatus.ON_RIDE)) {
-            Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeDesc(vehicle.getDriver(), RideStatus.IN_PROGRESS);
+            Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeAsc(vehicle.getDriver(), RideStatus.IN_PROGRESS);
             if (!ride.isEmpty())
                 return new VehicleIndicatorDto(vehicle.getDriver().getId(), new WaypointDto(vehicle.getLocation()), vehicle.getDriver().getStatus(), ride.get().getPanic());
         }
