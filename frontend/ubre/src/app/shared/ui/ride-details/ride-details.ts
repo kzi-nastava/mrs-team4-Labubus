@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output, SimpleChanges } from '@angular/core';
 import { ModalContainer } from '../modal-container/modal-container';
 import { ProfileCard } from '../profile-card/profile-card';
 import { VehicleCard } from '../vehicle-card/vehicle-card';
@@ -47,10 +47,12 @@ export class RideDetails {
         this.onError.emit(new Error("You can only review your rides"))
     })
   }
-  
-  ngOnInit() {
-    this.start = new Date(this.ride.startTime)
-    this.end = new Date(this.ride.endTime)
+
+  ngOnChanges(changes : SimpleChanges): void {
+    if (changes['ride']) {
+      this.start = new Date(this.ride.startTime)
+      this.end = new Date(this.ride.endTime)
+    }
   }
 
   onReorderClick() {

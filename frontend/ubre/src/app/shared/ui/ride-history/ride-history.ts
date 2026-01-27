@@ -8,6 +8,8 @@ import { Role } from '../../../enums/role';
 import { RideQueryDto } from '../../../dtos/ride-query';
 import { Observable, of } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
+import { WaypointDto } from '../../../dtos/waypoint-dto';
+import { RideDto } from '../../../dtos/ride-dto';
 
 
 @Component({
@@ -21,6 +23,8 @@ export class RideHistory {
   @Input() set open(value : boolean) {this._open = value; if (value) this.onQueryChange(this.lastQuery);} get open() {return this._open}
   @Output() onClose = new EventEmitter<void>();
   @Output() onError = new EventEmitter<Error>();
+  @Output() onReorder = new EventEmitter<RideDto>();
+  @Output() onRenderWaypoints = new EventEmitter<WaypointDto[]>();
 
   rideService : RideService = inject(RideService)
   userService : UserService = inject(UserService)

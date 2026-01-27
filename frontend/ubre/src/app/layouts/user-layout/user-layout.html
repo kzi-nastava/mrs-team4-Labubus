@@ -4,8 +4,10 @@
     [waypoints]="(ridePlanningStore.ridePlanningState$ | async)?.waypoints ?? []"
     [vehicles]="(vehicleService.vehicleLocations$ | async) ?? []"
     [routeGeometry]="(ridePlanningStore.ridePlanningState$ | async)?.routeInfo?.geometry ?? null"
-    [displayedRideRoute]="(rideTrackingStore.trackedRoute$ | async) ?? null"
-    [displayedRideWaypoints]="(rideTrackingStore.trackedWaypoints$ | async) ?? []"
+    [currentRideRoute]="(rideTrackingStore.trackedRoute$ | async) ?? null"
+    [currentRideWaypoints]="(rideTrackingStore.trackedWaypoints$ | async) ?? []"
+    [selectedRideRoute]="(selectedRideRoute$ | async) ?? null"
+    [selectedRideWaypoints]="(selectedRideWaypoints$ | async) ?? []"
     (mapClick)="ridePlanningStore.addFromMapClick($event.lat, $event.lon)">
   </app-map>
 
@@ -631,7 +633,13 @@
     }
 
     <!-- RIDE HISTORY SHEET -->
-    <app-ride-history class="ride-history" (onClose)="onRideHistoryBack()" [open]="ui.showRideHistory" (onError)="onEmmitError($event)"></app-ride-history>
+    <app-ride-history 
+      class="ride-history" 
+      (onClose)="onRideHistoryBack()" 
+      [open]="ui.showRideHistory" 
+      (onError)="onEmmitError($event)" 
+      (onReorder)="onFavoriteReorder($event)"
+      (onRenderWaypoints)="onRenderWaypoints($event)"></app-ride-history>
 
     <!-- FAVORITE RIDES SHEET -->
     <app-favorite-rides
@@ -639,7 +647,8 @@
       (onClose)="onFavouritesBack()"
       [open]="ui.showFavourites"
       (onError)="onEmmitError($event)"
-      (onReorder)="onFavoriteReorder($event)"></app-favorite-rides>
+      (onReorder)="onFavoriteReorder($event)"
+      (onRenderWaypoints)="onRenderWaypoints($event)"></app-favorite-rides>
 
     <!-- PROFILE CHANGES SHEET -->
     @if ((userService.currentUser$ | async)?.role === Role.ADMIN) {

@@ -7,6 +7,7 @@ import { RideQueryDto } from '../../../dtos/ride-query';
 import { RideList } from '../ride-list/ride-list';
 import { AsyncPipe } from '@angular/common';
 import { RideDto } from '../../../dtos/ride-dto';
+import { WaypointDto } from '../../../dtos/waypoint-dto';
 
 @Component({
   selector: 'app-favorite-rides',
@@ -20,6 +21,7 @@ export class FavoriteRides {
   @Output() onClose = new EventEmitter<void>();
   @Output() onError = new EventEmitter<Error>();
   @Output() onReorder = new EventEmitter<RideDto>();
+  @Output() onRenderWaypoints = new EventEmitter<WaypointDto[]>();
 
   rideService : RideService = inject(RideService)
   userService : UserService = inject(UserService)

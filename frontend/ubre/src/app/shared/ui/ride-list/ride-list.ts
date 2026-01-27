@@ -1,4 +1,4 @@
-import { Component, EventEmitter, inject, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output, signal, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RideCard } from '../ride-card/ride-card';
 import { ModalContainer } from '../modal-container/modal-container';
@@ -13,6 +13,8 @@ import { VehicleType } from '../../../enums/vehicle-type';
 import { RideStatus } from '../../../enums/ride-status';
 import { UserService } from '../../../services/user-service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { take } from 'rxjs';
+import { WaypointDto } from '../../../dtos/waypoint-dto';
 
 
 @Component({
@@ -30,6 +32,7 @@ export class RideList {
   @Output() onScrollToBottom = new EventEmitter<RideQueryDto>();
   @Output() onError = new EventEmitter<Error>();
   @Output() onReorder = new EventEmitter<RideDto>();
+  @Output() onRenderWaypoints = new EventEmitter<WaypointDto[]>();
 
   rideService : RideService = inject(RideService);
   userService : UserService = inject(UserService);
@@ -71,11 +74,19 @@ export class RideList {
   selectedField : string = "";
   ascending : boolean = false;
 
+  ngOnChanges(changes : SimpleChanges): void {
+    if (changes['open'] && !this.open)
+      this.onRenderWaypoints.emit([])
+  }
+
   onRideSelected(rideCard : RideCardDto) {
-    if (this.detailsOpen() && this.selectedRide().id == rideCard.id)
+    if (this.detailsOpen() && this.selectedRide().id == rideCard.id) {
+      this.onRenderWaypoints.emit([])
       this.detailsOpen.set(false);
+    }
     else {
-        this.rideService.getRide(rideCard.id).subscribe((ride : RideDto) => {
+        this.rideService.getRide(rideCard.id).pipe(take(1)).subscribe((ride : RideDto) => {
+        this.onRenderWaypoints.emit(ride.waypoints)
         this.selectedRide.set(ride);
         this.detailsOpen.set(true)
       })
