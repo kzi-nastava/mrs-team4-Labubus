@@ -93,6 +93,7 @@ public class RideServiceImpl implements RideService {
         Ride ride = rideRepository.findById(rideId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
         ride.setStatus(RideStatus.IN_PROGRESS);
+        ride.getDriver().setStatus(UserStatus.ON_RIDE);
         rideRepository.save(ride);
         webSocketNotificationService.sendCurrentRideUpdate(ride.getCreator().getId(), new CurrentRideNotification(
                 NotificationType.RIDE_STARTED.name(),
@@ -123,14 +124,16 @@ public class RideServiceImpl implements RideService {
         ride.setEndTime(LocalDateTime.now());
         ride.getWaypoints().add(endLocation);
         ride.setStatus(RideStatus.COMPLETED);
+        ride.getDriver().setStatus(UserStatus.ACTIVE);
 
         CurrentRideNotification currentRideNotification = new CurrentRideNotification(
                 NotificationType.RIDE_COMPLETED.name(),
                 null
         );
 
+        Double newPrice = this.estimateNewPrice(ride);
         this.webSocketNotificationService.sendCurrentRideUpdate(ride.getCreator().getId(), currentRideNotification);
-        return this.estimateNewPrice(ride);
+        return newPrice;
     }
 
     private double estimateNewPrice(Ride ride) {
