@@ -56,7 +56,6 @@ public class WebSocketNotificationService {
     }
 
     public void sendPanicNotification(PanicNotification panic) {
-        messagingTemplate.convertAndSend(VEHICLE_LOCATION_TOPIC_PREFIX, panic);
-
+        messagingTemplate.convertAndSend(PANIC_TOPIC_PREFIX, panic);
     }
 }

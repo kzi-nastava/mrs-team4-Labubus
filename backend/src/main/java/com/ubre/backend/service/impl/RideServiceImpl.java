@@ -505,6 +505,7 @@ public class RideServiceImpl implements RideService {
             panic.setRideId(rideId);
             panic.setTimestamp(LocalDateTime.now());
             panic.setTriggeredBy(user.getRole().name());
+            panic.setDriverId(ride.getDriver().getId());
             panicRepository.save(panic);
 
             ride.setPanic(true);
@@ -518,7 +519,7 @@ public class RideServiceImpl implements RideService {
 
     @Override
     public List<PanicNotification> getPanics() {
-        return panicRepository.findAll();
+        return panicRepository.findAllByOrderByTimestampDesc();
     }
 
 

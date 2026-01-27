@@ -1,5 +1,6 @@
 export interface PanicDto {
-  panicId: number;
+  id: number;
+  driverId: number;
   rideId: number;
   triggeredBy: string;
   timestamp: string;  

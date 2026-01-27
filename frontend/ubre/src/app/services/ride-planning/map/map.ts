@@ -46,8 +46,8 @@ export class Map implements AfterViewInit, OnChanges {
 
   private vehiclePanicIcon = L.icon({
     iconUrl: 'car_panic.svg',
-    iconSize: [Math.max(this.vehicleIndicatorWidth * Math.pow(2, -5), 17), Math.max(this.vehicleIndicatorHeight * Math.pow(2, -5), 30)],
-    iconAnchor: [Math.max(this.vehicleIndicatorWidth * Math.pow(2, -5), 17) / 2, Math.max(this.vehicleIndicatorHeight * Math.pow(2, -5), 30) / 2],
+    iconSize: [Math.max(this.vehicleIndicatorWidth * Math.pow(2, -3), 30), Math.max(this.vehicleIndicatorHeight * Math.pow(2, -3), 50)],
+    iconAnchor: [Math.max(this.vehicleIndicatorWidth * Math.pow(2, -3), 30) / 2, Math.max(this.vehicleIndicatorHeight * Math.pow(2, -3), 50) / 2],
   });
 
   @Input() waypoints: WaypointDto[] = []; // waypoints to display on the map

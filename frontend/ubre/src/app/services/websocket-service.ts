@@ -8,6 +8,7 @@ import { RideAssignmentNotification } from '../notifications/ride-assignment-noi
 import { RideReminderNotification } from '../notifications/ride-reminder-notification';
 import { CurrentRideNotification } from '../notifications/current-ride-notification';
 import { VehicleLocationNotification } from '../notifications/vehicle-location-notification';
+import { PanicDto } from '../dtos/panic-dto';
 
 export type WebSocketConnectionState = 'disconnected' | 'connecting' | 'connected';
 
@@ -191,6 +192,28 @@ export class WebSocketService {
       return () => subscription.unsubscribe();
     });
   }
+
+  panicNotifications(): Observable<PanicDto> {
+    const topic = `/topic/panic`;
+    
+    return new Observable<PanicDto>((subscriber) => {
+      const topic$ = this.listenToTopic(topic);
+      const subscription = topic$.subscribe({
+        next: (message) => {
+          try {
+            const payload = JSON.parse(message.body) as PanicDto;
+            this.zone.run(() => subscriber.next(payload));
+          } catch (error) {
+            this.zone.run(() => subscriber.error(error));
+          }
+        },
+        error: (error) => this.zone.run(() => subscriber.error(error)),
+      });
+
+      return () => subscription.unsubscribe();
+    });
+  }
+
 
   private listenToTopic(topic: string): Observable<IMessage> {
     let subject = this.topicSubjects.get(topic);
