@@ -323,11 +323,4 @@ public class RideController {
         RideDto cancelledRide = rideService.cancelRideByDriver(rideId, request.getReason());
         return ResponseEntity.status(HttpStatus.OK).body(cancelledRide);
     }
-
-    @GetMapping("/active")
-    public ResponseEntity<RideDto> getActiveRide() {
-        RideDto activeRide = rideService.getActiveRide();
-        return ResponseEntity.ok(activeRide);
-    }
-
 }

@@ -109,7 +109,7 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
     if (userId !== null && userId !== 0) {
       this.userService.setCurrentUserById(userId);
 
-      this.rideService.getActiveRide().subscribe({
+      this.rideService.getCurrentRide().subscribe({
       next: (ride) => {
         if (ride) {
           this.ridePlanningStore.currentRideSubject$.next(ride);
@@ -189,10 +189,8 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
       .subscribe({
         next: (notification) => {
           // notification that time for a ride has come
-          if (notification.status === NotificationType.TIME_FOR_A_RIDE) 
+          if (notification.status === NotificationType.TIME_FOR_A_RIDE)
             this.showToast('Get ready', 'Your ride is starting soon...');
-            this.ridePlanningStore.currentRideSubject$.next(notification.ride);
-          }
       
           if (notification.status === NotificationType.RIDE_STARTED) 
             this.showToast('Ride started', 'Your ride has been started successfully.');
@@ -214,7 +212,7 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
             this.ridePlanningStore.currentRideSubject$.next(notification.ride);
         },
       });
-  }
+    }
 
   ngOnDestroy() {
     this.profileChangeSubscription?.unsubscribe();
@@ -1008,47 +1006,79 @@ import { GeocodingService } from '../../services/ride-planning/geocoding-service
   }
 
   onStopRideClick() {
-        const ride = this.ridePlanningStore.getCurrentRide();
+    const ride = this.ridePlanningStore.getCurrentRide();
 
-  navigator.geolocation.getCurrentPosition(
-    position => {
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
 
-      this.geocodingService.reverse(lat, lon).subscribe({
-        next: (label: string | null) => {
-          if (label) {
-            const stopWaypoint: WaypointDto = {
-              latitude: lat,
-              longitude: lon,
-              label: label,
-              id: 0,
-            };
+        this.geocodingService.reverse(lat, lon).subscribe({
+          next: (label: string | null) => {
+            if (label) {
+              const stopWaypoint: WaypointDto = {
+                latitude: lat,
+                longitude: lon,
+                label: label,
+                id: 0,
+              };
 
-            console.log("Stop waypoint DTO:", stopWaypoint);
+              console.log("Stop waypoint DTO:", stopWaypoint);
 
-              this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
-                next: (price) => {
-                  const finalPrice = price;
-                  this.showToast("New price", finalPrice.toString());
-                  this.ridePlanningStore.currentRideSubject$.next(null);
-                },
-                error: (err) => {
-                }
-              });
-          } 
-        },
-        error: (err) => {
-          console.error("Error", err);
-        }
-      });
-    },
-    error => {
-      console.error("Geolocation error", error);
-    },
-    { enableHighAccuracy: true }
-  );
-}
+                this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
+                  next: (price) => {
+                    const finalPrice = price;
+                    this.showToast("New price", finalPrice.toString());
+                    this.ridePlanningStore.currentRideSubject$.next(null);
+                  },
+                  error: (err) => {
+                  }
+                });
+            } 
+          },
+          error: (err) => {
+            console.error("Error", err);
+          }
+        });
+      },
+      error => {
+        console.error("Geolocation error", error);
+
+        // Fallback if the location permisions are denied - DELETE LATER
+        const lat = 45.264180;
+        const lon = 19.830198;
+
+        this.geocodingService.reverse(lat, lon).subscribe({
+          next: (label: string | null) => {
+            if (label) {
+              const stopWaypoint: WaypointDto = {
+                latitude: lat,
+                longitude: lon,
+                label: label,
+                id: 0,
+              };
+
+              console.log("Stop waypoint DTO:", stopWaypoint);
+
+                this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
+                  next: (price) => {
+                    const finalPrice = price;
+                    this.showToast("New price", finalPrice.toString());
+                    this.ridePlanningStore.currentRideSubject$.next(null);
+                  },
+                  error: (err) => {
+                  }
+                });
+            } 
+          },
+          error: (err) => {
+            console.error("Error", err);
+          }
+        });
+      },
+      { enableHighAccuracy: true }
+    );
+  }
 
 
   onCancelUserClick() {

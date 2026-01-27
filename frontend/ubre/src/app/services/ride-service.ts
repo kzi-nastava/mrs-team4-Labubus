@@ -208,8 +208,8 @@ export class RideService {
     return this.http.put<RideDto>(this.BASE_URL + 'rides/' + rideId + '/cancel/user', {});
   }
 
-  getActiveRide(): Observable<RideDto> {
-    return this.http.get<RideDto>(`${this.BASE_URL}rides/active`, {});  
+  getCurrentRide(): Observable<RideDto> {
+    return this.http.get<RideDto>(`${this.BASE_URL}rides/current`, {});  
   }
 
   stopRide(rideId: number, waypoint: WaypointDto): Observable<number> {

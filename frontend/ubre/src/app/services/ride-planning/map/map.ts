@@ -166,7 +166,9 @@ export class Map implements AfterViewInit, OnChanges {
                 direction: 'left',
                 className: 'tracking-estimation'
               }).openTooltip();
-          };
+          }
+          else
+            marker.unbindTooltip();
           (marker as any).slideTo([v.location.latitude, v.location.longitude], {duration: 1000, keepAtCenter: (v as any).mapCenter})
           marker.setPopupContent(v.location.label + ` (${v.status})`)
           marker.setIcon(v.panic ? this.vehiclePanicIcon : this.vehicleIcon)

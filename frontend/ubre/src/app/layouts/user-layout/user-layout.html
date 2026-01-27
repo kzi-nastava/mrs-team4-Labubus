@@ -127,7 +127,7 @@
       <!-- START RIDE BUTTON (DRIVERS ONLY) -->
       @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
         <button 
-          class="start-ride-button"
+          class="ride-button"
           [class.disabled]="(ridePlanningStore.currentRide$ | async)?.status != 'PENDING'"
           [disabled]="(ridePlanningStore.currentRide$ | async)?.status != 'PENDING'"
           (click)="onStartRideClick()">

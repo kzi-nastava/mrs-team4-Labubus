@@ -529,19 +529,4 @@ public class RideServiceImpl implements RideService {
         return rideRepository.findById(rideId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
     }
-
-    @Override
-    public RideDto getActiveRide() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) auth.getPrincipal();
-        RideDto ride = null;
-
-        if (user.getRole() == Role.DRIVER)
-            ride = rideRepository.findDriverActiveRide(user.getId()).orElse(null);
-        else if (user.getRole() == Role.REGISTERED_USER)
-            ride = rideRepository.findUserActiveRide(user.getId()).orElse(null);
-
-        return ride;
-    }
-
 }

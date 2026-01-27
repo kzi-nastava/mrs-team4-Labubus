@@ -32,6 +32,4 @@ public interface RideService {
 
     RideDto orderRide(RideOrderDto rideDto);
     RideDto cancelRideByDriver(Long rideId, String reason);
-
-    RideDto getActiveRide();
 }
