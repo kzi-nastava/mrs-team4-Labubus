@@ -5,11 +5,14 @@ import com.ubre.backend.enums.NotificationType;
 import com.ubre.backend.enums.RideStatus;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
-import com.ubre.backend.model.*;
+import com.ubre.backend.model.Driver;
+import com.ubre.backend.model.Ride;
+import com.ubre.backend.model.User;
+import com.ubre.backend.model.Waypoint;
 import com.ubre.backend.repository.DriverRepository;
-import com.ubre.backend.repository.PanicRepository;
 import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.UserRepository;
+import com.ubre.backend.service.EmailService;
 import com.ubre.backend.service.RideService;
 import com.ubre.backend.websocket.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +42,7 @@ public class RideServiceImpl implements RideService {
     @Autowired
     private RideReminderService rideReminderService;
     @Autowired
-    private PanicRepository panicRepository;
+    private EmailService emailService;
 
     // Mock data for rides
     List<RideDto> rides = new ArrayList<RideDto>();
@@ -103,7 +106,27 @@ public class RideServiceImpl implements RideService {
 
     @Override
     public RideDto endRide(Long rideId) {
-        return new RideDto();
+        Ride ride = this.getRideOrThrow(rideId);
+
+        this.checkRidePrivilege(ride.getDriver().getId());
+
+        if (ride.getStatus() != RideStatus.IN_PROGRESS)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride is not in progress");
+
+        ride.setEndTime(LocalDateTime.now());
+        ride.setStatus(RideStatus.COMPLETED);
+        ride.getDriver().setStatus(UserStatus.ACTIVE);
+
+        CurrentRideNotification currentRideNotification = new CurrentRideNotification(
+                NotificationType.RIDE_COMPLETED.name(),
+                null
+        );
+
+        this.webSocketNotificationService.sendCurrentRideUpdate(ride.getCreator().getId(), currentRideNotification);
+        ride = rideRepository.save(ride);
+        for (User user : ride.getPassengers())
+            emailService.sendRideCompletedEmail(user.getEmail(), ride);
+        return new RideDto(ride);
     }
 
     @Override
@@ -133,6 +156,8 @@ public class RideServiceImpl implements RideService {
 
         Double newPrice = this.estimateNewPrice(ride);
         this.webSocketNotificationService.sendCurrentRideUpdate(ride.getCreator().getId(), currentRideNotification);
+        for (User user : ride.getPassengers())
+            emailService.sendRideCompletedEmail(user.getEmail(), ride);
         return newPrice;
     }
 
@@ -494,35 +519,6 @@ public class RideServiceImpl implements RideService {
         webSocketNotificationService.sendRideCancelledToUser(ride.getCreator().getId(), cancelNotification);
 
         return rideDto;
-    }
-
-    @Override
-    public void activatePanic(Long rideId) {
-        Ride ride = getRideOrThrow(rideId);
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) auth.getPrincipal();
-
-        if (ride.getDriver().getId().equals(user.getId()) || ride.getCreator().getId().equals(user.getId())) {
-
-            PanicNotification panic = new PanicNotification();
-            panic.setRideId(rideId);
-            panic.setTimestamp(LocalDateTime.now());
-            panic.setTriggeredBy(user.getRole().name());
-            panic.setDriverId(ride.getDriver().getId());
-            panicRepository.save(panic);
-
-            ride.setPanic(true);
-            rideRepository.save(ride);
-
-            webSocketNotificationService.sendPanicNotification(panic);
-        }
-        else
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your ride");
-    }
-
-    @Override
-    public List<PanicNotification> getPanics() {
-        return panicRepository.findAllByOrderByTimestampDesc();
     }
 
 
