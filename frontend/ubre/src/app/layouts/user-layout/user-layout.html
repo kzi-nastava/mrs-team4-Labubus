@@ -450,10 +450,6 @@
     </app-sheet>
 
 
-    <!-- EXAMPLE OF RIDE CARD USE -->
-    <!-- <app-ride-card [selected]="selectedRide === 1" [iconUrl]="favoriteRides.includes(1) ? 'favorite-red.svg' : 'favorite-grey.svg'" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card> -->
-
-
     <!-- REGISTER A DRIVER (ADMIN ROLE)-->  
     @let driverRegistration = (driverRegistrationService.draft$ | async);
     @let driverAvatarSrc = (driverRegistrationService.avatarSrc$ | async);
@@ -659,6 +655,15 @@
       (onError)="onEmmitError($event)"
       (onReorder)="onFavoriteReorder($event)"
       (onRenderWaypoints)="onRenderWaypoints($event)"></app-favorite-rides>
+
+      <!-- SCHEDULED RIDES SHEET -->
+    <app-scheduled-rides
+      class="scheduled-rides"
+      (onClose)="onScheduledRidesBack()"
+      [open]="ui.showScheduledRides"
+      (onError)="onEmmitError($event)"
+      (onReorder)="onFavoriteReorder($event)"
+      (onRenderWaypoints)="onRenderWaypoints($event)"></app-scheduled-rides>
 
     <!-- PROFILE CHANGES SHEET -->
     @if ((userService.currentUser$ | async)?.role === Role.ADMIN) {

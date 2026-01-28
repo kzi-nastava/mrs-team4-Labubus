@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
-import { BehaviorSubject, Observable, Observer, of } from 'rxjs';
+import { BehaviorSubject, Observable, Observer, of, take } from 'rxjs';
 import { RideCardDto } from '../dtos/ride-card-dto';
 import { RideDto } from '../dtos/ride-dto';
 import { RideStatus } from '../enums/ride-status';
@@ -32,6 +32,11 @@ export class RideService {
   public favorites$ : Observable<RideCardDto[]> = this.favorites.asObservable();
   private favoritesPage : number = 0;
   private fetchingFavorites : boolean = false;
+
+  private scheduled : BehaviorSubject<RideCardDto[]> = new BehaviorSubject<RideCardDto[]>([]);
+  public scheduled$ : Observable<RideCardDto[]> = this.scheduled.asObservable();
+  private scheduledPage : number = 0;
+  private fetchingScheduled : boolean = false;
 
   fetchHistory(query : RideQueryDto, count : number = 3) : void {
     if (this.fetchingHistory)
@@ -181,6 +186,34 @@ export class RideService {
         },
       })
     })
+  }
+
+  fetchScheduled(query : RideQueryDto, count : number = 3) : void {
+    if (this.fetchingScheduled)
+      return;
+
+    this.fetchingFavorites = true;
+    const params : HttpParams = this.extractParams(query, this.scheduledPage, count);
+    this.userService.getCurrentUser().pipe(take(1)).subscribe({
+      next: (currentUser : UserDto) => {
+        if (currentUser.role == Role.DRIVER) { 
+          this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/scheduled/${currentUser.id}`, {params}).pipe(take(1)).subscribe((value : RideCardDto[]) => {
+            this.fetchingScheduled = false;
+            if (value.length == 0)
+                  return;
+    
+            this.scheduled.next([...this.favorites.value, ...value]);
+            this.scheduledPage++; 
+      })}},
+      error : (err) => {
+        this.fetchingScheduled = false;
+      }
+    })
+  }
+
+  clearScheduled() {
+    this.scheduled.next([]);
+    this.scheduledPage = 0;
   }
 
   private extractParams(query : RideQueryDto, skip : number, count : number) : HttpParams {

@@ -134,8 +134,7 @@ public class RideController {
     }
 
     @GetMapping(
-            value = "/scheduled/{driverId}",
-            consumes = MediaType.APPLICATION_JSON_VALUE
+            value = "/scheduled/{driverId}"
     )
     @PreAuthorize("#driverId == @securityUtil.currentUserId() || hasRole('ADMIN')")
     public ResponseEntity<List<RideCardDto>> getScheduledRides(
