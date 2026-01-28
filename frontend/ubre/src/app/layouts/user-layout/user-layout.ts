@@ -59,6 +59,7 @@ import { PanicButton } from "../../shared/ui/panic-button/panic-button";
 import { PanicToast } from '../../features/panic/panic-toast/panic-toast';
 import { ComplaintModal } from '../../shared/ui/complaint-modal/complaint-modal';
 import { ComplaintService } from '../../services/complaint-service';
+import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides';
 
 @Component({
   selector: 'app-user-layout',
@@ -68,7 +69,8 @@ import { ComplaintService } from '../../services/complaint-service';
     Sheet,FormsModule,RideHistory,ProfileChangeCard,
     AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
     RideOptions, FavoriteRides, DriverCancelDialog,
-    ComplaintModal, PanicList, PanicButton, PanicToast,],
+    ComplaintModal, PanicList, PanicButton, PanicToast,
+    ScheduledRides],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -201,8 +203,9 @@ import { ComplaintService } from '../../services/complaint-service';
           if (notification.status === NotificationType.TIME_FOR_A_RIDE)
             this.showToast('Get ready', 'Your ride is starting soon...');
       
-          if (notification.status === NotificationType.RIDE_STARTED) 
+          if (notification.status === NotificationType.RIDE_STARTED)
             this.showToast('Ride started', 'Your ride has been started successfully.');
+
           
           if (notification.status === NotificationType.RIDE_CANCELLED) 
           
@@ -246,7 +249,6 @@ import { ComplaintService } from '../../services/complaint-service';
     changePasswordOpen: false,
     vehicleInfoOpen: false,
     registerDriverOpen: false,
-    rideHistoryOpen: false,
     rideOptionsOpen: false,
     checkoutModalOpen: false,
     toastOpen: false,
@@ -258,6 +260,7 @@ import { ComplaintService } from '../../services/complaint-service';
     timeEstimate: false,
     showRideHistory: false,
     showFavourites: false,
+    showScheduledRides: false,
     showCancelModal: false,
     panicListOpen: false,
     toastPanicOpen: false,
@@ -319,6 +322,7 @@ import { ComplaintService } from '../../services/complaint-service';
     this.ridePlanningStore.closeDest();
     this.closeRideHistory();
     this.closeFavourites();
+    this.closeScheduledRides();
     this.closeProfileChanges();
   }
 
@@ -340,6 +344,9 @@ import { ComplaintService } from '../../services/complaint-service';
     }
     if (action === 'favourites') {
       this.openFavourites();
+    }
+    if (action === 'scheduled') {
+      this.openScheduledRides();
     }
     if (action === 'login') {
       this.router.navigate(['/login']);
@@ -733,6 +740,7 @@ import { ComplaintService } from '../../services/complaint-service';
   }
 
   openRideHistory() {
+    this.ui.showScheduledRides = false;
     this.ui.showFavourites = false;
     this.ui.showRideHistory = true;
     this.ui.menuOpen = false;
@@ -784,6 +792,7 @@ import { ComplaintService } from '../../services/complaint-service';
   }
 
   openFavourites() {
+    this.ui.showScheduledRides = false;
     this.ui.showRideHistory = false;
     this.ui.showFavourites = true;
     this.ui.menuOpen = false;
@@ -791,6 +800,25 @@ import { ComplaintService } from '../../services/complaint-service';
 
   closeFavourites() {
     this.ui.showFavourites = false;
+  }
+
+  
+
+  // SCHEDULED RIDES SHEET LOGIC
+  onScheduledRidesBack() {
+    this.ui.showScheduledRides = false;
+    this.ui.menuOpen = true;
+  }
+
+  openScheduledRides() {
+    this.ui.showRideHistory = false;
+    this.ui.showFavourites = false;
+    this.ui.showScheduledRides = true;
+    this.ui.menuOpen = false;
+  }
+
+  closeScheduledRides() {
+    this.ui.showScheduledRides = false;
   }
 
 

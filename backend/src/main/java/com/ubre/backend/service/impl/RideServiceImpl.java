@@ -274,8 +274,8 @@ public class RideServiceImpl implements RideService {
         Pageable pageable = parseToPageable(skip, count, query);
 
         if (query != null && query.getDate() != null)
-            return rideRepository.findByDriverAndStatusInAndStartTimeBetween(driver.get(), List.of(RideStatus.ACCEPTED), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
-        return rideRepository.findByDriverAndStatusIn(driver.get(), List.of(RideStatus.ACCEPTED), pageable).stream().map(RideCardDto::new).toList();
+            return rideRepository.findByDriverAndStatusInAndStartTimeBetween(driver.get(), List.of(RideStatus.PENDING), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
+        return rideRepository.findByDriverAndStatusIn(driver.get(), List.of(RideStatus.PENDING), pageable).stream().map(RideCardDto::new).toList();
     }
 
     @Override

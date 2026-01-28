@@ -41,6 +41,11 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
       action: 'ride-history',
     },
     {
+      label: 'Scheduled rides',
+      icon: 'scheduled.svg',
+      action: 'scheduled',
+    },
+    {
       label: 'Account settings',
       icon: 'settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',
       action: 'account-settings',
