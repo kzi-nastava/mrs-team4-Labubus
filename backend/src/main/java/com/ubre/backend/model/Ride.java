@@ -69,7 +69,7 @@ public class Ride {
     @Column(nullable = false)
     private Boolean favorite;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "canceled_by")
     private User canceledBy;
 
