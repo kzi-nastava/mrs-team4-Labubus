@@ -26,6 +26,8 @@ export class LoginComponent {
 
   showPassword = false;
   showModal: any;
+  errorMessage: string = "";
+  
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -54,7 +56,8 @@ export class LoginComponent {
           this.router.navigate(['/']);
         },
         error: (err) => {
-          console.error('Login failed', err);
+          console.log(err)
+          this.errorMessage = err.error || 'Login failed. Please try again.';
           this.showModal = true;
           this.cdr.detectChanges();
         },

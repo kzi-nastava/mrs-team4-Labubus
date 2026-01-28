@@ -52,13 +52,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void logout(String email) throws BadRequestException {
+    public void logout(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        if (UserStatus.ON_RIDE.equals(user.getStatus())) {
-            throw new BadRequestException("Cannot logout while on a ride!");
-        }
+        if (user.getStatus() == UserStatus.ON_RIDE)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot logout while on a ride!");
 
         updateUserStatus(user, UserStatus.INACTIVE);
     }

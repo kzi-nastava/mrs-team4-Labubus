@@ -154,3 +154,14 @@
 >
 </app-modal>
 }
+
+@if (showErrorModal) {
+<app-modal
+  class="cd-modal show"
+  title="Registration Unsuccessful!"
+  [message]="errorMessage"
+  buttonText="OK"
+  (action)="onCdModalAction()"
+>
+</app-modal>
+}

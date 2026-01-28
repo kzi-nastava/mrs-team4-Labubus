@@ -67,7 +67,7 @@
 <app-modal
   class="cd-modal show"
   title="Login Unsuccessful"
-  message="Invalid email or password. Please try again."
+  [message]="errorMessage"
   buttonText="OK"
   (action)="onCdModalAction()"
 >

@@ -100,6 +100,8 @@ import { ComplaintService } from '../../services/complaint-service';
   RideStatus = RideStatus;
 
   userStats!: UserStatsDto;
+  isDriverActive: boolean = false;
+
 
   private websocketUserId: number | null = null;
   private profileChangeSubscription?: Subscription;
@@ -116,6 +118,7 @@ import { ComplaintService } from '../../services/complaint-service';
 
     if (userId !== null && userId !== 0) {
       this.userService.setCurrentUserById(userId);
+      this.isDriverActive = true;
 
       this.rideService.getCurrentRide().subscribe({
       next: (ride) => {
@@ -325,7 +328,15 @@ import { ComplaintService } from '../../services/complaint-service';
   handleMenuAction(action: string) {
     if (action === 'logout') {
       this.userService.setCurrentUserById(0);     // set current user to guest
-      this.authService.logout();
+      this.authService.logout().subscribe({
+        next: (message) => {
+          this.showToast('Logout', message);
+          this.authService.removeToken();
+        },
+        error: (err) => {
+          this.showToast('Logout failed', err.error || 'Something went wrong');
+        }});
+
       this.userService.resetAvatar();
       this.closeAllSidePanels();
     }
@@ -1195,6 +1206,22 @@ import { ComplaintService } from '../../services/complaint-service';
         });
       }
     }
+
+
+  toggleStatus() {
+    this.authService.changeDriverStatus().subscribe({
+      next: (message) => {
+        if (!message.includes("You are on a ride")) {
+          this.isDriverActive = !this.isDriverActive;
+        }
+        this.showToast('Driver status', message);
+      },
+      error: (err) => {
+        console.error('Status change failed', err);
+        this.showToast('Error', err.error || 'Could not change status');
+      }
+    });
+  }
 
 }
 
