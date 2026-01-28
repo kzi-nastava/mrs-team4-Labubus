@@ -51,6 +51,10 @@ export class AuthService {
   }
 
   logout() {
+    return this.http.get('http://localhost:8080/api/auth/logout', { responseType: 'text' });
+  }
+
+  removeToken() {
     return localStorage.removeItem('accessToken');
   }
 
@@ -67,7 +71,11 @@ export class AuthService {
   }
 
   resetPassword(dto: ResetPasswordDto): Observable<any> {
-  return this.http.post(this.apiHost + "api/auth/reset-password", dto, { responseType: 'text' });
+    return this.http.post(this.apiHost + "api/auth/reset-password", dto, { responseType: 'text' });
+  }
+
+  changeDriverStatus() {
+    return this.http.put('http://localhost:8080/api/auth/status', {}, { responseType: 'text' });
   }
 }
 

@@ -28,7 +28,8 @@ export class SignupComponent {
   showConfirmPassword = false;
   fileName = '';
   selectedFile: File | null = null;
-
+  errorMessage = "Registration error";
+  showErrorModal = false;
 
   constructor(private authService: AuthService, private avatarService: DriverRegistrationService, private cdr: ChangeDetectorRef) {}
 
@@ -82,7 +83,6 @@ export class SignupComponent {
         next: (user) => {
           this.showSuccessModal = true;
           this.cdr.detectChanges();
-          console.log('User registered successfully', user);
           if (this.selectedFile) this.avatarService.uploadAvatar(user.id, this.selectedFile).subscribe({
             next: () => {
               this.showSuccessModal = true;
@@ -92,7 +92,9 @@ export class SignupComponent {
           });
         },
         error: (err) => {
-          console.error('Registration failed', err);
+          this.showErrorModal = true;
+          this.errorMessage = err.error;
+          this.cdr.detectChanges();
         },
       });
     } else {
@@ -115,6 +117,7 @@ export class SignupComponent {
   }
   onCdModalAction() {
     this.showSuccessModal = false;
+    this.showErrorModal = false;
   }
 }
 

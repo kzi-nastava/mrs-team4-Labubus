@@ -105,13 +105,23 @@
       </app-modal>
     }
 
-
     <!-- ICONS -->
 
     <app-icon-button class="menu-button"
       iconUrl="side_navigation_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
       (click)="openMenu()">
     </app-icon-button>
+
+    @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
+    <app-icon-button 
+      class="toggle-driver-status-button"
+      [class.active-driver]="isDriverActive"
+      [iconUrl]="isDriverActive 
+        ? 'check_circle_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg' 
+        : 'radio_button_unchecked_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg'"
+      (click)="toggleStatus()">
+      </app-icon-button>
+    }
 
     <app-icon-button class="chat-button"
       iconUrl="chat_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"

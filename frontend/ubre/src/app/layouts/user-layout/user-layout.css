@@ -105,6 +105,12 @@
   left: 116px;
 }
 
+.toggle-driver-status-button {
+  position: fixed;
+  top: 16px;
+  left: 216px;
+}
+
 .ride-buttons {
   position: absolute;
   bottom: 16px;
