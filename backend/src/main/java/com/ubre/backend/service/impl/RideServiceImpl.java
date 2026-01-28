@@ -10,6 +10,7 @@ import com.ubre.backend.repository.DriverRepository;
 import com.ubre.backend.repository.PanicRepository;
 import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.UserRepository;
+import com.ubre.backend.service.EmailService;
 import com.ubre.backend.service.RideService;
 import com.ubre.backend.websocket.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,8 @@ public class RideServiceImpl implements RideService {
     private RideReminderService rideReminderService;
     @Autowired
     private PanicRepository panicRepository;
+    @Autowired
+    private EmailService emailService;
 
     // Mock data for rides
     List<RideDto> rides = new ArrayList<RideDto>();
@@ -103,7 +106,27 @@ public class RideServiceImpl implements RideService {
 
     @Override
     public RideDto endRide(Long rideId) {
-        return new RideDto();
+        Ride ride = this.getRideOrThrow(rideId);
+
+        this.checkRidePrivilege(ride.getDriver().getId());
+
+        if (ride.getStatus() != RideStatus.IN_PROGRESS)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride is not in progress");
+
+        ride.setEndTime(LocalDateTime.now());
+        ride.setStatus(RideStatus.COMPLETED);
+        ride.getDriver().setStatus(UserStatus.ACTIVE);
+
+        CurrentRideNotification currentRideNotification = new CurrentRideNotification(
+                NotificationType.RIDE_COMPLETED.name(),
+                null
+        );
+
+        this.webSocketNotificationService.sendCurrentRideUpdate(ride.getCreator().getId(), currentRideNotification);
+        ride = rideRepository.save(ride);
+        for (User user : ride.getPassengers())
+            emailService.sendRideCompletedEmail(user.getEmail(), ride);
+        return new RideDto(ride);
     }
 
     @Override
@@ -133,6 +156,8 @@ public class RideServiceImpl implements RideService {
 
         Double newPrice = this.estimateNewPrice(ride);
         this.webSocketNotificationService.sendCurrentRideUpdate(ride.getCreator().getId(), currentRideNotification);
+        for (User user : ride.getPassengers())
+            emailService.sendRideCompletedEmail(user.getEmail(), ride);
         return newPrice;
     }
 
@@ -524,7 +549,6 @@ public class RideServiceImpl implements RideService {
     public List<PanicNotification> getPanics() {
         return panicRepository.findAllByOrderByTimestampDesc();
     }
-
 
     @Override
     public RideDto cancelRide(Long rideId) {
