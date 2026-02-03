@@ -4,7 +4,7 @@ package com.example.ubre.ui.dtos;
 // For changing profile data: name, surname, address, phone, avatarUrl
 
 public class ProfileChangeDto {
-    public Long requestId;
+    public Long id;
     public Long userId;
 
     public String oldName;
@@ -26,9 +26,9 @@ public class ProfileChangeDto {
 
     }
 
-    public ProfileChangeDto(String newSurname, Long requestId, Long userId, String oldName, String newName, String oldSurname, String oldAddress, String newAddress, String oldPhone, String newPhone, String oldAvatarUrl, String newAvatarUrl) {
+    public ProfileChangeDto(String newSurname, Long id, Long userId, String oldName, String newName, String oldSurname, String oldAddress, String newAddress, String oldPhone, String newPhone, String oldAvatarUrl, String newAvatarUrl) {
         this.newSurname = newSurname;
-        this.requestId = requestId;
+        this.id = id;
         this.userId = userId;
         this.oldName = oldName;
         this.newName = newName;
@@ -49,12 +49,12 @@ public class ProfileChangeDto {
         this.userId = userId;
     }
 
-    public Long getRequestId() {
-        return requestId;
+    public Long getId() {
+        return id;
     }
 
-    public void setRequestId(Long requestId) {
-        this.requestId = requestId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getOldName() {

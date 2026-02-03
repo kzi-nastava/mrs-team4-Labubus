@@ -34,9 +34,9 @@ public class RideListAdapter extends RecyclerView.Adapter<RideListAdapter.RideCa
     public void onBindViewHolder(@NonNull RideCardViewHolder holder, int position) {
         RideDto ride = rides[position];
 
-        holder.time.setText(ride.getStart().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
-        holder.start.setText(ride.getWaypoints()[0].getLabel());
-        holder.end.setText(ride.getWaypoints()[ride.getWaypoints().length - 1].getLabel());
+        holder.time.setText(ride.getStartTime().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
+        holder.start.setText(ride.getWaypoints().getFirst().getLabel());
+        holder.end.setText(ride.getWaypoints().getLast().getLabel());
 
 
     }

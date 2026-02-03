@@ -22,6 +22,7 @@ import com.example.ubre.ui.adapters.RideListAdapter;
 import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.dtos.WaypointDto;
+import com.example.ubre.ui.enums.UserStatus;
 import com.example.ubre.ui.enums.VehicleType;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.dtos.UserDto;
@@ -33,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 
 public class RideHistoryFragment extends Fragment implements RideListAdapter.OnItemClickedListener {
     private  UserDto currentUser;
@@ -127,65 +129,8 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
                 requireActivity().getSupportFragmentManager().popBackStack()
         );
 
-        com.example.ubre.ui.dtos.UserDto placeholder = new com.example.ubre.ui.dtos.UserDto(1L, com.example.ubre.ui.enums.Role.REGISTERED_USER, "", "mail@mail.com", "Pera", "Peric", "0124120412041", "Adresa 123" );
-        RideDto[] rides = {
-                new RideDto(1L, LocalDateTime.now(), LocalDateTime.now(), new WaypointDto[]{
-                        new WaypointDto(1L, "Bulevar despota stefana", 46.17, 19.32),
-                        new WaypointDto(2L, "Narodno pozoriste", 46.17, 19.32),
-                        new WaypointDto(3L, "Bulevar oslobodjenja", 46.17, 19.32)
-                }, placeholder, new com.example.ubre.ui.dtos.UserDto[]{placeholder, placeholder}, false, "mail@mail.com",
-                        new VehicleDto(1L, "Ford F-150", VehicleType.LUXURY, "12312123132", 5, true, false),
-                        19.3, 4.1),
-                new RideDto(2L, LocalDateTime.now(), LocalDateTime.now(), new WaypointDto[]{
-                        new WaypointDto(4L, "Bulevar cara Lazara", 46.17, 19.32),
-                        new WaypointDto(5L, "Spens", 46.17, 19.32),
-                        new WaypointDto(6L, "Trg maldenaca", 46.17, 19.32)
-                }, placeholder, new com.example.ubre.ui.dtos.UserDto[]{placeholder, placeholder}, true, "",
-                        new VehicleDto(1L, "Honda Civic", VehicleType.VAN, "12312123132", 5, true, false),
-                        19.3, 12.1),
-                new RideDto(3L, LocalDateTime.now(), LocalDateTime.now(), new WaypointDto[]{
-                        new WaypointDto(4L, "Most slobode", 46.17, 19.32),
-                        new WaypointDto(6L, "Jevrejska", 46.17, 19.32)
-                }, placeholder, new com.example.ubre.ui.dtos.UserDto[]{placeholder, placeholder}, false, "mail@mail.com",
-                        new VehicleDto(1L, "Toyota Carolla 2021", VehicleType.STANDARD, "12312123132", 5, true, false),
-                        19.3, 3.1),
-                new RideDto(4L, LocalDateTime.now(), LocalDateTime.now(), new WaypointDto[]{
-                        new WaypointDto(4L, "Limanski park", 46.17, 19.32),
-                        new WaypointDto(5L, "Kisacka", 46.17, 19.32),
-                        new WaypointDto(5L, "Partizanska", 46.17, 19.32),
-                        new WaypointDto(6L, "Temerinski put", 46.17, 19.32)
-                }, placeholder, new com.example.ubre.ui.dtos.UserDto[]{placeholder, placeholder}, false, "dsadasdasda",
-                        new VehicleDto(1L, "Toyota Carolla 2021", VehicleType.STANDARD, "12312123132", 5, true, false),
-                        19.3, 27.4),
-                new RideDto(5L, LocalDateTime.now(), LocalDateTime.now(), new WaypointDto[]{
-                        new WaypointDto(1L, "Bulevar despota stefana", 46.17, 19.32),
-                        new WaypointDto(2L, "Narodno pozoriste", 46.17, 19.32),
-                        new WaypointDto(3L, "Bulevar oslobodjenja", 46.17, 19.32)
-                }, placeholder, new com.example.ubre.ui.dtos.UserDto[]{placeholder, placeholder}, true, "",
-                        new VehicleDto(1L, "Ford F-150", VehicleType.LUXURY, "12312123132", 5, true, false),
-                        19.3, 3.5),
-                new RideDto(6L, LocalDateTime.now(), LocalDateTime.now(), new WaypointDto[]{
-                        new WaypointDto(4L, "Bulevar cara Lazara", 46.17, 19.32),
-                        new WaypointDto(5L, "Spens", 46.17, 19.32),
-                        new WaypointDto(6L, "Trg maldenaca", 46.17, 19.32)
-                }, placeholder, new com.example.ubre.ui.dtos.UserDto[]{placeholder, placeholder}, false, "",
-                        new VehicleDto(1L, "Honda Civic", VehicleType.VAN, "12312123132", 5, true, false),
-                        19.3, 1.4),
-                new RideDto(7L, LocalDateTime.now(), LocalDateTime.now(), new WaypointDto[]{
-                        new WaypointDto(4L, "Most slobode", 46.17, 19.32),
-                        new WaypointDto(6L, "Jevrejska", 46.17, 19.32)
-                }, placeholder, new com.example.ubre.ui.dtos.UserDto[]{placeholder, placeholder}, false, "",
-                        new VehicleDto(1L, "Toyota Carolla 2021", VehicleType.STANDARD, "12312123132", 5, true, false),
-                        19.3, 4.3),
-                new RideDto(8L, LocalDateTime.now(), LocalDateTime.now(), new WaypointDto[]{
-                        new WaypointDto(4L, "Limanski park", 46.17, 19.32),
-                        new WaypointDto(5L, "Kisacka", 46.17, 19.32),
-                        new WaypointDto(5L, "Partizanska", 46.17, 19.32),
-                        new WaypointDto(6L, "Temerinski put", 46.17, 19.32)
-                }, placeholder, new com.example.ubre.ui.dtos.UserDto[]{placeholder, placeholder}, true, "dasdasdasd",
-                        new VehicleDto(1L, "Ford F-150", VehicleType.LUXURY, "12312123132", 5, true, false),
-                        19.3, 9.4),
-        };
+        com.example.ubre.ui.dtos.UserDto placeholder = new com.example.ubre.ui.dtos.UserDto(1L, com.example.ubre.ui.enums.Role.REGISTERED_USER, "", "mail@mail.com", "Pera", "Peric", "0124120412041", "Adresa 123", UserStatus.ACTIVE);
+        RideDto[] rides = {};
         RecyclerView cards = this.getView().findViewById(R.id.ride_list_cards);
         cards.setLayoutManager(new LinearLayoutManager(this.getActivity()));
         cards.setAdapter(new RideListAdapter(rides, this));

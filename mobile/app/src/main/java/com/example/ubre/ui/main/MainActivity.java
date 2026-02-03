@@ -25,6 +25,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.ubre.R;
 import com.example.ubre.ui.enums.Role;
+import com.example.ubre.ui.enums.UserStatus;
 import com.example.ubre.ui.enums.VehicleType;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
@@ -106,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
         );
 
         // Example role assignment; in a real app, this would come from user authentication
-        UserDto currentUser = new UserDto(1L, Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
+        UserDto currentUser = new UserDto(1L, Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St", UserStatus.ACTIVE);
         currentVehicle = new VehicleDto(1L, "Toyota Prius", VehicleType.STANDARD, "ABC-123", 4, true, false);
 
         setMenuOptions(currentUser.getRole());

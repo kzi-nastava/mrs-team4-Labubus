@@ -18,7 +18,6 @@ import android.widget.TextView;
 
 import com.example.ubre.R;
 import com.example.ubre.ui.dtos.RideDto;
-import com.example.ubre.ui.dtos.StatItemDto;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.dtos.WaypointDto;
@@ -63,10 +62,10 @@ public class RideDetailsFragment extends Fragment {
             Typeface font = ResourcesCompat.getFont(this.getActivity(), R.font.poppins_regular);
 
             TextView start = root.findViewById(R.id.ride_details_start);
-            start.setText(ride.getStart().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
+            start.setText(ride.getStartTime().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
 
             TextView end = root.findViewById(R.id.ride_details_end);
-            end.setText(ride.getEnd().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
+            end.setText(ride.getEndTime().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
 
             LinearLayout waypoints = root.findViewById(R.id.ride_details_waypoints);
             LinearLayout firstRow = new LinearLayout(this.getActivity());
@@ -78,7 +77,7 @@ public class RideDetailsFragment extends Fragment {
             firstRow.addView(firstWaypointIcon);
 
             TextView firstWaypointLabel = new TextView(this.getActivity());
-            firstWaypointLabel.setText(ride.getWaypoints()[0].getLabel());
+            firstWaypointLabel.setText(ride.getWaypoints().getFirst().getLabel());
             firstWaypointLabel.setTypeface(font);
             firstWaypointLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
             firstWaypointLabel.setTextColor(Color.BLACK);
@@ -88,8 +87,8 @@ public class RideDetailsFragment extends Fragment {
             firstRow.addView(firstWaypointLabel);
 
             waypoints.addView(firstRow);
-            for (int i = 1; i < ride.getWaypoints().length; ++i) {
-                WaypointDto waypoint = ride.getWaypoints()[i];
+            for (int i = 1; i < ride.getWaypoints().size(); ++i) {
+                WaypointDto waypoint = ride.getWaypoints().get(i);
                 LinearLayout separatorRow = new LinearLayout(this.getActivity());
                 separatorRow.setGravity(Gravity.CENTER_VERTICAL);
 
@@ -140,7 +139,7 @@ public class RideDetailsFragment extends Fragment {
                 panicIndicator.setPadding(toDP(4), toDP(4), toDP(4), toDP(4));
                 markers.addView(panicIndicator);
             }
-            if (!ride.getCanceledBy().isEmpty()) {
+            if (!ride.getCanceledBy().equals(null)) {
                 ImageView cancelIndicator = new ImageView(this.getActivity());
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(toDP(30), toDP(30));
                 params.setMargins(toDP(5), 0, 0, 0);
@@ -152,8 +151,8 @@ public class RideDetailsFragment extends Fragment {
             }
 
             if (user.getRole() == Role.ADMIN || user.getRole() == Role.DRIVER) {
-                for (int i = 0; i < ride.getPassengers().length; i++) {
-                    UserDto passenger = ride.getPassengers()[i];
+                for (int i = 0; i < ride.getPassengers().size(); i++) {
+                    UserDto passenger = ride.getPassengers().get(i);
                     ProfileCardFragment profileCard = ProfileCardFragment.newInstance(passenger.getAvatarUrl(), passenger.getName(), "", i == 0 ? R.drawable.ic_ordering_customer : -1);
                     this.getActivity().getSupportFragmentManager().beginTransaction().add(R.id.ride_details_passengers, profileCard).commit();
                 }
@@ -183,7 +182,7 @@ public class RideDetailsFragment extends Fragment {
             tvLabel.setText("Final price");
             priceCard.addView(card);
 
-            if (!user.getEmail().equals(ride.getPassengers()[0].getEmail()))
+            if (!user.getEmail().equals(ride.getPassengers().getFirst().getEmail()))
                 root.findViewById(R.id.ride_details_reorder).setVisibility(View.GONE);
         }
 
