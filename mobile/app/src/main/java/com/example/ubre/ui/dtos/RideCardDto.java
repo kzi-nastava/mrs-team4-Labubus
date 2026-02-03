@@ -2,18 +2,21 @@ package com.example.ubre.ui.dtos;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 // Ride history, active rides, my favourites
 
 public class RideCardDto {
     private Long id;
     private LocalDateTime startTime;
-    public ArrayList<WaypointDto> waypoints;
+    public List<WaypointDto> waypoints;
+    public Boolean favorite;
 
-    public RideCardDto(Long id, LocalDateTime startTime, ArrayList<WaypointDto> waypoints) {
+    public RideCardDto(Long id, LocalDateTime startTime, List<WaypointDto> waypoints, Boolean favorite) {
         this.id = id;
         this.startTime = startTime;
         this.waypoints = waypoints;
+        this.favorite = favorite;
     }
 
     public Long getId() {
@@ -22,7 +25,7 @@ public class RideCardDto {
     public LocalDateTime getStartTime() {
         return startTime;
     }
-    public ArrayList<WaypointDto> getWaypoints() {
+    public List<WaypointDto> getWaypoints() {
         return waypoints;
     }
 
@@ -32,7 +35,7 @@ public class RideCardDto {
     public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
-    public void setWaypoints(ArrayList<WaypointDto> waypoints) {
+    public void setWaypoints(List<WaypointDto> waypoints) {
         this.waypoints = waypoints;
     }
 }

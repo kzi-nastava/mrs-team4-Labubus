@@ -2,8 +2,6 @@ package com.example.ubre.ui.main;
 
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -12,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.ubre.R;
-import com.example.ubre.ui.adapters.RideListAdapter;
 import com.example.ubre.ui.dtos.RideDto;
 
 import java.time.format.DateTimeFormatter;
@@ -40,13 +37,13 @@ public class RideCardFragment extends Fragment {
             return;
 
         TextView time = this.getView().findViewById(R.id.ride_card_start);
-        time.setText(ride.getStart().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
+        time.setText(ride.getStartTime().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
 
         TextView start = this.getView().findViewById(R.id.ride_card_waypoint1);
-        start.setText(ride.getWaypoints()[0].getLabel());
+        start.setText(ride.getWaypoints().getFirst().getLabel());
 
         TextView end = this.getView().findViewById(R.id.ride_card_waypoint1);
-        end.setText(ride.getWaypoints()[ride.getWaypoints().length - 1].getLabel());
+        end.setText(ride.getWaypoints().getLast().getLabel());
     }
 
     @Override
