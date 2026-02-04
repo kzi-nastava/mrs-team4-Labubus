@@ -130,9 +130,9 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
         com.example.ubre.ui.dtos.UserDto placeholder = new com.example.ubre.ui.dtos.UserDto(1L, com.example.ubre.ui.enums.Role.REGISTERED_USER, "", "mail@mail.com", "Pera", "Peric", "0124120412041", "Adresa 123" );
         RideDto[] rides = {
                 new RideDto(1L, LocalDateTime.now(), LocalDateTime.now(), new WaypointDto[]{
-                        new WaypointDto(1L, "Bulevar despota stefana", 46.17, 19.32),
-                        new WaypointDto(2L, "Narodno pozoriste", 46.17, 19.32),
-                        new WaypointDto(3L, "Bulevar oslobodjenja", 46.17, 19.32)
+                        new WaypointDto(1L, "Bulevar despota stefana", 45.26419351544468, 19.830240546902445),
+                        new WaypointDto(2L, "Narodno pozoriste", 45.26168240990098, 19.835787932164553),
+                        new WaypointDto(3L, "Bulevar oslobodjenja", 45.261667894517174, 19.841190961676347)
                 }, placeholder, new com.example.ubre.ui.dtos.UserDto[]{placeholder, placeholder}, false, "mail@mail.com",
                         new VehicleDto(1L, "Ford F-150", VehicleType.LUXURY, "12312123132", 5, true, false),
                         19.3, 4.1),

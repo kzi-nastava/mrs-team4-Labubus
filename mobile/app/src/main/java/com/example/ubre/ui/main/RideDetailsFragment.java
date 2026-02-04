@@ -2,6 +2,7 @@ package com.example.ubre.ui.main;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.core.content.res.ResourcesCompat;
@@ -16,15 +17,23 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.ubre.R;
 import com.example.ubre.ui.dtos.RideDto;
-import com.example.ubre.ui.dtos.StatItemDto;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.dtos.WaypointDto;
 import com.example.ubre.ui.enums.Role;
 
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.CustomZoomButtonsController;
+import org.osmdroid.views.MapController;
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.Marker;
+
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,6 +41,8 @@ import java.time.format.DateTimeFormatter;
  * create an instance of this fragment.
  */
 public class RideDetailsFragment extends Fragment {
+
+    private MapView map;
 
 
     public RideDetailsFragment() {
@@ -58,9 +69,22 @@ public class RideDetailsFragment extends Fragment {
         View root = inflater.inflate(R.layout.ride_details, container, false);
 
         if (getArguments() != null) {
+            map = root.findViewById(R.id.ride_details_map);
+            map.setTileSource(TileSourceFactory.MAPNIK);
+            map.setMultiTouchControls(true);
+            map.getZoomController().setVisibility(
+                    CustomZoomButtonsController.Visibility.NEVER
+            );
+            map.setVisibility(View.VISIBLE);
+
+            MapController controller = (MapController) map.getController();
+            controller.setZoom(14.0);
+            controller.setCenter(new GeoPoint(45.2671, 19.8335));
+
             RideDto ride = (RideDto) getArguments().getSerializable("RIDE");
             UserDto user = (UserDto) getArguments().getSerializable("USER");
             Typeface font = ResourcesCompat.getFont(this.getActivity(), R.font.poppins_regular);
+            renderWaypoints(ride.getWaypoints());
 
             TextView start = root.findViewById(R.id.ride_details_start);
             start.setText(ride.getStart().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
@@ -188,6 +212,46 @@ public class RideDetailsFragment extends Fragment {
         }
 
         return root;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (map != null) map.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (map != null) map.onPause();
+    }
+
+    private void renderWaypoints(WaypointDto[] waypoints) {
+        this.map.getOverlays().clear();
+
+        ArrayList<GeoPoint> locations = new ArrayList<GeoPoint>();
+        Drawable waypointIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_waypoint_red, null);
+        for (WaypointDto waypoint : waypoints) {
+            GeoPoint location = new GeoPoint(waypoint.getLatitude(), waypoint.getLongitude());
+            locations.add(location);
+            Marker marker = new Marker(map);
+            marker.setPosition(location);
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            marker.setIcon(waypointIcon);
+            marker.setTitle(waypoint.getLabel());
+
+            map.getOverlays().add(marker);
+
+            marker.setOnMarkerClickListener(new Marker.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker, MapView mapView) {
+                    marker.showInfoWindow();
+                    return true;
+                }
+            });
+        }
+
+        map.invalidate();
     }
 
     private int toDP(int value) {
