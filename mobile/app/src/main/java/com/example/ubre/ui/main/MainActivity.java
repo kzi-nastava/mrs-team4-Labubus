@@ -1,15 +1,19 @@
 package com.example.ubre.ui.main;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +33,8 @@ import com.example.ubre.ui.enums.UserStatus;
 import com.example.ubre.ui.enums.VehicleType;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
+import com.example.ubre.ui.services.LoginService;
+import com.example.ubre.ui.services.ServiceUtils;
 import com.google.android.material.navigation.NavigationView;
 import com.bumptech.glide.Glide;
 
@@ -39,6 +45,11 @@ import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapController;
 
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MainActivity extends AppCompatActivity {
 
     private MapView map;
@@ -47,6 +58,9 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawer;
     private UserDto currentUser;
     private VehicleDto currentVehicle; // If role is DRIVER, that is drivers vehicle
+    LoginService loginService = ServiceUtils.loginService;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
         btnMenu = findViewById(R.id.btn_menu);
         btnChat = findViewById(R.id.btn_chat);
 
+
     }
 
     @Override
@@ -220,9 +235,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void logout() {
-        Intent intent = new Intent(this, LoginSignupActivity.class);
-        startActivity(intent);
-        finish();
+
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+        loginService.logout("Bearer " + token).enqueue(new Callback<ResponseBody>() {
+
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Log.d("Logout", "Logout");
+
+                if (response.isSuccessful()) {
+                    sharedPreferences.edit().clear().apply();
+                    Toast.makeText(getApplicationContext(), "Logout successful", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Logout failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 

@@ -165,8 +165,8 @@ public class RideDetailsFragment extends Fragment {
                 ProfileCardFragment profileCard = ProfileCardFragment.newInstance(driver.getAvatarUrl(), driver.getName(), "", R.drawable.ic_review);
                 this.getActivity().getSupportFragmentManager().beginTransaction().add(R.id.ride_details_driver, profileCard).commit();
 
-                VehicleDto vehicle = ride.getVehicle();
-                profileCard = ProfileCardFragment.newInstance("", vehicle.getModel(), vehicle.getType().name(), -1);
+                //VehicleDto vehicle = ride.getVehicle();
+                //profileCard = ProfileCardFragment.newInstance("", vehicle.getModel(), vehicle.getType().name(), -1);
                 this.getActivity().getSupportFragmentManager().beginTransaction().add(R.id.ride_details_vehicle, profileCard).commit();
             }
             else {
