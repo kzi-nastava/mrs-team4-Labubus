@@ -42,7 +42,7 @@ public class EmailServiceImpl implements EmailService {
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name()
             );
-            helper.setTo(recipientEmail);
+            helper.setTo("ljubinkovicbogdan@gmail.com");
             helper.setSubject(subject);
             helper.setText(body, true);
             helper.setFrom("Ubre <" + fromAddress + ">");
@@ -107,7 +107,7 @@ public class EmailServiceImpl implements EmailService {
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name()
             );
-            helper.setTo(recipientEmail);
+            helper.setTo("ljubinkovicbogdan@gmail.com");
             helper.setSubject(subject);
             helper.setText(body, true);
             helper.setFrom("Ubre <" + fromAddress + ">");
@@ -130,7 +130,7 @@ public class EmailServiceImpl implements EmailService {
                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                    StandardCharsets.UTF_8.name()
            );
-           helper.setTo(recipientEmail);
+           helper.setTo("ljubinkovicbogdan@gmail.com");
            helper.setSubject(subject);
            helper.setText(body, true);
            helper.setFrom("Ubre <" + fromAddress + ">");
@@ -155,7 +155,7 @@ public class EmailServiceImpl implements EmailService {
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name()
             );
-            helper.setTo(email);
+            helper.setTo("ljubinkovicbogdan@gmail.com");
             helper.setSubject(subject);
             helper.setText(body, true);
             helper.setFrom("Ubre <" + fromAddress + ">");
