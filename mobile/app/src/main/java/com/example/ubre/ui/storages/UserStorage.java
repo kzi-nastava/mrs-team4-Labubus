@@ -5,11 +5,13 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.ubre.ui.dtos.UserDto;
+import com.example.ubre.ui.enums.Role;
+import com.example.ubre.ui.enums.UserStatus;
 
 public class UserStorage {
 
     private static UserStorage instance;
-    private MutableLiveData<UserDto> currentUser = new MutableLiveData<>(null);
+    private MutableLiveData<UserDto> currentUser = new MutableLiveData<>(new UserDto(33L, Role.REGISTERED_USER, null, "", "", "", "", "", UserStatus.ACTIVE)); // TODO: Change back to null after testing
     private MutableLiveData<byte[]> currentUserAvatar = new MutableLiveData<>(null);
 
     private UserStorage() {

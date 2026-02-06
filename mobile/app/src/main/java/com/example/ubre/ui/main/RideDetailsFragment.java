@@ -1,20 +1,27 @@
 package com.example.ubre.ui.main;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
+import android.view.WindowManager;
 
 import com.example.ubre.R;
 import com.example.ubre.ui.dtos.RideDto;
@@ -51,6 +58,7 @@ public class RideDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -60,6 +68,40 @@ public class RideDetailsFragment extends Fragment {
             RideDto ride = (RideDto) getArguments().getSerializable("RIDE");
             UserDto user = (UserDto) getArguments().getSerializable("USER");
             Typeface font = ResourcesCompat.getFont(this.getActivity(), R.font.poppins_regular);
+
+            ScrollView bottomDrawer = root.findViewById(R.id.ride_details_bottom_drawer);
+            bottomDrawer.setOnTouchListener(new View.OnTouchListener() {
+                private int startHeight;
+                private float lastTouchY;
+
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    DisplayMetrics displayMetrics = new DisplayMetrics();
+                    getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            startHeight = v.getHeight();
+                            lastTouchY = event.getRawY();
+                            break;
+
+                        case MotionEvent.ACTION_MOVE:
+                            float dy = event.getRawY() - lastTouchY;
+                            int newHeight = Math.max((int) (startHeight + dy), 70);
+
+                            ConstraintSet constraints = new ConstraintSet();
+                            constraints.clone((ConstraintLayout) root);
+                            constraints.constrainPercentHeight(R.id.ride_details_bottom_drawer, ((float) newHeight) / displayMetrics.heightPixels);
+                            constraints.applyTo((ConstraintLayout) root);
+
+                            lastTouchY = event.getRawY();
+                            startHeight = newHeight;
+                            break;
+                    }
+
+                    return true;
+                }
+            });
 
             TextView start = root.findViewById(R.id.ride_details_start);
             start.setText(ride.getStartTime().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
