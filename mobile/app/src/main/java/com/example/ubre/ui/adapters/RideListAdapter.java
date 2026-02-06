@@ -35,8 +35,14 @@ public class RideListAdapter extends RecyclerView.Adapter<RideListAdapter.RideCa
         RideDto ride = rides[position];
 
         holder.time.setText(ride.getStartTime().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
-        holder.start.setText(ride.getWaypoints().getFirst().getLabel());
-        holder.end.setText(ride.getWaypoints().getLast().getLabel());
+        if (ride.getWaypoints() != null && !ride.getWaypoints().isEmpty()) {
+            holder.start.setText(ride.getWaypoints().get(0).getLabel());
+            holder.end.setText(ride.getWaypoints().get(0).getLabel());
+        }
+        else {
+            holder.start.setText("");
+            holder.end.setText("");
+        }
 
 
     }

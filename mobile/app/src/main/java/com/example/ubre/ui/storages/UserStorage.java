@@ -5,6 +5,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.ubre.ui.dtos.UserDto;
+import com.example.ubre.ui.enums.Role;
+import com.example.ubre.ui.enums.UserStatus;
 
 public class UserStorage {
 

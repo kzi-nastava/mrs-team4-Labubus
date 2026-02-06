@@ -22,6 +22,7 @@ import com.example.ubre.ui.adapters.RideListAdapter;
 import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.dtos.WaypointDto;
+import com.example.ubre.ui.enums.RideStatus;
 import com.example.ubre.ui.enums.UserStatus;
 import com.example.ubre.ui.enums.VehicleType;
 import com.example.ubre.ui.enums.Role;
@@ -130,7 +131,13 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
         );
 
         com.example.ubre.ui.dtos.UserDto placeholder = new com.example.ubre.ui.dtos.UserDto(1L, com.example.ubre.ui.enums.Role.REGISTERED_USER, "", "mail@mail.com", "Pera", "Peric", "0124120412041", "Adresa 123", UserStatus.ACTIVE);
-        RideDto[] rides = {};
+        RideDto[] rides = {
+                new RideDto(1L, LocalDateTime.now(), LocalDateTime.now(), List.of(
+                        new WaypointDto(1L, "Bulevar despota stefana", 45.26419351544468, 19.830240546902445),
+                        new WaypointDto(2L, "Narodno pozoriste", 45.26168240990098, 19.835787932164553),
+                        new WaypointDto(3L, "Bulevar oslobodjenja", 45.261667894517174, 19.841190961676347)
+                ), placeholder, List.of(placeholder, placeholder), false, 1L, 12.4, 2.5, RideStatus.COMPLETED, 1L)
+        };
         RecyclerView cards = this.getView().findViewById(R.id.ride_list_cards);
         cards.setLayoutManager(new LinearLayoutManager(this.getActivity()));
         cards.setAdapter(new RideListAdapter(rides, this));
