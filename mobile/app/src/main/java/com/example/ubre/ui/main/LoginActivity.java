@@ -16,13 +16,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.auth0.android.jwt.JWT;
 import com.example.ubre.R;
+import com.example.ubre.ui.apis.ApiClient;
 import com.example.ubre.ui.dtos.LoginDto;
 import com.example.ubre.ui.dtos.LoginTokenDto;
-import com.example.ubre.ui.services.LoginService;
-import com.example.ubre.ui.services.ServiceUtils;
+import com.example.ubre.ui.apis.LoginApi;
 import com.google.android.material.textfield.TextInputEditText;
-
-import org.json.JSONObject;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -46,7 +44,7 @@ public class LoginActivity extends AppCompatActivity {
         TextView tvRegister = findViewById(R.id.tvRegister);
         TextView tvForgotPassword = findViewById(R.id.tvForgotPassword);
 
-        LoginService loginService = ServiceUtils.loginService;
+        LoginApi loginApi = ApiClient.getClient().create(LoginApi.class);
 
 
         btnBack.setOnClickListener(new View.OnClickListener() {
@@ -78,7 +76,7 @@ public class LoginActivity extends AppCompatActivity {
                 loginDTO.setEmail(emailText);
                 loginDTO.setPassword(passwordText);
 
-                loginService.login(loginDTO).enqueue(new Callback<LoginTokenDto>() {
+                loginApi.login(loginDTO).enqueue(new Callback<LoginTokenDto>() {
 
                     public void onResponse(@NonNull Call<LoginTokenDto> call, @NonNull Response<LoginTokenDto> response) {
                         if (response.isSuccessful() && response.body() != null) {

@@ -9,8 +9,8 @@ import com.example.ubre.ui.dtos.UserDto;
 public class UserStorage {
 
     private static UserStorage instance;
-    private MutableLiveData<UserDto> currentUser = new MutableLiveData<>();
-    private MutableLiveData<byte[]> currentUserAvatar = new MutableLiveData<>();
+    private MutableLiveData<UserDto> currentUser = new MutableLiveData<>(null);
+    private MutableLiveData<byte[]> currentUserAvatar = new MutableLiveData<>(null);
 
     private UserStorage() {
     }

@@ -1,7 +1,8 @@
-package com.example.ubre.ui.services;
+package com.example.ubre.ui.apis;
 
 import com.example.ubre.ui.dtos.LoginDto;
 import com.example.ubre.ui.dtos.LoginTokenDto;
+import com.example.ubre.ui.apis.ApiClient;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -11,14 +12,14 @@ import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 
-public interface LoginService {
+public interface LoginApi {
     @Headers({
             "User-Agent: Mobile-Android",
             "Content-Type:application/json"
     })
-    @POST(ServiceUtils.LOGIN)
+    @POST(ApiClient.LOGIN)
     Call<LoginTokenDto> login(@Body LoginDto loginDto);
 
-    @GET(ServiceUtils.LOGOUT)
+    @GET(ApiClient.LOGOUT)
     Call<ResponseBody> logout(@Header("Authorization") String authHeader);
 }
