@@ -1,7 +1,6 @@
 package com.example.ubre.ui.services;
 
-// this service represents currently logged in user and provides methods to access user data and perform user-related operations// java
-
+// main difference between this service, and angular serices, is that there is no logic here, only state management, and api calls with repositories is separate class.
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -10,7 +9,8 @@ import com.example.ubre.ui.dtos.UserDto;
 public class UserService {
 
     private static UserService instance;
-    private final MutableLiveData<UserDto> currentUser = new MutableLiveData<>();
+    private MutableLiveData<UserDto> currentUser = new MutableLiveData<>();
+    private MutableLiveData<byte[]> currentUserAvatar = new MutableLiveData<>();
 
     private UserService() {
     }
@@ -47,8 +47,19 @@ public class UserService {
         return currentUser.getValue() != null;
     }
 
+    public MutableLiveData<byte[]> getCurrentUserAvatar() {
+        return currentUserAvatar;
+    }
 
-    // api calls to backend for user-related operations would go here
+    public LiveData<byte[]> getCurrentUserAvatarReadOnly() {
+        return currentUserAvatar;
+    }
 
+    public void setCurrentUserAvatar(byte[] avatar) {
+        currentUserAvatar.setValue(avatar);
+    }
 
+    public void clearCurrentUserAvatar() {
+        currentUserAvatar.setValue(null);
+    }
 }
