@@ -10,7 +10,7 @@ public class MockData {
         List<ProfileChangeDto> list = new ArrayList<>();
 
         ProfileChangeDto a = new ProfileChangeDto();
-        a.id = 1L;
+//        a.requestId = 1L;
         a.userId = 1L;
         a.oldName = "Marko"; a.newName = "Marko";
         a.oldSurname = "Markovic"; a.newSurname = "Markovic";
@@ -20,7 +20,7 @@ public class MockData {
         list.add(a);
 
         ProfileChangeDto b = new ProfileChangeDto();
-        b.id = 2L;
+//        b.requestId = 2L;
         b.userId = 3L;
         b.oldName = "Ana"; b.newName = "Ana";
         b.oldSurname = "Ilic"; b.newSurname = "Ilic";

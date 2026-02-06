@@ -77,7 +77,7 @@ public class RideDetailsFragment extends Fragment {
             firstRow.addView(firstWaypointIcon);
 
             TextView firstWaypointLabel = new TextView(this.getActivity());
-            firstWaypointLabel.setText(ride.getWaypoints().getFirst().getLabel());
+//            firstWaypointLabel.setText(ride.getWaypoints().getFirst().getLabel());
             firstWaypointLabel.setTypeface(font);
             firstWaypointLabel.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
             firstWaypointLabel.setTextColor(Color.BLACK);
@@ -165,9 +165,9 @@ public class RideDetailsFragment extends Fragment {
                 ProfileCardFragment profileCard = ProfileCardFragment.newInstance(driver.getAvatarUrl(), driver.getName(), "", R.drawable.ic_review);
                 this.getActivity().getSupportFragmentManager().beginTransaction().add(R.id.ride_details_driver, profileCard).commit();
 
-                //VehicleDto vehicle = ride.getVehicle();
-                //profileCard = ProfileCardFragment.newInstance("", vehicle.getModel(), vehicle.getType().name(), -1);
-                this.getActivity().getSupportFragmentManager().beginTransaction().add(R.id.ride_details_vehicle, profileCard).commit();
+//                VehicleDto vehicle = ride.getVehicle();
+//                profileCard = ProfileCardFragment.newInstance("", vehicle.getModel(), vehicle.getType().name(), -1);
+//                this.getActivity().getSupportFragmentManager().beginTransaction().add(R.id.ride_details_vehicle, profileCard).commit();
             }
             else {
                 root.findViewById(R.id.ride_details_vehicle).setVisibility(View.GONE);
@@ -182,8 +182,8 @@ public class RideDetailsFragment extends Fragment {
             tvLabel.setText("Final price");
             priceCard.addView(card);
 
-            if (!user.getEmail().equals(ride.getPassengers().getFirst().getEmail()))
-                root.findViewById(R.id.ride_details_reorder).setVisibility(View.GONE);
+//            if (!user.getEmail().equals(ride.getPassengers().getFirst().getEmail()))
+//                root.findViewById(R.id.ride_details_reorder).setVisibility(View.GONE);
         }
 
         return root;

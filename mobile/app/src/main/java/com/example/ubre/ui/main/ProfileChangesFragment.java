@@ -43,12 +43,12 @@ public class ProfileChangesFragment extends Fragment {
         adapter = new ProfileChangesAdapter(new ProfileChangesAdapter.Listener() {
             @Override public void onAccept(ProfileChangeDto item) {
                 // TODO: pozovi approve endpoint
-                adapter.removeById(item.id);
+//                adapter.removeById(item.requestId);
             }
 
             @Override public void onReject(ProfileChangeDto item) {
                 // TODO: pozovi reject endpoint
-                adapter.removeById(item.id);
+//                adapter.removeById(item.requestId);
             }
         });
 
