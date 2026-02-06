@@ -30,7 +30,6 @@ import androidx.fragment.app.Fragment;
 import com.example.ubre.R;
 import com.example.ubre.ui.apis.ApiClient;
 import com.example.ubre.ui.enums.Role;
-import com.example.ubre.ui.enums.UserStatus;
 import com.example.ubre.ui.enums.VehicleType;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
@@ -132,9 +131,22 @@ public class MainActivity extends AppCompatActivity {
         if (token != null && !token.isEmpty()) {
             try { UserService.getInstance(getApplicationContext()).loadCurrentUser(); }
             catch (Exception ignored) {}
+            try { UserService.getInstance(getApplicationContext()).loadCurrentUserAvatar(); }
+            catch (Exception ignored) {}
         }
 
-        UserStorage.getInstance().getCurrentUserReadOnly().observe(this, currentUser -> {
+
+
+
+
+
+
+
+
+
+        // SEKCIJA ZA OSLUŠKIVANJE PROMENA KORISNIKA
+
+        UserStorage.getInstance().getCurrentUser().observe(this, currentUser -> {
             SharedPreferences sp2 = getSharedPreferences("app_prefs", MODE_PRIVATE);
             String token2 = sp2.getString("jwt", null);
             if (currentUser == null) {
@@ -146,8 +158,24 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             setMenuOptions(currentUser.getRole());
-            fillDrawerHeader(currentUser);
+            fillDrawerHeader();
         });
+
+        UserStorage.getInstance().getCurrentUserAvatar().observe(this, avatar -> {
+            fillDrawerHeader();
+        });
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -158,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
             int itemId = item.getItemId();
 
             if (itemId == R.id.nav_account_settings) {
-                if (UserStorage.getInstance().getCurrentUserReadOnly().getValue() != null && UserStorage.getInstance().getCurrentUserReadOnly().getValue().getRole() == Role.DRIVER) {
+                if (UserStorage.getInstance().getCurrentUser().getValue() != null && UserStorage.getInstance().getCurrentUser().getValue().getRole() == Role.DRIVER) {
                     showFragment(AccountSettingsFragment.newInstance(currentVehicle));
                     return true;
                 } else {
@@ -231,7 +259,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("SetTextI18n")
-    private void fillDrawerHeader(UserDto user) {
+    private void fillDrawerHeader() {
+        UserDto user = UserStorage.getInstance().getCurrentUser().getValue();
+        if (user == null) return;
+
         NavigationView nav = findViewById(R.id.nav_view);
 
         ImageView avatar = nav.getHeaderView(0).findViewById(R.id.img_avatar);
@@ -241,9 +272,10 @@ public class MainActivity extends AppCompatActivity {
         name.setText(user.getName() + " " + user.getSurname());
         phone.setText(user.getPhone());
 
-        String url = user.getAvatarUrl();
-        if (url != null && !url.isEmpty()) {
-            Glide.with(this).load(url).circleCrop().into(avatar);
+        byte[] avatarBytes = UserStorage.getInstance().getCurrentUserAvatar().getValue();
+
+        if (avatarBytes != null) {
+            Glide.with(this).asBitmap().load(avatarBytes).circleCrop().into(avatar);
         } else {
             Glide.with(this).load(R.drawable.img_default_avatar).circleCrop().into(avatar);
         }

@@ -59,4 +59,36 @@ public class UserService {
             }
         });
     }
+
+    public void loadCurrentUserAvatar() throws Exception {
+        UserApi userApi = ApiClient.getClient().create(UserApi.class);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            throw new Exception("User not authenticated");
+        }
+
+        String userIdString = sharedPreferences.getString("id", null);
+        Long userId = userIdString != null ? Long.parseLong(userIdString) : null;
+
+        userApi.getUserAvatar("Bearer " + token, userId).enqueue(new Callback<okhttp3.ResponseBody>() {
+            @Override
+            public void onResponse(Call<okhttp3.ResponseBody> call, Response<okhttp3.ResponseBody> response) {
+                try {
+                    if (response.isSuccessful() && response.body() != null) {
+                        byte[] avatarBytes = response.body().bytes();
+                        UserStorage.getInstance().setCurrentUserAvatar(avatarBytes);
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(context, "Error processing avatar data", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<okhttp3.ResponseBody> call, Throwable t) {
+                Toast.makeText(context, "Failed to load user avatar", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 }

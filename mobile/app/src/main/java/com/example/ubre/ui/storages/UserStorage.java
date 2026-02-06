@@ -22,11 +22,7 @@ public class UserStorage {
         return instance;
     }
 
-    public MutableLiveData<UserDto> getCurrentUser() {
-        return currentUser;
-    }
-
-    public LiveData<UserDto> getCurrentUserReadOnly() {
+    public LiveData<UserDto> getCurrentUser() {
         return currentUser;
     }
 
@@ -47,11 +43,7 @@ public class UserStorage {
         return currentUser.getValue() != null;
     }
 
-    public MutableLiveData<byte[]> getCurrentUserAvatar() {
-        return currentUserAvatar;
-    }
-
-    public LiveData<byte[]> getCurrentUserAvatarReadOnly() {
+    public LiveData<byte[]> getCurrentUserAvatar() {
         return currentUserAvatar;
     }
 

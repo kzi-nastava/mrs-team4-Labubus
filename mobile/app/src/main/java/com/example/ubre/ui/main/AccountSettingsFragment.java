@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import com.example.ubre.ui.dtos.StatItemDto;
@@ -14,10 +15,11 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.ubre.R;
-import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.dtos.UserDto;
+import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.dtos.UserStatsDto;
 import com.example.ubre.ui.dtos.VehicleDto;
+import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -41,28 +43,11 @@ public class AccountSettingsFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Bundle args = getArguments();
-        UserDto user = (args != null) ? (UserDto) args.getSerializable(ARG_USER) : null;
-
-        boolean isDriver = user != null && user.getRole() != null && user.getRole() == Role.DRIVER;
-
-        int layout = isDriver ? R.layout.account_settings_driver : R.layout.account_settings;
-        return inflater.inflate(layout, container, false);
+        return inflater.inflate(R.layout.account_settings_driver, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-
-        // stat kartice logika
-
-        LinearLayout statsContainer = view.findViewById(R.id.stats_container);
-
-        if (statsContainer != null) {
-            UserStatsDto stats = new UserStatsDto(0L, 0, 0, 0.0, 0.0, 0.0);
-            stats.setActivePast24Hours(450);
-            stats.setDistanceTraveled(1920.0);
-            renderStats(statsContainer, stats);
-        }
 
         TextInputLayout tilName = view.findViewById(R.id.til_name);
         TextInputLayout tilSurname = view.findViewById(R.id.til_surname);
@@ -76,30 +61,71 @@ public class AccountSettingsFragment extends Fragment {
 
         ImageView avatar = view.findViewById(R.id.img_avatar);
 
+        LinearLayout statsContainer = view.findViewById(R.id.stats_container);
+        View btnVehicle = view.findViewById(R.id.btn_view_vehicle_information);
+
+        Bundle args = getArguments();
+        final VehicleDto vehicle = (VehicleDto) (args != null ? args.getSerializable(ARG_VEHICLE) : null);
+
         view.findViewById(R.id.btn_back).setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager().popBackStack()
         );
 
-        // PREFILL iz DTO
-        UserDto user = null;
-        if (getArguments() != null) user = (UserDto) getArguments().getSerializable(ARG_USER);
+        // User -> popuni polja + prikaži/sakrij driver stvari
+        UserStorage.getInstance().getCurrentUser().observe(getViewLifecycleOwner(), user -> {
+            if (user == null) return;
 
-        if (user != null) {
             etEmail.setText(user.getEmail());
             etName.setText(user.getName());
             etSurname.setText(user.getSurname());
             etAddress.setText(user.getAddress());
             etPhone.setText(user.getPhone());
 
-            String url = user.getAvatarUrl();
-            if (url != null && !url.isEmpty()) {
-                Glide.with(this).load(url).circleCrop().into(avatar);
+            boolean isDriver = user.getRole() == Role.DRIVER;
+
+            // STATS
+            if (statsContainer != null) {
+                statsContainer.setVisibility(isDriver ? View.VISIBLE : View.GONE);
+
+                if (isDriver) {
+                    UserStatsDto stats = new UserStatsDto(0L, 0, 0, 0.0, 0.0, 0.0);
+                    stats.setActivePast24Hours(450);
+                    stats.setDistanceTraveled(1920.0);
+                    renderStats(statsContainer, stats);
+                } else {
+                    // we must hide stats title section as well
+                    View statsHeader = view.findViewById(R.id.stats_header);
+                    if (statsHeader != null) statsHeader.setVisibility(View.GONE);
+                }
+            }
+
+            // VEHICLE BUTTON
+            if (btnVehicle != null) {
+                if (isDriver && vehicle != null) {
+                    btnVehicle.setVisibility(View.VISIBLE);
+                    btnVehicle.setOnClickListener(v ->
+                            requireActivity().getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.fragment_container, VehicleInformationFragment.newInstance(vehicle))
+                                    .addToBackStack(null)
+                                    .commit()
+                    );
+                } else {
+                    btnVehicle.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        // Avatar
+        UserStorage.getInstance().getCurrentUserAvatar().observe(getViewLifecycleOwner(), avatarBytes -> {
+            if (avatarBytes != null && avatarBytes.length > 0) {
+                Glide.with(this).asBitmap().load(avatarBytes).circleCrop().into(avatar);
             } else {
                 Glide.with(this).load(R.drawable.img_default_avatar).circleCrop().into(avatar);
             }
-        }
+        });
 
-        // Change password -> fragment
+        // Change password
         view.findViewById(R.id.btn_change_password).setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager()
                         .beginTransaction()
@@ -108,32 +134,12 @@ public class AccountSettingsFragment extends Fragment {
                         .commit()
         );
 
-        // View vehicle inforamtion -> fragment (only for drivers)
-        Bundle args = getArguments();
-
-        final VehicleDto vehicle = (VehicleDto) (args != null ? args.getSerializable(ARG_VEHICLE) : null);
-
-        View btnVehicle = view.findViewById(R.id.btn_view_vehicle_information);
-
-        if (btnVehicle != null) {
-            if (vehicle != null) {
-                btnVehicle.setOnClickListener(v ->
-                        requireActivity().getSupportFragmentManager()
-                                .beginTransaction()
-                                .replace(R.id.fragment_container, VehicleInformationFragment.newInstance(vehicle))
-                                .addToBackStack(null)
-                                .commit()
-                );
-            } else {
-                btnVehicle.setVisibility(View.GONE);
-            }
-        }
-
         // Clear error čim krene da kuca
         clearErrorOnType(etName, tilName);
         clearErrorOnType(etSurname, tilSurname);
         clearErrorOnType(etPhone, tilPhone);
 
+        // Save
         view.findViewById(R.id.btn_save).setOnClickListener(v -> {
             boolean ok = true;
 
@@ -143,14 +149,31 @@ public class AccountSettingsFragment extends Fragment {
 
             if (!ok) return;
 
-            // TODO: paziv API / repo i upis u DTO
-            // user.setName(etName.getText().toString().trim()); ...
+            // update local storage user
+            UserDto old = UserStorage.getInstance().getCurrentUser().getValue();
+            if (old == null) return;
+
+            UserDto updated = new UserDto(old);
+            updated.setName(etName.getText().toString().trim());
+            updated.setSurname(etSurname.getText().toString().trim());
+            updated.setPhone(etPhone.getText().toString().trim());
+            updated.setAddress(etAddress.getText() != null ? etAddress.getText().toString().trim() : "");
+
+            UserStorage.getInstance().updateCurrentUser(updated);
+
+            Toast.makeText(getContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
+
+            // TODO: call API to update user on backend as well
+
+
+
         });
 
         view.findViewById(R.id.btn_discard).setOnClickListener(v ->
                 requireActivity().getSupportFragmentManager().popBackStack()
         );
     }
+
 
     private void renderStats(LinearLayout container, UserStatsDto stats) {
         container.removeAllViews();
