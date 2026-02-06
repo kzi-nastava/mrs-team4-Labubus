@@ -35,6 +35,7 @@ import com.example.ubre.ui.enums.VehicleType;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.apis.LoginApi;
+import com.example.ubre.ui.services.UserService;
 import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.navigation.NavigationView;
 import com.bumptech.glide.Glide;
@@ -57,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
     private View btnMenu;
     private View btnChat;
     private DrawerLayout drawer;
-    private UserDto currentUser; // Currently logged in user
     private VehicleDto currentVehicle; // If role is DRIVER, that is drivers vehicle
     LoginApi loginApi = ApiClient.getClient().create(LoginApi.class);
 
@@ -124,19 +124,31 @@ public class MainActivity extends AppCompatActivity {
         // Example role assignment; in a real app, this would come from user authentication
         currentVehicle = new VehicleDto(1L, "Toyota Prius", VehicleType.STANDARD, "ABC-123", 4, true, false);
 
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        setMenuOptions(Role.GUEST);
+
+        if (token != null && !token.isEmpty()) {
+            try { UserService.getInstance(getApplicationContext()).loadCurrentUser(); }
+            catch (Exception ignored) {}
+        }
+
         UserStorage.getInstance().getCurrentUserReadOnly().observe(this, currentUser -> {
+            SharedPreferences sp2 = getSharedPreferences("app_prefs", MODE_PRIVATE);
+            String token2 = sp2.getString("jwt", null);
             if (currentUser == null) {
-                Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
-                startActivity(intent);
-                finish();
+                if (token2 != null && !token2.isEmpty()) { // user se učitava, samo čekaj
+                    return;
+                }
+                // ako nema ni korisnika a ni tokena, onda je gost
+                setMenuOptions(Role.GUEST);
                 return;
             }
-
-            this.currentUser = currentUser; // privremeno samo, nije dobro.
-
             setMenuOptions(currentUser.getRole());
             fillDrawerHeader(currentUser);
         });
+
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setItemIconTintList(null);
@@ -146,20 +158,25 @@ public class MainActivity extends AppCompatActivity {
             int itemId = item.getItemId();
 
             if (itemId == R.id.nav_account_settings) {
-                if (currentUser.getRole() == Role.DRIVER) {
-                    showFragment(AccountSettingsFragment.newInstance(currentUser, currentVehicle));
+                if (UserStorage.getInstance().getCurrentUserReadOnly().getValue() != null && UserStorage.getInstance().getCurrentUserReadOnly().getValue().getRole() == Role.DRIVER) {
+                    showFragment(AccountSettingsFragment.newInstance(currentVehicle));
                     return true;
                 } else {
-                    showFragment(AccountSettingsFragment.newInstance(currentUser, null));
+                    showFragment(AccountSettingsFragment.newInstance(null));
                     return true;
                 }
             }
-            else if (itemId == R.id.nav_ride_history) { showFragment(RideHistoryFragment.newInstance(currentUser)); return true; }
+            else if (itemId == R.id.nav_ride_history) { showFragment(RideHistoryFragment.newInstance()); return true; }
             else if (itemId == R.id.nav_profile_changes) {
                 showFragment(ProfileChangesFragment.newInstance());
                 return true;
             } else if (itemId == R.id.nav_log_out) {
                 logout();
+                return true;
+            } else if (itemId == R.id.nav_log_in) {
+                Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
+                startActivity(intent);
+                finish();
                 return true;
             }
 

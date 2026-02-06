@@ -49,10 +49,9 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
 
     }
 
-    public static RideHistoryFragment newInstance(UserDto user) {
+    public static RideHistoryFragment newInstance() {
         RideHistoryFragment rideHistory = new RideHistoryFragment();
         Bundle args = new Bundle();
-        args.putSerializable("USER", user);
         rideHistory.setArguments(args);
         return rideHistory;
     }

@@ -29,10 +29,9 @@ public class AccountSettingsFragment extends Fragment {
     private static final String ARG_USER = "arg_user";
     private static final String ARG_VEHICLE = "arg_vehicle";
 
-    public static AccountSettingsFragment newInstance(UserDto user, VehicleDto vehicle) {
+    public static AccountSettingsFragment newInstance(VehicleDto vehicle) {
         AccountSettingsFragment f = new AccountSettingsFragment();
         Bundle b = new Bundle();
-        b.putSerializable(ARG_USER, user); // ako UserDto nije Serializable, reci
         b.putSerializable(ARG_VEHICLE, vehicle);
         f.setArguments(b);
         return f;

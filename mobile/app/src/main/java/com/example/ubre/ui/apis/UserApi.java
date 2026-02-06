@@ -20,5 +20,5 @@ public interface UserApi {
 
     // get user avatar
     @GET("api/users/{id}/avatar") // on frontend, we used blob, but now we use response body to get the image
-    Call<ResponseBody> getUserAvatar(@Path("id") Long id);
+    Call<ResponseBody> getUserAvatar(@Header("Authorization") String authHeader, @Path("id") Long id);
 }
