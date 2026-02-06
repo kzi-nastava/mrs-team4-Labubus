@@ -11,6 +11,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:background="@drawable/bg_bottom_modal"
         android:padding="35dp"
+        android:paddingTop="50dp"
         android:id="@+id/ride_details_bottom_drawer">
 
         <LinearLayout

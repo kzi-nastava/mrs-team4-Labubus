@@ -81,17 +81,26 @@ public class RideDetailsFragment extends Fragment {
 
                     switch (event.getAction()) {
                         case MotionEvent.ACTION_DOWN:
+                            if (event.getY() > 60) {
+                                startHeight = 0;
+                                lastTouchY = 0;
+                                return false;
+                            }
+
                             startHeight = v.getHeight();
                             lastTouchY = event.getRawY();
                             break;
 
                         case MotionEvent.ACTION_MOVE:
+                            if (startHeight == 0 || lastTouchY == 0)
+                                return false;
+
                             float dy = event.getRawY() - lastTouchY;
-                            int newHeight = Math.max((int) (startHeight + dy), 70);
+                            int newHeight = Math.max((int) (startHeight - dy), 140);
 
                             ConstraintSet constraints = new ConstraintSet();
                             constraints.clone((ConstraintLayout) root);
-                            constraints.constrainPercentHeight(R.id.ride_details_bottom_drawer, ((float) newHeight) / displayMetrics.heightPixels);
+                            constraints.constrainPercentHeight(R.id.ride_details_bottom_drawer, Math.min((float) newHeight / displayMetrics.heightPixels, 0.7f));
                             constraints.applyTo((ConstraintLayout) root);
 
                             lastTouchY = event.getRawY();
