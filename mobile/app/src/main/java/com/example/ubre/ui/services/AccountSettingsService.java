@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import com.example.ubre.ui.apis.AccountSettingsApi;
 import com.example.ubre.ui.apis.ApiClient;
+import com.example.ubre.ui.dtos.PasswordChangeDto;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.storages.UserStorage;
 
@@ -56,7 +57,11 @@ public class AccountSettingsService {
         api.updateUserProfile("Bearer " + token, userId, body).enqueue(new Callback<UserDto>() {
             @Override
             public void onResponse(Call<UserDto> call, Response<UserDto> response) {
-                Toast.makeText(context, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                if (response.isSuccessful()) {
+                    Toast.makeText(context, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
@@ -119,5 +124,42 @@ public class AccountSettingsService {
         int n;
         while ((n = is.read(data)) != -1) buffer.write(data, 0, n);
         return buffer.toByteArray();
+    }
+
+    // change password
+    public void changePassword(PasswordChangeDto passwordChangeDto) {
+        AccountSettingsApi api = ApiClient.getClient().create(AccountSettingsApi.class);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // comapre user id in passwordChangeDto with current user id in storage, if not match, return error
+        String userIdString = sharedPreferences.getString("id", null);
+        Long userId = userIdString != null ? Long.parseLong(userIdString) : null;
+        if (!userId.equals(passwordChangeDto.getUserId())) {
+            Toast.makeText(context, "User ID mismatch", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        api.changePassword("Bearer " + token, passwordChangeDto).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // important toast message to re-login after change
+                    Toast.makeText(context, "Password changed successfully. Please log in again.", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(context, "Failed to change password", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(context, "Failed to change password", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

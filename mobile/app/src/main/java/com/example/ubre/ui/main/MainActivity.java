@@ -53,6 +53,7 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
     private MapView map;
     private View btnMenu;
     private View btnChat;
@@ -130,9 +131,9 @@ public class MainActivity extends AppCompatActivity {
 
         if (token != null && !token.isEmpty()) {
             try { UserService.getInstance(getApplicationContext()).loadCurrentUser(); }
-            catch (Exception ignored) {}
+            catch (Exception e) { Log.e(TAG, "Failed to load current user", e); }
             try { UserService.getInstance(getApplicationContext()).loadCurrentUserAvatar(); }
-            catch (Exception ignored) {}
+            catch (Exception e) { Log.e(TAG, "Failed to load current user avatar", e); }
         }
 
 
@@ -301,43 +302,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void logout() {
+        SharedPreferences sp = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sp.getString("jwt", null);
 
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        String token = sharedPreferences.getString("jwt", null);
+        // 1) Clear local storage
+        sp.edit().clear().apply();
+        UserStorage.getInstance().clearUserStorage();
 
-        if (token == null) {
-            Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
-            startActivity(intent);
-            finish();
-            return;
-        }
+        // 2) Switch to login/signup activity
+        Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
+        startActivity(intent);
+        finish();
+
+        // 3) (optional) Notify backend about logout - this is not strictly necessary if using stateless JWTs
+        if (token == null || token.isEmpty()) return;
 
         loginApi.logout("Bearer " + token).enqueue(new Callback<ResponseBody>() {
-
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.d("Logout", "Logout");
-
-                if (response.isSuccessful()) {
-                    sharedPreferences.edit().clear().apply();
-                    // Clear user data from UserStorage
-                    UserStorage.getInstance().clearUserStorage();
-
-                    Toast.makeText(getApplicationContext(), "Logout successful", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Logout failed: " + response.code(), Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+            @Override public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) { }
+            @Override public void onFailure(Call<ResponseBody> call, Throwable t) { }
         });
     }
+
 
 
 }

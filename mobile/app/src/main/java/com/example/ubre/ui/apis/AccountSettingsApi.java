@@ -1,5 +1,6 @@
 package com.example.ubre.ui.apis;
 
+import com.example.ubre.ui.dtos.PasswordChangeDto;
 import com.example.ubre.ui.dtos.UserDto;
 
 import okhttp3.MultipartBody;
@@ -29,4 +30,13 @@ public interface AccountSettingsApi {
     @Multipart
     @POST("api/users/{id}/avatar")
     Call<Void> updateUserAvatar(@Header("Authorization") String authHeader, @Path("id") Long id, @Part MultipartBody.Part file);
+
+    // change password (for everyone)
+    @Headers({
+            "User-Agent: Mobile-Android",
+            "Content-Type:application/json"
+    })
+    @PUT("api/users/change-password")
+    Call<Void> changePassword(@Header("Authorization") String authHeader, @Body PasswordChangeDto passwordChangeDto);
+
 }

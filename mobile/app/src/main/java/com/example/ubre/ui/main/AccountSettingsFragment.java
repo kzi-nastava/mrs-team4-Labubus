@@ -3,6 +3,7 @@ package com.example.ubre.ui.main;
 import android.app.Application;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,7 @@ import java.util.List;
 
 public class AccountSettingsFragment extends Fragment {
 
+    private static final String TAG = "AccountSettingsFragment";
     private static final String ARG_USER = "arg_user";
     private static final String ARG_VEHICLE = "arg_vehicle";
 
@@ -195,7 +197,9 @@ public class AccountSettingsFragment extends Fragment {
                     AccountSettingsService.getInstance(context).updateUserAvatar();
                     UserStorage.getInstance().clearPendingAvatarUri();
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to save profile changes", e);
+            }
         });
 
         view.findViewById(R.id.btn_discard).setOnClickListener(v -> {
