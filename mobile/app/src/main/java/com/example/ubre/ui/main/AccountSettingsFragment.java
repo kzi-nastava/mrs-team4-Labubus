@@ -1,5 +1,6 @@
 package com.example.ubre.ui.main;
 
+import android.app.Application;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.Context;
 
 import androidx.annotation.NonNull;
 import com.example.ubre.ui.dtos.StatItemDto;
@@ -19,6 +21,7 @@ import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.dtos.UserStatsDto;
 import com.example.ubre.ui.dtos.VehicleDto;
+import com.example.ubre.ui.services.AccountSettingsService;
 import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -159,14 +162,13 @@ public class AccountSettingsFragment extends Fragment {
             updated.setPhone(etPhone.getText().toString().trim());
             updated.setAddress(etAddress.getText() != null ? etAddress.getText().toString().trim() : "");
 
-            UserStorage.getInstance().updateCurrentUser(updated);
+            // api call to update profile goes here
+            UserStorage.getInstance().setCurrentUser(updated);
 
-            Toast.makeText(getContext(), "Profile updated successfully", Toast.LENGTH_SHORT).show();
-
-            // TODO: call API to update user on backend as well
-
-
-
+            try {
+                Context context = requireContext().getApplicationContext(); // crash if there is no context
+                AccountSettingsService.getInstance(context).saveProfileChanges();
+            } catch (Exception ignored) {}
         });
 
         view.findViewById(R.id.btn_discard).setOnClickListener(v ->
