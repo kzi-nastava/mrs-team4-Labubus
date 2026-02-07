@@ -1,6 +1,9 @@
 package com.example.ubre.ui.storages;
 
 // main difference between this service, and angular serices, is that there is no logic here, only state management, and api calls with repositories is separate class.
+import android.net.Uri;
+
+import androidx.collection.MutableLongIntMap;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -11,6 +14,7 @@ public class UserStorage {
     private static UserStorage instance;
     private MutableLiveData<UserDto> currentUser = new MutableLiveData<>(null);
     private MutableLiveData<byte[]> currentUserAvatar = new MutableLiveData<>(null);
+    private MutableLiveData<Uri> pendingAvatarUri = new MutableLiveData<>(null); // for storing the URI of the new avatar before uploading
 
     private UserStorage() {
     }
@@ -54,4 +58,25 @@ public class UserStorage {
     public void clearCurrentUserAvatar() {
         currentUserAvatar.setValue(null);
     }
+
+    public LiveData<Uri> getPendingAvatarUri() {
+        return pendingAvatarUri;
+    }
+
+    public void setPendingAvatarUri(Uri uri) {
+        pendingAvatarUri.setValue(uri);
+    }
+
+    public void clearPendingAvatarUri() {
+        pendingAvatarUri.setValue(null);
+    }
+
+
+    // very important method after logout to clear all user related data, and also to be called when app is opened to clear any stale data if exists (if user is not logged in)
+    public void clearUserStorage() {
+        clearCurrentUser();
+        clearCurrentUserAvatar();
+        clearPendingAvatarUri();
+    }
 }
+

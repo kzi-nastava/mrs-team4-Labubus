@@ -261,13 +261,19 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     private void fillDrawerHeader() {
         UserDto user = UserStorage.getInstance().getCurrentUser().getValue();
-        if (user == null) return;
 
         NavigationView nav = findViewById(R.id.nav_view);
 
         ImageView avatar = nav.getHeaderView(0).findViewById(R.id.img_avatar);
         TextView name = nav.getHeaderView(0).findViewById(R.id.txt_name);
         TextView phone = nav.getHeaderView(0).findViewById(R.id.txt_phone);
+
+        if (user == null) {
+            name.setText("Guest");
+            phone.setText("+381 XX XXX XXXX");
+            Glide.with(this).load(R.drawable.img_default_avatar).circleCrop().into(avatar);
+            return;
+        }
 
         name.setText(user.getName() + " " + user.getSurname());
         phone.setText(user.getPhone());
@@ -314,6 +320,9 @@ public class MainActivity extends AppCompatActivity {
 
                 if (response.isSuccessful()) {
                     sharedPreferences.edit().clear().apply();
+                    // Clear user data from UserStorage
+                    UserStorage.getInstance().clearUserStorage();
+
                     Toast.makeText(getApplicationContext(), "Logout successful", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
                     startActivity(intent);

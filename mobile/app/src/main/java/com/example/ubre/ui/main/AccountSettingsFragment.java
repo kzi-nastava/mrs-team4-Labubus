@@ -1,6 +1,7 @@
 package com.example.ubre.ui.main;
 
 import android.app.Application;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +12,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.content.Context;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ubre.ui.dtos.StatItemDto;
 import androidx.fragment.app.Fragment;
 
@@ -63,6 +68,22 @@ public class AccountSettingsFragment extends Fragment {
         TextInputEditText etPhone = view.findViewById(R.id.et_phone);
 
         ImageView avatar = view.findViewById(R.id.img_avatar);
+
+        ActivityResultLauncher<String> pickImage =
+                registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                    if (uri != null) {
+                        Glide.with(this)
+                                .load(uri)
+                                .circleCrop()
+                                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                .skipMemoryCache(true)
+                                .into(avatar); // preview only, not saved
+                        UserStorage.getInstance().setPendingAvatarUri(uri);
+                    }
+                });
+
+        avatar.setOnClickListener(v -> pickImage.launch("image/*"));
+
 
         LinearLayout statsContainer = view.findViewById(R.id.stats_container);
         View btnVehicle = view.findViewById(R.id.btn_view_vehicle_information);
@@ -168,12 +189,19 @@ public class AccountSettingsFragment extends Fragment {
             try {
                 Context context = requireContext().getApplicationContext(); // crash if there is no context
                 AccountSettingsService.getInstance(context).saveProfileChanges();
+
+                Uri pending = UserStorage.getInstance().getPendingAvatarUri().getValue();
+                if (pending != null) {
+                    AccountSettingsService.getInstance(context).updateUserAvatar();
+                    UserStorage.getInstance().clearPendingAvatarUri();
+                }
             } catch (Exception ignored) {}
         });
 
-        view.findViewById(R.id.btn_discard).setOnClickListener(v ->
-                requireActivity().getSupportFragmentManager().popBackStack()
-        );
+        view.findViewById(R.id.btn_discard).setOnClickListener(v -> {
+            UserStorage.getInstance().clearPendingAvatarUri();
+            requireActivity().getSupportFragmentManager().popBackStack();
+        });
     }
 
 
