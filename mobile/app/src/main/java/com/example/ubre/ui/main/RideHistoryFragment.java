@@ -31,6 +31,10 @@ import android.util.DisplayMetrics;
 import com.example.ubre.R;
 import com.example.ubre.ui.adapters.RideListAdapter;
 import com.example.ubre.ui.dtos.RideCardDto;
+import com.example.ubre.ui.dtos.RideDto;
+import com.example.ubre.ui.dtos.VehicleDto;
+import com.example.ubre.ui.dtos.WaypointDto;
+import com.example.ubre.ui.enums.RideStatus;
 import com.example.ubre.ui.enums.UserStatus;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.dtos.UserDto;
@@ -60,10 +64,9 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
 
     }
 
-    public static RideHistoryFragment newInstance(UserDto user) {
+    public static RideHistoryFragment newInstance() {
         RideHistoryFragment rideHistory = new RideHistoryFragment();
         Bundle args = new Bundle();
-        args.putSerializable("USER", user);
         rideHistory.setArguments(args);
         return rideHistory;
     }
@@ -203,7 +206,6 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
         RecyclerView cards = this.getView().findViewById(R.id.ride_list_cards);
         cards.setAdapter(new RideListAdapter(List.of(), this));
         cards.setLayoutManager(new LinearLayoutManager(this.getActivity()));
-        com.example.ubre.ui.dtos.UserDto placeholder = new com.example.ubre.ui.dtos.UserDto(1L, com.example.ubre.ui.enums.Role.REGISTERED_USER, "", "mail@mail.com", "Pera", "Peric", "0124120412041", "Adresa 123", UserStatus.ACTIVE);
         RideHistoryStorage.getInstance().getHistoryReadOnly().observe(this, rides -> {
             ((RideListAdapter) cards.getAdapter()).updateItems(rides);
         });

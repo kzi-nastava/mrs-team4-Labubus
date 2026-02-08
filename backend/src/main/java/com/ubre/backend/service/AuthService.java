@@ -14,6 +14,6 @@ public interface AuthService {
     String toggleAvailability(String email);
     void activateAccount(String token) throws BadRequestException;
     Optional<User> findByEmail(String trim);
-    void createPasswordResetToken(String email);
+    void createPasswordResetToken(String email, String userAgent);
     void resetPassword(ResetPasswordDto dto);
 }

@@ -30,6 +30,19 @@ public class UserDto implements Serializable {
         this.status = status;
     }
 
+    // copy constructor
+    public UserDto(UserDto other) {
+        this.id = other.id;
+        this.role = other.role;
+        this.avatarUrl = other.avatarUrl;
+        this.email = other.email;
+        this.name = other.name;
+        this.surname = other.surname;
+        this.phone = other.phone;
+        this.address = other.address;
+        this.status = other.status;
+    }
+
     // getters
     public Long getId() {
         return id;

@@ -6,6 +6,8 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
@@ -13,10 +15,12 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,6 +65,7 @@ public class RideDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -71,6 +76,55 @@ public class RideDetailsFragment extends Fragment {
             SharedPreferences sharedPreferences = getContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
             String role = sharedPreferences.getString("role", "");
             Typeface font = ResourcesCompat.getFont(this.getActivity(), R.font.poppins_regular);
+
+            ScrollView bottomDrawer = root.findViewById(R.id.ride_details_bottom_drawer);
+            bottomDrawer.setOnTouchListener(new View.OnTouchListener() {
+                private int startHeight;
+                private float lastTouchY;
+
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    DisplayMetrics displayMetrics = new DisplayMetrics();
+                    getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            if (event.getY() > 60) {
+                                startHeight = 0;
+                                lastTouchY = 0;
+                                return false;
+                            }
+
+                            startHeight = v.getHeight();
+                            lastTouchY = event.getRawY();
+                            break;
+
+                        case MotionEvent.ACTION_MOVE:
+                            if (startHeight == 0 || lastTouchY == 0)
+                                return false;
+
+                            float dy = event.getRawY() - lastTouchY;
+                            int newHeight = Math.max((int) (startHeight - dy), 140);
+
+                            ConstraintSet constraints = new ConstraintSet();
+                            constraints.clone((ConstraintLayout) root);
+                            constraints.constrainPercentHeight(R.id.ride_details_bottom_drawer, Math.min((float) newHeight / displayMetrics.heightPixels, 0.7f));
+                            constraints.applyTo((ConstraintLayout) root);
+
+                            lastTouchY = event.getRawY();
+                            startHeight = newHeight;
+                            break;
+                    }
+
+                    return true;
+                }
+            });
+
+            TextView start = root.findViewById(R.id.ride_details_start);
+            start.setText(ride.getStartTime().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
+
+            TextView end = root.findViewById(R.id.ride_details_end);
+            end.setText(ride.getEndTime().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
 
             LinearLayout waypoints = root.findViewById(R.id.ride_details_waypoints);
             LinearLayout firstRow = new LinearLayout(this.getActivity());
