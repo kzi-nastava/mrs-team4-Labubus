@@ -153,32 +153,6 @@ public class UserService {
         });
     }
 
-    public void loadCurrentUser() throws Exception {
-        UserApi userApi = ApiClient.getClient().create(UserApi.class);
-        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        String token = sharedPreferences.getString("jwt", null);
-
-        if (token == null) {
-            throw new Exception("User not authenticated");
-        }
-
-        String userIdString = sharedPreferences.getString("id", null);
-        Long userId = userIdString != null ? Long.parseLong(userIdString) : null;
-
-        userApi.getUserById("Bearer " + token, userId).enqueue(new Callback<UserDto>() {
-            @Override
-            public void onResponse(Call<UserDto> call, Response<UserDto> response) {
-                UserStorage.getInstance().setCurrentUser(response.body());
-                Toast.makeText(context, "User profile loaded", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFailure(Call<UserDto> call, Throwable t) {
-                Toast.makeText(context, "Failed to load user profile", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
     public void loadProfileCardAvatar(Long userId, ProfileCardStorage storage) throws Exception {
         UserApi userApi = ApiClient.getClient().create(UserApi.class);
         SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);

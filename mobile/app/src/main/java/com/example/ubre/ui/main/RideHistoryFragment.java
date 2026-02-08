@@ -139,6 +139,8 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
                 }
             });
         }
+        else
+            userFilter.setVisibility(View.GONE);
 
         ListView userOptions = this.getView().findViewById(R.id.filtering_options);
         RideHistoryStorage.getInstance().getFilterUsersReadOnly().observe(this, (users) -> {

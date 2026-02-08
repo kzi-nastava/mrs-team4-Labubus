@@ -11,6 +11,7 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -65,7 +66,6 @@ public class RideDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -119,12 +119,6 @@ public class RideDetailsFragment extends Fragment {
                     return true;
                 }
             });
-
-            TextView start = root.findViewById(R.id.ride_details_start);
-            start.setText(ride.getStartTime().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
-
-            TextView end = root.findViewById(R.id.ride_details_end);
-            end.setText(ride.getEndTime().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
 
             LinearLayout waypoints = root.findViewById(R.id.ride_details_waypoints);
             LinearLayout firstRow = new LinearLayout(this.getActivity());
