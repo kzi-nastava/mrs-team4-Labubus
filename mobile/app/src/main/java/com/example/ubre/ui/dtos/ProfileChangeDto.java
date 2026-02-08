@@ -3,8 +3,10 @@ package com.example.ubre.ui.dtos;
 // Made by driver ---> and then is sent to admin for approval
 // For changing profile data: name, surname, address, phone, avatarUrl
 
+import com.example.ubre.ui.enums.ProfileChangeStatus;
+
 public class ProfileChangeDto {
-    public Long requestId;
+    public Long id;
     public Long userId;
 
     public String oldName;
@@ -21,24 +23,28 @@ public class ProfileChangeDto {
 
     public String oldAvatarUrl;
     public String newAvatarUrl;
+    public ProfileChangeStatus profileChangeStatus;
 
     public ProfileChangeDto() {
 
     }
 
-    public ProfileChangeDto(String newSurname, Long requestId, Long userId, String oldName, String newName, String oldSurname, String oldAddress, String newAddress, String oldPhone, String newPhone, String oldAvatarUrl, String newAvatarUrl) {
-        this.newSurname = newSurname;
-        this.requestId = requestId;
+    public ProfileChangeDto(Long id, Long userId, String oldName, String newName, String oldSurname, String newSurname,
+                            String oldAddress, String newAddress, String oldPhone, String newPhone,
+                            String oldAvatarUrl, String newAvatarUrl, ProfileChangeStatus profileChangeStatus) {
+        this.id = id;
         this.userId = userId;
         this.oldName = oldName;
         this.newName = newName;
         this.oldSurname = oldSurname;
+        this.newSurname = newSurname;
         this.oldAddress = oldAddress;
         this.newAddress = newAddress;
         this.oldPhone = oldPhone;
         this.newPhone = newPhone;
         this.oldAvatarUrl = oldAvatarUrl;
         this.newAvatarUrl = newAvatarUrl;
+        this.profileChangeStatus = profileChangeStatus;
     }
 
     public Long getUserId() {
@@ -49,12 +55,12 @@ public class ProfileChangeDto {
         this.userId = userId;
     }
 
-    public Long getRequestId() {
-        return requestId;
+    public Long getId() {
+        return id;
     }
 
-    public void setRequestId(Long requestId) {
-        this.requestId = requestId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getOldName() {
@@ -135,6 +141,13 @@ public class ProfileChangeDto {
 
     public void setNewAvatarUrl(String newAvatarUrl) {
         this.newAvatarUrl = newAvatarUrl;
+    }
+    public ProfileChangeStatus getProfileChangeStatus() {
+        return profileChangeStatus;
+    }
+
+    public void setProfileChangeStatus(ProfileChangeStatus profileChangeStatus) {
+        this.profileChangeStatus = profileChangeStatus;
     }
 }
 

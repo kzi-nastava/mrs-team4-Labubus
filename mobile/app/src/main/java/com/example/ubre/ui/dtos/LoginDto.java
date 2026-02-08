@@ -2,14 +2,18 @@ package com.example.ubre.ui.dtos;
 
 public class LoginDto {
     private String email;
-    private String passwordHash;
+    private String password;
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public LoginDto() {
     }
 
-    public LoginDto(String email, String passwordHash) {
+    public LoginDto(String email, String password) {
         this.email = email;
-        this.passwordHash = passwordHash;
+        this.password = password;
     }
     public String getEmail() {
         return email;
@@ -17,7 +21,7 @@ public class LoginDto {
     public void setEmail(String email) {
         this.email = email;
     }
-    public String getPasswordHash() {
-        return passwordHash;
+    public String getPassword() {
+        return password;
     }
 }

@@ -8,16 +8,16 @@ import androidx.fragment.app.Fragment;
 
 import com.example.ubre.R;
 import com.example.ubre.ui.dtos.VehicleDto;
+import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class VehicleInformationFragment extends Fragment {
 
     private static final String ARG_VEHICLE = "arg_vehicle";
 
-    public static VehicleInformationFragment newInstance(VehicleDto vehicle) {
+    public static VehicleInformationFragment newInstance() {
         VehicleInformationFragment f = new VehicleInformationFragment();
         Bundle b = new Bundle();
-        b.putSerializable(ARG_VEHICLE, vehicle);
         f.setArguments(b);
         return f;
     }
@@ -26,10 +26,6 @@ public class VehicleInformationFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        VehicleDto vehicle = null;
-        if (getArguments() != null) {
-            vehicle = (VehicleDto) getArguments().getSerializable(ARG_VEHICLE);
-        }
 
         TextInputEditText etModel = view.findViewById(R.id.et_vehicle_model);
         TextInputEditText etType = view.findViewById(R.id.et_vehicle_type);
@@ -42,14 +38,23 @@ public class VehicleInformationFragment extends Fragment {
                 requireActivity().getSupportFragmentManager().popBackStack()
         );
 
-        if (vehicle == null) return;
+        // vehicle is in user storage
+        if (UserStorage.getInstance().getCurrentUserVehicle().getValue() == null) {
+            etModel.setText("");
+            etType.setText("");
+            etPlates.setText("");
+            etSeats.setText("");
+            etBaby.setText("");
+            etPet.setText("");
+            return;
+        }
 
-        etModel.setText(s(vehicle.getModel()));
-        etType.setText(s(vehicle.getType().name()));
-        etPlates.setText(s(vehicle.getPlates()));
-        etSeats.setText(String.valueOf(vehicle.getSeats()));
-        etBaby.setText(vehicle.isBabyFriendly() ? "Yes" : "No");
-        etPet.setText(vehicle.isPetFriendly() ? "Yes" : "No");
+        etModel.setText(s(UserStorage.getInstance().getCurrentUserVehicle().getValue().getModel()));
+        etType.setText(s(UserStorage.getInstance().getCurrentUserVehicle().getValue().getType().name()));
+        etPlates.setText(s(UserStorage.getInstance().getCurrentUserVehicle().getValue().getPlates()));
+        etSeats.setText(String.valueOf(UserStorage.getInstance().getCurrentUserVehicle().getValue().getSeats()));
+        etBaby.setText(UserStorage.getInstance().getCurrentUserVehicle().getValue().isBabyFriendly() ? "Yes" : "No");
+        etPet.setText(UserStorage.getInstance().getCurrentUserVehicle().getValue().isPetFriendly() ? "Yes" : "No");
     }
 
     private String s(String v) { return v == null ? "" : v; }

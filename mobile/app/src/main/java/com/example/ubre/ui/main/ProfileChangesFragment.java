@@ -1,6 +1,7 @@
 package com.example.ubre.ui.main;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,8 @@ import com.example.ubre.R;
 import com.example.ubre.ui.adapters.ProfileChangesAdapter;
 import com.example.ubre.ui.dtos.ProfileChangeDto;
 import com.example.ubre.ui.mockdata.MockData;
+import com.example.ubre.ui.services.ProfileChangeService;
+import com.example.ubre.ui.storages.ProfileChangeStorage;
 
 
 public class ProfileChangesFragment extends Fragment {
@@ -22,7 +25,7 @@ public class ProfileChangesFragment extends Fragment {
     public static ProfileChangesFragment newInstance() {
         return new ProfileChangesFragment();
     }
-
+    public static final String TAG = "ProfileChangesFragment";
     private ProfileChangesAdapter adapter;
 
     @Nullable
@@ -42,26 +45,43 @@ public class ProfileChangesFragment extends Fragment {
 
         adapter = new ProfileChangesAdapter(new ProfileChangesAdapter.Listener() {
             @Override public void onAccept(ProfileChangeDto item) {
-                // TODO: pozovi approve endpoint
-                adapter.removeById(item.requestId);
+                try {
+                    ProfileChangeService.getInstance(requireContext()).approve(item); // this one runs post remove in background
+                } catch (Exception e) {
+                    Log.e(TAG, "Error approving profile change", e);
+                }
             }
 
             @Override public void onReject(ProfileChangeDto item) {
-                // TODO: pozovi reject endpoint
-                adapter.removeById(item.requestId);
+                try {
+                    ProfileChangeService.getInstance(requireContext()).reject(item); // this one runs post remove in background
+                } catch (Exception e) {
+                    Log.e(TAG, "Error rejecting profile change", e);
+                }
             }
         });
 
         rv.setAdapter(adapter);
 
-        loadPending(); // TODO: ucitaj sa backend-a
-        return v;
-    }
+        ProfileChangeStorage.getInstance()
+                .getProfileChanges()
+                .observe(getViewLifecycleOwner(), list -> {
+                    adapter.setItems(list);
+                });
 
-    private void loadPending() {
-        // TODO: GET pending -> adapter.setItems(list)
-        // Za test dok se ne povežemo na backend
-        adapter.setItems(MockData.profileProfileChanges());
+        ProfileChangeStorage.getInstance()
+                .getAvatars()
+                .observe(getViewLifecycleOwner(), map -> {
+                    adapter.notifyDataSetChanged();
+                });
+
+        try {
+            ProfileChangeService.getInstance(requireContext()).loadPendingProfileChanges();
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading pending profile changes", e);
+        }
+
+        return v;
     }
 }
 

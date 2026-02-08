@@ -1,22 +1,23 @@
 package com.example.ubre.ui.dtos;
 
 import java.util.ArrayList;
+import java.util.List;
 
 // By providing ride estimations when or before ordering (guest can see it too)
 
 public class RideEstimationsDto {
-    private ArrayList<WaypointDto> waypoints;
+    private List<WaypointDto> waypoints;
     private Double price;
     private Integer duration; // in minutes
 
     public RideEstimationsDto() {
     }
-    public RideEstimationsDto(ArrayList<WaypointDto> waypoints, Double price, Integer duration) {
+    public RideEstimationsDto(List<WaypointDto> waypoints, Double price, Integer duration) {
         this.waypoints = waypoints;
         this.price = price;
         this.duration = duration;
     }
-    public ArrayList<WaypointDto> getWaypoints() {
+    public List<WaypointDto> getWaypoints() {
         return waypoints;
     }
     public void setWaypoints(ArrayList<WaypointDto> waypoints) {

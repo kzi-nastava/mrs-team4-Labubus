@@ -1,6 +1,8 @@
 package com.example.ubre.ui.main;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -8,10 +10,15 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.example.ubre.R;
+import com.example.ubre.ui.dtos.PasswordChangeDto;
+import com.example.ubre.ui.services.AccountSettingsService;
+import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 public class ChangePasswordFragment extends Fragment {
+
+    private static final String TAG = "ChangePasswordFragment";
 
     public ChangePasswordFragment() { super(R.layout.change_password); }
 
@@ -56,7 +63,21 @@ public class ChangePasswordFragment extends Fragment {
             tilNew.setError(null);
             tilConfirm.setError(null);
 
-            // TODO: poziv API za promenu lozinke
+            // api call for changing password goes here
+            PasswordChangeDto passwordChangeDto = new PasswordChangeDto();
+            passwordChangeDto.setNewPassword(p1);
+
+            // extract user id from current context (shared pref or user storage)
+            Long userId = UserStorage.getInstance().getCurrentUser().getValue().getId();
+            passwordChangeDto.setUserId(userId);
+
+            try {
+                Context context = requireContext().getApplicationContext(); // crash if there is no context
+                AccountSettingsService.getInstance(context).changePassword(passwordChangeDto);
+            } catch (Exception e) {
+                Log.e(TAG, "Save password failed", e);
+            }
+
             requireActivity().getSupportFragmentManager().popBackStack();
         });
 

@@ -1,48 +1,51 @@
 package com.example.ubre.ui.dtos;
 
+import com.example.ubre.ui.enums.RideStatus;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class RideDto implements Serializable {
     private Long id;
-    private LocalDateTime start;
-    private LocalDateTime end;
-    private WaypointDto[] waypoints;
+    private String startTime;
+    private String endTime;
+    private List<WaypointDto> waypoints;
     private UserDto driver;
-    private UserDto[] passengers;
+    private List<UserDto> passengers;
     private Boolean panic;
-    private String canceledBy;
-    private VehicleDto vehicle;
+    private Long canceledBy;
     private Double price;
     private Double distance;
+    private RideStatus status;
+    private Long createdBy;
 
-    public RideDto(Long id, LocalDateTime start, LocalDateTime end, WaypointDto[] waypoints, UserDto driver, UserDto[] passengers, Boolean panic, String canceledBy, VehicleDto vehicle, Double price, Double distance) {
+    public RideDto(Long id, String startTime, String endTime, List<WaypointDto> waypoints, UserDto driver, List<UserDto> passengers, Boolean panic, Long canceledBy, Double price, Double distance, RideStatus status, Long createdBy) {
         this.id = id;
-        this.start = start;
-        this.end = end;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.waypoints = waypoints;
         this.driver = driver;
         this.passengers = passengers;
         this.panic = panic;
         this.canceledBy = canceledBy;
-        this.vehicle = vehicle;
         this.price = price;
         this.distance = distance;
+        this.status = status;
+        this.createdBy = createdBy;
     }
 
     public Long getId() {
         return id;
     }
 
-    public LocalDateTime getStart() {
-        return start;
+    public LocalDateTime getStartTime() {
+        return LocalDateTime.parse(startTime);
     }
 
-    public LocalDateTime getEnd() {
-        return end;
-    }
+    public LocalDateTime getEndTime() {return LocalDateTime.parse(endTime);}
 
-    public WaypointDto[] getWaypoints() {
+    public List<WaypointDto> getWaypoints() {
         return waypoints;
     }
 
@@ -50,7 +53,7 @@ public class RideDto implements Serializable {
         return driver;
     }
 
-    public UserDto[] getPassengers() {
+    public List<UserDto> getPassengers() {
         return passengers;
     }
 
@@ -58,12 +61,8 @@ public class RideDto implements Serializable {
         return panic;
     }
 
-    public String getCanceledBy() {
+    public Long getCanceledBy() {
         return canceledBy;
-    }
-
-    public VehicleDto getVehicle() {
-        return vehicle;
     }
 
     public Double getPrice() {
@@ -72,5 +71,11 @@ public class RideDto implements Serializable {
 
     public Double getDistance() {
         return distance;
+    }
+    public RideStatus getStatus() {
+        return status;
+    }
+    public Long getCreatedBy() {
+        return createdBy;
     }
 }
