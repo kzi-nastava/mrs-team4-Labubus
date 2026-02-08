@@ -90,7 +90,7 @@ public class ProfileCardFragment extends Fragment {
                             UserDto user = UserStorage.getInstance().getCurrentUser().getValue();
                             RideDto ride = RideDetailsStorage.getInstance().getSelectedRideReadOnly().getValue();
 
-                            if (user == null || ride == null || !ride.getCreatedBy().equals(user.getId()) /*|| LocalDateTime.now().isAfter(ride.getStartTime().plusDays(3))*/) { //
+                            if (user == null || ride == null || !ride.getCreatedBy().equals(user.getId()) || LocalDateTime.now().isAfter(ride.getStartTime().plusDays(3))) { //
                                 Toast.makeText(getContext(), "Unable to review ride", Toast.LENGTH_SHORT).show();
                                 return;
                             }
