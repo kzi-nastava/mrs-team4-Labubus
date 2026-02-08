@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.ubre.R;
+import com.example.ubre.ui.services.UserService;
 
 public class ProfileCardFragment extends Fragment {
 

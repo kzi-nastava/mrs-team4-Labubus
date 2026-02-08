@@ -1,6 +1,7 @@
 package com.example.ubre.ui.apis;
 
 import com.example.ubre.ui.dtos.UserDto;
+import com.example.ubre.ui.dtos.VehicleDto;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -19,6 +20,10 @@ public interface UserApi {
     Call<UserDto> getUserById(@Header("Authorization") String authHeader, @Path("id") Long id);
 
     // get user avatar
-    @GET("api/users/{id}/avatar") // on frontend, we used blob, but now we use response body to get the image
-    Call<ResponseBody> getUserAvatar(@Path("id") Long id);
+    @GET("api/users/{id}/avatar")
+    Call<ResponseBody> getUserAvatar(@Header("Authorization") String authHeader, @Path("id") Long id);
+
+    // get user drivers vehicle
+    @GET("api/vehicles/driver/{id}")
+    Call<VehicleDto> getUserVehicle(@Header("Authorization") String authHeader, @Path("id") Long id);
 }
