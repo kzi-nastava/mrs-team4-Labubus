@@ -9,15 +9,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.ubre.R;
-import com.example.ubre.ui.dtos.RideDto;
+import com.example.ubre.ui.dtos.RideCardDto;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class RideListAdapter extends RecyclerView.Adapter<RideListAdapter.RideCardViewHolder> {
-    private RideDto[] rides;
+    private List<RideCardDto> rides;
     private final OnItemClickedListener listener;
 
-    public RideListAdapter(RideDto[] rides, OnItemClickedListener listener) {
+    public RideListAdapter(List<RideCardDto> rides, OnItemClickedListener listener) {
         this.rides = rides;
         this.listener = listener;
     }
@@ -32,18 +33,20 @@ public class RideListAdapter extends RecyclerView.Adapter<RideListAdapter.RideCa
 
     @Override
     public void onBindViewHolder(@NonNull RideCardViewHolder holder, int position) {
-        RideDto ride = rides[position];
+        RideCardDto ride = rides.get(position);
 
         holder.time.setText(ride.getStartTime().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
-        holder.start.setText(ride.getWaypoints().getFirst().getLabel());
-        holder.end.setText(ride.getWaypoints().getLast().getLabel());
+        String firstStop = ride.getWaypoints().get(0).getLabel();
+        holder.start.setText(firstStop.length() > 30 ? firstStop.substring(0, 27) + "..." : firstStop);
+        String lastStop = ride.getWaypoints().get(ride.getWaypoints().size() - 1).getLabel();
+        holder.end.setText(lastStop.length() > 30 ? lastStop.substring(0, 27) + "..." : lastStop);
 
 
     }
 
     @Override
     public int getItemCount() {
-        return rides.length;
+        return rides.size();
     }
 
     class RideCardViewHolder extends RecyclerView.ViewHolder {
@@ -63,7 +66,7 @@ public class RideListAdapter extends RecyclerView.Adapter<RideListAdapter.RideCa
                     if (listener != null) {
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION) {
-                            listener.onItemClicked(rides[position]);
+                            listener.onItemClicked(rides.get(position));
                         }
                     }
                 }
@@ -71,7 +74,12 @@ public class RideListAdapter extends RecyclerView.Adapter<RideListAdapter.RideCa
         }
     }
 
+    public void updateItems(List<RideCardDto> rides) {
+        this.rides = rides;
+        notifyDataSetChanged();
+    }
+
     public interface  OnItemClickedListener {
-        void onItemClicked(RideDto ride);
+        void onItemClicked(RideCardDto ride);
     }
 }

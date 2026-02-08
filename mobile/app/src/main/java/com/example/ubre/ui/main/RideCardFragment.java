@@ -40,10 +40,12 @@ public class RideCardFragment extends Fragment {
         time.setText(ride.getStartTime().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
 
         TextView start = this.getView().findViewById(R.id.ride_card_waypoint1);
-        start.setText(ride.getWaypoints().getFirst().getLabel());
+        String firstStop = ride.getWaypoints().getFirst().getLabel();
+        start.setText(firstStop.length() > 30 ? firstStop.substring(0, 27) + "..." : firstStop);
 
         TextView end = this.getView().findViewById(R.id.ride_card_waypoint1);
-        end.setText(ride.getWaypoints().getLast().getLabel());
+        String lastStop = ride.getWaypoints().getLast().getLabel();
+        end.setText(lastStop.length() > 30 ? lastStop.substring(0, 27) + "..." : lastStop);
     }
 
     @Override

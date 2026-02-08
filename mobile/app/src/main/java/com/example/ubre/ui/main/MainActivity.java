@@ -35,6 +35,7 @@ import com.example.ubre.ui.enums.VehicleType;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.apis.LoginApi;
+import com.example.ubre.ui.services.UserService;
 import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.navigation.NavigationView;
 import com.bumptech.glide.Glide;
@@ -123,6 +124,16 @@ public class MainActivity extends AppCompatActivity {
 
         // Example role assignment; in a real app, this would come from user authentication
         currentVehicle = new VehicleDto(1L, "Toyota Prius", VehicleType.STANDARD, "ABC-123", 4, true, false);
+
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        setMenuOptions(Role.GUEST);
+
+        if (token != null && !token.isEmpty()) {
+            try { UserService.getInstance(getApplicationContext()).loadCurrentUser(); }
+            catch (Exception ignored) {}
+        }
 
         UserStorage.getInstance().getCurrentUserReadOnly().observe(this, currentUser -> {
             if (currentUser == null) {
