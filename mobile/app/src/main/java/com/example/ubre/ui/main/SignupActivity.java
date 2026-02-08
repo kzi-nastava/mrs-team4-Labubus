@@ -165,7 +165,7 @@ public class SignupActivity extends AppCompatActivity {
             byte[] avatarBytes = getBytesFromUri(selectedFileUri);
 
             RequestBody rb = RequestBody.create(avatarBytes, MediaType.parse("image/*"));
-            MultipartBody.Part part = MultipartBody.Part.createFormData("file", email + "_avatar.jpg", rb);
+            MultipartBody.Part part = MultipartBody.Part.createFormData("file", "avatar.jpg", rb);
 
             avatarApi.updateUserAvatar("", userId, part).enqueue(new Callback<Void>() {
                 @Override
