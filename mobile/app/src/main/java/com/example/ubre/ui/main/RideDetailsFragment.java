@@ -26,6 +26,7 @@ import com.example.ubre.ui.dtos.WaypointDto;
 import com.example.ubre.ui.enums.Role;
 
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
+import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapController;
@@ -84,7 +85,9 @@ public class RideDetailsFragment extends Fragment {
             RideDto ride = (RideDto) getArguments().getSerializable("RIDE");
             UserDto user = (UserDto) getArguments().getSerializable("USER");
             Typeface font = ResourcesCompat.getFont(this.getActivity(), R.font.poppins_regular);
-            renderWaypoints(ride.getWaypoints());
+            map.post(() -> {
+                renderWaypoints(ride.getWaypoints());
+            });
 
             TextView start = root.findViewById(R.id.ride_details_start);
             start.setText(ride.getStart().format(DateTimeFormatter.ofPattern("d MMM yyyy HH:mm")));
@@ -231,8 +234,18 @@ public class RideDetailsFragment extends Fragment {
 
         ArrayList<GeoPoint> locations = new ArrayList<GeoPoint>();
         Drawable waypointIcon = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_waypoint_red, null);
+
+        double north = -90;
+        double south = 90;
+        double west = 180;
+        double east = -180;
+
         for (WaypointDto waypoint : waypoints) {
             GeoPoint location = new GeoPoint(waypoint.getLatitude(), waypoint.getLongitude());
+            north = Math.max(location.getLatitude(), north);
+            south = Math.min(location.getLatitude(), south);
+            west = Math.min(location.getLongitude(), west);
+            east = Math.max(location.getLongitude(), east);
             locations.add(location);
             Marker marker = new Marker(map);
             marker.setPosition(location);
@@ -251,6 +264,8 @@ public class RideDetailsFragment extends Fragment {
             });
         }
 
+        BoundingBox boundingBox = new BoundingBox(north, east, south, west);
+        map.zoomToBoundingBox(boundingBox, true, 20);
         map.invalidate();
     }
 
