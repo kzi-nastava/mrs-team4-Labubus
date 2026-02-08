@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
     private View btnMenu;
     private View btnChat;
     private DrawerLayout drawer;
-    private VehicleDto currentVehicle; // If role is DRIVER, that is drivers vehicle
     LoginApi loginApi = ApiClient.getClient().create(LoginApi.class);
 
 
@@ -121,9 +120,6 @@ public class MainActivity extends AppCompatActivity {
                 drawer.openDrawer(GravityCompat.START)
         );
 
-        // Example role assignment; in a real app, this would come from user authentication
-        currentVehicle = new VehicleDto(1L, "Toyota Prius", VehicleType.STANDARD, "ABC-123", 4, true, false);
-
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
         String token = sharedPreferences.getString("jwt", null);
 
@@ -134,6 +130,15 @@ public class MainActivity extends AppCompatActivity {
             catch (Exception e) { Log.e(TAG, "Failed to load current user", e); }
             try { UserService.getInstance(getApplicationContext()).loadCurrentUserAvatar(); }
             catch (Exception e) { Log.e(TAG, "Failed to load current user avatar", e); }
+            // driver only (extract role from shared pref
+            String roleString = sharedPreferences.getString("role", "GUEST");
+            Role role = Role.valueOf(roleString);
+            if (role == Role.DRIVER) {
+                try { UserService.getInstance(getApplicationContext()).loadCurrentUserVehicle(); }
+                catch (Exception e) { Log.e(TAG, "Failed to load current user vehicle", e); }
+                try { UserService.getInstance(getApplicationContext()).loadCurrentUserStats(); }
+                catch (Exception e) { Log.e(TAG, "Failed to load current user stats", e); }
+            }
         }
 
 
@@ -188,10 +193,10 @@ public class MainActivity extends AppCompatActivity {
 
             if (itemId == R.id.nav_account_settings) {
                 if (UserStorage.getInstance().getCurrentUser().getValue() != null && UserStorage.getInstance().getCurrentUser().getValue().getRole() == Role.DRIVER) {
-                    showFragment(AccountSettingsFragment.newInstance(currentVehicle));
+                    showFragment(AccountSettingsFragment.newInstance());
                     return true;
                 } else {
-                    showFragment(AccountSettingsFragment.newInstance(null));
+                    showFragment(AccountSettingsFragment.newInstance());
                     return true;
                 }
             }
@@ -270,7 +275,7 @@ public class MainActivity extends AppCompatActivity {
         TextView phone = nav.getHeaderView(0).findViewById(R.id.txt_phone);
 
         if (user == null) {
-            name.setText("Guest");
+            name.setText("John Doe");
             phone.setText("+381 XX XXX XXXX");
             Glide.with(this).load(R.drawable.img_default_avatar).circleCrop().into(avatar);
             return;

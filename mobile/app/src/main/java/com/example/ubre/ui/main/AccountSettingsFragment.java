@@ -30,6 +30,7 @@ import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.dtos.UserStatsDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.services.AccountSettingsService;
+import com.example.ubre.ui.services.UserService;
 import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -43,10 +44,9 @@ public class AccountSettingsFragment extends Fragment {
     private static final String ARG_USER = "arg_user";
     private static final String ARG_VEHICLE = "arg_vehicle";
 
-    public static AccountSettingsFragment newInstance(VehicleDto vehicle) {
+    public static AccountSettingsFragment newInstance() {
         AccountSettingsFragment f = new AccountSettingsFragment();
         Bundle b = new Bundle();
-        b.putSerializable(ARG_VEHICLE, vehicle);
         f.setArguments(b);
         return f;
     }
@@ -116,10 +116,10 @@ public class AccountSettingsFragment extends Fragment {
                 statsContainer.setVisibility(isDriver ? View.VISIBLE : View.GONE);
 
                 if (isDriver) {
-                    UserStatsDto stats = new UserStatsDto(0L, 0, 0, 0.0, 0.0, 0.0);
-                    stats.setActivePast24Hours(450);
-                    stats.setDistanceTraveled(1920.0);
-                    renderStats(statsContainer, stats);
+                    UserStatsDto stats = UserStorage.getInstance().getCurrentUserStats().getValue();
+                    if (stats != null) {
+                        renderStats(statsContainer, stats);
+                    }
                 } else {
                     // we must hide stats title section as well
                     View statsHeader = view.findViewById(R.id.stats_header);
@@ -129,12 +129,12 @@ public class AccountSettingsFragment extends Fragment {
 
             // VEHICLE BUTTON
             if (btnVehicle != null) {
-                if (isDriver && vehicle != null) {
+                if (isDriver) {
                     btnVehicle.setVisibility(View.VISIBLE);
                     btnVehicle.setOnClickListener(v ->
                             requireActivity().getSupportFragmentManager()
                                     .beginTransaction()
-                                    .replace(R.id.fragment_container, VehicleInformationFragment.newInstance(vehicle))
+                                    .replace(R.id.fragment_container, VehicleInformationFragment.newInstance())
                                     .addToBackStack(null)
                                     .commit()
                     );
@@ -216,7 +216,7 @@ public class AccountSettingsFragment extends Fragment {
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Failed to request profile change", e);
-                }oog
+                }
             } else { // for admins, and regular users, we just update profile directly without approval
                 UserStorage.getInstance().setCurrentUser(updated);
 
@@ -246,7 +246,7 @@ public class AccountSettingsFragment extends Fragment {
         container.removeAllViews();
 
         List<StatItemDto> items = new ArrayList<>();
-        items.add(new StatItemDto(formatMinutes(stats.getActivePast24Hours()), "Active in last 24h"));
+        items.add(new StatItemDto(getActivePast24HoursDisplay(stats.getActivePast24Hours()), "Active in last 24h"));
 
         LayoutInflater inflater = LayoutInflater.from(container.getContext());
 
@@ -263,14 +263,6 @@ public class AccountSettingsFragment extends Fragment {
         }
     }
 
-    private String formatMinutes(int minutes) {
-        int h = minutes / 60;
-        int m = minutes % 60;
-        if (h > 0 && m > 0) return h + "h " + m + "m";
-        if (h > 0) return h + "h";
-        return m + "m";
-    }
-
     private boolean isEmpty(TextInputEditText et) {
         return et.getText() == null || et.getText().toString().trim().isEmpty();
     }
@@ -283,5 +275,11 @@ public class AccountSettingsFragment extends Fragment {
             }
             @Override public void afterTextChanged(android.text.Editable s) {}
         });
+    }
+
+    public String getActivePast24HoursDisplay(int minutes) {
+        int hours = minutes / 60;
+        int remainingMinutes = minutes % 60;
+        return hours + "h " + remainingMinutes + "m";
     }
 }

@@ -6,7 +6,10 @@ import android.content.SharedPreferences;
 
 import com.example.ubre.ui.apis.ApiClient;
 import com.example.ubre.ui.apis.UserApi;
+import com.example.ubre.ui.apis.UserStatsApi;
 import com.example.ubre.ui.dtos.UserDto;
+import com.example.ubre.ui.dtos.UserStatsDto;
+import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.main.MainActivity;
 import com.example.ubre.ui.storages.UserStorage;
 
@@ -88,6 +91,58 @@ public class UserService {
             @Override
             public void onFailure(Call<okhttp3.ResponseBody> call, Throwable t) {
                 Toast.makeText(context, "Failed to load user avatar", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // load drivers vehicle (drivers only role)
+    public void loadCurrentUserVehicle() throws Exception {
+        UserApi userApi = ApiClient.getClient().create(UserApi.class);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            throw new Exception("User not authenticated");
+        }
+
+        String userIdString = sharedPreferences.getString("id", null);
+        Long userId = userIdString != null ? Long.parseLong(userIdString) : null;
+
+        userApi.getUserVehicle("Bearer " + token, userId).enqueue(new Callback<VehicleDto>() {
+            @Override
+            public void onResponse(Call<VehicleDto> call, Response<VehicleDto> response) {
+                UserStorage.getInstance().setCurrentUserVehicle(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<VehicleDto> call, Throwable t) {
+                Toast.makeText(context, "Failed to load user's vehicle", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // load user stats data (user stats dto)
+    public void loadCurrentUserStats() throws Exception {
+        UserStatsApi api = ApiClient.getClient().create(UserStatsApi.class);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            throw new Exception("User not authenticated");
+        }
+
+        String userIdString = sharedPreferences.getString("id", null);
+        Long userId = userIdString != null ? Long.parseLong(userIdString) : null;
+
+        api.getUserStats("Bearer " + token, userId).enqueue(new Callback<UserStatsDto>() {
+            @Override
+            public void onResponse(Call<UserStatsDto> call, Response<UserStatsDto> response) {
+                UserStorage.getInstance().setCurrentUserStats(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<UserStatsDto> call, Throwable t) {
+                Toast.makeText(context, "Failed to load user's stats", Toast.LENGTH_SHORT).show();
             }
         });
     }
