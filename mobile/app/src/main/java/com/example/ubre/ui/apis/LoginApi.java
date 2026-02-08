@@ -22,4 +22,11 @@ public interface LoginApi {
 
     @GET(ApiClient.LOGOUT)
     Call<ResponseBody> logout(@Header("Authorization") String authHeader);
+
+    @Headers({
+            "User-Agent: Mobile-Android",
+            "Content-Type: application/json"
+    })
+    @POST(ApiClient.FORGOT_PASSWORD)
+    Call<ResponseBody> forgotPassword(@Body String email);
 }

@@ -7,7 +7,7 @@ public interface EmailService {
     @Async
     void sendDriverActivationEmail(String recipientEmail, String activationToken);
     @Async
-    void sendPasswordResetEmail(String email, String token);
+    void sendPasswordResetEmail(String email, String token, String userAgent);
     @Async
     void sendRideCompletedEmail(String recipientEmail, Ride ride);
     @Async

@@ -92,13 +92,15 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody String email) {
-        authService.createPasswordResetToken(email);
+    public ResponseEntity<String> forgotPassword(@RequestBody String email, @RequestHeader(value = "User-Agent", defaultValue = "") String userAgent) {
+        String cleanEmail = email.replace("\"", "");
+        authService.createPasswordResetToken(cleanEmail, userAgent);
         return ResponseEntity.ok("If an account exists, a reset link has been sent.");
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDto dto) {
+        System.out.println("heyeheyhye");
         authService.resetPassword(dto);
         return ResponseEntity.ok("Password successfully updated.");
     }
