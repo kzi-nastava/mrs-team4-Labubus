@@ -106,6 +106,7 @@
     </LinearLayout>
 
     <ImageView
+        android:id="@+id/ride_card_favorite"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:src="@drawable/ic_favorite_grey"

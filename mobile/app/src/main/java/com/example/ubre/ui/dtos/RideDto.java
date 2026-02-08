@@ -8,8 +8,8 @@ import java.util.List;
 
 public class RideDto implements Serializable {
     private Long id;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private String startTime;
+    private String endTime;
     private List<WaypointDto> waypoints;
     private UserDto driver;
     private List<UserDto> passengers;
@@ -20,7 +20,7 @@ public class RideDto implements Serializable {
     private RideStatus status;
     private Long createdBy;
 
-    public RideDto(Long id, LocalDateTime startTime, LocalDateTime endTime, List<WaypointDto> waypoints, UserDto driver, List<UserDto> passengers, Boolean panic, Long canceledBy, Double price, Double distance, RideStatus status, Long createdBy) {
+    public RideDto(Long id, String startTime, String endTime, List<WaypointDto> waypoints, UserDto driver, List<UserDto> passengers, Boolean panic, Long canceledBy, Double price, Double distance, RideStatus status, Long createdBy) {
         this.id = id;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -40,12 +40,10 @@ public class RideDto implements Serializable {
     }
 
     public LocalDateTime getStartTime() {
-        return startTime;
+        return LocalDateTime.parse(startTime);
     }
 
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
+    public LocalDateTime getEndTime() {return LocalDateTime.parse(endTime);}
 
     public List<WaypointDto> getWaypoints() {
         return waypoints;

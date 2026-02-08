@@ -11,11 +11,17 @@ import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.UserStatsDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.main.MainActivity;
+import com.example.ubre.ui.storages.ProfileCardStorage;
+import com.example.ubre.ui.storages.RideDetailsStorage;
+import com.example.ubre.ui.storages.RideHistoryStorage;
 import com.example.ubre.ui.storages.UserStorage;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.widget.Toast;
+
+import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -143,6 +149,61 @@ public class UserService {
             @Override
             public void onFailure(Call<UserStatsDto> call, Throwable t) {
                 Toast.makeText(context, "Failed to load user's stats", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void loadProfileCardAvatar(Long userId, ProfileCardStorage storage) throws Exception {
+        UserApi userApi = ApiClient.getClient().create(UserApi.class);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            throw new Exception("User not authenticated");
+        }
+
+        userApi.getUserAvatar("Bearer " + token, userId).enqueue(new Callback<okhttp3.ResponseBody>() {
+            @Override
+            public void onResponse(Call<okhttp3.ResponseBody> call, Response<okhttp3.ResponseBody> response) {
+                try {
+                    if (response.isSuccessful() && response.body() != null) {
+                        byte[] avatarBytes = response.body().bytes();
+                        storage.setAvatar(avatarBytes);
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(context, "Error processing avatar data", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<okhttp3.ResponseBody> call, Throwable t) {
+                Toast.makeText(context, "Failed to load user avatar", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    public void searchFilterUsers(String fullName) throws Exception {
+        UserApi userApi = ApiClient.getClient().create(UserApi.class);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            throw new Exception("User not authenticated");
+        }
+
+        userApi.getUsersByFullName("Bearer " + token, fullName).enqueue(new Callback<List<UserDto>>() {
+            @Override
+            public void onResponse(Call<List<UserDto>> call, Response<List<UserDto>> response) {
+                if (!response.isSuccessful())
+                    Toast.makeText(context, "User fetching failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                else
+                    RideHistoryStorage.getInstance().setFilterUsers(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<List<UserDto>> call, Throwable t) {
+                Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

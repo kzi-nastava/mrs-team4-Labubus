@@ -7,10 +7,12 @@ import android.graphics.Color;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +37,7 @@ import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.apis.LoginApi;
 import com.example.ubre.ui.services.UserService;
+import com.example.ubre.ui.storages.ReviewStorage;
 import com.example.ubre.ui.storages.ProfileChangeStorage;
 import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.navigation.NavigationView;
@@ -222,6 +225,16 @@ public class MainActivity extends AppCompatActivity {
         btnChat = findViewById(R.id.btn_chat);
 
 
+        // Adding an observer that opens review modal when it's state is set
+        ReviewStorage.getInstance().getRideId().observe(this, (rideId) -> {
+            if (rideId != null)
+                showModal(new ReviewModalFragment());
+            else {
+                FrameLayout modalContainer = findViewById(R.id.modal_container);
+                modalContainer.setVisibility(View.GONE);
+                modalContainer.removeAllViews();
+            }
+        });
     }
 
     @Override
@@ -307,6 +320,16 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
+    public void showModal(Fragment f) {
+        findViewById(R.id.modal_container).setVisibility(View.VISIBLE);
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.modal_container, f)
+                .addToBackStack(null)
+                .commit();
+    }
+
     private void logout() {
         SharedPreferences sp = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
         String token = sp.getString("jwt", null);
@@ -329,7 +352,4 @@ public class MainActivity extends AppCompatActivity {
             @Override public void onFailure(Call<ResponseBody> call, Throwable t) { }
         });
     }
-
-
-
 }
