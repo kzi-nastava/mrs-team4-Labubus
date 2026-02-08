@@ -8,6 +8,7 @@ import android.widget.Toast;
 import com.example.ubre.ui.apis.AccountSettingsApi;
 import com.example.ubre.ui.apis.ApiClient;
 import com.example.ubre.ui.dtos.PasswordChangeDto;
+import com.example.ubre.ui.dtos.ProfileChangeDto;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.storages.UserStorage;
 
@@ -106,6 +107,14 @@ public class AccountSettingsService {
                     UserStorage.getInstance().setCurrentUserAvatar(avatarBytes);
                     // FIXME: after this action, avater url in current user dto is not updated, but it should not be a problem...
                     // FIXME: after every fetch of current user, fresh avatar will be fetched, so it should be ok, but it is not optimal solution:
+                    // option is to modify user avatar url locally by merging email + _ + file name
+                    String email = UserStorage.getInstance().getCurrentUser().getValue().getEmail();
+                    String newAvatarUrl = email + "_avatar.jpg";
+                    UserDto updatedUser = UserStorage.getInstance().getCurrentUser().getValue();
+                    if (updatedUser != null) {
+                        updatedUser.setAvatarUrl(newAvatarUrl);
+                        UserStorage.getInstance().updateCurrentUser(updatedUser);
+                    }
                 } else {
                     Toast.makeText(context, "Failed to update avatar", Toast.LENGTH_SHORT).show();
                 }
@@ -159,6 +168,42 @@ public class AccountSettingsService {
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 Toast.makeText(context, "Failed to change password", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // request profile change (for drivers)
+    public void requestProfileChange(ProfileChangeDto profileChangeDto) {
+        AccountSettingsApi api = ApiClient.getClient().create(AccountSettingsApi.class);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // comapre user id in profileChangeDto with current user id in storage, if not match, return error
+        String userIdString = sharedPreferences.getString("id", null);
+        Long userId = userIdString != null ? Long.parseLong(userIdString) : null;
+        if (!userId.equals(profileChangeDto.getUserId())) {
+            Toast.makeText(context, "User ID mismatch", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        api.requestProfileChange("Bearer " + token, profileChangeDto).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(context, "Profile change request sent successfully", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(context, "Failed to send profile change request", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(context, "Failed to send profile change request", Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -1,6 +1,7 @@
 package com.example.ubre.ui.apis;
 
 import com.example.ubre.ui.dtos.PasswordChangeDto;
+import com.example.ubre.ui.dtos.ProfileChangeDto;
 import com.example.ubre.ui.dtos.UserDto;
 
 import okhttp3.MultipartBody;
@@ -38,5 +39,13 @@ public interface AccountSettingsApi {
     })
     @PUT("api/users/change-password")
     Call<Void> changePassword(@Header("Authorization") String authHeader, @Body PasswordChangeDto passwordChangeDto);
+
+    // profile change request (for drivers)
+    @Headers({
+            "User-Agent: Mobile-Android",
+            "Content-Type:application/json"
+    })
+    @POST("api/drivers/profile-changes")
+    Call<Void> requestProfileChange(@Header("Authorization") String authHeader, @Body ProfileChangeDto profileChangeDto);
 
 }

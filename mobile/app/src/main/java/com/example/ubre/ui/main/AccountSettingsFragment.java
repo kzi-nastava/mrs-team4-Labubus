@@ -18,12 +18,14 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.example.ubre.ui.dtos.ProfileChangeDto;
 import com.example.ubre.ui.dtos.StatItemDto;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.ubre.R;
 import com.example.ubre.ui.dtos.UserDto;
+import com.example.ubre.ui.enums.ProfileChangeStatus;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.dtos.UserStatsDto;
 import com.example.ubre.ui.dtos.VehicleDto;
@@ -186,19 +188,50 @@ public class AccountSettingsFragment extends Fragment {
             updated.setAddress(etAddress.getText() != null ? etAddress.getText().toString().trim() : "");
 
             // api call to update profile goes here
-            UserStorage.getInstance().setCurrentUser(updated);
+            // UserStorage.getInstance().setCurrentUser(updated);
 
-            try {
-                Context context = requireContext().getApplicationContext(); // crash if there is no context
-                AccountSettingsService.getInstance(context).saveProfileChanges();
-
-                Uri pending = UserStorage.getInstance().getPendingAvatarUri().getValue();
-                if (pending != null) {
-                    AccountSettingsService.getInstance(context).updateUserAvatar();
-                    UserStorage.getInstance().clearPendingAvatarUri();
+            // if user role is driver, no we just request profile change (extract role from current user in storage)
+            if (UserStorage.getInstance().getCurrentUser().getValue().getRole() == Role.DRIVER) {
+                // if there is new avatar, we must create new avater url by merging email + _ + file name
+                // NOTE: this part is very risky and make sure to fix later, may be very problematic actually
+                Uri pendingAvatarUri = UserStorage.getInstance().getPendingAvatarUri().getValue();
+                String newAvatarUrl = UserStorage.getInstance().getCurrentUser().getValue().getAvatarUrl();
+                if (pendingAvatarUri != null) {
+                    String email = UserStorage.getInstance().getCurrentUser().getValue().getEmail();
+                    newAvatarUrl = email + "_avatar.jpg";
                 }
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to save profile changes", e);
+
+                ProfileChangeDto change = new ProfileChangeDto(0L, old.getId(), old.getName(), updated.getName(), old.getSurname(), updated.getSurname(),
+                        old.getAddress(), updated.getAddress(), old.getPhone(), updated.getPhone(),
+                        old.getAvatarUrl(), newAvatarUrl, ProfileChangeStatus.PENDING);
+
+                // send request to backend
+                try {
+                    Context context = requireContext().getApplicationContext(); // crash if there is no context
+                    AccountSettingsService.getInstance(context).requestProfileChange(change);
+                    // approve avatar change immediately without need for admin approval
+                    if (pendingAvatarUri != null) {
+                        AccountSettingsService.getInstance(context).updateUserAvatar();
+                        UserStorage.getInstance().clearPendingAvatarUri();
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to request profile change", e);
+                }oog
+            } else { // for admins, and regular users, we just update profile directly without approval
+                UserStorage.getInstance().setCurrentUser(updated);
+
+                try {
+                    Context context = requireContext().getApplicationContext(); // crash if there is no context
+                    AccountSettingsService.getInstance(context).saveProfileChanges();
+
+                    Uri pending = UserStorage.getInstance().getPendingAvatarUri().getValue();
+                    if (pending != null) {
+                        AccountSettingsService.getInstance(context).updateUserAvatar();
+                        UserStorage.getInstance().clearPendingAvatarUri();
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to save profile changes", e);
+                }
             }
         });
 
