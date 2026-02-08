@@ -240,8 +240,7 @@ public class AccountSettingsFragment extends Fragment {
             requireActivity().getSupportFragmentManager().popBackStack();
         });
     }
-
-
+    
     private void renderStats(LinearLayout container, UserStatsDto stats) {
         container.removeAllViews();
 
