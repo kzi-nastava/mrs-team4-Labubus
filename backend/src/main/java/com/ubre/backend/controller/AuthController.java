@@ -100,7 +100,6 @@ public class AuthController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDto dto) {
-        System.out.println("heyeheyhye");
         authService.resetPassword(dto);
         return ResponseEntity.ok("Password successfully updated.");
     }
