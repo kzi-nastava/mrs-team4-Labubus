@@ -214,6 +214,12 @@ public class MainActivity extends AppCompatActivity {
                 finish();
                 return true;
             }
+            else if (itemId == R.id.nav_register) {
+                Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
+                startActivity(intent);
+                finish();
+                return true;
+            }
 
             return true;
         });
@@ -308,26 +314,48 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void logout() {
-        SharedPreferences sp = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        String token = sp.getString("jwt", null);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
 
-        // 1) Clear local storage
-        sp.edit().clear().apply();
-        UserStorage.getInstance().clearUserStorage();
-        ProfileChangeStorage.getInstance().clearProfileChangeStorage();
-
-        // 2) Switch to login/signup activity
-        Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
-        startActivity(intent);
-        finish();
-
-        // 3) (optional) Notify backend about logout - this is not strictly necessary if using stateless JWTs
-        if (token == null || token.isEmpty()) return;
+        if (token == null) {
+            Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
 
         loginApi.logout("Bearer " + token).enqueue(new Callback<ResponseBody>() {
-            @Override public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) { }
-            @Override public void onFailure(Call<ResponseBody> call, Throwable t) { }
+
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Log.d("Logout", "Logout");
+
+                if (response.isSuccessful()) {
+                    sharedPreferences.edit().clear().apply();
+                    UserStorage.getInstance().clearUserStorage();
+                    ProfileChangeStorage.getInstance().clearProfileChangeStorage();
+                    Toast.makeText(getApplicationContext(), "Logout successful", Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Logout failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         });
+
+
+
+        // 3) (optional) Notify backend about logout - this is not strictly necessary if using stateless JWTs
+        // It is necessary because the driver can't logout in certain situations.
+        // Thanks for deleting half of my code without checking with me first.
+
     }
 
 
