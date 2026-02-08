@@ -94,12 +94,12 @@ public class RideDetailsFragment extends Fragment {
             );
             map.setVisibility(View.VISIBLE);
 
+            ConstraintLayout content = root.findViewById(R.id.ride_details_content);
+
             MapController controller = (MapController) map.getController();
             controller.setZoom(14.0);
             controller.setCenter(new GeoPoint(45.2671, 19.8335));
 
-            RideDto ride = (RideDto) getArguments().getSerializable("RIDE");
-            UserDto user = (UserDto) getArguments().getSerializable("USER");
             Long rideId = (Long) getArguments().getSerializable("RIDEID");
             SharedPreferences sharedPreferences = getContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
             String role = sharedPreferences.getString("role", "");
@@ -135,9 +135,9 @@ public class RideDetailsFragment extends Fragment {
                             int newHeight = Math.max((int) (startHeight - dy), 140);
 
                             ConstraintSet constraints = new ConstraintSet();
-                            constraints.clone((ConstraintLayout) root);
+                            constraints.clone(content);
                             constraints.constrainPercentHeight(R.id.ride_details_bottom_drawer, Math.min((float) newHeight / displayMetrics.heightPixels, 0.7f));
-                            constraints.applyTo((ConstraintLayout) root);
+                            constraints.applyTo(content);
 
                             lastTouchY = event.getRawY();
                             startHeight = newHeight;
@@ -172,7 +172,7 @@ public class RideDetailsFragment extends Fragment {
             tvLabel.setText("Final price");
             priceCard.addView(card);
 
-            RideDetailsStorage.getInstance().getSelectedRideReadOnly().observe(this, (RideDto ride) -> {
+            RideDetailsStorage.getInstance().getSelectedRideReadOnly().observe(getViewLifecycleOwner(), (RideDto ride) -> {
                 if (ride == null)
                     return;
 
@@ -298,7 +298,7 @@ public class RideDetailsFragment extends Fragment {
             });
 
             if (role.equals("ADMIN") || role.equals("REGISTERED_USER")) {
-                RideDetailsStorage.getInstance().getSelectedRideVehicleReadOnly().observe(this, (vehicle) -> {
+                RideDetailsStorage.getInstance().getSelectedRideVehicleReadOnly().observe(getViewLifecycleOwner(), (vehicle) -> {
                     if (vehicle == null)
                         return;
 
@@ -336,7 +336,7 @@ public class RideDetailsFragment extends Fragment {
         if (map != null) map.onPause();
     }
 
-    private void renderWaypoints(WaypointDto[] waypoints) {
+    private void renderWaypoints(List<WaypointDto> waypoints) {
         this.map.getOverlays().clear();
 
         ArrayList<GeoPoint> locations = new ArrayList<GeoPoint>();
@@ -372,7 +372,7 @@ public class RideDetailsFragment extends Fragment {
         }
 
         BoundingBox boundingBox = new BoundingBox(north, east, south, west);
-        map.zoomToBoundingBox(boundingBox, true, 20);
+        map.zoomToBoundingBox(boundingBox, true, 200);
         map.invalidate();
     }
       
