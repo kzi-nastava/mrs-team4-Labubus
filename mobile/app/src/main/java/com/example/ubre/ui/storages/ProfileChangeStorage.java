@@ -94,4 +94,10 @@ public class ProfileChangeStorage {
     public void postClear() {
         profileChanges.postValue(new ArrayList<>());
     }
+
+    // method for clearing all data from storage
+    public void clearProfileChangeStorage() {
+        postClear();
+        avatars.postValue(new HashMap<>());
+    }
 }

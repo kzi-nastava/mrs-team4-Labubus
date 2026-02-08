@@ -1,5 +1,6 @@
 package com.example.ubre.ui.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,10 +75,35 @@ public class ProfileChangesAdapter extends RecyclerView.Adapter<ProfileChangesAd
         h.txtOld.setText(oldInfo);
         h.txtNew.setText(newInfo);
 
-
-
         h.btnAccept.setOnClickListener(v -> listener.onAccept(it));
         h.btnReject.setOnClickListener(v -> listener.onReject(it));
+
+        // avatar logic
+        var avatars = ProfileChangeStorage.getInstance()
+                .getAvatars()
+                .getValue();
+
+        byte[] avatar = null;
+        if (avatars != null) {
+            avatar = avatars.get(it.userId);
+        }
+
+        if (avatar == null) {
+            try {
+                ProfileChangeService.getInstance(h.itemView.getContext())
+                        .fetchDriverAvatar(it.userId);
+            } catch (Exception e) {
+                Log.e("ProfileChangesAdapter", "Error fetching avatar for user " + it.userId, e);
+            }
+
+            bindAvatar(h.imgNewAvatar, null);
+        } else {
+            Glide.with(h.imgNewAvatar)
+                    .load(avatar)
+                    .circleCrop()
+                    .into(h.imgNewAvatar);
+        }
+
     }
 
     private void bindAvatar(ImageView img, String url) {

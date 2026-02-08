@@ -35,6 +35,7 @@ import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.apis.LoginApi;
 import com.example.ubre.ui.services.UserService;
+import com.example.ubre.ui.storages.ProfileChangeStorage;
 import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.navigation.NavigationView;
 import com.bumptech.glide.Glide;
@@ -313,6 +314,7 @@ public class MainActivity extends AppCompatActivity {
         // 1) Clear local storage
         sp.edit().clear().apply();
         UserStorage.getInstance().clearUserStorage();
+        ProfileChangeStorage.getInstance().clearProfileChangeStorage();
 
         // 2) Switch to login/signup activity
         Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
