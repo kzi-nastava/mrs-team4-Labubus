@@ -143,8 +143,12 @@ public class EmailServiceImpl implements EmailService {
 
 
     @Override
-    public void sendPasswordResetEmail(String email, String token) {
+    public void sendPasswordResetEmail(String email, String token, String userAgent) {
         String resetLink = "http://localhost:4200/reset-password?token=" + token;
+
+        if (userAgent != null && userAgent.contains("Mobile-Android"))
+            resetLink = "https://ubre.notixdms.com/reset-password?token=" + token;
+
         String subject = "Reset your password";
         String body = buildPasswordResetEmailBody(resetLink);
    

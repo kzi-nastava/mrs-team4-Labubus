@@ -106,8 +106,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void createPasswordResetToken(String email) {
+    public void createPasswordResetToken(String email, String userAgent) {
         Optional<User> userOptional = userRepository.findByEmail(email);
+
         if (userOptional.isPresent()) {
             User user = userOptional.get();
 
@@ -121,7 +122,8 @@ public class AuthServiceImpl implements AuthService {
 
             passwordResetTokenRepository.save(resetToken);
 
-            emailService.sendPasswordResetEmail(user.getEmail(), token);
+            emailService.sendPasswordResetEmail(user.getEmail(), token, userAgent);
+
         }
     }
 
