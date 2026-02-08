@@ -23,8 +23,8 @@ public interface UserApi {
     Call<UserDto> getUserById(@Header("Authorization") String authHeader, @Path("id") Long id);
 
     // get user avatar
-    @GET("api/users/{id}/avatar") // on frontend, we used blob, but now we use response body to get the image
-    Call<ResponseBody> getUserAvatar(@Path("id") Long id);
+    @GET("api/users/{id}/avatar")
+    Call<ResponseBody> getUserAvatar(@Header("Authorization") String authHeader, @Path("id") Long id);
 
     // This request just fetches the users based on name search. It is used in admin ride history to provide select options for user filter.
     @GET("api/users")

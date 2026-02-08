@@ -185,7 +185,7 @@ public class RideDetailsFragment extends Fragment {
                 vehicleInfo.removeAllViews();
                 if (role.equals("ADMIN") || role.equals("REGISTERED_USER") && ride.getDriver() != null) {
                     UserDto driver = ride.getDriver();
-                    ProfileCardFragment profileCard = ProfileCardFragment.newInstance(driver.getAvatarUrl(), driver.getName(), "", R.drawable.ic_review);
+                    ProfileCardFragment profileCard = ProfileCardFragment.newInstance(driver.getId(), driver.getName(), "", R.drawable.ic_review);
                     root.findViewById(R.id.ride_details_driver_section).setVisibility(View.VISIBLE);
                     this.getActivity().getSupportFragmentManager().beginTransaction().add(R.id.ride_details_driver, profileCard).commit();
                 }
@@ -199,7 +199,7 @@ public class RideDetailsFragment extends Fragment {
                 if (role.equals("ADMIN") || role.equals("DRIVER") && !ride.getPassengers().isEmpty()) {
                     for (int i = 0; i < ride.getPassengers().size(); i++) {
                         UserDto passenger = ride.getPassengers().get(i);
-                        ProfileCardFragment profileCard = ProfileCardFragment.newInstance(passenger.getAvatarUrl(), passenger.getName(), "", i == 0 ? R.drawable.ic_ordering_customer : -1);
+                        ProfileCardFragment profileCard = ProfileCardFragment.newInstance(passenger.getId(), passenger.getName(), "", i == 0 ? R.drawable.ic_ordering_customer : -1);
                         root.findViewById(R.id.ride_details_passenger_section).setVisibility(View.VISIBLE);
                         this.getActivity().getSupportFragmentManager().beginTransaction().add(R.id.ride_details_passengers, profileCard).commit();
                     }
@@ -222,7 +222,7 @@ public class RideDetailsFragment extends Fragment {
                     if (vehicle == null)
                         return;
 
-                    ProfileCardFragment profileCard = ProfileCardFragment.newInstance("", vehicle.getModel(), vehicle.getType().name(), -1);
+                    ProfileCardFragment profileCard = ProfileCardFragment.newInstance(-1L, vehicle.getModel(), vehicle.getType().name(), -1);
                     root.findViewById(R.id.ride_details_vehicle_section).setVisibility(View.VISIBLE);
                     this.getActivity().getSupportFragmentManager().beginTransaction().add(R.id.ride_details_vehicle, profileCard).commit();
                 });
