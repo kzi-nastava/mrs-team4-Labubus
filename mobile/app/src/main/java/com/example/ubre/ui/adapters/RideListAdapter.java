@@ -1,15 +1,20 @@
 package com.example.ubre.ui.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.ubre.R;
 import com.example.ubre.ui.dtos.RideCardDto;
+import com.example.ubre.ui.services.RideService;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -40,8 +45,21 @@ public class RideListAdapter extends RecyclerView.Adapter<RideListAdapter.RideCa
         holder.start.setText(firstStop.length() > 30 ? firstStop.substring(0, 27) + "..." : firstStop);
         String lastStop = ride.getWaypoints().get(ride.getWaypoints().size() - 1).getLabel();
         holder.end.setText(lastStop.length() > 30 ? lastStop.substring(0, 27) + "..." : lastStop);
-
-
+        if (ride.favorite)
+            Glide.with(holder.itemView).load(R.drawable.ic_favorite_red).circleCrop().into(holder.icon);
+        else
+            Glide.with(holder.itemView).load(R.drawable.ic_favorite_grey).circleCrop().into(holder.icon);
+        holder.icon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    RideService.getInstance().toggleFavorite(holder.icon.getContext(), ride);
+                } catch (Exception e) {
+                    Toast.makeText(holder.icon.getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("TOGGLE RIDE FAVORITE", e.getMessage());
+                }
+            }
+        });
     }
 
     @Override
@@ -51,6 +69,7 @@ public class RideListAdapter extends RecyclerView.Adapter<RideListAdapter.RideCa
 
     class RideCardViewHolder extends RecyclerView.ViewHolder {
         TextView time, start, end;
+        ImageView icon;
 
         public RideCardViewHolder(View itemView) {
 
@@ -59,6 +78,7 @@ public class RideListAdapter extends RecyclerView.Adapter<RideListAdapter.RideCa
             time = itemView.findViewById(R.id.ride_card_start);
             start = itemView.findViewById(R.id.ride_card_waypoint1);
             end = itemView.findViewById(R.id.ride_card_waypoint2);
+            icon = itemView.findViewById(R.id.ride_card_favorite);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

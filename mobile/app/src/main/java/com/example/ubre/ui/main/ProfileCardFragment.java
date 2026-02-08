@@ -14,8 +14,15 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.ubre.R;
+import com.example.ubre.ui.dtos.RideDto;
+import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.services.UserService;
 import com.example.ubre.ui.storages.ProfileCardStorage;
+import com.example.ubre.ui.storages.ReviewStorage;
+import com.example.ubre.ui.storages.RideDetailsStorage;
+import com.example.ubre.ui.storages.UserStorage;
+
+import java.time.LocalDateTime;
 
 public class ProfileCardFragment extends Fragment {
 
@@ -74,8 +81,26 @@ public class ProfileCardFragment extends Fragment {
             int icon = args.getInt("ICON");
             if (icon == -1)
                 iconView.setVisibility(View.GONE);
-            else
+            else {
                 Glide.with(this).load(icon).circleCrop().into(iconView);
+                if (icon == R.drawable.ic_review) {
+                    iconView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            UserDto user = UserStorage.getInstance().getCurrentUser().getValue();
+                            RideDto ride = RideDetailsStorage.getInstance().getSelectedRideReadOnly().getValue();
+
+                            if (user == null || ride == null || !ride.getCreatedBy().equals(user.getId()) || LocalDateTime.now().isAfter(ride.getStartTime().plusDays(3))) { //
+                                Toast.makeText(getContext(), "Unable to review ride", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            ReviewStorage.getInstance().setRideId(RideDetailsStorage.getInstance().getSelectedRideReadOnly().getValue().getId());
+                        }
+                    });
+                }
+            }
+
 
             String name = args.getString("NAME");
             if (name != null)

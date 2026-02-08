@@ -14,9 +14,9 @@ import com.example.ubre.ui.storages.RideHistoryStorage;
 import com.example.ubre.ui.storages.UserStorage;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -94,5 +94,46 @@ public class RideService {
         };
 
         api.getRideById("Bearer " + token, id).enqueue(callback);
+    }
+
+    public void toggleFavorite(Context context, RideCardDto ride) throws Exception {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            throw new Exception("User not authenticated");
+        }
+
+        if (UserStorage.getInstance().getCurrentUser().getValue() == null)
+            throw  new Exception("Unable to favorite/unfavorite ride");
+
+        Long userId = UserStorage.getInstance().getCurrentUser().getValue().getId();
+        Callback<ResponseBody> callback = new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (!response.isSuccessful())
+                    Toast.makeText(context, "Failed to favorite/unfavorite ride: " + response.code(), Toast.LENGTH_SHORT).show();
+                else {
+                    List<RideCardDto> history = RideHistoryStorage.getInstance().getHistoryReadOnly().getValue();
+                    for (RideCardDto card : history) {
+                        if (card.getId().equals(ride.getId())) {
+                            card.favorite = !card.favorite;
+                        }
+                    }
+                    RideHistoryStorage.getInstance().setHistory(history);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("TOGGLE RIDE FAVORITE", t.getMessage());
+            }
+        };
+
+        if (ride.favorite)
+            api.removeFromFavorites("Bearer " + token, userId, ride.getId()).enqueue(callback);
+        else
+            api.addToFavorites("Bearer " + token, userId, ride.getId()).enqueue(callback);
     }
 }

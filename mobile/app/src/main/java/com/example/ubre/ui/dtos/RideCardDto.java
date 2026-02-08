@@ -1,5 +1,6 @@
 package com.example.ubre.ui.dtos;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -7,7 +8,7 @@ import java.util.List;
 
 // Ride history, active rides, my favourites
 
-public class RideCardDto {
+public class RideCardDto implements Serializable {
     private Long id;
     private String startTime;
     public List<WaypointDto> waypoints;

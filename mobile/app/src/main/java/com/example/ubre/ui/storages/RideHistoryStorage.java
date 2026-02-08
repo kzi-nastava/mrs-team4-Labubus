@@ -26,6 +26,10 @@ public class RideHistoryStorage {
 
     public LiveData<List<RideCardDto>> getHistoryReadOnly() {return history;}
 
+    public void setHistory(List<RideCardDto> history) {
+        this.history.setValue(history);
+    }
+
     public void extendHistory(List<RideCardDto> rides) {
         List<RideCardDto> temp = history.getValue();
         temp.addAll(rides);

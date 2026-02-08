@@ -2,12 +2,14 @@ package com.example.ubre.ui.apis;
 
 import com.example.ubre.ui.dtos.RideCardDto;
 import com.example.ubre.ui.dtos.RideDto;
-import com.example.ubre.ui.dtos.UserDto;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -26,4 +28,10 @@ public interface RideApi {
 
     @GET("api/rides/history/{id}")
     Call<List<RideCardDto>> getRideHistory(@Header("Authorization") String authHeader, @Path("id") Long id, @Query("skip") Integer skip, @Query("count") Integer count, @Query("sortBy") String sort, @Query("ascending") Boolean ascending, @Query("date") LocalDateTime date);
+
+    @PUT("api/rides/{userId}/favorites/{rideId}")
+    Call<ResponseBody> addToFavorites(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Path("rideId") Long rideId);
+
+    @DELETE("api/rides/{userId}/favorites/{rideId}")
+    Call<ResponseBody> removeFromFavorites(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Path("rideId") Long rideId);
 }

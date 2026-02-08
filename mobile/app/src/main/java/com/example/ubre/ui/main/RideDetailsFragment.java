@@ -29,6 +29,7 @@ import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.services.RideService;
 import com.example.ubre.ui.services.UserService;
 import com.example.ubre.ui.services.VehicleService;
+import com.example.ubre.ui.storages.ReviewStorage;
 import com.example.ubre.ui.storages.RideDetailsStorage;
 import com.example.ubre.ui.storages.RideHistoryStorage;
 import com.example.ubre.ui.storages.UserStorage;
@@ -42,7 +43,6 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class RideDetailsFragment extends Fragment {
-
 
     public RideDetailsFragment() {
 
