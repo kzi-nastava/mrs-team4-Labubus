@@ -1,6 +1,7 @@
 package com.example.ubre.ui.apis;
 
 import com.example.ubre.ui.dtos.UserDto;
+import com.example.ubre.ui.dtos.UserRegistrationDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 
 import java.util.List;
@@ -34,4 +35,7 @@ public interface UserApi {
     // get user drivers vehicle
     @GET("api/vehicles/driver/{id}")
     Call<VehicleDto> getUserVehicle(@Header("Authorization") String authHeader, @Path("id") Long id);
+
+    @POST("api/users/register")
+    Call<UserDto> register(@Body UserRegistrationDto registrationDto);
 }
