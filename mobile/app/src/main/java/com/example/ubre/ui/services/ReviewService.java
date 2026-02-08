@@ -45,7 +45,7 @@ public class ReviewService {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (!response.isSuccessful()) {
-                    Toast.makeText(context, "Review submission failed: " + response.body(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Review submission failed: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
                 else {
                     Toast.makeText(context, "Review successfully submitted", Toast.LENGTH_SHORT).show();
