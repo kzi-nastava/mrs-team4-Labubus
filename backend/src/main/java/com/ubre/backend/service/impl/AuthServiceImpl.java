@@ -1,15 +1,10 @@
 package com.ubre.backend.service.impl;
 
 import com.ubre.backend.dto.ResetPasswordDto;
+import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
-import com.ubre.backend.model.ActivationToken;
-import com.ubre.backend.model.Driver;
-import com.ubre.backend.model.PasswordResetToken;
-import com.ubre.backend.model.User;
-import com.ubre.backend.repository.ActivationTokenRepository;
-import com.ubre.backend.repository.DriverRepository;
-import com.ubre.backend.repository.PasswordResetTokenRepository;
-import com.ubre.backend.repository.UserRepository;
+import com.ubre.backend.model.*;
+import com.ubre.backend.repository.*;
 import com.ubre.backend.service.AuthService;
 import com.ubre.backend.service.EmailService;
 import jakarta.transaction.Transactional;
@@ -39,6 +34,8 @@ public class AuthServiceImpl implements AuthService {
     private EmailService emailService;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserStatusRecordRepository userStatusRecordRepository;
 
     @Override
     public User save(User user) {
@@ -48,6 +45,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public User updateUserStatus(User user, UserStatus newStatus) {
         user.setStatus(newStatus);
+        if (user.getRole() == Role.DRIVER) {
+            UserStatusRecord statusRecord = new UserStatusRecord(user, newStatus, LocalDateTime.now());
+            userStatusRecordRepository.save(statusRecord);
+        }
         return userRepository.save(user);
     }
 
@@ -74,6 +75,10 @@ public class AuthServiceImpl implements AuthService {
         }
 
         driver.setStatus(driver.getStatus() == UserStatus.ACTIVE ? UserStatus.INACTIVE : UserStatus.ACTIVE);
+
+        UserStatusRecord statusRecord = new UserStatusRecord(driver, driver.getStatus(), LocalDateTime.now());
+        userStatusRecordRepository.save(statusRecord);
+
         save(driver);
         return "Status changed.";
     }
