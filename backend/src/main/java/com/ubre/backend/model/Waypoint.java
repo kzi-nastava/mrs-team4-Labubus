@@ -24,6 +24,9 @@ public class Waypoint {
     @Column(nullable = false)
     private Double longitude;
 
+    @Column
+    private Boolean visited;
+
     // Constructors
     public Waypoint() {}
 
@@ -31,6 +34,14 @@ public class Waypoint {
         this.label = label;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.visited = false;
+    }
+
+    public Waypoint(String label, Double latitude, Double longitude, Boolean visited) {
+        this.label = label;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.visited = visited;
     }
 
     public Waypoint(WaypointDto dto) {
@@ -38,5 +49,6 @@ public class Waypoint {
         this.label = dto.getLabel();
         this.latitude = dto.getLatitude();
         this.longitude = dto.getLongitude();
+        this.visited = dto.getVisited();
     }
 }
