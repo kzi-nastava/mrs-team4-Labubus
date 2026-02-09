@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { MENU_BY_ROLE, Role, MenuItem } from './menu.config';
+import { MENU_BY_ROLE, MenuItem } from './menu.config';
+import { Role } from '../../../enums/role';
 
-type UserVM = {
+type SideMenuUser = {
   name: string;
   surname: string;
   phone?: string;
@@ -16,9 +17,10 @@ type UserVM = {
 })
 export class SideMenu {
   @Input() open = false;
-  @Input() title = 'Account';
-  @Input() role: Role = 'guest';
-  @Input() user: UserVM | null = null;
+  @Input() role: Role = Role.GUEST;
+  @Input() user: SideMenuUser | null = null;
+
+  @Input() avatarSrc?: string; // local browser path to avatar image that is created via URL.createObjectURL
 
   @Output() closed = new EventEmitter<void>();
   @Output() action = new EventEmitter<string>();

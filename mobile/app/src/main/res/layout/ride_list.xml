@@ -39,15 +39,27 @@
                 android:onClick="showDatePicker"
                 />
 
-            <!-- DRIVER FILTER -->
+            <!-- USER FILTER -->
             <EditText
-                android:id="@+id/driver_filter"
+                android:id="@+id/user_filter"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:hint="Driver"
+                android:hint="User"
                 android:padding="16dp"
                 style="@style/InputField"/>
+
+            <ListView
+                android:id="@+id/filtering_options"
+                style="@style/InputField"
+                android:visibility="gone"
+                android:divider="@null"
+                android:dividerHeight="0dp"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="100dp">
+
+            </ListView>
 
             <!-- SORT -->
             <LinearLayout

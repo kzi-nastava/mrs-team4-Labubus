@@ -1,13 +1,13 @@
 <div class="profile-card">
-    <img [src]="vehicle.image ? vehicle.image : 'default-avatar.jpg'" alt="" class="picture">
+    <img [src]="'default-avatar.jpg'" alt="" class="picture">
     <div class="info">
-        <div class="name">{{ vehicle.model }}</div>
+        <div class="name">{{ vehicle().model }}</div>
         <div class="subtext">
-            <div class="type">{{ vehicle.type }}</div>
+            <div class="type">{{ vehicle().type }}</div>
         </div>
     </div>
-    @if (icon) {
-        <img [src]="icon" alt="" class="action-icon">
+    @if (icon()) {
+        <img [src]="icon()" alt="" class="action-icon">
     }
 </div>
 

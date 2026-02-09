@@ -1,0 +1,21 @@
+<div class="pc-card" [class.leaving]="leaving">
+  <div class="pc-userid">User ID: {{ item.userId }}</div>
+
+  <div class="pc-avatars">
+    <img class="pc-avatar" [src]="avatarSrc$ | async" alt="new avatar">
+  </div>
+
+  <div class="pc-old">
+    Old: {{ item.oldName }} {{ item.oldSurname }}, {{ item.oldAddress }}, {{ item.oldPhone }}
+  </div>
+
+  <div class="pc-new">
+    New: {{ item.newName }} {{ item.newSurname }}, {{ item.newAddress }}, {{ item.newPhone }}
+  </div>
+
+  <div class="pc-actions">
+    <button type="button" class="pc-btn pc-btn-filled" (click)="onApprove()">Approve</button>
+    <div class="pc-gap"></div>
+    <button type="button" class="pc-btn pc-btn-outlined" (click)="onReject()">Reject</button>
+  </div>
+</div>

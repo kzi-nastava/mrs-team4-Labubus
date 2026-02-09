@@ -2,15 +2,29 @@ package com.ubre.backend.dto;
 
 // For leaving a review after a ride
 
+import com.ubre.backend.model.Review;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class ReviewDto {
     private Long id;
     private Long driverId;
+    @NotNull(message = "User ID cannot be null")
     private Long userId;
+    @Min(value = 1, message = "Rating must be at least 1")
+    @Max(value = 5, message = "Rating cannot be more than 5")
     private Integer rating; // e.g., 1 to 5
+    @NotBlank(message = "Review text cannot be blank")
     private String text;
 
-    public ReviewDto() {
-    }
     public ReviewDto(Long id, Long driverId, Long userId, Integer rating, String text) {
         this.id = id;
         this.driverId = driverId;
@@ -18,34 +32,12 @@ public class ReviewDto {
         this.rating = rating;
         this.text = text;
     }
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public Long getDriverId() {
-        return driverId;
-    }
-    public void setDriverId(Long driverId) {
-        this.driverId = driverId;
-    }
-    public Long getUserId() {
-        return userId;
-    }
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-    public Integer getRating() {
-        return rating;
-    }
-    public void setRating(Integer rating) {
-        this.rating = rating;
-    }
-    public String getText() {
-        return text;
-    }
-    public void setText(String text) {
-        this.text = text;
+
+    public ReviewDto(Review model) {
+        this.id = model.getId();
+        this.driverId = model.getDriver().getId();
+        this.userId = model.getUser().getId();
+        this.rating = model.getRating();
+        this.text = model.getText();
     }
 }

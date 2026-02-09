@@ -2,8 +2,13 @@ package com.ubre.backend.model;
 
 import com.ubre.backend.enums.VehicleType;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "vehicle_type_pricing")
 public class VehicleTypePricing {
@@ -35,46 +40,5 @@ public class VehicleTypePricing {
         this.basePrice = basePrice;
         this.pricePerKm = pricePerKm;
         this.effectiveFrom = LocalDateTime.now();
-    }
-
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public VehicleType getVehicleType() {
-        return vehicleType;
-    }
-
-    public void setVehicleType(VehicleType vehicleType) {
-        this.vehicleType = vehicleType;
-    }
-
-    public double getBasePrice() {
-        return basePrice;
-    }
-
-    public void setBasePrice(double basePrice) {
-        this.basePrice = basePrice;
-    }
-
-    public double getPricePerKm() {
-        return pricePerKm;
-    }
-
-    public void setPricePerKm(double pricePerKm) {
-        this.pricePerKm = pricePerKm;
-    }
-
-    public LocalDateTime getEffectiveFrom() {
-        return effectiveFrom;
-    }
-
-    public void setEffectiveFrom(LocalDateTime effectiveFrom) {
-        this.effectiveFrom = effectiveFrom;
     }
 }

@@ -63,3 +63,13 @@
     </form>
   </div>
 </div>
+@if (showModal) {
+<app-modal
+  class="cd-modal show"
+  title="Login Unsuccessful"
+  [message]="errorMessage"
+  buttonText="OK"
+  (action)="onCdModalAction()"
+>
+</app-modal>
+}

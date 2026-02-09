@@ -1,8 +1,13 @@
 package com.ubre.backend.model;
 
+import com.ubre.backend.dto.VehicleDto;
 import com.ubre.backend.enums.VehicleType;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "vehicles")
 public class Vehicle {
@@ -15,108 +20,48 @@ public class Vehicle {
     private String model;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "vehicle_type", nullable = false)
-    private VehicleType vehicleType;
+    @Column(name = "type", nullable = false)
+    private VehicleType type;
 
-    @Column(name = "license_plate", nullable = false, unique = true)
-    private String licensePlate;
+    @Column(name = "seats", nullable = false)
+    private Integer seats;
 
-    @Column(name = "number_of_seats", nullable = false)
-    private int numberOfSeats;
+    @Column(name = "plates", nullable = false, unique = true)
+    private String plates;
 
-    @Column(name = "allows_babies")
-    private boolean allowsBabies = false;
+    @Column(name = "baby_friendly")
+    private Boolean babyFriendly = false;
 
-    @Column(name = "allows_pets")
-    private boolean allowsPets = false;
+    @Column(name = "pet_friendly")
+    private Boolean petFriendly = false;
 
-    @Column(name = "is_active")
-    private boolean isActive = true;
-
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "driver_id", nullable = false)
     private Driver driver;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location")
+    private Waypoint location;
 
     // Constructors
     public Vehicle() {}
 
-    public Vehicle(String model, VehicleType vehicleType, String licensePlate, int numberOfSeats) {
+    public Vehicle(String model, VehicleType type, Integer seats, String plates, Boolean babyFriendly, Boolean petFriendly) {
         this.model = model;
-        this.vehicleType = vehicleType;
-        this.licensePlate = licensePlate;
-        this.numberOfSeats = numberOfSeats;
+        this.type = type;
+        this.seats = seats;
+        this.plates = plates;
+        this.babyFriendly = babyFriendly;
+        this.petFriendly = petFriendly;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    public VehicleType getVehicleType() {
-        return vehicleType;
-    }
-
-    public void setVehicleType(VehicleType vehicleType) {
-        this.vehicleType = vehicleType;
-    }
-
-    public String getLicensePlate() {
-        return licensePlate;
-    }
-
-    public void setLicensePlate(String licensePlate) {
-        this.licensePlate = licensePlate;
-    }
-
-    public int getNumberOfSeats() {
-        return numberOfSeats;
-    }
-
-    public void setNumberOfSeats(int numberOfSeats) {
-        this.numberOfSeats = numberOfSeats;
-    }
-
-    public boolean isAllowsBabies() {
-        return allowsBabies;
-    }
-
-    public void setAllowsBabies(boolean allowsBabies) {
-        this.allowsBabies = allowsBabies;
-    }
-
-    public boolean isAllowsPets() {
-        return allowsPets;
-    }
-
-    public void setAllowsPets(boolean allowsPets) {
-        this.allowsPets = allowsPets;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    public Driver getDriver() {
-        return driver;
-    }
-
-    public void setDriver(Driver driver) {
-        this.driver = driver;
+    public Vehicle(VehicleDto dto) {
+        this.id = dto.getId();
+        this.model = dto.getModel();
+        this.type = dto.getType();
+        this.seats = dto.getSeats();
+        this.babyFriendly = dto.getBabyFriendly();
+        this.petFriendly = dto.getPetFriendly();
+        this.plates = dto.getPlates();
     }
 }

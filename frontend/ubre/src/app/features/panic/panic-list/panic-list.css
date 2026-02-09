@@ -1,0 +1,80 @@
+.backdrop { position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.1); }
+.panel {
+  position: fixed; top: 0; left: 0; bottom: 0; width: 400px;
+  background: #fff; transform: translateX(-100%); opacity: 0;
+  transition: transform 0.5s cubic-bezier(.22,.61,.36,1), opacity .15s ease;
+  z-index: 3100; box-shadow: 12px 0 40px rgba(0, 0, 0, 0.12);
+  display: flex; flex-direction: column; overflow-y: auto;
+}
+.panel.open { transform: translateX(0); opacity: 1; }
+
+.header { display: flex; align-items: center; gap: 10px; padding: 24px 24px 10px; }
+.back { border: 0; background: transparent; cursor: pointer; }
+.title { font-size: 1.2rem; font-weight: 500; }
+
+.rd-wrap {
+  padding: 14px 18px 18px;
+  display: flex; flex-direction: column; gap: 14px;
+  font-family: var(--font-family);
+}
+
+.rd-section-title {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  margin: 0 0 4px; color: var(--color-neutral-dark-gray);
+  font-size: var(--font-size-regular);
+}
+.rd-section-title::before, .rd-section-title::after {
+  content: ""; height: 1px; background: var(--color-neutral-dark-gray); flex: 1;
+}
+
+.rd-panic-card {
+  position: relative;
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid var(--color-neutral-light-gray);
+  padding: 18px;
+  display: flex;
+  justify-content: space-between;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.rd-panic-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--drop-shadow);
+}
+
+.rd-info-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.rd-border-top {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-neutral-light-gray);
+}
+
+.rd-card-icon { width: 20px; height: 20px}
+
+.rd-card-text {
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.rd-card-badge {
+  font-size: 11px;
+  color: var(--color-neutral-dark-gray);
+  background: var(--color-neutral-light-gray);
+  padding: 2px 6px;
+  border-radius: 6px;
+  height: fit-content;
+}
+
+.rd-empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-neutral-dark-gray);
+  font-style: italic;
+}

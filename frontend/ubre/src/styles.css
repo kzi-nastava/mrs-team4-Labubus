@@ -51,3 +51,10 @@ html, body {
 
   /* TODO: Define spacing variables */
 }
+
+/* This was suppossed to be the style for time estimation of ride in progress, but it does not apply...
+/* .tracking-estimation {
+  color: var(--color-surface);
+  background-color: var(--color-primary);
+  border-radius: var(--border-radius-buttons-small);
+} */

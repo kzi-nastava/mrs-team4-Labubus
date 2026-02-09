@@ -1,14 +1,20 @@
 <div class="screen">
   <app-map
     class="map"
-    [waypoints]="waypoints"
-    (mapClick)="addFromMapClick($event.lat, $event.lon)">
+    [waypoints]="(ridePlanningStore.ridePlanningState$ | async)?.waypoints ?? []"
+    [vehicles]="(vehicleService.vehicleLocations$ | async) ?? []"
+    [routeGeometry]="(ridePlanningStore.ridePlanningState$ | async)?.routeInfo?.geometry ?? null"
+    [currentRideRoute]="(rideTrackingStore.trackedRoute$ | async) ?? null"
+    [currentRideWaypoints]="(rideTrackingStore.trackedWaypoints$ | async) ?? []"
+    [selectedRideRoute]="(selectedRideRoute$ | async) ?? null"
+    [selectedRideWaypoints]="(selectedRideWaypoints$ | async) ?? []"
+    (mapClick)="ridePlanningStore.addFromMapClick($event.lat, $event.lon)">
   </app-map>
 
   <div class="overlay">
 
     <!-- MAP CHOOSE A DESTINATION OVERLAY -->
-    @if (destOpen) {
+    @if (ridePlanningStore.destOpen) {
       <div class="dest-card show">
         <div class="dest-header">
           <button type="button" class="dest-back" (click)="onDestBack()">
@@ -17,28 +23,36 @@
           <div class="dest-title">Choose a destination</div>
         </div>
 
-        @for (w of waypoints; track w.id) {
+        @for (w of ridePlanningStore.waypoints; track w.id) {
           <div class="wp-row">
             <img src="waypoint.svg" alt="pin" class="wp-ico">
             <span class="wp-text">{{ w.label }}</span>
-            <button type="button" class="wp-x" (click)="removeWaypoint(w.id)">
+            <button type="button" class="wp-x" (click)="ridePlanningStore.removeWaypoint(w.id)">
               <img src="cancel_16dp_999999_FILL0_wght400_GRAD0_opsz20.svg" alt="remove waypoint">
             </button>
           </div>
         }
+        @if (isLoggedIn() || getWaypointCount() < 2) {
+          <div class="wp-row input">
+            <input
+              class="wp-input"
+              type="text"
+              [(ngModel)]="ridePlanningStore.query"
+              (ngModelChange)="ridePlanningStore.setQuery($event)"
+              placeholder="Enter destination">
+          </div>
+        }
 
-        <div class="wp-row input">
-          <input
-            class="wp-input"
-            type="text"
-            [(ngModel)]="query"
-            (input)="onQueryChange()"
-            placeholder="Enter destination">
-        </div>
+        @if (((ridePlanningStore.ridePlanningState$ | async)?.waypoints?.length ?? 0) === 0) {
+          <button type="button" class="s-item include-location" (click)="ridePlanningStore.addCurrentLocationAsFirstWaypoint()">
+            <img src="location.svg" alt="pin" class="s-ico">
+            <span class="s-text-medium">From my location</span>
+          </button>
+        }
 
         <div class="suggestions">
-          @for (s of suggestions; track s.place_id) {
-            <button type="button" class="s-item" (click)="addFromSuggestion(s)">
+          @for (s of ridePlanningStore.suggestions; track s.place_id) {
+            <button type="button" class="s-item" (click)="ridePlanningStore.addFromSuggestion(s)">
               <img src="location.svg" alt="pin" class="s-ico">
               <span class="s-text">{{ s.display_name }}</span>
             </button>
@@ -46,81 +60,43 @@
         </div>
 
         <div class="dest-footer">
-          <app-button (clicked)="onCdProceed()" width="100%">Proceed</app-button>
+          <button type="button" class="dest-btn dest-btn-filled" (click)="onCdProceed()">Proceed</button>
         </div>
       </div>
     }
 
+      <!-- RIDE OPTIONS MODAL -->
+      @if (ui.rideOptionsOpen) {
+        <app-ride-options 
+          class="ride-options"
+          (back)="onRideOptionsBack()"
+          (scheduleRide)="onRideOptionsScheduleRide($event)"
+          (proceed)="onRideOptionsProceed($event)">
+        </app-ride-options>
+      }
 
+      <!-- SCHEDULE TIMER -->
+      @if (ui.scheduleTimerOpen) {
+        <app-schedule-timer 
+          class="schedule-timer"
+          (back)="onScheduleTimerBack()"
+          (checkout)="onScheduleTimerCheckout($event)">
+        </app-schedule-timer>
+      }
 
-    <!-- RIDE OPTIONS MODAL -->
-    @if (rideOptionsOpen) {
-      <div class="ro-modal show" role="dialog" aria-label="Ride options">
-        <div class="rd-wrap">
-          <div class="ro-header">
-            <button type="button" class="ro-back" (click)="onRideOptionsBack()">
-              <img src="arrow_back_28dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg" alt="back">
-            </button>
-            <div class="ro-title">Ride options</div>
-          </div>
-
-          <div class="rd-pills">
-            <button type="button" class="rd-pill"
-                    [class.active]="rideOptions.rideType === 'Standard'"
-                    (click)="setRideType('Standard')">
-              Standard
-            </button>
-
-            <button type="button" class="rd-pill"
-                    [class.active]="rideOptions.rideType === 'Luxury'"
-                    (click)="setRideType('Luxury')">
-              Luxury
-            </button>
-
-            <button type="button" class="rd-pill"
-                    [class.active]="rideOptions.rideType === 'Van'"
-                    (click)="setRideType('Van')">
-              Van
-            </button>
-          </div>
-
-          <div class="rd-row">
-            <div class="rd-row-label">Baby-friendly</div>
-            <button type="button" class="rd-switch"
-                    [class.on]="rideOptions.babyFriendly"
-                    (click)="toggleRideBaby()">
-              <span class="rd-knob"></span>
-            </button>
-          </div>
-
-          <div class="rd-row">
-            <div class="rd-row-label">Pet-friendly</div>
-            <button type="button" class="rd-switch"
-                    [class.on]="rideOptions.petFriendly"
-                    (click)="toggleRidePet()">
-              <span class="rd-knob"></span>
-            </button>
-          </div>
-
-          <div class="ro-actions">
-            <button type="button" class="ro-btn ro-btn-outline" (click)="onScheduleRide()">
-              Schedule ride
-            </button>
-
-            <button type="button" class="ro-btn ro-btn-filled" (click)="onCheckout()">
-              Checkout
-            </button>
-          </div>
-        </div>
-      </div>
-    }
-
-
-
+      <!-- INVITE PASSENGERS -->
+      @if (ui.invitePassengersOpen) {
+        <app-invite-passengers 
+          class="invite-passengers show"
+          (back)="onInvitePassengersBack()"
+          (proceed)="onInvitePassengersProceed($event)">
+        </app-invite-passengers>
+      }
+    
 
     <!-- MAIN OVERLAY CONTENT -->
 
-    @if (cdModalOpen) {
+    @if (ui.cdModalOpen) {
       <app-modal class="cd-modal show"
         title="Choose a destination"
         message="Please select a valid destination"
@@ -129,7 +105,6 @@
       </app-modal>
     }
 
-
     <!-- ICONS -->
 
     <app-icon-button class="menu-button"
@@ -137,42 +112,133 @@
       (click)="openMenu()">
     </app-icon-button>
 
+    @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
+    <app-icon-button 
+      class="toggle-driver-status-button"
+      [class.active-driver]="isDriverActive"
+      [iconUrl]="isDriverActive 
+        ? 'check_circle_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg' 
+        : 'radio_button_unchecked_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg'"
+      (click)="toggleStatus()">
+      </app-icon-button>
+    }
+
     <app-icon-button class="chat-button"
       iconUrl="chat_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
       (click)="openChat()">
     </app-icon-button>
 
+    @if ((ridePlanningStore.currentRide$ | async)?.status === RideStatus.IN_PROGRESS && (userService.currentUser$ | async)?.role === Role.REGISTERED_USER) {
+      <app-icon-button class="complaint-button"
+        iconUrl="complaint.svg"
+        (click)="openComplaintModal()">
+      </app-icon-button>
+    }
+
     <app-icon-button class="map-button"
       iconUrl="map_search_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
+      [disabled]="(ridePlanningStore.currentRide$ | async)?.status === RideStatus.IN_PROGRESS"
       (click)="toggleDest()">
     </app-icon-button>
 
+    <!-- BUTTON CONTAINER -->
+    <div class="ride-buttons">
+      
+      <!-- PANIC BUTTON -->
+      @if ((userService.currentUser$ | async)?.role === Role.REGISTERED_USER 
+         || (userService.currentUser$ | async)?.role === Role.DRIVER) {
+        <app-panic-button 
+          [class.disabled]="!(ridePlanningStore.currentRide$ | async)"
+          [disabled]="!(ridePlanningStore.currentRide$ | async)"
+          (click)="activatePanic()">
+        </app-panic-button> 
+      }
+      
+      <!-- START RIDE BUTTON (DRIVERS ONLY) -->
+      @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
+        <button 
+          class="ride-button"
+          [class.disabled]="(ridePlanningStore.currentRide$ | async)?.status != 'PENDING'"
+          [disabled]="(ridePlanningStore.currentRide$ | async)?.status != 'PENDING'"
+          (click)="onStartRideClick()">
+          <span class="ride-text">Start this ride</span>
+        </button>
+      }
+
+      <!-- CANCEL RIDE BUTTON (DRIVERS ONLY) -->
+      @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
+        <button 
+          class="ride-button"
+          [class.disabled]="!canCancelRide()"
+          [disabled]="!canCancelRide()"
+          (click)="onCancelRideClick()">
+          <span class="ride-text">Cancel</span>
+        </button> 
+      }
+
+      <!-- STOP RIDE BUTTON (DRIVERS ONLY) -->
+      @if ((userService.currentUser$ | async)?.role === Role.DRIVER) {
+        <button 
+          class="ride-button"
+          [class.disabled]="!canStopRide()"
+          [disabled]="!canStopRide()"
+          (click)="onStopRideClick()">
+          <span class="ride-text">Stop</span>
+        </button> 
+      }
+
+      <!-- CANCEL RIDE BUTTON (USERS ONLY) -->
+      @if ((userService.currentUser$ | async)?.role === Role.REGISTERED_USER) {
+        <button 
+          class="ride-button"
+          [class.disabled]="!canCancelRide()"
+          [disabled]="!canCancelRide()"
+          (click)="onCancelUserClick()">
+          <span class="ride-text">Cancel</span>
+        </button> 
+      }
+
+    </div>
+
     <!-- TOAST NOTIFICATION -->
-    @if (toastOpen) {
+    @if (ui.toastOpen) {
       <app-toast [title]="toastTitle" [message]="toastMessage"></app-toast>
     }
 
+    <!-- PANIC NOTIFICATION -->
+    <app-panic-toast ></app-panic-toast>
+    
+
     <!-- SIDE MENU -->
     <app-side-menu
-      [open]="menuOpen"
+      [open]="ui.menuOpen"
       title="Account"
-      [role]="user.role"
-      [user]="user"
+      [role]="(userService.currentUser$ | async)?.role ?? Role.GUEST"
+      [user]="(userService.currentUser$ | async) ?? { id: 0, role: Role.GUEST, name: '', surname: '', email: '', avatarUrl: 'default-avatar.jpg', phone: '', address: '' }"
+      [avatarSrc]="(userService.avatarSrc$ | async) ?? 'default-avatar.jpg'"
       (closed)="closeMenu()"
       (action)="handleMenuAction($event)">
     </app-side-menu>
 
     <!-- CHECKOUT MODAL -->
-    @if (checkoutModalOpen) {
+    @if (ui.checkoutModalOpen) {
       <app-modal-container class="checkout-modal" title="Checkout" [showTitleBar]="true" (backPressed)="onCheckoutModalBack()">
-        <app-stat-card value="$12.50" label="Estimated price" variant="dark"></app-stat-card>
+        <app-stat-card [value]="'$' + (ridePlanningStore.ridePlanningState$ | async)?.price" label="Estimated price" variant="dark"></app-stat-card> <!-- in euro -->
         <app-button width="290px" (click)="onConfirmRide()">Confirm ride</app-button>
+      </app-modal-container>
+    }
+
+    <!-- CHECKOUT FOR UNREGISTERED USER -->
+    @if (ui.timeEstimate) {
+      <app-modal-container class="checkout-modal" title="Checkout" [showTitleBar]="true" (backPressed)="onEstimateTime()">
+        <app-stat-card [value]="calculateEstimatedTime() +'min'" label="Estimated time" variant="dark"></app-stat-card> <!-- in minutes -->
+        <app-button width="290px" (click)="onEstimateTime()">OK</app-button>
       </app-modal-container>
     }
 
     <!-- ACCOUNT SETTINGS SHEET -->
     <app-sheet
-      [open]="accountSettingsOpen"
+      [open]="ui.accountSettingsOpen"
       title="Account settings"
       (closed)="closeAllSidePanels()"
       (back)="onAccountSettingsBack()"
@@ -182,13 +248,14 @@
 
         <div class="as-section-title"><span>Account information</span></div>
 
-        <div class="as-avatar">
-          <img [src]="editing.avatarUrl" alt="avatar">
+        <div class="as-avatar" (click)="accountSettingsAvatarInput.click()">
+          <img [src]="accountSettingsService.avatarSrc$ | async" alt="avatar">
+          <input #accountSettingsAvatarInput type="file" accept=".jpg" hidden (change)="onAccountSettingsAvatarSelected($event)">
         </div>
 
         <div class="as-field">
           <div class="as-label">Email</div>
-          <input class="as-input" [(ngModel)]="editing.email" readonly>
+          <input class="as-input" [ngModel]="accountSettingsService.draft?.email" readonly>
         </div>
 
         <div class="as-field">
@@ -197,7 +264,7 @@
           <div class="as-input-row">
             <input class="as-input"
                   [type]="hidePassword ? 'password' : 'text'"
-                  [value]="editing.passwordMasked"
+                  [value]="'youcannotseeit'"
                   readonly>
 
             <button class="as-eye" type="button" (click)="hidePassword = !hidePassword">
@@ -212,10 +279,10 @@
           </button>
         </div>
 
-        @if (editing.role === 'driver') {
+        @if (accountSettingsService.draft?.role === Role.DRIVER) {
           <div class="as-section-title"><span>Statistics</span></div>
           <div class="as-stat">
-            <app-stat-card [value]="editing.activeLast24h ?? '0m'"
+            <app-stat-card [value]="userStatsService.getActivePast24HoursDisplay((userStatsService.currentUserStats$ | async)?.activePast24Hours ?? 0)"
                           label="Active in last 24h"
                           variant="dark"></app-stat-card>
           </div>
@@ -223,27 +290,61 @@
 
         <div class="as-section-title"><span>Personal information</span></div>
 
-        <div class="as-field">
-          <div class="as-label">Name</div>
-          <input class="as-input" [(ngModel)]="editing.name">
-        </div>
+        @if (accountSettingsService.draft) {
+          <div class="as-field">
+            <div class="as-label">
+              <span>Name</span>
+              @if (accountSettingsService.fieldErrors?.name) {
+                <span class="as-error">{{ accountSettingsService.fieldErrors?.name }}</span>
+              }
+            </div>
+            <input class="as-input" 
+                   [class.error]="!!accountSettingsService.fieldErrors?.name"
+                   [(ngModel)]="accountSettingsService.draft.name"
+                   (ngModelChange)="accountSettingsService.clearFieldError('name')">
+          </div>
 
-        <div class="as-field">
-          <div class="as-label">Surname</div>
-          <input class="as-input" [(ngModel)]="editing.surname">
-        </div>
+          <div class="as-field">
+            <div class="as-label">
+              <span>Surname</span>
+              @if (accountSettingsService.fieldErrors?.surname) {
+                <span class="as-error">{{ accountSettingsService.fieldErrors?.surname }}</span>
+              }
+            </div>
+            <input class="as-input" 
+                   [class.error]="!!accountSettingsService.fieldErrors?.surname"
+                   [(ngModel)]="accountSettingsService.draft.surname"
+                   (ngModelChange)="accountSettingsService.clearFieldError('surname')">
+          </div>
 
-        <div class="as-field">
-          <div class="as-label">Residental address</div>
-          <input class="as-input" [(ngModel)]="editing.address">
-        </div>
+          <div class="as-field">
+            <div class="as-label">
+              <span>Residental address</span>
+              @if (accountSettingsService.fieldErrors?.address) {
+                <span class="as-error">{{ accountSettingsService.fieldErrors?.address }}</span>
+              }
+            </div>
+            <input class="as-input" 
+                   [class.error]="!!accountSettingsService.fieldErrors?.address"
+                   [(ngModel)]="accountSettingsService.draft.address"
+                   (ngModelChange)="accountSettingsService.clearFieldError('address')">
+          </div>
 
-        <div class="as-field">
-          <div class="as-label">Phone number</div>
-          <input class="as-input" [(ngModel)]="editing.phone">
-        </div>
+          <div class="as-field">
+            <div class="as-label">
+              <span>Phone number</span>
+              @if (!!accountSettingsService.fieldErrors?.phone) {
+                <span class="as-error">{{ accountSettingsService.fieldErrors?.phone }}</span>
+              }
+            </div>
+            <input class="as-input" 
+                   [class.error]="!!accountSettingsService.fieldErrors?.phone"
+                   [(ngModel)]="accountSettingsService.draft.phone"
+                   (ngModelChange)="accountSettingsService.clearFieldError('phone')">
+          </div>
+        }
 
-        @if (editing.role === 'driver') {
+        @if (accountSettingsService.draft?.role === Role.DRIVER) {
           <button class="as-link as-link-bottom" type="button" (click)="onViewVehicleInfo()">
             View vehicle information
           </button>
@@ -255,7 +356,7 @@
       <div class="footer-actions" sheetFooter>
         <app-button (clicked)="saveAccountSettings()">Save</app-button>
         <app-button variant="outlined"
-                    (clicked)="accountSettingsOpen=false">
+                    (clicked)="ui.accountSettingsOpen=false">
           Cancel
         </app-button>
       </div>
@@ -263,7 +364,7 @@
 
     <!-- CHANGE PASSWORD SHEET -->
     <app-sheet
-      [open]="changePasswordOpen"
+      [open]="ui.changePasswordOpen"
       title="Change password"
       (closed)="closeChangePassword()"
       (back)="onChangePasswordBack()">
@@ -274,8 +375,13 @@
           <input
             class="cp-input"
             type="password"
-            [(ngModel)]="newPassword"
+            [class.error]="!!changePasswordService.fieldErrors?.newPassword"
+            [(ngModel)]="changePasswordService.newPassword"
+            (ngModelChange)="changePasswordService.clearError('newPassword')"
             placeholder="Enter your password">
+            @if (changePasswordService.fieldErrors?.newPassword) {
+              <span class="cp-error">{{ changePasswordService.fieldErrors?.newPassword }}</span>
+            }
         </div>
 
         <div class="cp-field">
@@ -283,12 +389,17 @@
           <input
             class="cp-input"
             type="password"
-            [(ngModel)]="confirmPassword"
+            [class.error]="!!changePasswordService.fieldErrors?.confirmNewPassword"
+            [(ngModel)]="changePasswordService.confirmNewPassword"
+            (ngModelChange)="changePasswordService.clearError('confirmNewPassword')"
             placeholder="Enter your password">
+            @if (changePasswordService.fieldErrors?.confirmNewPassword) {
+              <span class="cp-error">{{ changePasswordService.fieldErrors?.confirmNewPassword }}</span>
+            }
         </div>
 
-        @if (passwordMismatch) {
-          <div class="cp-error">Passwords do not match</div>
+        @if (changePasswordService.fieldErrors?.passwordMismatch) {
+          <div class="cp-error">{{ changePasswordService.fieldErrors?.passwordMismatch }}</div>
         }
       </div>
 
@@ -300,7 +411,7 @@
 
     <!-- VEHICLE INFORMATION SHEET -->
     <app-sheet
-      [open]="vehicleInfoOpen"
+      [open]="ui.vehicleInfoOpen"
       title="Vehicle information"
       (closed)="closeVehicleInfo()"
       (back)="onVehicleInfoBack()">
@@ -308,45 +419,43 @@
       <div class="vi-wrap">
         <div class="vi-field">
           <div class="vi-label">Vehicle model</div>
-          <input class="vi-input" [value]="vehicle.model" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.model" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">Vehicle type</div>
-          <input class="vi-input" [value]="vehicle.type" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.type" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">License plates</div>
-          <input class="vi-input" [value]="vehicle.plates" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.plates" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">Number of seats</div>
-          <input class="vi-input" [value]="vehicle.seats" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.seats" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">Baby-friendly</div>
-          <input class="vi-input" [value]="vehicle.babyFriendly" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.babyFriendly" readonly>
         </div>
 
         <div class="vi-field">
           <div class="vi-label">Pet-friendly</div>
-          <input class="vi-input" [value]="vehicle.petFriendly" readonly>
+          <input class="vi-input" [value]="(userService.currentUserVehicle$ | async)?.petFriendly" readonly>
         </div>
       </div>
     </app-sheet>
 
 
-    <!-- EXAMPLE OF RIDE CARD USE -->
-    <!-- <app-ride-card [selected]="selectedRide === 1" [iconUrl]="favoriteRides.includes(1) ? 'favorite-red.svg' : 'favorite-grey.svg'" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card> -->
-
-
     <!-- REGISTER A DRIVER (ADMIN ROLE)-->  
-    @if (user.role === 'admin') {
+    @let driverRegistration = (driverRegistrationService.draft$ | async);
+    @let driverAvatarSrc = (driverRegistrationService.avatarSrc$ | async);
+    @if ((userService.currentUser$ | async)?.role === Role.ADMIN && driverRegistration) {
       <app-sheet
-        [open]="registerDriverOpen"
+        [open]="ui.registerDriverOpen"
         title="Register a driver"
         (closed)="closeAllSidePanels()"
         (back)="onRegisterDriverBack()"
@@ -355,65 +464,101 @@
 
           <div class="rd-section-title"><span>Account information</span></div>
 
-          <div class="rd-avatar">
-            <img [src]="driverRegister.avatarUrl" alt="avatar">
+          <div class="rd-avatar" (click)="driverAvatarInput.click()">
+            <img [src]="driverAvatarSrc || 'default-avatar.jpg'" alt="avatar">
           </div>
 
+          <input #driverAvatarInput type="file" accept=".jpg" hidden (change)="onDriverRegistrationAvatarSelected($event)">
+
           <div class="rd-field">
-            <div class="rd-label">Email</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.email" placeholder="Driver's email">
+              <div class="rd-label-row">
+              <span>Email</span>
+                @if (driverRegistrationService.fieldErrors?.email) {
+                  <span class="rd-error">{{ driverRegistrationService.fieldErrors?.email }}</span>
+                }
+            </div>
+            <input #f1rd (keydown.enter)="focusNext(f2rd)" class="rd-input" [class.error]="!!driverRegistrationService.fieldErrors?.email" [(ngModel)]="driverRegistration.email" (ngModelChange)="patchDriverRegistration({ email: $event }); driverRegistrationService.clearFieldError('email')" placeholder="Driver's email">
           </div>
 
           <div class="rd-field">
             <div class="rd-label-row">
               <span>Password</span>
-              @if (driverRegister.passwordError) { <span class="rd-required">Required</span> }
+              @if (!!driverRegistrationService.fieldErrors?.password) { <span class="rd-error"> {{ driverRegistrationService.fieldErrors?.password }}</span> }
             </div>
 
             <input
+              #f2rd (keydown.enter)="focusNext(f3rd)"
               class="rd-input"
-              [class.error]="driverRegister.passwordError"
+              [class.error]="!!driverRegistrationService.fieldErrors?.password"
               type="password"
-              [(ngModel)]="driverRegister.password"
+              [(ngModel)]="driverRegistration.password"
               placeholder="Driver's password"
-              (blur)="validateDriverPassword()"
+              (ngModelChange)="patchDriverRegistration({ password: $event }); driverRegistrationService.clearFieldError('password')"
             >
           </div>
 
           <div class="rd-field">
-            <div class="rd-label">Confirm password</div>
-            <input class="rd-input" type="password" [(ngModel)]="driverRegister.confirmPassword" placeholder="Driver's password">
+            <div class="rd-label-row">
+              <span>Confirm</span>
+              @if (!!driverRegistrationService.fieldErrors?.passwordConfirm) { <span class="rd-error"> {{ driverRegistrationService.fieldErrors?.passwordConfirm }}</span> }
+            </div>
+            <input #f3rd (keydown.enter)="focusNext(f4rd)" class="rd-input" type="password" [(ngModel)]="confirmPasswordDR" placeholder="Driver's password" (ngModelChange)="driverRegistrationService.clearFieldError('passwordConfirm')" [class.error]="!!driverRegistrationService.fieldErrors?.passwordConfirm">
           </div>
 
 
           <div class="rd-section-title"><span>Personal information</span></div>
 
           <div class="rd-field">
-            <div class="rd-label">Name</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.name" placeholder="Driver's name">
+            <div class="rd-label-row">
+              <span>Name</span>
+              @if (!!driverRegistrationService.fieldErrors?.name) {
+                <span class="rd-error">{{ driverRegistrationService.fieldErrors?.name }}</span>
+              }
+            </div>
+            <input #f4rd (keydown.enter)="focusNext(f5rd)" class="rd-input" [(ngModel)]="driverRegistration.name" placeholder="Driver's name" (ngModelChange)="patchDriverRegistration({ name: $event }); driverRegistrationService.clearFieldError('name')" [class.error]="!!driverRegistrationService.fieldErrors?.name">
           </div>
 
           <div class="rd-field">
-            <div class="rd-label">Surname</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.surname" placeholder="Driver's surname">
+            <div class="rd-label-row">
+              <span>Surname</span>
+              @if (!!driverRegistrationService.fieldErrors?.surname) {
+                <span class="rd-error">{{ driverRegistrationService.fieldErrors?.surname }}</span>
+              }
+            </div>
+            <input #f5rd (keydown.enter)="focusNext(f6rd)" class="rd-input" [(ngModel)]="driverRegistration.surname" placeholder="Driver's surname" (ngModelChange)="patchDriverRegistration({ surname: $event }); driverRegistrationService.clearFieldError('surname')" [class.error]="!!driverRegistrationService.fieldErrors?.surname">
           </div>
 
           <div class="rd-field">
-            <div class="rd-label">Residental address</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.address" placeholder="Driver's residental address">
+            <div class="rd-label-row">
+              <span>Residental address</span>
+              @if (!!driverRegistrationService.fieldErrors?.address) {
+                <span class="rd-error">{{ driverRegistrationService.fieldErrors?.address }}</span>
+              }
+            </div>
+            <input #f6rd (keydown.enter)="focusNext(f7rd)" class="rd-input" [(ngModel)]="driverRegistration.address" placeholder="Driver's residental address" (ngModelChange)="patchDriverRegistration({ address: $event }); driverRegistrationService.clearFieldError('address')" [class.error]="!!driverRegistrationService.fieldErrors?.address">
           </div>
 
           <div class="rd-field">
-            <div class="rd-label">Phone number</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.phone" placeholder="Driver's phone number">
+            <div class="rd-label-row">
+              <span>Phone number</span>
+              @if (!!driverRegistrationService.fieldErrors?.phone) {
+                <span class="rd-error">{{ driverRegistrationService.fieldErrors?.phone }}</span>
+              }
+            </div>
+            <input #f7rd (keydown.enter)="focusNext(f8rd)" class="rd-input" [(ngModel)]="driverRegistration.phone" placeholder="Driver's phone number" (ngModelChange)="patchDriverRegistration({ phone: $event }); driverRegistrationService.clearFieldError('phone')" [class.error]="!!driverRegistrationService.fieldErrors?.phone">
           </div>
 
 
           <div class="rd-section-title"><span>Vehicle information</span></div>
 
           <div class="rd-field">
-            <div class="rd-label">Vehicle model</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.vehicleModel" placeholder="Driver's vehicle model">
+            <div class="rd-label-row">
+              <span>Vehicle model</span>
+              @if (!!driverRegistrationService.fieldErrors?.model) {
+                <span class="rd-error">{{ driverRegistrationService.fieldErrors?.model }}</span>
+              }
+            </div>
+            <input #f8rd (keydown.enter)="focusNext(f9rd)" class="rd-input" [(ngModel)]="driverRegistration.vehicle.model" placeholder="Driver's vehicle model" (ngModelChange)="patchDriverRegistration({ vehicle: { model: $event } }); driverRegistrationService.clearFieldError('model')" [class.error]="!!driverRegistrationService.fieldErrors?.model">
           </div>
 
           <div class="rd-field">
@@ -422,30 +567,35 @@
             <div class="rd-pills">
               <button class="rd-pill"
                       type="button"
-                      [class.active]="driverRegister.vehicleType==='Standard'"
-                      (click)="driverRegister.vehicleType='Standard'">
+                      [class.active]="driverRegistration.vehicle.type===VehicleType.STANDARD"
+                      (click)="driverRegistration.vehicle.type=VehicleType.STANDARD">
                 Standard
               </button>
 
               <button class="rd-pill"
                       type="button"
-                      [class.active]="driverRegister.vehicleType==='Luxury'"
-                      (click)="driverRegister.vehicleType='Luxury'">
+                      [class.active]="driverRegistration.vehicle.type===VehicleType.LUXURY"
+                      (click)="driverRegistration.vehicle.type=VehicleType.LUXURY">
                 Luxury
               </button>
 
               <button class="rd-pill"
                       type="button"
-                      [class.active]="driverRegister.vehicleType==='Van'"
-                      (click)="driverRegister.vehicleType='Van'">
+                      [class.active]="driverRegistration.vehicle.type===VehicleType.VAN"
+                      (click)="driverRegistration.vehicle.type=VehicleType.VAN">
                 Van
               </button>
             </div>
           </div>
 
           <div class="rd-field">
-            <div class="rd-label">License plates</div>
-            <input class="rd-input" [(ngModel)]="driverRegister.plates" placeholder="Vehicle license plates">
+            <div class="rd-label-row">
+              <span>License plates</span>
+              @if (!!driverRegistrationService.fieldErrors?.plates) {
+                <span class="rd-error">{{ driverRegistrationService.fieldErrors?.plates }}</span>
+              }
+            </div>
+            <input #f9rd class="rd-input" [(ngModel)]="driverRegistration.vehicle.plates" placeholder="Vehicle license plates" (ngModelChange)="patchDriverRegistration({ vehicle: { plates: $event } }); driverRegistrationService.clearFieldError('plates')" [class.error]="!!driverRegistrationService.fieldErrors?.plates">  
           </div>
 
           <div class="rd-row">
@@ -453,7 +603,7 @@
 
             <div class="rd-stepper">
               <button class="rd-step" type="button" (click)="decDriverSeats()">−</button>
-              <div class="rd-step-value">{{ driverRegister.seats }}</div>
+              <div class="rd-step-value">{{ driverRegistration.vehicle.seats }}</div>
               <button class="rd-step" type="button" (click)="incDriverSeats()">+</button>
             </div>
           </div>
@@ -462,8 +612,8 @@
             <div class="rd-row-label">Baby-friendly</div>
             <button class="rd-switch"
                     type="button"
-                    [class.on]="driverRegister.babyFriendly"
-                    (click)="driverRegister.babyFriendly=!driverRegister.babyFriendly">
+                    [class.on]="driverRegistration.vehicle.babyFriendly"
+                    (click)="toggleBabyFriendly()">
               <span class="rd-knob"></span>
             </button>
           </div>
@@ -472,8 +622,8 @@
             <div class="rd-row-label">Pet-friendly</div>
             <button class="rd-switch dark"
                     type="button"
-                    [class.on]="driverRegister.petFriendly"
-                    (click)="driverRegister.petFriendly=!driverRegister.petFriendly">
+                    [class.on]="driverRegistration.vehicle.petFriendly"
+                    (click)="togglePetFriendly()">
               <span class="rd-knob"></span>
             </button>
           </div>
@@ -489,6 +639,74 @@
     }
 
     <!-- RIDE HISTORY SHEET -->
-    <app-ride-list class="ride-history" (onClose)="onRideHistoryBack()" [open]="showRideHistory" [rides]="rides" [user]="currentUser" title="Ride history"></app-ride-list>
+    <app-ride-history 
+      class="ride-history" 
+      (onClose)="onRideHistoryBack()" 
+      [open]="ui.showRideHistory" 
+      (onError)="onEmmitError($event)" 
+      (onReorder)="onFavoriteReorder($event)"
+      (onRenderWaypoints)="onRenderWaypoints($event)"></app-ride-history>
+
+    <!-- FAVORITE RIDES SHEET -->
+    <app-favorite-rides
+      class="favorite-rides"
+      (onClose)="onFavouritesBack()"
+      [open]="ui.showFavourites"
+      (onError)="onEmmitError($event)"
+      (onReorder)="onFavoriteReorder($event)"
+      (onRenderWaypoints)="onRenderWaypoints($event)"></app-favorite-rides>
+
+      <!-- SCHEDULED RIDES SHEET -->
+    <app-scheduled-rides
+      class="scheduled-rides"
+      (onClose)="onScheduledRidesBack()"
+      [open]="ui.showScheduledRides"
+      (onError)="onEmmitError($event)"
+      (onReorder)="onFavoriteReorder($event)"
+      (onRenderWaypoints)="onRenderWaypoints($event)"></app-scheduled-rides>
+
+    <!-- PROFILE CHANGES SHEET -->
+    @if ((userService.currentUser$ | async)?.role === Role.ADMIN) {
+    <app-sheet
+      [open]="ui.profileChangesOpen"
+      title="Profile changes"
+      (closed)="closeProfileChanges()"
+      (back)="onProfileChangesBack()">
+
+      <div class="pc-list">
+        @for (it of profileChangeService.profileChanges$ | async; track it.id) {
+          <app-profile-change-card [item]="it"
+            (approve)="approveProfileChange($event)"
+            (reject)="rejectProfileChange($event)">
+          </app-profile-change-card>
+        }
+
+        @if ((profileChangeService.profileChanges$ | async)?.length === 0) {
+          <div class="pc-empty">No pending requests</div>
+        }
+      </div>
+    </app-sheet>
+  }
+
+  @if ((userService.currentUser$ | async)?.role === Role.ADMIN) {
+    <app-sheet [open]="ui.panicListOpen"
+      title="Panic Notifications"
+      (back)="ui.panicListOpen=false; ui.menuOpen = true">
+      <app-panic-list></app-panic-list>
+    </app-sheet>
+  }
+
   </div>
+
+  <app-review-modal [show]="ui.reviewModalOpen" (onError)="onEmmitError($event)"></app-review-modal>
+  <app-complaint-modal [show]="ui.complaintModalOpen" (onError)="onEmmitError($event)"></app-complaint-modal>
+
+  @if (ui.showCancelModal) {
+    <app-driver-cancel-dialog 
+      (close)="ui.showCancelModal = false" 
+      (confirmed)="handleCancelRide($event)">
+    </app-driver-cancel-dialog>
+  }
+
+
 </div>

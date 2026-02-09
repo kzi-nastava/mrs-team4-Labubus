@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { RideDto } from '../../../dtos/ride-dto';
+import { RideCardDto } from '../../../dtos/ride-card-dto';
 
 @Component({
   selector: 'app-ride-card',
@@ -9,11 +9,13 @@ import { RideDto } from '../../../dtos/ride-dto';
   styleUrl: './ride-card.css',
 })
 export class RideCard {
-  @Input() ride : RideDto | null = null;
+  @Input() ride : RideCardDto | null = null;
   @Input() iconUrl : string = "http://localhost:4200/favorite_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg"
   @Input() selected : boolean = false;
   @Output() select = new EventEmitter<any>();
   @Output() action = new EventEmitter<any>();
+
+  start : Date = new Date();
 
   onSelect(event : MouseEvent) {
     const clickedElement = event.target as Element;
@@ -23,5 +25,10 @@ export class RideCard {
 
   onAction() {
     this.action.emit(this.ride)
+  }
+  
+  ngOnInit() {
+    if (this.ride)
+      this.start = new Date(this.ride.startTime)
   }
 }

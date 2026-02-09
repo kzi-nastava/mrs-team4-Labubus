@@ -1,15 +1,21 @@
 package com.example.ubre.ui.main;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,10 +30,16 @@ import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.ubre.R;
+import com.example.ubre.ui.apis.ApiClient;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.enums.VehicleType;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
+import com.example.ubre.ui.apis.LoginApi;
+import com.example.ubre.ui.services.UserService;
+import com.example.ubre.ui.storages.ReviewStorage;
+import com.example.ubre.ui.storages.ProfileChangeStorage;
+import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.navigation.NavigationView;
 import com.bumptech.glide.Glide;
 
@@ -38,14 +50,21 @@ import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapController;
 
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
     private MapView map;
     private View btnMenu;
     private View btnChat;
     private DrawerLayout drawer;
-    private UserDto currentUser;
-    private VehicleDto currentVehicle; // If role is DRIVER, that is drivers vehicle
+    LoginApi loginApi = ApiClient.getClient().create(LoginApi.class);
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,12 +124,69 @@ public class MainActivity extends AppCompatActivity {
                 drawer.openDrawer(GravityCompat.START)
         );
 
-        // Example role assignment; in a real app, this would come from user authentication
-        UserDto currentUser = new UserDto(1L, Role.ADMIN, "", "registered@user.com", "John", "Doe", "1234567890", "123 Main St");
-        currentVehicle = new VehicleDto(1L, "Toyota Prius", VehicleType.STANDARD, "ABC-123", 4, true, false);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
 
-        setMenuOptions(currentUser.getRole());
-        fillDrawerHeader(currentUser);
+        setMenuOptions(Role.GUEST);
+
+        if (token != null && !token.isEmpty()) {
+            try { UserService.getInstance(getApplicationContext()).loadCurrentUser(); }
+            catch (Exception e) { Log.e(TAG, "Failed to load current user", e); }
+            try { UserService.getInstance(getApplicationContext()).loadCurrentUserAvatar(); }
+            catch (Exception e) { Log.e(TAG, "Failed to load current user avatar", e); }
+            // driver only (extract role from shared pref
+            String roleString = sharedPreferences.getString("role", "GUEST");
+            Role role = Role.valueOf(roleString);
+            if (role == Role.DRIVER) {
+                try { UserService.getInstance(getApplicationContext()).loadCurrentUserVehicle(); }
+                catch (Exception e) { Log.e(TAG, "Failed to load current user vehicle", e); }
+                try { UserService.getInstance(getApplicationContext()).loadCurrentUserStats(); }
+                catch (Exception e) { Log.e(TAG, "Failed to load current user stats", e); }
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+        // SEKCIJA ZA OSLUŠKIVANJE PROMENA KORISNIKA
+
+        UserStorage.getInstance().getCurrentUser().observe(this, currentUser -> {
+            SharedPreferences sp2 = getSharedPreferences("app_prefs", MODE_PRIVATE);
+            String token2 = sp2.getString("jwt", null);
+            if (currentUser == null) {
+                if (token2 != null && !token2.isEmpty()) { // user se učitava, samo čekaj
+                    return;
+                }
+                // ako nema ni korisnika a ni tokena, onda je gost
+                setMenuOptions(Role.GUEST);
+                return;
+            }
+            setMenuOptions(currentUser.getRole());
+            fillDrawerHeader();
+        });
+
+        UserStorage.getInstance().getCurrentUserAvatar().observe(this, avatar -> {
+            fillDrawerHeader();
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setItemIconTintList(null);
@@ -120,20 +196,31 @@ public class MainActivity extends AppCompatActivity {
             int itemId = item.getItemId();
 
             if (itemId == R.id.nav_account_settings) {
-                if (currentUser.getRole() == Role.DRIVER) {
-                    showFragment(AccountSettingsFragment.newInstance(currentUser, currentVehicle));
+                if (UserStorage.getInstance().getCurrentUser().getValue() != null && UserStorage.getInstance().getCurrentUser().getValue().getRole() == Role.DRIVER) {
+                    showFragment(AccountSettingsFragment.newInstance());
                     return true;
                 } else {
-                    showFragment(AccountSettingsFragment.newInstance(currentUser, null));
+                    showFragment(AccountSettingsFragment.newInstance());
                     return true;
                 }
             }
-            else if (itemId == R.id.nav_ride_history) { showFragment(RideHistoryFragment.newInstance(currentUser)); return true; }
+            else if (itemId == R.id.nav_ride_history) { showFragment(RideHistoryFragment.newInstance()); return true; }
             else if (itemId == R.id.nav_profile_changes) {
                 showFragment(ProfileChangesFragment.newInstance());
                 return true;
             } else if (itemId == R.id.nav_log_out) {
                 logout();
+                return true;
+            } else if (itemId == R.id.nav_log_in) {
+                Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
+                startActivity(intent);
+                finish();
+                return true;
+            }
+            else if (itemId == R.id.nav_register) {
+                Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
+                startActivity(intent);
+                finish();
                 return true;
             }
 
@@ -143,6 +230,17 @@ public class MainActivity extends AppCompatActivity {
         btnMenu = findViewById(R.id.btn_menu);
         btnChat = findViewById(R.id.btn_chat);
 
+
+        // Adding an observer that opens review modal when it's state is set
+        ReviewStorage.getInstance().getRideId().observe(this, (rideId) -> {
+            if (rideId != null)
+                showModal(new ReviewModalFragment());
+            else {
+                FrameLayout modalContainer = findViewById(R.id.modal_container);
+                modalContainer.setVisibility(View.GONE);
+                modalContainer.removeAllViews();
+            }
+        });
     }
 
     @Override
@@ -187,19 +285,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressLint("SetTextI18n")
-    private void fillDrawerHeader(UserDto user) {
+    private void fillDrawerHeader() {
+        UserDto user = UserStorage.getInstance().getCurrentUser().getValue();
+
         NavigationView nav = findViewById(R.id.nav_view);
 
         ImageView avatar = nav.getHeaderView(0).findViewById(R.id.img_avatar);
         TextView name = nav.getHeaderView(0).findViewById(R.id.txt_name);
         TextView phone = nav.getHeaderView(0).findViewById(R.id.txt_phone);
 
+        if (user == null) {
+            name.setText("John Doe");
+            phone.setText("+381 XX XXX XXXX");
+            Glide.with(this).load(R.drawable.img_default_avatar).circleCrop().into(avatar);
+            return;
+        }
+
         name.setText(user.getName() + " " + user.getSurname());
         phone.setText(user.getPhone());
 
-        String url = user.getAvatarUrl();
-        if (url != null && !url.isEmpty()) {
-            Glide.with(this).load(url).circleCrop().into(avatar);
+        byte[] avatarBytes = UserStorage.getInstance().getCurrentUserAvatar().getValue();
+
+        if (avatarBytes != null) {
+            Glide.with(this).asBitmap().load(avatarBytes).circleCrop().into(avatar);
         } else {
             Glide.with(this).load(R.drawable.img_default_avatar).circleCrop().into(avatar);
         }
@@ -218,11 +326,58 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private void logout() {
-        Intent intent = new Intent(this, LoginSignupActivity.class);
-        startActivity(intent);
-        finish();
+    public void showModal(Fragment f) {
+        findViewById(R.id.modal_container).setVisibility(View.VISIBLE);
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.modal_container, f)
+                .addToBackStack(null)
+                .commit();
     }
 
+    private void logout() {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
 
+        if (token == null) {
+            Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+        loginApi.logout("Bearer " + token).enqueue(new Callback<ResponseBody>() {
+
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Log.d("Logout", "Logout");
+
+                if (response.isSuccessful()) {
+                    sharedPreferences.edit().clear().apply();
+                    UserStorage.getInstance().clearUserStorage();
+                    ProfileChangeStorage.getInstance().clearProfileChangeStorage();
+                    Toast.makeText(getApplicationContext(), "Logout successful", Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Logout failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+
+        // 3) (optional) Notify backend about logout - this is not strictly necessary if using stateless JWTs
+        // It is necessary because the driver can't logout in certain situations.
+        // Thanks for deleting half of my code without checking with me first.
+
+    }
 }

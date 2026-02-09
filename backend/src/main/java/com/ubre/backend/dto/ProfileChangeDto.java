@@ -3,8 +3,17 @@ package com.ubre.backend.dto;
 // Made by driver ---> and then is sent to admin for approval
 // For changing profile data: name, surname, address, phone, avatarUrl
 
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class ProfileChangeDto {
-    public Long requestId;
+    public Long id;
+    @NotNull(message = "User ID cannot be null")
     public Long userId;
 
     public String oldName;
@@ -22,13 +31,9 @@ public class ProfileChangeDto {
     public String oldAvatarUrl;
     public String newAvatarUrl;
 
-    public ProfileChangeDto() {
-
-    }
-
     public ProfileChangeDto(String newSurname, Long requestId, Long userId, String oldName, String newName, String oldSurname, String oldAddress, String newAddress, String oldPhone, String newPhone, String oldAvatarUrl, String newAvatarUrl) {
         this.newSurname = newSurname;
-        this.requestId = requestId;
+        this.id = requestId;
         this.userId = userId;
         this.oldName = oldName;
         this.newName = newName;
@@ -38,102 +43,6 @@ public class ProfileChangeDto {
         this.oldPhone = oldPhone;
         this.newPhone = newPhone;
         this.oldAvatarUrl = oldAvatarUrl;
-        this.newAvatarUrl = newAvatarUrl;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(Long requestId) {
-        this.requestId = requestId;
-    }
-
-    public String getOldName() {
-        return oldName;
-    }
-
-    public void setOldName(String oldName) {
-        this.oldName = oldName;
-    }
-
-    public String getNewName() {
-        return newName;
-    }
-
-    public void setNewName(String newName) {
-        this.newName = newName;
-    }
-
-    public String getOldSurname() {
-        return oldSurname;
-    }
-
-    public void setOldSurname(String oldSurname) {
-        this.oldSurname = oldSurname;
-    }
-
-    public String getNewSurname() {
-        return newSurname;
-    }
-
-    public void setNewSurname(String newSurname) {
-        this.newSurname = newSurname;
-    }
-
-    public String getOldAddress() {
-        return oldAddress;
-    }
-
-    public void setOldAddress(String oldAddress) {
-        this.oldAddress = oldAddress;
-    }
-
-    public String getNewAddress() {
-        return newAddress;
-    }
-
-    public void setNewAddress(String newAddress) {
-        this.newAddress = newAddress;
-    }
-
-    public String getOldPhone() {
-        return oldPhone;
-    }
-
-    public void setOldPhone(String oldPhone) {
-        this.oldPhone = oldPhone;
-    }
-
-    public String getNewPhone() {
-        return newPhone;
-    }
-
-    public void setNewPhone(String newPhone) {
-        this.newPhone = newPhone;
-    }
-
-    public String getOldAvatarUrl() {
-        return oldAvatarUrl;
-    }
-
-    public void setOldAvatarUrl(String oldAvatarUrl) {
-        this.oldAvatarUrl = oldAvatarUrl;
-    }
-
-    public String getNewAvatarUrl() {
-        return newAvatarUrl;
-    }
-
-    public void setNewAvatarUrl(String newAvatarUrl) {
         this.newAvatarUrl = newAvatarUrl;
     }
 }

@@ -1,28 +1,47 @@
 package com.ubre.backend.dto;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.Collection;
+import com.ubre.backend.enums.RideStatus;
+import com.ubre.backend.model.Ride;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.io.Serializable;
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class RideDto implements Serializable {
     private Long id;
-    private LocalDateTime start;
-    private LocalDateTime end;
-    private WaypointDto[] waypoints;
+    @NotNull(message = "Start time cannot be null")
+    private String startTime; // ISO 8601 format
+    private String endTime;
+    @NotEmpty(message = "Waypoints cannot be empty")
+    @Size(min = 2)
+    private List<WaypointDto> waypoints;
+    @NotNull(message = "Driver cannot be null")
     private UserDto driver;
-    private Collection<UserDto> passengers;
+    private List<UserDto> passengers;
     private Boolean panic;
-    private String canceledBy;
+    private Long canceledBy;
     private Double price;
+    @NotNull(message = "Distance cannot be null")
     private Double distance;
+    @NotNull(message = "Ride status cannot be null")
+    private RideStatus status;
+    @NotNull(message = "Creator ID cannot be null")
+    private Long createdBy;
 
-    public RideDto() {
-    }
-
-    public RideDto(Long id, LocalDateTime start, LocalDateTime end, WaypointDto[] waypoints, UserDto driver, Collection<UserDto> passengers, boolean panic, String canceledBy, double price, double distance) {
+    public RideDto(Long id, String startTime, String endTime, List<WaypointDto> waypoints, UserDto driver, List<UserDto> passengers, Boolean panic, Long canceledBy, Double price, Double distance, RideStatus status, Long createdBy) {
         this.id = id;
-        this.start = start;
-        this.end = end;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.waypoints = waypoints;
         this.driver = driver;
         this.passengers = passengers;
@@ -30,82 +49,22 @@ public class RideDto implements Serializable {
         this.canceledBy = canceledBy;
         this.price = price;
         this.distance = distance;
+        this.status = status;
+        this.createdBy = createdBy;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public LocalDateTime getStart() {
-        return start;
-    }
-
-    public LocalDateTime getEnd() {
-        return end;
-    }
-
-    public WaypointDto[] getWaypoints() {
-        return waypoints;
-    }
-
-    public UserDto getDriver() {
-        return driver;
-    }
-
-    public Collection<UserDto> getPassengers() {
-        return passengers;
-    }
-
-    public Boolean isPanic() {
-        return panic;
-    }
-
-    public String getCanceledBy() {
-        return canceledBy;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public Double getDistance() {
-        return distance;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public void setStart(LocalDateTime start) {
-        this.start = start;
-    }
-    public void setEnd(LocalDateTime end) {
-        this.end = end;
-    }
-    public void setWaypoints(WaypointDto[] waypoints) {
-        this.waypoints = waypoints;
-    }
-
-    public void setDriver(UserDto driver) {
-        this.driver = driver;
-    }
-
-    public void setPassengers(Collection<UserDto> passengers) {
-        this.passengers = passengers;
-    }
-
-    public void setPanic(Boolean panic) {
-        this.panic = panic;
-    }
-
-    public void setCanceledBy(String canceledBy) {
-        this.canceledBy = canceledBy;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public void setDistance(Double distance) {
-        this.distance = distance;
+    public RideDto(Ride model) {
+        this.id = model.getId();
+        this.startTime = model.getStartTime().toString();
+        this.endTime = model.getEndTime().toString();
+        this.waypoints = model.getWaypoints().stream().map(WaypointDto::new).toList();
+        this.driver = new UserDto(model.getDriver());
+        this.passengers = model.getPassengers().stream().map(UserDto::new).toList();
+        this.panic = model.getPanic();
+        this.canceledBy = model.getCanceledBy() != null ? model.getCanceledBy().getId() : null;
+        this.price = model.getPrice();
+        this.distance = model.getDistance();
+        this.status = model.getStatus();
+        this.createdBy = model.getCreator() == null ? null : model.getCreator().getId();
     }
 }

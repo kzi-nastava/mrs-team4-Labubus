@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -10,6 +10,9 @@ import {
 import { Button } from '../../../shared/ui/button/button';
 import { CommonModule } from '@angular/common';
 import { Modal } from '../../../shared/ui/modal/modal';
+import { AuthService } from '../auth-service';
+import { UserService } from '../../../services/user-service';
+import { DriverRegistrationService } from '../../../services/driver-registration-service';
 
 @Component({
   selector: 'app-signup',
@@ -25,6 +28,10 @@ export class SignupComponent {
   showConfirmPassword = false;
   fileName = '';
   selectedFile: File | null = null;
+  errorMessage = "Registration error";
+  showErrorModal = false;
+
+  constructor(private authService: AuthService, private avatarService: DriverRegistrationService, private cdr: ChangeDetectorRef) {}
 
   signUpForm = new FormGroup(
     {
@@ -57,8 +64,39 @@ export class SignupComponent {
 
   onSubmit() {
     if (this.signUpForm.valid) {
-      console.log('Form Data:', this.signUpForm.value);
-      this.showSuccessModal = true;
+      
+      const avatarUrlValue = this.selectedFile 
+        ? `${this.signUpForm.value.email}_${this.selectedFile.name}` 
+        : 'default-avatar.jpg';
+
+      const dto: UserRegistrationDto = {
+        name: this.signUpForm.value.name!,
+        surname: this.signUpForm.value.surname!,
+        phone: this.signUpForm.value.phoneNumber!,
+        address: this.signUpForm.value.address!,
+        email: this.signUpForm.value.email!,
+        password: this.signUpForm.value.password!,
+        avatarUrl: avatarUrlValue
+      };
+
+      this.authService.register(dto).subscribe({
+        next: (user) => {
+          this.showSuccessModal = true;
+          this.cdr.detectChanges();
+          if (this.selectedFile) this.avatarService.uploadAvatar(user.id, this.selectedFile).subscribe({
+            next: () => {
+              this.showSuccessModal = true;
+              this.cdr.detectChanges();
+            },
+            error: (err) => console.error('Avatar upload failed', err)
+          });
+        },
+        error: (err) => {
+          this.showErrorModal = true;
+          this.errorMessage = err.error;
+          this.cdr.detectChanges();
+        },
+      });
     } else {
       this.signUpForm.markAllAsTouched();
     }
@@ -74,10 +112,21 @@ export class SignupComponent {
         profilePicture: file.name,
       });
 
-      console.log('Selected file:', file);
+      this.avatarService.setAvatarFile(file);
     }
   }
   onCdModalAction() {
     this.showSuccessModal = false;
+    this.showErrorModal = false;
   }
+}
+
+export interface UserRegistrationDto {
+  name: string;
+  surname: string;
+  phone: string;
+  address: string;
+  email: string;
+  password: string;
+  avatarUrl?: string;
 }

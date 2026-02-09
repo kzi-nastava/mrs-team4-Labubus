@@ -3,13 +3,26 @@ package com.ubre.backend.dto;
 // Waypoint Data Transfer Object
 // Used to represent a geographical waypoint with an ID, label, latitude, and longitude
 
+import com.ubre.backend.model.Waypoint;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.io.Serializable;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class WaypointDto implements Serializable {
     private Long id;
     private String label;
+    @NotNull(message = "Latitude cannot be null")
     private Double latitude;
+    @NotNull(message = "Longitude cannot be null")
     private Double longitude;
+
     public WaypointDto(Long id, String label, double latitude, double longitude) {
         this.id = id;
         this.label = label;
@@ -17,35 +30,10 @@ public class WaypointDto implements Serializable {
         this.longitude = longitude;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
+    public WaypointDto(Waypoint model) {
+        this.id = model.getId();
+        this.label = model.getLabel();
+        this.latitude = model.getLatitude();
+        this.longitude = model.getLongitude();
     }
 }

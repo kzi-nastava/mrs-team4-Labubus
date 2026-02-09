@@ -13,7 +13,6 @@ export class ProfileChangeDto {
   public newPhone : string;
   public oldAvatarUrl : string;
   public newAvatarUrl : string;
-
   public profileChangeStatus : ProfileChangeStatus;
 
   constructor(id : number, userId : number, oldName : string, newName : string, oldSurname : string, newSurname : string, oldAddress : string, newAddress : string, oldPhone : string, newPhone : string, oldAvatarUrl : string, newAvatarUrl : string, profileChangeStatus : ProfileChangeStatus) { 

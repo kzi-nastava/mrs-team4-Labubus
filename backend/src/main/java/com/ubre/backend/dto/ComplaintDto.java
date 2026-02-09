@@ -2,14 +2,23 @@ package com.ubre.backend.dto;
 
 // For handling complaints made by users against drivers
 
+import com.ubre.backend.model.Complaint;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class ComplaintDto {
     private Long id;
     private Long driverId;
+    @NotNull(message = "User ID cannot be null")
     private Long userId;
+    @NotBlank(message = "Complaint text cannot be blank")
     private String text;
-
-    public ComplaintDto() {
-    }
 
     public ComplaintDto(Long id, Long driverId, Long userId, String text) {
         this.id = id;
@@ -18,28 +27,10 @@ public class ComplaintDto {
         this.text = text;
     }
 
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id) {
-        this.id = id;
-    }
-    public Long getDriverId() {
-        return driverId;
-    }
-    public void setDriverId(Long driverId) {
-        this.driverId = driverId;
-    }
-    public Long getUserId() {
-        return userId;
-    }
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-    public String getText() {
-        return text;
-    }
-    public void setText(String text) {
-        this.text = text;
+    public ComplaintDto(Complaint model) {
+        this.id = model.getId();
+        this.driverId = model.getDriver().getId();
+        this.userId = model.getUser().getId();
+        this.text = model.getText();
     }
 }

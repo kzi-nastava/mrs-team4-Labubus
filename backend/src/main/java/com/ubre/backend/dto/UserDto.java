@@ -4,17 +4,34 @@ import java.io.Serializable;
 
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.model.User;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 // User...
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class UserDto implements Serializable {
     private Long id;
+    @NotNull(message = "Role cannot be null")
     private Role role;
     private String avatarUrl;
+    @NotNull(message = "Email cannot be null")
+    @Email(message = "Email format is invalid")
     private String email;
+    @NotBlank(message = "Name cannot be blank")
     private String name;
+    @NotBlank(message = "Surname cannot be blank")
     private String surname;
+    @NotBlank(message = "Phone number cannot be blank")
     private String phone;
+    @NotBlank(message = "Address cannot be blank")
     private String address;
     private UserStatus status;
 
@@ -30,59 +47,15 @@ public class UserDto implements Serializable {
         this.status = status;
     }
 
-    // getters
-    public Long getId() {
-        return id;
+    public UserDto(User user) {
+        this.id = user.getId();
+        this.role = user.getRole();
+        this.avatarUrl = user.getAvatarUrl();
+        this.email = user.getEmail();
+        this.name = user.getName();
+        this.surname = user.getSurname();
+        this.phone = user.getPhone();
+        this.address = user.getAddress();
+        this.status = user.getStatus();
     }
-    public Role getRole() {
-        return role;
-    }
-    public String getAvatarUrl() {
-        return avatarUrl;
-    }
-    public String getEmail() {
-        return email;
-    }
-    public String getName() {
-        return name;
-    }
-    public String getSurname() {
-        return surname;
-    }
-    public String getPhone() {
-        return phone;
-    }
-    public String getAddress() {
-        return address;
-    }
-    public UserStatus getStatus() { return status; }
-
-    // setters
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-    public void setAvatarUrl(String avatarUrl) {
-        this.avatarUrl = avatarUrl;
-    }
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-    public void setAddress(String address) {
-        this.address = address;
-    }
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-    public void setStatus(UserStatus status) { this.status = status; }
 }

@@ -1,0 +1,28 @@
+<div class="rd-wrap">
+
+  <div class="list-container">
+    @for (panic of panics; track panic.id) {
+      <div class="rd-panic-card">
+        <div class="rd-card-body">
+          <div class="rd-info-row">
+            <img [src]="ALERT_ICON" class="rd-card-icon">
+            <span class="rd-card-text">{{ panic.timestamp | date:'dd MMM yyyy HH:mm' }}</span>
+          </div>
+          
+          <div class="rd-info-row">
+            <img [src]="CAR_ICON" class="rd-card-icon">
+            <span class="rd-card-text">Ride id #{{ panic.rideId }}</span>
+          </div>
+
+          <div class="rd-info-row rd-border-top">
+            <img [src]="USER_ICON" class="rd-card-icon">
+            <span class="rd-card-text">By: <strong>{{ panic.triggeredBy }}</strong></span>
+          </div>
+        </div>
+        <div class="rd-card-badge">#{{ panic.id }}</div>
+      </div>
+    } @empty {
+      <div class="rd-empty">No panic notifications found.</div>
+    }
+  </div>
+</div>

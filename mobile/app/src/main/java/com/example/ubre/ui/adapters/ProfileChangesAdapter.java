@@ -1,5 +1,6 @@
 package com.example.ubre.ui.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.ubre.R;
 import com.example.ubre.ui.dtos.ProfileChangeDto;
+import com.example.ubre.ui.services.ProfileChangeService;
+import com.example.ubre.ui.storages.ProfileChangeStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,15 +41,15 @@ public class ProfileChangesAdapter extends RecyclerView.Adapter<ProfileChangesAd
     }
 
     public void removeById(Long requestId) {
-        if (requestId == null) return;
-        for (int i = 0; i < items.size(); i++) {
-            ProfileChangeDto it = items.get(i);
-            if (requestId.equals(it.requestId)) {
-                items.remove(i);
-                notifyItemRemoved(i);
-                return;
-            }
-        }
+//        if (requestId == null) return;
+//        for (int i = 0; i < items.size(); i++) {
+//            ProfileChangeDto it = items.get(i);
+//            if (requestId.equals(it.requestId)) {
+//                items.remove(i);
+//                notifyItemRemoved(i);
+//                return;
+//            }
+//        }
     }
 
     @NonNull
@@ -72,11 +75,35 @@ public class ProfileChangesAdapter extends RecyclerView.Adapter<ProfileChangesAd
         h.txtOld.setText(oldInfo);
         h.txtNew.setText(newInfo);
 
-        bindAvatar(h.imgOldAvatar, it.oldAvatarUrl);
-        bindAvatar(h.imgNewAvatar, it.newAvatarUrl);
-
         h.btnAccept.setOnClickListener(v -> listener.onAccept(it));
         h.btnReject.setOnClickListener(v -> listener.onReject(it));
+
+        // avatar logic
+        var avatars = ProfileChangeStorage.getInstance()
+                .getAvatars()
+                .getValue();
+
+        byte[] avatar = null;
+        if (avatars != null) {
+            avatar = avatars.get(it.userId);
+        }
+
+        if (avatar == null) {
+            try {
+                ProfileChangeService.getInstance(h.itemView.getContext())
+                        .fetchDriverAvatar(it.userId);
+            } catch (Exception e) {
+                Log.e("ProfileChangesAdapter", "Error fetching avatar for user " + it.userId, e);
+            }
+
+            bindAvatar(h.imgNewAvatar, null);
+        } else {
+            Glide.with(h.imgNewAvatar)
+                    .load(avatar)
+                    .circleCrop()
+                    .into(h.imgNewAvatar);
+        }
+
     }
 
     private void bindAvatar(ImageView img, String url) {
@@ -95,7 +122,7 @@ public class ProfileChangesAdapter extends RecyclerView.Adapter<ProfileChangesAd
 
     static class VH extends RecyclerView.ViewHolder {
         TextView txtUserId, txtOld, txtNew;
-        ImageView imgOldAvatar, imgNewAvatar;
+        ImageView imgNewAvatar;
         Button btnAccept, btnReject;
 
         VH(@NonNull View v) {
@@ -103,7 +130,6 @@ public class ProfileChangesAdapter extends RecyclerView.Adapter<ProfileChangesAd
             txtUserId = v.findViewById(R.id.txt_user_id);
             txtOld = v.findViewById(R.id.txt_old);
             txtNew = v.findViewById(R.id.txt_new);
-            imgOldAvatar = v.findViewById(R.id.img_old_avatar);
             imgNewAvatar = v.findViewById(R.id.img_new_avatar);
             btnAccept = v.findViewById(R.id.btn_accept);
             btnReject = v.findViewById(R.id.btn_reject);

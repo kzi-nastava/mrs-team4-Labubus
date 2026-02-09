@@ -2,14 +2,18 @@ package com.ubre.backend.controller;
 
 import com.ubre.backend.dto.VehicleDto;
 import com.ubre.backend.dto.VehicleIndicatorDto;
+import com.ubre.backend.dto.WaypointDto;
 import com.ubre.backend.service.VehicleService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/vehicles")
@@ -19,82 +23,60 @@ public class VehicleController {
     @Autowired
     private VehicleService vehicleService;
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/driver/{driverId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VehicleDto> createVehicle(
-            @RequestBody VehicleDto createVehicleDto) {
-        try {
-            VehicleDto vehicle = vehicleService.createVehicle(createVehicleDto);
-            return new ResponseEntity<>(vehicle, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+            @Valid @RequestBody VehicleDto createVehicleDto,
+            @PathVariable Long driverId) {
+        VehicleDto vehicle = vehicleService.createVehicle(createVehicleDto, driverId);
+        return new ResponseEntity<>(vehicle, HttpStatus.CREATED);
     }
 
+    // get a drivers vehicle by veihicle id
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VehicleDto> getVehicleById(@PathVariable Long id) {
-        try {
-            VehicleDto vehicle = vehicleService.getVehicleById(id);
-            if (vehicle == null)
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            return new ResponseEntity<>(vehicle, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        VehicleDto vehicle = vehicleService.getVehicleById(id);
+        return new ResponseEntity<>(vehicle, HttpStatus.OK);
     }
 
     @GetMapping(value = "/driver/{driverId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VehicleDto> getVehicleByDriver(@PathVariable Long driverId) {
-        try {
-            VehicleDto vehicle = vehicleService.getVehicleByDriver(driverId);
-            if (vehicle == null)
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            return new ResponseEntity<>(vehicle, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        VehicleDto vehicle = vehicleService.getVehicleByDriver(driverId);
+        return new ResponseEntity<>(vehicle, HttpStatus.OK);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VehicleDto> updateVehicle(
             @PathVariable Long id,
-            @RequestBody VehicleDto updateVehicleDto) {
-        try {
-            VehicleDto vehicle = vehicleService.updateVehicle(id, updateVehicleDto);
-            return new ResponseEntity<>(vehicle, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+            @Valid @RequestBody VehicleDto updateVehicleDto) {
+        VehicleDto vehicle = vehicleService.updateVehicle(id, updateVehicleDto);
+        return new ResponseEntity<>(vehicle, HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VehicleDto> deleteVehicle(@PathVariable Long id) {
-        try {
-            VehicleDto vehicle = vehicleService.deleteVehicle(id);
-            return new ResponseEntity<>(vehicle, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        VehicleDto vehicle = vehicleService.deleteVehicle(id);
+        return new ResponseEntity<>(vehicle, HttpStatus.OK);
     }
 
     @GetMapping(value = "/locations", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Collection<VehicleIndicatorDto>> getVehicleIndicators() {
-        try {
-            Collection<VehicleIndicatorDto> locations = vehicleService.getVehicleIndicators();
-            return new ResponseEntity<>(locations, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<List<VehicleIndicatorDto>> getVehicleIndicators() {
+        List<VehicleIndicatorDto> locations = vehicleService.getVehicleIndicators();
+        return new ResponseEntity<>(locations, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}/location", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VehicleIndicatorDto> getVehicleIndicator(@PathVariable Long id) {
-        try {
-            VehicleIndicatorDto location = vehicleService.getVehicleIndicator(id);
-            if (location == null)
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            return new ResponseEntity<>(location, HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        VehicleIndicatorDto location = vehicleService.getVehicleIndicator(id);
+        return new ResponseEntity<>(location, HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/{id}/location", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('DRIVER')")
+    public ResponseEntity<VehicleIndicatorDto> setVehicleIndicator(@PathVariable Long id, @Valid @RequestBody WaypointDto location) {
+        VehicleIndicatorDto setLocation = vehicleService.setVehicleIndicator(id, location);
+        return new ResponseEntity<>(setLocation, HttpStatus.OK);
     }
 }

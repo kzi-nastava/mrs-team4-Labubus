@@ -1,7 +1,12 @@
 package com.ubre.backend.model;
 
+import com.ubre.backend.dto.WaypointDto;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "waypoints")
 public class Waypoint {
@@ -10,67 +15,28 @@ public class Waypoint {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_index", nullable = false)
-    private int orderIndex;
+    @Column
+    private String label;
 
-    @ManyToOne
-    @JoinColumn(name = "location_id", nullable = false)
-    private Location location;
+    @Column(nullable = false)
+    private Double latitude;
 
-    @ManyToOne
-    @JoinColumn(name = "ride_id")
-    private Ride ride;
-
-    @ManyToOne
-    @JoinColumn(name = "route_id")
-    private Route route;
+    @Column(nullable = false)
+    private Double longitude;
 
     // Constructors
     public Waypoint() {}
 
-    public Waypoint(int orderIndex, Location location) {
-        this.orderIndex = orderIndex;
-        this.location = location;
+    public Waypoint(String label, Double latitude, Double longitude) {
+        this.label = label;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public int getOrderIndex() {
-        return orderIndex;
-    }
-
-    public void setOrderIndex(int orderIndex) {
-        this.orderIndex = orderIndex;
-    }
-
-    public Location getLocation() {
-        return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
-    }
-
-    public Ride getRide() {
-        return ride;
-    }
-
-    public void setRide(Ride ride) {
-        this.ride = ride;
-    }
-
-    public Route getRoute() {
-        return route;
-    }
-
-    public void setRoute(Route route) {
-        this.route = route;
+    public Waypoint(WaypointDto dto) {
+        this.id = dto.getId();
+        this.label = dto.getLabel();
+        this.latitude = dto.getLatitude();
+        this.longitude = dto.getLongitude();
     }
 }

@@ -2,28 +2,17 @@ package com.ubre.backend.dto;
 
 // DTO for ride cancellation requests
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 public class CancellationDto {
-    private Long rideId;
+    @NotBlank(message = "Cancellation reason cannot be blank")
     private String reason;
 
-    public CancellationDto() {
-    }
-
-    public CancellationDto(Long rideId, String reason) {
-        this.rideId = rideId;
-        this.reason = reason;
-    }
-
-    public Long getRideId() {
-        return rideId;
-    }
-    public void setRideId(Long rideId) {
-        this.rideId = rideId;
-    }
-    public String getReason() {
-        return reason;
-    }
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
 }

@@ -1,0 +1,11 @@
+<app-ride-list
+  class="favorite-rides"
+  (onClose)="onClose.emit()"
+  (onScrollToBottom)="onScrollToBottom($event)"
+  [open]="open"
+  [rides]="rides$ | async"
+  (onQueryChange)="onQueryChange($event)"
+  title="Favorites"
+  (onError)="onError.emit($event)"
+  (onRenderWaypoints)="onRenderWaypoints.emit($event)"
+  (onReorder)="onReorder.emit($event)"></app-ride-list>

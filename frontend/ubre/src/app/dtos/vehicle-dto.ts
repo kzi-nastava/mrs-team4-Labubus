@@ -1,4 +1,4 @@
-import { VehicleType } from "../enums/vehicle_type";
+import { VehicleType } from "../enums/vehicle-type";
 
 export class VehicleDto {
     public id : number;

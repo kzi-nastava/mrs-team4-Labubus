@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { Map } from '../../features/map/map';
+import { Component, ViewChild } from '@angular/core';
+import { Map } from '../../services/ride-planning/map/map';
 import { IconButton } from '../../shared/ui/icon-button/icon-button';
 import { SideMenu } from '../../shared/ui/side-menu/side-menu';
 import { Toast } from '../../shared/ui/toast/toast';
@@ -12,333 +12,308 @@ import { Sheet } from '../../shared/ui/sheet/sheet';
 import { FormsModule } from '@angular/forms';
 import { ConfettiService } from '../../services/confetti';
 import { inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { RideList } from '../../shared/ui/ride-list/ride-list';
-import { RideCard } from '../../shared/ui/ride-card/ride-card';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-
-type UserSettingsVM = {
-  role: 'registered-user' | 'driver' | 'admin' | 'guest';
-  avatarUrl: string;
-  email: string;
-  passwordMasked: string;
-  name: string;
-  surname: string;
-  address: string;
-  phone: string;
-  activeLast24h?: string; // driver
-};
-
-// TESTING PURPOSES ONLY - WILL NOT BE AVAILABLE FOR THE USER TO EDIT
-type VehicleInformationVM = {
-  model: string;
-  type: string;
-  plates: string;
-  seats: number;
-  babyFriendly: 'Yes' | 'No';
-  petFriendly: 'Yes' | 'No';
-};
-
-type DriverRegisterVM = {
-  avatarUrl: string;
-
-  email: string;
-  password: string;
-  confirmPassword: string;
-  passwordError: boolean;
-
-  name: string;
-  surname: string;
-  address: string;
-  phone: string;
-
-  vehicleModel: string;
-  vehicleType: 'Standard' | 'Luxury' | 'Van';
-  plates: string;
-  seats: number;
-  babyFriendly: boolean;
-  petFriendly: boolean;
-};
-
-type Waypoint = { id: string; label: string; lat: number; lon: number };
-
-type NominatimItem = {
-  place_id: string;
-  display_name: string;
-  lat: string;
-  lon: string;
-};
-
-type RideOptionsVM = {
-  rideType: 'Standard' | 'Luxury' | 'Van';
-  babyFriendly: boolean;
-  petFriendly: boolean;
-};
+import { RideHistory } from '../../shared/ui/ride-history/ride-history';
+import { OnInit } from '@angular/core';
+import { UserService } from '../../services/user-service';
+import { UserDto } from '../../dtos/user-dto';
+import { UserStatsDto } from '../../dtos/user-stats-dto';
+import { VehicleDto } from '../../dtos/vehicle-dto';
+import { Role } from '../../enums/role';
+import { VehicleType } from '../../enums/vehicle-type';
+import { BehaviorSubject, Observable, Subscription, forkJoin, of, take } from 'rxjs';
+import { DriverRegistrationService } from '../../services/driver-registration-service';
+import { ProfileChangeService } from '../../services/profile-change-service';
+import { ProfileChangeDto } from '../../dtos/profile-change-dto';
+import { ProfileChangeCard } from '../../shared/ui/profile-change-card/profile-change-card';
+import { AsyncPipe } from '@angular/common';
+import { AccountSettingsService } from '../../services/account-settings-service';
+import { AuthService } from '../../features/auth/auth-service';
+import { DriverRegistrationDto } from '../../dtos/driver-registration-dto';
+import { WebSocketService } from '../../services/websocket-service';
+import { StatItemDto } from '../../dtos/stat-item-dto';
+import { ReviewService } from '../../services/review-service';
+import { ReviewModal } from '../../shared/ui/review-modal/review-modal';
+import { ChangePasswordService } from '../../services/change-password-service';
+import { UserStatsService } from '../../services/user-stats-service';
+import { RidePlanningStore } from '../../services/ride-planning/ride-planning-store';
+import { ScheduleTimer } from '../../shared/ui/schedule-timer/schedule-timer';
+import { InvitePassengers } from '../../shared/ui/invite-passengers/invite-passengers';
+import { RideOptions } from '../../shared/ui/ride-options/ride-options';
+import { RideOptionsDto } from '../../dtos/ride-options-dto';
+import { NotificationType } from '../../enums/notification-type';
+import { FavoriteRides } from '../../shared/ui/favorite-rides/favorite-rides';
+import { RideStatus } from '../../enums/ride-status';
+import { RideDto } from '../../dtos/ride-dto';
+import { DriverCancelDialog } from '../../shared/ui/driver-cancel-dialog/driver-cancel-dialog';
+import { RideService } from '../../services/ride-service';
+import { VehicleService } from '../../services/vehicle-service';
+import { RideTrackingStore } from '../../services/ride-planning/ride-tracking-store';
+import { WaypointDto } from '../../dtos/waypoint-dto';
+import { GeocodingService } from '../../services/ride-planning/geocoding-service';
+import { RoutingService } from '../../services/ride-planning/routing-service';
+import { RouteInfo } from '../../services/ride-planning/ride-types';
+import { PanicList } from '../../features/panic/panic-list/panic-list';
+import { PanicButton } from "../../shared/ui/panic-button/panic-button";
+import { PanicToast } from '../../features/panic/panic-toast/panic-toast';
+import { ComplaintModal } from '../../shared/ui/complaint-modal/complaint-modal';
+import { ComplaintService } from '../../services/complaint-service';
+import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides';
 
 @Component({
   selector: 'app-user-layout',
   standalone: true,
-  imports: [
-    Map,
-    IconButton,
-    SideMenu,
-    Toast,
-    Modal,
-    ModalContainer,
-    StatCard,
-    Button,
-    Sheet,
-    FormsModule,
-    RideCard,
-    RideList,
-  ],
-  templateUrl: './user-layout.html',
-  styleUrl: './user-layout.css',
-})
-export class UserLayout {
-  constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
+  imports: [Map,IconButton,SideMenu,Toast,
+    Modal,ModalContainer,StatCard,Button,
+    Sheet,FormsModule,RideHistory,ProfileChangeCard,
+    AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
+    RideOptions, FavoriteRides, DriverCancelDialog,
+    ComplaintModal, PanicList, PanicButton, PanicToast,
+    ScheduledRides],
+    templateUrl: './user-layout.html',
+    styleUrl: './user-layout.css',
+  })
+  export class UserLayout implements OnInit {
 
-  user: UserSettingsVM = {
-    role: 'admin',
-    avatarUrl: 'default-avatar.jpg',
-    email: 'john@doe.com',
-    passwordMasked: '********',
-    name: 'John',
-    surname: 'Doe',
-    address: '123 Main St, Anytown, USA',
-    phone: '+1 234 567 8900',
-    activeLast24h: '5h 30m',
-  };
+    constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
+    
+    public userService = inject(UserService);
+    private authService = inject(AuthService);
+    private reviewService : ReviewService = inject(ReviewService)
+    private complaintService : ComplaintService = inject(ComplaintService)
+    public driverRegistrationService = inject(DriverRegistrationService);
+    public ridePlanningStore = inject(RidePlanningStore);
+    private confetti = inject(ConfettiService);
+    public profileChangeService = inject(ProfileChangeService); 
+    public accountSettingsService = inject(AccountSettingsService);
+    public webSocketService = inject(WebSocketService);
+    public changePasswordService = inject(ChangePasswordService);
+    public userStatsService = inject(UserStatsService);
+    public rideService = inject(RideService);
+    public geocodingService = inject(GeocodingService);
 
-  // NOTE: Dummy vehicle data is here ONLY for testing in registered-user layout.
-  vehicle: VehicleInformationVM = {
-    model: 'Toyota Corolla 2021',
-    type: 'Standard',
-    plates: 'AB-123-CD',
-    seats: 4,
-    babyFriendly: 'Yes',
-    petFriendly: 'No',
-  };
 
-  driverRegister: DriverRegisterVM = {
-    avatarUrl: 'default-avatar.jpg',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    passwordError: false,
+    public vehicleService = inject(VehicleService)
+    public rideTrackingStore = inject(RideTrackingStore)
 
-    name: '',
-    surname: '',
-    address: '',
-    phone: '',
+  Role = Role;
+  VehicleType = VehicleType;
+  RideStatus = RideStatus;
 
-    vehicleModel: '',
-    vehicleType: 'Standard',
-    plates: '',
-    seats: 4,
-    babyFriendly: false,
-    petFriendly: false,
-  };
+  userStats!: UserStatsDto;
+  isDriverActive: boolean = false;
 
-  // MAP AND DESTINATION SELECTION LOGIC
-  waypoints: Waypoint[] = [];
-  query = '';
-  suggestions: NominatimItem[] = [];
-  suggestTimer: any = null;
-  private suggestReqId = 0;
 
-  destOpen = false;
+  private websocketUserId: number | null = null;
+  private profileChangeSubscription?: Subscription;
+  private rideAssignmentSubscription?: Subscription;
+  private rideReminderSubscription?: Subscription;
+  private panicSubscription?: Subscription;
+  private currentRideSubscription?: Subscription; // this subscription represents a current ride, for user and for a driver
 
-  openDest() {
-    this.destOpen = true;
-  }
-  closeDest() {
-    this.destOpen = false;
-  }
+  @ViewChild(PanicToast) panicToast!: PanicToast;
 
-  toLatin(s: string) {
-    const map: Record<string, string> = {
-      А: 'A',
-      Б: 'B',
-      В: 'V',
-      Г: 'G',
-      Д: 'D',
-      Ђ: 'Đ',
-      Е: 'E',
-      Ж: 'Ž',
-      З: 'Z',
-      И: 'I',
-      Ј: 'J',
-      К: 'K',
-      Л: 'L',
-      Љ: 'Lj',
-      М: 'M',
-      Н: 'N',
-      Њ: 'Nj',
-      О: 'O',
-      П: 'P',
-      Р: 'R',
-      С: 'S',
-      Т: 'T',
-      Ћ: 'Ć',
-      У: 'U',
-      Ф: 'F',
-      Х: 'H',
-      Ц: 'C',
-      Ч: 'Č',
-      Џ: 'Dž',
-      Ш: 'Š',
-      а: 'a',
-      б: 'b',
-      в: 'v',
-      г: 'g',
-      д: 'd',
-      ђ: 'đ',
-      е: 'e',
-      ж: 'ž',
-      з: 'z',
-      и: 'i',
-      ј: 'j',
-      к: 'k',
-      л: 'l',
-      љ: 'lj',
-      м: 'm',
-      н: 'n',
-      њ: 'nj',
-      о: 'o',
-      п: 'p',
-      р: 'r',
-      с: 's',
-      т: 't',
-      ћ: 'ć',
-      у: 'u',
-      ф: 'f',
-      х: 'h',
-      ц: 'c',
-      ч: 'č',
-      џ: 'dž',
-      ш: 'š',
-    };
 
-    return s.replace(/[\u0400-\u04FF]/g, (ch) => map[ch] ?? ch);
-  }
+  ngOnInit() {
+    const userId = this.authService.getId();
 
-  onQueryChange() {
-    const q = this.query.trim();
+    if (userId !== null && userId !== 0) {
+      this.userService.setCurrentUserById(userId);
+      this.isDriverActive = true;
 
-    if (this.suggestTimer) clearTimeout(this.suggestTimer);
+      this.rideService.getCurrentRide().subscribe({
+      next: (ride) => {
+        if (ride) {
+          this.ridePlanningStore.currentRideSubject$.next(ride);
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching active ride', err);
+      }
+    });
+    }
 
-    if (q.length < 3) {
-      this.suggestions = [];
-      this.cdr.detectChanges();
+    
+      
+    if (userId === 0 || userId === null) {
+      this.profileChangeSubscription?.unsubscribe();
+      // this.webSocketService.disconnect();
+      this.websocketUserId = null;
       return;
     }
 
-    this.suggestTimer = setTimeout(() => {
-      const reqId = ++this.suggestReqId;
+    if (this.websocketUserId === userId) {
+      return;
+    }
 
-      const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&q=${encodeURIComponent(
-        q + ', Novi Sad, Serbia'
-      )}`;
+    this.websocketUserId = userId;
+    this.profileChangeSubscription?.unsubscribe();
+    this.webSocketService.connect();
+    this.profileChangeSubscription = this.webSocketService
+      .profileChangeNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          if (notification.status === NotificationType.PROFILE_CHANGE_APPROVED && notification.user) {
+            this.userService.setCurrentUserById(notification.user.id);
+            this.playNotificationSound();
+            this.showToast('Profile change approved', 'Your profile change request has been approved.');
+            this.cdr.detectChanges();
+            this.userService.loadAvatar(notification.user.id);
+            return;
+          }
 
-      this.http.get<NominatimItem[]>(url).subscribe((items) => {
-        if (reqId !== this.suggestReqId) return;
-
-        this.suggestions = (items ?? []).map((i) => ({
-          ...i,
-          display_name: this.toLatin(i.display_name),
-        }));
-        this.cdr.detectChanges();
+          if (notification.status === NotificationType.PROFILE_CHANGE_REJECTED && notification.user) {
+            this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
+          }
+        },
+        error: () => {
+          this.showToast('Connection error', 'Could not receive profile change updates.');
+        },
       });
-    }, 250);
+    
+    this.rideAssignmentSubscription = this.webSocketService
+      .rideAssignmentNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          if (notification.status === NotificationType.RIDE_ASSIGNED && notification.ride) {
+            this.playNotificationSound();
+            this.showToast('New ride assigned', 'Check your notifications for more details.');
+          }
+        },
+      });
+
+    this.ui.reviewModalOpen = this.reviewService.showReviewModal$;
+    this.ui.complaintModalOpen = this.complaintService.showComplaintModal$;
+    
+    this.rideReminderSubscription = this.webSocketService
+      .rideReminderNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          if (notification.status === NotificationType.RIDE_REMINDER && notification.time) {
+            this.playNotificationSound();
+            this.showToast('Ride reminder', 'You have a ride scheduled at ' + notification.time + '.');
+          }
+        },
+      });
+
+    // this subscription receives notifications for a current ride via websocket
+    this.currentRideSubscription = this.webSocketService
+      .currentRideNotifications(userId)
+      .subscribe({
+        next: (notification) => {
+          // notification that time for a ride has come
+          if (notification.status === NotificationType.TIME_FOR_A_RIDE)
+            this.showToast('Get ready', 'Your ride is starting soon...');
+      
+          if (notification.status === NotificationType.RIDE_STARTED)
+            this.showToast('Ride started', 'Your ride has been started successfully.');
+
+          
+          if (notification.status === NotificationType.RIDE_CANCELLED) 
+          
+            if (notification.reason)
+              this.showToast('Ride cancelled', notification.reason);
+            else
+              this.showToast('Ride cancelled', "Ride has been cancelled by the user.");
+
+          if (notification.status === NotificationType.RIDE_COMPLETED) {
+            this.showToast('Ride completed', "Ride completed.");
+            this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
+              this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
+                if (user.role == Role.REGISTERED_USER && this.ridePlanningStore.currentRideSubject$.value != null)
+                  this.reviewService.newReview(this.ridePlanningStore.currentRideSubject$.value.id)
+              })
+              this.ridePlanningStore.currentRideSubject$.next(nextRide)
+            })
+          }
+
+
+          if (notification.ride)
+            this.ridePlanningStore.currentRideSubject$.next(notification.ride);
+        },
+      });
+
+      this.subscribeToPanicNotifications();
+    }
+
+  ngOnDestroy() {
+    this.profileChangeSubscription?.unsubscribe();
+    this.rideAssignmentSubscription?.unsubscribe();
+    this.rideReminderSubscription?.unsubscribe();
+    this.currentRideSubscription?.unsubscribe();
+    this.panicSubscription?.unsubscribe();
+    this.webSocketService.disconnect();
   }
+  ui = {
+    menuOpen: false,
+    cdModalOpen: true,
+    accountSettingsOpen: false,
+    changePasswordOpen: false,
+    vehicleInfoOpen: false,
+    registerDriverOpen: false,
+    rideOptionsOpen: false,
+    checkoutModalOpen: false,
+    toastOpen: false,
+    profileChangesOpen: false,
+    reviewModalOpen: of(false),
+    complaintModalOpen: of(false),
+    scheduleTimerOpen: false,
+    invitePassengersOpen: false,
+    timeEstimate: false,
+    showRideHistory: false,
+    showFavourites: false,
+    showScheduledRides: false,
+    showCancelModal: false,
+    panicListOpen: false,
+    toastPanicOpen: false,
+  };
 
-  addFromSuggestion(s: NominatimItem) {
-    const wp: Waypoint = {
-      id: String(s.place_id),
-      label: s.display_name,
-      lat: Number(s.lat),
-      lon: Number(s.lon),
-    };
-    this.waypoints = [...this.waypoints, wp];
-
-    this.query = '';
-    this.suggestions = [];
-  }
-
-  addFromMapClick(lat: number, lon: number) {
-    if (this.destOpen === false) return;
-    const id = crypto.randomUUID();
-
-    const fallback = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
-
-    this.waypoints = [...this.waypoints, { id, label: fallback, lat, lon }];
-
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=sr-Latn`;
-
-    this.http.get<any>(url).subscribe({
-      next: (res) => {
-        const label = res?.display_name ? this.toLatin(res.display_name) : fallback;
-
-        this.waypoints = this.waypoints.map((w) => (w.id === id ? { ...w, label } : w));
-
-        this.cdr.detectChanges();
-      },
-      error: () => {},
-    });
-  }
-
-  removeWaypoint(id: string) {
-    this.waypoints = this.waypoints.filter((w) => w.id !== id);
-  }
-
-  get currentRoute() {
-    return this.waypoints.map((wp) => [wp.lat, wp.lon] as [number, number]);
-  }
-
+  private previousScreenBeforeInvite: 'schedule-timer' | 'ride-options' | null = null;
+  
   onDestBack() {
-    this.waypoints = [];
-    this.suggestions = [];
-    this.query = '';
-    this.closeDest();
+    this.ridePlanningStore.resetDest();
   }
 
   toggleDest() {
-    this.destOpen = !this.destOpen;
-    if (this.destOpen) this.cdModalOpen = false;
+    this.ridePlanningStore.toggleDestOpen();
+    if (this.ridePlanningStore.destOpen) this.ui.cdModalOpen = false;
   }
 
   onCdProceed() {
-    if (this.waypoints.length === 0) {
-      this.showToast('No destination', 'Please add at least one destination waypoint.');
-      return;
+    // close destination card
+    this.ridePlanningStore.closeDest();
+
+    //if user isn't logged in, proceed to time estimate
+    if (!this.isLoggedIn()) {
+      this.ui.timeEstimate = true;
+      return
     }
-    this.closeDest();
-    this.rideOptionsOpen = true;
+
+    this.ui.rideOptionsOpen = true;
   }
 
-  editing: UserSettingsVM = { ...this.user };
-  hidePassword = true;
-
-  menuOpen = false;
-
-  toastOpen = false;
-  toastTitle = 'Ignore this toast';
-  toastMessage = 'This is just a demo message for the toast';
-
-  cdModalOpen = true; // Choose a destination modal
-
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   openMenu() {
-    this.menuOpen = true;
+    this.ui.menuOpen = true;
   }
   closeMenu() {
-    this.menuOpen = false;
+    this.ui.menuOpen = false;
   }
   openCdModal() {
-    this.cdModalOpen = true;
+    this.ui.cdModalOpen = true;
   }
   closeCdModal() {
-    this.cdModalOpen = false;
+    this.ui.cdModalOpen = false;
   }
 
   closeAllSidePanels() {
@@ -347,13 +322,27 @@ export class UserLayout {
     this.closeChangePassword();
     this.closeVehicleInfo();
     this.closeRegisterDriver();
-    this.closeDest();
+    this.ridePlanningStore.closeDest();
     this.closeRideHistory();
+    this.closeFavourites();
+    this.closeScheduledRides();
+    this.closeProfileChanges();
   }
 
   handleMenuAction(action: string) {
     if (action === 'logout') {
-      this.user = { ...this.user, name: 'Guest', surname: '', phone: '', role: 'guest' };
+      this.userService.setCurrentUserById(0);     // set current user to guest
+      this.authService.logout().subscribe({
+        next: (message) => {
+          this.showToast('Logout', message);
+          this.authService.removeToken();
+        },
+        error: (err) => {
+          this.showToast('Logout failed', err.error || 'Something went wrong');
+        }});
+
+      this.userService.resetAvatar();
+      this.closeAllSidePanels();
     }
     if (action === 'account-settings') {
       this.openAccountSettings();
@@ -364,389 +353,903 @@ export class UserLayout {
     if (action === 'ride-history') {
       this.openRideHistory();
     }
+    if (action === 'favourites') {
+      this.openFavourites();
+    }
+    if (action === 'scheduled') {
+      this.openScheduledRides();
+    }
     if (action === 'login') {
       this.router.navigate(['/login']);
     }
     if (action === 'sign-up') {
       this.router.navigate(['/signup']);
     }
+    if (action === 'profile-changes') {
+      this.openProfileChanges();
+    }
+    if (action === 'admin-changes') {
+      this.openProfileChanges();
+    }
+    if (action === 'admin-panics') {
+      this.ui.panicListOpen = true;
+    }
+   
     this.closeMenu();
   }
-
+  
+  private toastTimer: any = null;
+  public toastTitle: string = '';
+  public toastMessage: string = '';
   showToast(title: string, message: string) {
-    this.toastTitle = title;
-    this.toastMessage = message;
-    this.toastOpen = true;
+    if (this.toastTimer) {
+      clearTimeout(this.toastTimer);
+      this.toastTimer = null;
+    }
+
+    this.ui.toastOpen = false;
+    this.cdr.detectChanges();
 
     setTimeout(() => {
-      this.hideToast();
+      this.toastTitle = title;
+      this.toastMessage = message;
+
+      this.ui.toastOpen = true;
       this.cdr.detectChanges();
-    }, 3000);
+
+      this.toastTimer = setTimeout(() => {
+        this.ui.toastOpen = false;
+        this.cdr.detectChanges();
+        this.toastTimer = null;
+      }, 3000);
+    }, 0);
   }
 
+
+  
   hideToast() {
-    this.toastOpen = false;
+    this.ui.toastOpen = false;
   }
 
   onCdModalAction() {
-    this.cdModalOpen = false;
-    this.destOpen = true;
+    this.ui.cdModalOpen = false;
+    this.ridePlanningStore.openDest();
   }
 
   openChat() {
     // Open chat widget
   }
 
-  // ACCOUNT SETTINGS SHEET LOGIC
-  accountSettingsOpen = false;
-
-  openAccountSettings() {
-    this.accountSettingsOpen = true;
-    this.editing = { ...this.user };
+  openComplaintModal() {
+    this.ridePlanningStore.currentRide$.pipe(take(1)).subscribe((ride : RideDto | null) => {
+      if (ride != null)
+        this.complaintService.newComplaint(ride?.id)
+    })
   }
+
+
+  focusNext(el: HTMLElement) {
+    el.focus();
+  }
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  hidePassword = true;
+  
+  // ACCOUNT SETTINGS SHEET LOGIC
+  openAccountSettings() {
+    this.accountSettingsService.loadDraft();
+    this.ui.accountSettingsOpen = true;
+    this.userStatsService.loadUserStats();
+  }
+  
   closeAccountSettings() {
-    this.accountSettingsOpen = false;
-    this.user = { ...this.editing };
+    this.ui.accountSettingsOpen = false;
+    this.accountSettingsService.clearDraft();
   }
 
   saveAccountSettings() {
-    // Save account settings logic
-    this.closeAccountSettings();
-    this.showToast('Settings saved', 'Your account settings have been updated.');
+    this.userService.currentUser$.pipe(take(1)).subscribe(user => {
+      if (user.role === Role.DRIVER) {
+        this.accountSettingsService.requestProfileChange().pipe(take(1)).subscribe({
+          next: () =>
+            this.showToast('Profile change requested', 'Your profile change request has been sent.')
+        });
+      } else {
+        this.accountSettingsService.save().pipe(take(1)).subscribe({
+          next: () =>
+            this.showToast('Settings saved', 'Your account settings have been updated.'),
+          error: (err) => {
+            if (typeof err === 'string') {
+              this.showToast('Error saving settings', err);
+            }
+          }
+        });
+      }
+    });
   }
-
+  
+  
   onAccountSettingsBack() {
     this.closeAccountSettings();
-    this.menuOpen = true;
+    this.ui.menuOpen = true;
   }
 
-  // EXAMPLE OF RIDE CARD CONTROL VARIABLES
-  // selectedRide = undefined;
-  // favoriteRides : any[] = [];
+  onAccountSettingsAvatarSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.accountSettingsService.setAvatarFile(file);
+    input.value = ''; 
+  }
 
-  // EXAMPLE FOR RIDE CARD EVENT HANDLERS
-  // onRideSelected(ride : any) {
-  //   if (this.selectedRide === ride.id)
-  //     this.selectedRide = undefined;
-  //   else
-  //     this.selectedRide = ride.id;
-  // }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
-  // onRideAction(ride : any) {
-  //   if (this.favoriteRides.includes(ride.id))
-  //     this.favoriteRides = this.favoriteRides.filter(id => id != ride.id)
-  //   else
-  //     this.favoriteRides.push(ride.id);
-  // }
 
+  
   // CHANGE PASSWORD SHEET LOGIC
-  changePasswordOpen = false;
-
-  newPassword = '';
-  confirmPassword = '';
-  passwordMismatch = false;
-
+  
   onChangePassword() {
-    this.accountSettingsOpen = false;
-    this.changePasswordOpen = true;
-
-    this.newPassword = '';
-    this.confirmPassword = '';
-    this.passwordMismatch = false;
+    this.ui.accountSettingsOpen = false;
+    this.ui.changePasswordOpen = true;
+    this.changePasswordService.clearAllErrors();
   }
-
+  
   closeChangePassword() {
-    this.changePasswordOpen = false;
-    this.passwordMismatch = false;
+    this.ui.changePasswordOpen = false;
   }
-
+  
   onChangePasswordBack() {
     this.closeChangePassword();
-    this.accountSettingsOpen = true;
+    this.ui.accountSettingsOpen = true;
   }
-
+  
   savePassword() {
-    this.passwordMismatch = this.newPassword !== this.confirmPassword;
-
-    if (this.passwordMismatch) return;
-
-    // TODO: API call za promenu lozinke
-    this.closeChangePassword();
-    this.showToast('Password changed', 'Your password has been updated.');
+    const errors = this.changePasswordService.validate();
+    if (Object.keys(errors).length > 0) {
+      this.changePasswordService.fieldErrors = errors;
+      return;
+    }
+    this.changePasswordService.changePassword().pipe(take(1)).subscribe({
+      next: () => {
+        this.showToast('Password changed', 'Your might need to login again to perform certain actions.');
+        this.changePasswordService.clearAllErrors();
+        // close change password sheet and open account settings sheet
+        this.closeChangePassword();
+        this.openAccountSettings();
+      },
+      error: (err) => {
+        if (typeof err === 'string') {
+          this.showToast('Error changing password', err);
+        }
+      }
+    });
   }
 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   // VEHICLE INFORMATION SHEET LOGIC
-  vehicleInfoOpen = false;
-
+  
   openVehicleInfo() {
-    this.vehicleInfoOpen = true;
+    this.ui.vehicleInfoOpen = true;
   }
   closeVehicleInfo() {
-    this.vehicleInfoOpen = false;
+    this.ui.vehicleInfoOpen = false;
   }
-
+  
   onVehicleInfoBack() {
     this.closeVehicleInfo();
-    this.accountSettingsOpen = true;
+    this.ui.accountSettingsOpen = true;
   }
-
+  
   onViewVehicleInfo() {
-    this.accountSettingsOpen = false;
+    this.ui.accountSettingsOpen = false;
     this.openVehicleInfo();
   }
 
-  registerDriverOpen = false;
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  confirmPasswordDR = '';
 
+  // DRIVER REGISTRATION SHEET LOGIC
   openRegisterDriver() {
-    this.registerDriverOpen = true;
+    this.ui.registerDriverOpen = true;
+    this.driverRegistrationService.fieldErrors = null;
   }
+
   closeRegisterDriver() {
-    this.registerDriverOpen = false;
+    this.ui.registerDriverOpen = false;
+    this.driverRegistrationService.resetDraft();
+    this.confirmPasswordDR = '';
+  }
+
+  patchDriverRegistration(changes : any) {
+    this.driverRegistrationService.patchDraft(changes);
+  }
+
+  setVehiceleType(type: VehicleType) {
+    this.driverRegistrationService.patchDraft({ vehicle: { type } });
+  }
+
+  toggleBabyFriendly() {
+    const curr = this.driverRegistrationService.getDraftSnapshot().vehicle.babyFriendly;
+    this.driverRegistrationService.patchDraft({ vehicle: { babyFriendly: !curr } });
+  }
+
+  togglePetFriendly() {
+    const curr = this.driverRegistrationService.getDraftSnapshot().vehicle.petFriendly;
+    this.driverRegistrationService.patchDraft({ vehicle: { petFriendly: !curr } });
   }
 
   onRegisterDriver() {
-    // TODO: API call za registraciju vozača
-
-    this.closeRegisterDriver();
-    this.showToast('Driver registered', 'Activation mail has been sent to the driver.');
-    this.confetti.fire();
+    this.driverRegistrationService.register(this.confirmPasswordDR).subscribe({
+      next: () => {
+        this.closeRegisterDriver();
+        this.showToast('Driver registered', 'Activation mail has been sent to the driver.');
+        this.confetti.fire();
+        this.confirmPasswordDR = '';
+      },
+      error: (e) => {
+        if (typeof e === 'string') {
+          this.showToast('Registration error', e);
+        }
+      }
+    });
   }
 
   onRegisterDriverBack() {
     this.closeRegisterDriver();
-    this.menuOpen = true;
-  }
-
-  validateDriverPassword() {
-    this.driverRegister.passwordError = !this.driverRegister.password.trim();
+    this.ui.menuOpen = true;
   }
 
   decDriverSeats() {
-    this.driverRegister.seats = Math.max(0, this.driverRegister.seats - 1);
+    this.driverRegistrationService.decSeats();
   }
+
   incDriverSeats() {
-    this.driverRegister.seats = Math.min(9, this.driverRegister.seats + 1);
+    this.driverRegistrationService.incSeats();
   }
 
-  // EASTER EGG
+  validateAll() {
+    const errors = this.driverRegistrationService.validate(
+      this.driverRegistrationService.getDraftSnapshot(),
+      this.confirmPasswordDR
+    );
+    this.driverRegistrationService.fieldErrors = Object.keys(errors).length > 0 ? errors : null;
+  }
 
-  private confetti = inject(ConfettiService);
+  onDriverRegistrationAvatarSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    this.driverRegistrationService.setAvatarFile(file);
+    input.value = '';
+  }
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // Ride HISTORY SHEET LOGIC
-  showRideHistory = false;
-  currentUser: User = {
-    email: 'mika@mikic.com',
-    firstName: 'Mika',
-    lastName: 'Mikic',
-    profilePicture: '',
-    role: this.user.role,
-  };
-  rides = [
-    {
-      id: 1,
-      startTime: new Date(),
-      endTime: new Date(),
-      waypoints: ['Narodnog fronta', 'Bulevar oslobodjenja', 'Bulevar despota Stefana'],
-      driver: {
-        email: 'pera@peric.com',
-        firstName: 'Pera',
-        lastName: 'Peric',
-        profilePicture: '',
-        role: 'driver',
-      } as User,
-      vehicle: { model: 'Toyota Carolla 2021', type: 'Standard', image: '' } as Vehicle,
-      passengers: [
-        {
-          email: 'mika@mikic.com',
-          firstName: 'Mika',
-          lastName: 'Mikic',
-          profilePicture: '',
-          role: 'registered-user',
-        } as User,
-        {
-          email: 'djura@djuric.com',
-          firstName: 'Djura',
-          lastName: 'Djuric',
-          profilePicture: '',
-          role: 'registered-user',
-        } as User,
-      ],
-      price: 16.13,
-      travelDistance: 10.3,
-      panicActivated: false,
-      canceledBy: null,
-    },
-    {
-      id: 2,
-      startTime: new Date(),
-      endTime: new Date(),
-      waypoints: ['Narodnog fronta', 'Bulevar despota Stefana', 'Trg mladenaca'],
-      driver: {
-        email: 'pera@peric.com',
-        firstName: 'Pera',
-        lastName: 'Peric',
-        profilePicture: '',
-        role: 'driver',
-      } as User,
-      vehicle: { model: 'Toyota Carolla 2021', type: 'Standard', image: '' } as Vehicle,
-      passengers: [
-        {
-          email: 'mika@mikic.com',
-          firstName: 'Mika',
-          lastName: 'Mikic',
-          profilePicture: '',
-          role: 'registered-user',
-        } as User,
-        {
-          email: 'djura@djuric.com',
-          firstName: 'Djura',
-          lastName: 'Djuric',
-          profilePicture: '',
-          role: 'registered-user',
-        } as User,
-      ],
-      price: 20.84,
-      travelDistance: 17.1,
-      panicActivated: true,
-      canceledBy: 'mika@mikic.com',
-    },
-    {
-      id: 3,
-      startTime: new Date(),
-      endTime: new Date(),
-      waypoints: ['Bulevar cara Lazara', 'Bulevar despota Stefana'],
-      driver: {
-        email: 'pera@peric.com',
-        firstName: 'Pera',
-        lastName: 'Peric',
-        profilePicture: '',
-        role: 'driver',
-      } as User,
-      vehicle: { model: 'Toyota Carolla 2021', type: 'Standard', image: '' } as Vehicle,
-      passengers: [
-        {
-          email: 'mika@mikic.com',
-          firstName: 'Mika',
-          lastName: 'Mikic',
-          profilePicture: '',
-          role: 'registered-user',
-        } as User,
-        {
-          email: 'djura@djuric.com',
-          firstName: 'Djura',
-          lastName: 'Djuric',
-          profilePicture: '',
-          role: 'registered-user',
-        } as User,
-      ],
-      price: 10.74,
-      travelDistance: 5.6,
-      panicActivated: false,
-      canceledBy: 'mika@mikic.com',
-    },
-    {
-      id: 4,
-      startTime: new Date(),
-      endTime: new Date(),
-      waypoints: ['Temerinski put', 'Most slobode'],
-      driver: {
-        email: 'pera@peric.com',
-        firstName: 'Pera',
-        lastName: 'Peric',
-        profilePicture: '',
-        role: 'driver',
-      } as User,
-      vehicle: { model: 'Toyota Carolla 2021', type: 'Standard', image: '' } as Vehicle,
-      passengers: [
-        {
-          email: 'mika@mikic.com',
-          firstName: 'Mika',
-          lastName: 'Mikic',
-          profilePicture: '',
-          role: 'registered-user',
-        } as User,
-        {
-          email: 'djura@djuric.com',
-          firstName: 'Djura',
-          lastName: 'Djuric',
-          profilePicture: '',
-          role: 'registered-user',
-        } as User,
-      ],
-      price: 7.94,
-      travelDistance: 3.9,
-      panicActivated: true,
-      canceledBy: 'pera@peric.com',
-    },
-  ];
-
   onRideHistoryBack() {
-    this.showRideHistory = false;
-    this.menuOpen = true;
+    this.ui.showRideHistory = false;
+    this.ui.menuOpen = true;
   }
 
   openRideHistory() {
-    this.showRideHistory = true;
-    this.menuOpen = false;
+    this.ui.showScheduledRides = false;
+    this.ui.showFavourites = false;
+    this.ui.showRideHistory = true;
+    this.ui.menuOpen = false;
   }
 
   closeRideHistory() {
-    this.showRideHistory = false;
-    console.log('closed');
+    this.ui.showRideHistory = false;
   }
+
+  onEmmitError(error : Error) {
+    this.showToast(error.name, error.message)
+  }
+
+  // TODO: Move this logic outside user-layout
+  // This is probably not the right way to do it, but I cant fix it right now...
+  private selectedRideWaypoints = new BehaviorSubject<WaypointDto[]>([]);
+  selectedRideWaypoints$ = this.selectedRideWaypoints.asObservable()
+  private selectedRideRoute = new BehaviorSubject<RouteInfo | null>(null);
+  selectedRideRoute$  = this.selectedRideRoute.asObservable();
+
+  private routingService : RoutingService = inject(RoutingService)
+
+  onRenderWaypoints(waypoints : WaypointDto[]) {
+    if (waypoints.length < 1) {
+      this.selectedRideWaypoints.next([])
+      this.selectedRideRoute.next(null)
+      return
+    }
+
+    this.routingService.route(waypoints).pipe(take(1)).subscribe({
+      next: (routeInfo) => {
+          console.log(waypoints)
+          this.selectedRideWaypoints.next(waypoints)
+          console.log(this.selectedRideWaypoints.value)
+          this.selectedRideRoute.next(routeInfo)
+        },
+        error: (err) => {
+            console.log(err)
+        },
+    });
+  }
+
+
+
+  // Favourites SHEET LOGIC
+  onFavouritesBack() {
+    this.ui.showFavourites = false;
+    this.ui.menuOpen = true;
+  }
+
+  openFavourites() {
+    this.ui.showScheduledRides = false;
+    this.ui.showRideHistory = false;
+    this.ui.showFavourites = true;
+    this.ui.menuOpen = false;
+  }
+
+  closeFavourites() {
+    this.ui.showFavourites = false;
+  }
+
+  
+
+  // SCHEDULED RIDES SHEET LOGIC
+  onScheduledRidesBack() {
+    this.ui.showScheduledRides = false;
+    this.ui.menuOpen = true;
+  }
+
+  openScheduledRides() {
+    this.ui.showRideHistory = false;
+    this.ui.showFavourites = false;
+    this.ui.showScheduledRides = true;
+    this.ui.menuOpen = false;
+  }
+
+  closeScheduledRides() {
+    this.ui.showScheduledRides = false;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+  playNotificationSound() {
+    try {
+      const audio = new Audio('/new-notification-07-210334.mp3');
+      
+      audio.volume = 0.3;
+      
+      audio.play().catch((error) => {
+        console.warn('Failed to play notification sound:', error);
+        const audioAlt = new Audio('new-notification-07-210334.mp3');
+        audioAlt.volume = 0.3;
+        audioAlt.play().catch((err) => {
+          console.warn('Failed to play notification sound with alternative path:', err);
+        });
+      });
+    } catch (error) {
+      console.warn('Error creating audio element:', error);
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // RIDE OPTIONS SHEET LOGIC
 
-  rideOptions = {
-    rideType: 'Standard' as 'Standard' | 'Luxury' | 'Van',
-    babyFriendly: false,
-    petFriendly: false,
-  };
-
-  rideOptionsOpen = false;
-  setRideType(type: 'Standard' | 'Luxury' | 'Van') {
-    this.rideOptions.rideType = type;
-  }
-
-  toggleRideBaby() {
-    this.rideOptions.babyFriendly = !this.rideOptions.babyFriendly;
-  }
-  toggleRidePet() {
-    this.rideOptions.petFriendly = !this.rideOptions.petFriendly;
-  }
-
   closeRideOptions() {
-    this.rideOptionsOpen = false;
+    this.ui.rideOptionsOpen = false;
   }
   openRideOptions() {
-    this.rideOptionsOpen = true;
+    this.ui.rideOptionsOpen = true;
   }
   onRideOptionsBack() {
-    this.rideOptionsOpen = false;
-    this.destOpen = true;
+    this.ui.rideOptionsOpen = false;
+    this.ridePlanningStore.openDest();
   }
 
-  onScheduleRide() {
+  onRideOptionsScheduleRide(options: RideOptionsDto) {
     this.closeRideOptions();
-    this.showToast('Ride scheduled', 'Your ride has been scheduled successfully.');
+    this.ridePlanningStore.setRideOptions(options);
+    this.ui.scheduleTimerOpen = true;
   }
 
-  onCheckout() {
+  onRideOptionsProceed(options: RideOptionsDto) {
     this.closeRideOptions();
-    this.checkoutModalOpen = true;
+    this.previousScreenBeforeInvite = 'ride-options';
+    this.ridePlanningStore.setRideOptions(options);
+    this.ui.invitePassengersOpen = true;
   }
 
-  // CHECKOUT MODAL LOGIC
-  checkoutModalOpen = false;
+  onScheduleTimerBack() {
+    this.ui.scheduleTimerOpen = false;
+    this.ui.rideOptionsOpen = true;
+    this.ridePlanningStore.clearScheduledTime();
+  }
+
+  onScheduleTimerCheckout(timeData: { hours: number; minutes: number; isAM: boolean }) {
+    this.ui.scheduleTimerOpen = false;
+    this.previousScreenBeforeInvite = 'schedule-timer';
+    this.ui.invitePassengersOpen = true;
+    this.ridePlanningStore.setScheduledTime(timeData);
+  }
+
+
+
+
 
   onCheckoutModalBack() {
-    this.checkoutModalOpen = false;
-    this.rideOptionsOpen = true;
+    this.ui.checkoutModalOpen = false;
+    this.ui.invitePassengersOpen = true;
+  }
+
+
+
+
+
+
+  onInvitePassengersBack() {
+    this.ui.invitePassengersOpen = false;
+    // Go back to previous screen - either schedule timer or ride options
+    if (this.previousScreenBeforeInvite === 'schedule-timer') {
+      this.ui.scheduleTimerOpen = true;
+    } else if (this.previousScreenBeforeInvite === 'ride-options') {
+      this.ui.rideOptionsOpen = true;
+    }
+    this.previousScreenBeforeInvite = null;
+  }
+
+  onInvitePassengersProceed(emails: string[]) {
+    this.ui.invitePassengersOpen = false;
+    this.ui.checkoutModalOpen = true;
+    this.ridePlanningStore.setPassengersEmails(emails);
+    this.ridePlanningStore.estimatePrice();
   }
 
   onConfirmRide() {
-    // TODO: API call za potvrdu vožnje
-    this.checkoutModalOpen = false;
-    this.showToast('Ride confirmed', 'Your ride has been confirmed successfully.');
+    this.ui.checkoutModalOpen = false;
+    this.ridePlanningStore.orderRide().subscribe({
+      next: () => {
+        this.showToast('Ride ordered', 'Your ride has been ordered successfully.');
+        this.playNotificationSound();
+      },
+      error: (err: HttpErrorResponse) => {
+        let errorMessage = 'Failed to order ride';
+        if (err.error && typeof err.error === 'string') {
+          errorMessage = err.error;
+        } else if (err.error && err.error.message && typeof err.error.message === 'string') {
+          errorMessage = err.error.message;
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+        this.showToast('Error ordering ride', errorMessage);
+      }
+    });
   }
+
+  onStartRideClick() {
+    const currentRide = this.ridePlanningStore.getCurrentRide();
+    if (!currentRide) {
+      this.showToast('No ride available', 'There is no ride available to start.');
+    } else {
+      this.ridePlanningStore.startCurrentRide().pipe(take(1)).subscribe({
+        next: () => {
+          this.showToast('Ride started', 'Please drive carefully and enjoy your ride.');
+        },
+        error: (err: HttpErrorResponse) => {
+          this.showToast('Error starting ride', err.error.message);
+        }
+      });
+    }
+  }
+
+
+  // REORDER RIDE FROM FAVORITES
+  onFavoriteReorder(ride: RideDto) {
+    // close favourites sheet
+    this.closeFavourites();
+    // close initial choose-destination modal
+    this.ui.cdModalOpen = false;
+    // prepare state for new ride using existing waypoints
+    this.ridePlanningStore.clearRidePlanningState();
+    this.ridePlanningStore.setWaypoints(ride.waypoints);
+    // open destination card and recalculate route
+    this.ridePlanningStore.openDest();
+    this.ridePlanningStore.recalculateRoute();
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // PROFILE CHANGES SHEET LOGIC
+  loadProfileChanges() {
+    this.profileChangeService.loadPendingProfileChanges();
+  }
+
+  openProfileChanges() {
+    this.ui.menuOpen = false;
+    this.ui.profileChangesOpen = true;
+    this.loadProfileChanges();
+  }
+
+  closeProfileChanges() {
+    this.ui.profileChangesOpen = false;
+  }
+
+  onProfileChangesBack() {
+    this.closeProfileChanges();
+    this.ui.menuOpen = true;
+  }
+
+  approveProfileChange(id: number) {
+    this.profileChangeService.approve(id);
+  }
+
+  rejectProfileChange(id: number) {
+    this.profileChangeService.reject(id);
+  }
+
+  isLoggedIn(): boolean {
+    return this.authService.isLoggedIn();
+  }
+
+  getWaypointCount(): number {
+    return this.ridePlanningStore.waypoints.length;
+  }
+
+  onEstimateTime() {
+    this.ui.timeEstimate = false;
+    this.ui.cdModalOpen = true;
+    this.ridePlanningStore.setWaypoints([]);
+    this.ridePlanningStore.clearRoute();
+  }
+
+  calculateEstimatedTime() {
+    return this.ridePlanningStore.getDurationMinutes();
+  }
+
+  onCancelRideClick() {
+    this.ui.showCancelModal = true;
+  }
+
+  handleCancelRide(reason: string) {
+    const rideId = this.ridePlanningStore.currentRideSubject$.getValue()!.id;
+    this.rideService.cancelRideDriver(rideId, reason).subscribe({
+        next: () => {
+          this.ui.showCancelModal = false;
+          this.ridePlanningStore.currentRideSubject$.next(null);
+          this.showToast('Ride cancelled', 'Ride cancelled successfully.');
+        },
+        error: (err: any) => {
+          this.showToast('Error cancelling ride', err.error.message);
+        }
+      });
+  }
+
+  canCancelRide(): boolean {
+    const ride = this.ridePlanningStore.getCurrentRide();
+    return !!ride && ride.status === 'PENDING';
+  }
+
+  
+  canStopRide(): boolean {
+    const ride = this.ridePlanningStore.getCurrentRide();
+    return !!ride && ride.status === 'IN_PROGRESS';
+  }
+
+  onStopRideClick() {
+    const ride = this.ridePlanningStore.getCurrentRide();
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        this.geocodingService.reverse(lat, lon).subscribe({
+          next: (label: string | null) => {
+            if (label) {
+              const stopWaypoint: WaypointDto = {
+                latitude: lat,
+                longitude: lon,
+                label: label,
+                id: 0,
+              };
+
+              console.log("Stop waypoint DTO:", stopWaypoint);
+
+              this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
+                next: (price) => {
+                  const finalPrice = price;
+                  this.showToast("New price", finalPrice.toString());
+                  this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
+                    this.ridePlanningStore.currentRideSubject$.next(nextRide)
+                    this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
+                      if (user.role == Role.REGISTERED_USER && ride != null)
+                        this.reviewService.newReview(ride.id)
+                    })
+                  })
+                },
+                error: (err) => {
+                }
+              });
+            } 
+          },
+          error: (err) => {
+            console.error("Error", err);
+          }
+        });
+      },
+      error => {
+        console.error("Geolocation error", error);
+
+        // Fallback if the location permisions are denied - DELETE LATER
+        const lat = 45.264180;
+        const lon = 19.830198;
+
+        this.geocodingService.reverse(lat, lon).subscribe({
+          next: (label: string | null) => {
+            if (label) {
+              const stopWaypoint: WaypointDto = {
+                latitude: lat,
+                longitude: lon,
+                label: label,
+                id: 0,
+              };
+
+              console.log("Stop waypoint DTO:", stopWaypoint);
+
+              this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
+                next: (price) => {
+                  const finalPrice = price;
+                  this.showToast("New price", finalPrice.toString());
+                  this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
+                    this.ridePlanningStore.currentRideSubject$.next(nextRide)
+                    this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
+                      if (user.role == Role.REGISTERED_USER && ride != null)
+                        this.reviewService.newReview(ride.id)
+                    })
+                  })
+                },
+                error: (err) => {
+                }
+              });
+            } 
+          },
+          error: (err) => {
+            console.error("Error", err);
+          }
+        });
+      },
+      { enableHighAccuracy: true }
+    );
+  }
+
+
+  onCancelUserClick() {
+    const rideId = this.ridePlanningStore.currentRideSubject$.getValue()!.id;
+    this.rideService.cancelRideUser(rideId).subscribe({
+        next: () => {
+          this.ui.showCancelModal = false;
+          this.ridePlanningStore.currentRideSubject$.next(null);
+          this.showToast('Ride cancelled', 'Ride cancelled successfully.');
+        },
+        error: (err: any) => {
+          this.showToast('Error cancelling ride', err.error.message);
+        }
+      });
+  }
+
+  activatePanic() {
+    const rideId = this.ridePlanningStore.currentRideSubject$.getValue()!.id;
+    this.rideService.activatePanic(rideId).subscribe({
+      next: () => this.showToast('Panic activated', 'Admins are notified.'),
+      error: err => console.error(err)
+    });
+  }
+
+  subscribeToPanicNotifications() {
+    console.log(this.authService.getRole())
+    if (this.authService.getRole() === "ADMIN") { 
+        this.panicSubscription = this.webSocketService
+        .panicNotifications()
+        .subscribe({
+          next: (panic) => {
+            this.panicToast.show(panic.rideId.toString());
+            this.playNotificationSound();
+          },
+          error: () => {
+            this.showToast('Connection error', 'Could not receive panic updates.');
+          }
+        });
+      }
+    }
+
+
+  toggleStatus() {
+    this.authService.changeDriverStatus().subscribe({
+      next: (message) => {
+        if (!message.includes("You are on a ride")) {
+          this.isDriverActive = !this.isDriverActive;
+        }
+        this.showToast('Driver status', message);
+      },
+      error: (err) => {
+        console.error('Status change failed', err);
+        this.showToast('Error', err.error || 'Could not change status');
+      }
+    });
+  }
+
 }
+
