@@ -1,0 +1,32 @@
+2.4. Poručivanje vožnje
+2.4.1 Poručivanje vožnje (Student1)
+Ulogovanom korisniku se na početnoj stranici prikazuje mapa u istom obliku kao i
+neulogovanom sa razlikom u više opcija koje se mogu definisati prilikom poručivanja vožnje.
+Pored definisanja polazišta i destinacije, ulogovani korisnik ima mogućnost da definiše
+više stanica između početne i krajnje tačke pri čemu redosled igra bitnu ulogu jer definiše
+redosled u kom vozač mora obići navedene tačke.
+Korisnik može ulinkovati više drugih putnika prema njihovim mejl adresama i da na taj
+način ostali putnici mogu pratiti detalje o vožnji (dodatno u 2.4.2). Pretpostaviti da svi korisnici
+putuju od polazišta do destinacije i da vožnju plaća kreator vožnje.
+Nakon što je putanja izabrana, korisnik može definisati neke dodatne stavke bitne za
+izbor vozača: izbor tipa vozila, da li se prevoze bebe ili kućni ljubimci.
+Cena se računa po formuli cena_po_tipu_vozila + broj_kilometara * 120.
+Sistem proverava da li postoje dostupni vozači i ako postoje automatski dodeljuje vožnju
+vozaču i putnicima. Obratiti pažnju na sledeće:
+● Ako ne postoji nijedan vozač prijavljen/aktivan, vožnja se odbija i korisniku stiže
+notifikacija da trenutno nema aktivnih vozača.
+● Ako su svi vozači trenutno zauzeti i ako imaju već zakazanu buduću vožnju, takođe se
+vožnja odbija uz slanje notifikacije da trenutno nema aktivnih vozača.
+● Ako ima slobodnih vozača, sistem bira najbližeg, a ako su svi zauzeti, bira se onaj koji je
+najbliži polazištu i najbliži zavšetku trenutne vožnje (preostalo mu je još 10 minuta
+prethodne vožnje). Korisniku se šalje notifikacija o dodeljenoj vožnji.
+● Ako vozač ima više od 8 radnih sati u poslednja 24 časa, ne postoji mogućnost da mu
+sistem dodeli vožnju.
+Kada je vozač uspešno pronađen, šalje se notifikacija vozaču o novoj vožnji. Korisniku
+koji je naručio vožnju se isto šalje notifikacija da je porudžbina prihvaćena. Ako je poručivanje
+neuspešno, korisnik koji je naručio vožnju dobija notifikacija o neuspešnoj vožnji.
+Vožnja se može zakazati i za budućnost (npr. putnik u 10:00 zakaže vožnju za 15:00) pri
+čemu unapred zakazane vožnje imaju prioritet prilikom dodeljivanja vozila. Vožnja se može
+zakazati najviše 5 časova unapred.
+Na 15 minuta do početka vožnje i na svakih 5 nakon toga, korisnik dobija notifikaciju da
+je zakazao vožnju kao podsetnik. Nakon početka vožnje nije potrebno da se dobija notifikacija.
