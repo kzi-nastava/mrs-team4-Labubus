@@ -1,10 +1,12 @@
 package com.ubre.backend.service.impl;
 
 import com.ubre.backend.dto.*;
+import com.ubre.backend.enums.RideStatus;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.*;
 import com.ubre.backend.repository.ActivationTokenRepository;
+import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.EmailService;
 import com.ubre.backend.repository.UserStatusRecordRepository;
@@ -23,6 +25,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +61,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private RideRepository rideRepository;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -287,14 +293,93 @@ public class UserServiceImpl implements UserService {
 
         UserStatsDto statsDto = new UserStatsDto();
         statsDto.setUserId(user.getId());
-        statsDto.setActivePast24Hours(stats.getActivePast24Hours()); // minutes
-        statsDto.setNumberOfRides(stats.getNumberOfRides());
-        statsDto.setDistanceTraveled(stats.getDistanceTraveled()); // kilometers, float
-        statsDto.setMoneySpent(stats.getMoneySpent()); // float
-        statsDto.setMoneyEarned(stats.getMoneyEarned()); // float
+//        statsDto.setActivePast24Hours(stats.getActivePast24Hours()); // minutes
+//        statsDto.setNumberOfRides(stats.getNumberOfRides());
+//        statsDto.setDistanceTraveled(stats.getDistanceTraveled()); // kilometers, float
+//        statsDto.setMoneySpent(stats.getMoneySpent()); // float
+//        statsDto.setMoneyEarned(stats.getMoneyEarned()); // float
+
+        statsDto.setActivePast24Hours((int) calculateActivePast24Hours(user.getId()));
+        if (user.getRole() == Role.DRIVER) {
+            statsDto.setNumberOfRides(calculateNumberOfRides(user.getId()));
+            statsDto.setDistanceTraveled(calculateDistanceTraveled(user.getId()));
+            statsDto.setMoneyEarned(calculateMoneyEarned(user.getId()));
+            statsDto.setMoneySpent(0.0); // drivers don't spend money, they earn money
+        } else {
+            statsDto.setNumberOfRides(0); // for now, only drivers have rides, when passengers have rides, we will update this method
+            statsDto.setDistanceTraveled(0.0); // same as above
+            statsDto.setMoneyEarned(0.0); // passengers don't earn money
+            statsDto.setMoneySpent(0.0); // for now, we don't have money spent for passengers, when we have, we will update this method
+        }
+
+        // save user stats to database
+        stats.setActivePast24Hours(statsDto.getActivePast24Hours());
+        stats.setNumberOfRides(statsDto.getNumberOfRides());
+        stats.setDistanceTraveled(statsDto.getDistanceTraveled());
+        stats.setMoneyEarned(statsDto.getMoneyEarned());
+        stats.setMoneySpent(statsDto.getMoneySpent());
+        userRepository.save(user);
 
         return statsDto;
     }
+
+    // user stats are for driver only right now, when records come to the table, we will create new methods, and new endpoints
+    public long calculateActivePast24Hours(Long userId) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime from = now.minusHours(24);
+
+        List<UserStatusRecord> records =
+                userStatusRecordRepository.findByUserIdAndValidFromBetweenOrderByValidFromAsc(userId, from, now);
+
+        // ubaci početno stanje (status koji je važio tačno u "from")
+        userStatusRecordRepository.findTopByUserIdAndValidFromLessThanOrderByValidFromDesc(userId, from)
+                .ifPresent(prev -> records.add(0, prev));
+
+        // ako nema nijednog zapisa ikad, ne može se samo vraća nula
+        if (records.isEmpty()) return 0;
+
+        long minutes = 0;
+
+        for (int i = 0; i < records.size(); i++) {
+            UserStatusRecord cur = records.get(i);
+
+            LocalDateTime next = (i + 1 < records.size())
+                    ? records.get(i + 1).getValidFrom()
+                    : now;
+
+            LocalDateTime start = cur.getValidFrom().isAfter(from) ? cur.getValidFrom() : from;
+            LocalDateTime end = next.isBefore(now) ? next : now;
+
+            if (cur.getStatus() == UserStatus.ACTIVE && start.isBefore(end)) {
+                minutes += Duration.between(start, end).toMinutes();
+            }
+        }
+
+        return minutes;
+    }
+
+
+    public int calculateNumberOfRides(Long driverId) {
+        List<Ride> rides = rideRepository.findByDriverId(driverId);
+       // keep only with status COMPLETED
+        rides = rides.stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).toList();
+        return rides.size();
+    }
+
+    public double calculateDistanceTraveled(Long driverId) {
+        List<Ride> rides = rideRepository.findByDriverId(driverId);
+        // keep only with status COMPLETED
+        rides = rides.stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).toList();
+        return rides.stream().mapToDouble(Ride::getDistance).sum();
+    }
+
+    public double calculateMoneyEarned(Long driverId) {
+        List<Ride> rides = rideRepository.findByDriverId(driverId);
+        // keep only with status COMPLETED
+        rides = rides.stream().filter(ride -> ride.getStatus() == RideStatus.COMPLETED).toList();
+        return rides.stream().mapToDouble(Ride::getPrice).sum();
+    }
+
 
     @Override
     public void changePassword(PasswordChangeDto passwordChangeDto) {
