@@ -8,6 +8,8 @@ import { VehicleLocationNotification } from '../notifications/vehicle-location-n
 import { RideTrackingStore } from './ride-planning/ride-tracking-store';
 import { RidePlanningStore } from './ride-planning/ride-planning-store';
 import { RideStatus } from '../enums/ride-status';
+import { WaypointDto } from '../dtos/waypoint-dto';
+import { RideDto } from '../dtos/ride-dto';
 
 @Injectable({
   providedIn: 'root',
@@ -35,6 +37,17 @@ export class VehicleService {
               for (let indicator of notification.indicators) {
                 if (indicator.driverId == this.ridePlanningStore.currentRideSubject$.value?.driver.id) {
                   (indicator as any).mapCenter = true;
+                  for (const i in this.ridePlanningStore.currentRideSubject$.value.waypoints) {
+                    const waypoint = this.ridePlanningStore.currentRideSubject$.value.waypoints[i]
+                    if (!waypoint.visited) {
+                      if (Math.abs(waypoint.longitude - indicator.location.longitude) < 0.00054 && Math.abs(waypoint.latitude - indicator.location.latitude) < 0.00030) {
+                        let temp : WaypointDto[] = this.ridePlanningStore.currentRideSubject$.value.waypoints;
+                        temp[i].visited = true;
+                        this.rideTrackingStore.trackedWaypoints.next(temp);
+                      }
+                      break
+                    }
+                  }
                   this.rideTrackingStore.recalculateRideRoute(this.ridePlanningStore.currentRideSubject$.value, indicator.location)
                   break
                 }

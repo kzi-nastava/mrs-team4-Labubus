@@ -155,10 +155,18 @@ public class VehicleServiceImpl implements VehicleService {
             newLocation.setId(vehicle.getLocation().getId());
         waypointRepository.save(newLocation);
 
-        if (vehicle.getDriver().getStatus().equals(UserStatus.ON_RIDE)) {
-            Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeAsc(vehicle.getDriver(), RideStatus.IN_PROGRESS);
-            if (!ride.isEmpty())
-                return new VehicleIndicatorDto(vehicle.getDriver().getId(), new WaypointDto(vehicle.getLocation()), vehicle.getDriver().getStatus(), ride.get().getPanic());
+        Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeAsc(vehicle.getDriver(), RideStatus.IN_PROGRESS);
+        if (!ride.isEmpty()) {
+            for (Waypoint waypoint : ride.get().getWaypoints()) {
+                if (waypoint.getVisited() == null || !waypoint.getVisited()) {
+                    if (Math.abs(waypoint.getLongitude() - waypointDto.getLongitude()) < 0.00054 && Math.abs(waypoint.getLatitude() - waypointDto.getLatitude()) < 0.00030) {
+                        waypoint.setVisited(true);
+                        waypointRepository.save(waypoint);
+                    }
+                    break;
+                }
+            }
+            return new VehicleIndicatorDto(vehicle.getDriver().getId(), new WaypointDto(vehicle.getLocation()), vehicle.getDriver().getStatus(), ride.get().getPanic());
         }
         return new VehicleIndicatorDto(vehicle.getDriver().getId(), new WaypointDto(vehicle.getLocation()), vehicle.getDriver().getStatus(), false);
     }
