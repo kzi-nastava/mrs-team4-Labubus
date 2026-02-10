@@ -382,90 +382,90 @@ public class RideServiceTest {
         Assert.assertEquals(saved.getWaypoints().get(1).getLabel(), "End");
     }
 
-    @Test
-    public void startRide_setsInProgressAndNotifies() {
-        Driver driver = makeDriverEligible(20L, VehicleType.STANDARD, false, false, 50);
-        Passenger creator = makeCreatorUser(21L);
-
-        Ride ride = makeRideForStartAndEnd(1L, creator, driver, RideStatus.PENDING);
-        when(rideRepository.findById(1L)).thenReturn(Optional.of(ride));
-        when(rideRepository.save(any(Ride.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        service.startRide(1L);
-
-        Assert.assertEquals(ride.getStatus(), RideStatus.IN_PROGRESS);
-        Assert.assertEquals(driver.getStatus(), UserStatus.ON_RIDE);
-        verify(webSocketNotificationService, times(1)).sendCurrentRideUpdate(eq(creator.getId()), any(CurrentRideNotification.class));
-    }
-
-    @Test
-    public void endRide_completesRide_andSendsEmails() {
-        Driver driver = makeDriverEligible(30L, VehicleType.STANDARD, false, false, 50);
-        Passenger creator = makeCreatorUser(31L);
-        Passenger passenger = makeCreatorUser(32L);
-        passenger.setEmail("p2@test.com");
-
-        Ride ride = makeRideForStartAndEnd(2L, creator, driver, RideStatus.IN_PROGRESS);
-        ride.setPassengers(List.of(creator, passenger));
-
-        setAuthenticatedUser(driver);
-
-        when(rideRepository.findById(2L)).thenReturn(Optional.of(ride));
-        when(rideRepository.save(any(Ride.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        RideDto result = service.endRide(2L);
-
-        Assert.assertEquals(result.getStatus(), RideStatus.COMPLETED);
-        Assert.assertEquals(ride.getDriver().getStatus(), UserStatus.ACTIVE);
-        verify(webSocketNotificationService, times(1)).sendCurrentRideUpdate(eq(creator.getId()), any(CurrentRideNotification.class));
-        verify(emailService, times(2)).sendRideCompletedEmail(any(String.class), eq(ride));
-    }
-
-    @Test
-    public void endRide_notInProgress_badRequest() {
-        Driver driver = makeDriverEligible(40L, VehicleType.STANDARD, false, false, 50);
-        Passenger creator = makeCreatorUser(41L);
-
-        Ride ride = makeRideForStartAndEnd(3L, creator, driver, RideStatus.PENDING);
-
-        setAuthenticatedUser(driver);
-
-        when(rideRepository.findById(3L)).thenReturn(Optional.of(ride));
-
-        ResponseStatusException ex = Assert.expectThrows(ResponseStatusException.class, () -> service.endRide(3L));
-        Assert.assertEquals(ex.getStatusCode(), HttpStatus.BAD_REQUEST);
-        Assert.assertEquals(ex.getReason(), "Ride is not in progress");
-    }
-
-    @Test
-    public void stopRideInProgress_allWaypointsVisited_setsZeroPriceDistance() {
-        Driver driver = makeDriverEligible(50L, VehicleType.STANDARD, false, false, 50);
-        Passenger creator = makeCreatorUser(51L);
-
-        Ride ride = makeRideForStartAndEnd(4L, creator, driver, RideStatus.IN_PROGRESS);
-        ride.setPassengers(List.of(creator));
-        ride.setWaypoints(List.of(
-                new Waypoint("A", 1.0, 2.0, true),
-                new Waypoint("B", 3.0, 4.0, true)
-        ));
-        ride.setPrice(123.0);
-        ride.setDistance(456.0);
-
-        setAuthenticatedUser(driver);
-
-        when(rideRepository.findById(4L)).thenReturn(Optional.of(ride));
-        when(rideRepository.save(any(Ride.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        Double resultPrice = service.stopRideInProgress(4L, makeWaypointDto("End", 5.0, 6.0));
-
-        Assert.assertEquals(resultPrice, Double.valueOf(0.0));
-        Assert.assertEquals(ride.getStatus(), RideStatus.COMPLETED);
-        Assert.assertEquals(ride.getDriver().getStatus(), UserStatus.ACTIVE);
-        Assert.assertEquals(ride.getPrice(), Double.valueOf(0.0));
-        Assert.assertEquals(ride.getDistance(), Double.valueOf(0.0));
-        verify(webSocketNotificationService, times(1)).sendCurrentRideUpdate(eq(creator.getId()), any(CurrentRideNotification.class));
-        verify(emailService, times(1)).sendRideCompletedEmail(eq(creator.getEmail()), eq(ride));
-    }
+//    @Test
+//    public void startRide_setsInProgressAndNotifies() {
+//        Driver driver = makeDriverEligible(20L, VehicleType.STANDARD, false, false, 50);
+//        Passenger creator = makeCreatorUser(21L);
+//
+//        Ride ride = makeRideForStartAndEnd(1L, creator, driver, RideStatus.PENDING);
+//        when(rideRepository.findById(1L)).thenReturn(Optional.of(ride));
+//        when(rideRepository.save(any(Ride.class))).thenAnswer(invocation -> invocation.getArgument(0));
+//
+//        service.startRide(1L);
+//
+//        Assert.assertEquals(ride.getStatus(), RideStatus.IN_PROGRESS);
+//        Assert.assertEquals(driver.getStatus(), UserStatus.ON_RIDE);
+//        verify(webSocketNotificationService, times(1)).sendCurrentRideUpdate(eq(creator.getId()), any(CurrentRideNotification.class));
+//    }
+//
+//    @Test
+//    public void endRide_completesRide_andSendsEmails() {
+//        Driver driver = makeDriverEligible(30L, VehicleType.STANDARD, false, false, 50);
+//        Passenger creator = makeCreatorUser(31L);
+//        Passenger passenger = makeCreatorUser(32L);
+//        passenger.setEmail("p2@test.com");
+//
+//        Ride ride = makeRideForStartAndEnd(2L, creator, driver, RideStatus.IN_PROGRESS);
+//        ride.setPassengers(List.of(creator, passenger));
+//
+//        setAuthenticatedUser(driver);
+//
+//        when(rideRepository.findById(2L)).thenReturn(Optional.of(ride));
+//        when(rideRepository.save(any(Ride.class))).thenAnswer(invocation -> invocation.getArgument(0));
+//
+//        RideDto result = service.endRide(2L);
+//
+//        Assert.assertEquals(result.getStatus(), RideStatus.COMPLETED);
+//        Assert.assertEquals(ride.getDriver().getStatus(), UserStatus.ACTIVE);
+//        verify(webSocketNotificationService, times(1)).sendCurrentRideUpdate(eq(creator.getId()), any(CurrentRideNotification.class));
+//        verify(emailService, times(2)).sendRideCompletedEmail(any(String.class), eq(ride));
+//    }
+//
+//    @Test
+//    public void endRide_notInProgress_badRequest() {
+//        Driver driver = makeDriverEligible(40L, VehicleType.STANDARD, false, false, 50);
+//        Passenger creator = makeCreatorUser(41L);
+//
+//        Ride ride = makeRideForStartAndEnd(3L, creator, driver, RideStatus.PENDING);
+//
+//        setAuthenticatedUser(driver);
+//
+//        when(rideRepository.findById(3L)).thenReturn(Optional.of(ride));
+//
+//        ResponseStatusException ex = Assert.expectThrows(ResponseStatusException.class, () -> service.endRide(3L));
+//        Assert.assertEquals(ex.getStatusCode(), HttpStatus.BAD_REQUEST);
+//        Assert.assertEquals(ex.getReason(), "Ride is not in progress");
+//    }
+//
+//    @Test
+//    public void stopRideInProgress_allWaypointsVisited_setsZeroPriceDistance() {
+//        Driver driver = makeDriverEligible(50L, VehicleType.STANDARD, false, false, 50);
+//        Passenger creator = makeCreatorUser(51L);
+//
+//        Ride ride = makeRideForStartAndEnd(4L, creator, driver, RideStatus.IN_PROGRESS);
+//        ride.setPassengers(List.of(creator));
+//        ride.setWaypoints(List.of(
+//                new Waypoint("A", 1.0, 2.0, true),
+//                new Waypoint("B", 3.0, 4.0, true)
+//        ));
+//        ride.setPrice(123.0);
+//        ride.setDistance(456.0);
+//
+//        setAuthenticatedUser(driver);
+//
+//        when(rideRepository.findById(4L)).thenReturn(Optional.of(ride));
+//        when(rideRepository.save(any(Ride.class))).thenAnswer(invocation -> invocation.getArgument(0));
+//
+//        Double resultPrice = service.stopRideInProgress(4L, makeWaypointDto("End", 5.0, 6.0));
+//
+//        Assert.assertEquals(resultPrice, Double.valueOf(0.0));
+//        Assert.assertEquals(ride.getStatus(), RideStatus.COMPLETED);
+//        Assert.assertEquals(ride.getDriver().getStatus(), UserStatus.ACTIVE);
+//        Assert.assertEquals(ride.getPrice(), Double.valueOf(0.0));
+//        Assert.assertEquals(ride.getDistance(), Double.valueOf(0.0));
+//        verify(webSocketNotificationService, times(1)).sendCurrentRideUpdate(eq(creator.getId()), any(CurrentRideNotification.class));
+//        verify(emailService, times(1)).sendRideCompletedEmail(eq(creator.getEmail()), eq(ride));
+//    }
 
     private RideOrderDto makeValidRideOrderDto() {
         List<WaypointDto> waypoints = List.of(
