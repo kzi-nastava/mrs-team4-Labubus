@@ -20,10 +20,8 @@ import com.ubre.backend.repository.PanicRepository;
 import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.repository.WaypointRepository;
-import com.ubre.backend.service.EmailService;
 import com.ubre.backend.service.impl.RideReminderService;
 import com.ubre.backend.service.impl.RideServiceImpl;
-import com.ubre.backend.websocket.CurrentRideNotification;
 import com.ubre.backend.websocket.RideAssignmentNotification;
 import com.ubre.backend.websocket.WebSocketNotificationService;
 import org.mockito.ArgumentCaptor;
@@ -55,7 +53,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class RideServiceTest {
+public class RideServiceOrderRideTest {
 
     @Mock
     private RideRepository rideRepository;
