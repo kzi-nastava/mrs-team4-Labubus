@@ -34,6 +34,7 @@ import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.dtos.WaypointDto;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.services.RideService;
+import com.example.ubre.ui.services.RouteService;
 import com.example.ubre.ui.services.UserService;
 import com.example.ubre.ui.services.VehicleService;
 import com.example.ubre.ui.storages.ReviewStorage;
@@ -374,6 +375,9 @@ public class RideDetailsFragment extends Fragment {
         BoundingBox boundingBox = new BoundingBox(north, east, south, west);
         map.zoomToBoundingBox(boundingBox, true, 200);
         map.invalidate();
+
+        // Crtanje rute između tačaka - koristi OSRM API i prikazuje na mapi, miljane proveri
+        RouteService.getInstance().drawRoute(map, waypoints);
     }
       
     public void onDestroyView() {
