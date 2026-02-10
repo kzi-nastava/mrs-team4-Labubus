@@ -22,7 +22,7 @@ export class RideTrackingStore {
         }
     });
     public readonly trackedRoute$ = this.trackedRoute.asObservable();
-    private trackedWaypoints : BehaviorSubject<WaypointDto[]> = new BehaviorSubject<WaypointDto[]>([]);
+    public trackedWaypoints : BehaviorSubject<WaypointDto[]> = new BehaviorSubject<WaypointDto[]>([]);
     public readonly trackedWaypoints$ = this.trackedWaypoints.asObservable();
 
     constructor() {
@@ -45,17 +45,40 @@ export class RideTrackingStore {
     }
 
     public recalculateRideRoute(ride : RideDto, currentLocation : WaypointDto | undefined = undefined) {
-        let coordinates = ride.waypoints;
+        let coordinates : WaypointDto[] = [];
+        for (const i in ride.waypoints)
+            if (!ride.waypoints[i].visited)
+                coordinates.push(ride.waypoints[i]);
         if (currentLocation != undefined)
             coordinates = [currentLocation, ...coordinates]
 
         this.routingService.route(coordinates).pipe(take(1)).subscribe({
             next: (routeInfo) => {
-                this.trackedRoute.next(routeInfo)
-                this.trackedWaypoints.next(ride.waypoints)
+                if (coordinates.length < 2)
+                    this.trackedRoute.next({
+                        distance: 0,
+                        duration: 0,
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: []
+                        }
+                    });
+                else
+                    this.trackedRoute.next(routeInfo)
+                if (this.trackedWaypoints.value.length != coordinates.length - 1)
+                    this.trackedWaypoints.next(coordinates.slice(1))
             },
             error: (err) => {
                 console.log(err)
+                if (coordinates.length < 2)
+                    this.trackedRoute.next({
+                        distance: 0,
+                        duration: 0,
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: []
+                        }
+                    });
             },
         });
     }

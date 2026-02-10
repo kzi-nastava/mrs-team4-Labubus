@@ -6,12 +6,10 @@ import com.ubre.backend.enums.RideStatus;
 import com.ubre.backend.enums.Role;
 import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.*;
-import com.ubre.backend.repository.DriverRepository;
-import com.ubre.backend.repository.PanicRepository;
-import com.ubre.backend.repository.RideRepository;
-import com.ubre.backend.repository.UserRepository;
+import com.ubre.backend.repository.*;
 import com.ubre.backend.service.EmailService;
 import com.ubre.backend.service.RideService;
+import com.ubre.backend.service.VehicleService;
 import com.ubre.backend.websocket.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -23,9 +21,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RideServiceImpl implements RideService {
@@ -43,6 +47,8 @@ public class RideServiceImpl implements RideService {
     private PanicRepository panicRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private WaypointRepository waypointRepository;
 
     // Mock data for rides
     List<RideDto> rides = new ArrayList<RideDto>();
@@ -138,27 +144,39 @@ public class RideServiceImpl implements RideService {
         if (ride.getStatus() != RideStatus.IN_PROGRESS)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride is not in progress");
 
-        Waypoint endLocation = new Waypoint(
-                waypoint.getLabel(),
-                waypoint.getLatitude(),
-                waypoint.getLongitude()
-        );
-
         ride.setEndTime(LocalDateTime.now());
-        ride.getWaypoints().add(endLocation);
         ride.setStatus(RideStatus.COMPLETED);
         ride.getDriver().setStatus(UserStatus.ACTIVE);
+
+        if (ride.getWaypoints().stream().noneMatch( w ->w.getVisited() == null || !w.getVisited())) {
+            ride.setPrice(0.0);
+            ride.setDistance(0.0);
+        }
+        else if (ride.getWaypoints().stream().anyMatch(w ->w.getVisited() == null || !w.getVisited())) {
+
+            Waypoint endLocation = new Waypoint(
+                    waypoint.getLabel(),
+                    waypoint.getLatitude(),
+                    waypoint.getLongitude()
+            );
+
+            ride.getWaypoints().removeIf(w ->w.getVisited() == null || !w.getVisited());
+            ride.getWaypoints().add(endLocation);
+            ride.setDistance(this.estimateDistance(ride));
+            ride.setPrice(this.estimateNewPrice(ride));
+        }
+
+        rideRepository.save(ride);
 
         CurrentRideNotification currentRideNotification = new CurrentRideNotification(
                 NotificationType.RIDE_COMPLETED.name(),
                 null
         );
 
-        Double newPrice = this.estimateNewPrice(ride);
         this.webSocketNotificationService.sendCurrentRideUpdate(ride.getCreator().getId(), currentRideNotification);
         for (User user : ride.getPassengers())
             emailService.sendRideCompletedEmail(user.getEmail(), ride);
-        return newPrice;
+        return ride.getPrice();
     }
 
     private double estimateNewPrice(Ride ride) {
@@ -177,10 +195,35 @@ public class RideServiceImpl implements RideService {
 
         double finalPrice = Math.round(price * 100.0) / 100.0;
 
-        ride.setPrice(finalPrice);
-        rideRepository.save(ride);
-
         return finalPrice;
+    }
+
+    private double estimateDistance(Ride ride) {
+
+        StringBuilder URL = new StringBuilder("https://routing.openstreetmap.de/routed-car/route/v1/driving/");
+        for (Waypoint w : ride.getWaypoints())
+            URL.append(w.getLatitude()).append(",").append(w.getLongitude()).append(";");
+        URL.setLength(URL.length()-1);
+        URL.append("?overview=full&geometries=geojson&steps=false");
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(URL.toString()))
+                .method("GET", HttpRequest.BodyPublishers.noBody())
+                .build();
+        HttpResponse<String> response = null;
+
+        try {
+            response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        String responseString = response.body();
+
+        int summaryIdx =responseString.indexOf("summary")+9;
+        int distanceIdx=responseString.indexOf("distance",summaryIdx)+10;
+        int dis=responseString.indexOf("}",distanceIdx);
+
+        return Double.parseDouble(responseString.substring(distanceIdx,dis));
     }
 
 
@@ -449,6 +492,7 @@ public class RideServiceImpl implements RideService {
 
         List<User> passengers = new ArrayList<>();
 
+        passengers.add(creator);
         for (String email : rideOrderDto.getPassengersEmails()) {
             userRepository.findByEmail(email)
                     .ifPresent(passengers::add);

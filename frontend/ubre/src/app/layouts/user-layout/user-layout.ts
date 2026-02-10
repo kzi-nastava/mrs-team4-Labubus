@@ -1123,6 +1123,7 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
                 latitude: lat,
                 longitude: lon,
                 label: label,
+                visited: false,
                 id: 0,
               };
 
@@ -1164,6 +1165,7 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
                 latitude: lat,
                 longitude: lon,
                 label: label,
+                visited: false,
                 id: 0,
               };
 
