@@ -413,6 +413,7 @@ public class RideServiceImpl implements RideService {
         if (rideOrderDto.getWaypoints() == null || rideOrderDto.getWaypoints().size() == 1 || rideOrderDto.getWaypoints().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one waypoint is required to order a ride");
         }
+
         // if creator id is null or zero throw error
         if (rideOrderDto.getCreatorId() == null || rideOrderDto.getCreatorId() == 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Creator id is required to order a ride");

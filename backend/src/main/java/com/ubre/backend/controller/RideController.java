@@ -281,6 +281,11 @@ public class RideController {
         Double dist = options.get("distance"); // in meters
         Double vehicleType = options.get("vehicleType"); // 0 - standard, 1 - van, 2 - luxury
 
+        // if there is no distance or vehicle type in the request, return bad request (if they are null for example)
+        if (dist == null || vehicleType == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+
         double baseFare;
         if (vehicleType == 0) {
             baseFare = standard;
