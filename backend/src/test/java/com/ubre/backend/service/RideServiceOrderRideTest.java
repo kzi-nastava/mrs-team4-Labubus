@@ -77,6 +77,7 @@ public class RideServiceOrderRideTest {
 
     private AutoCloseable mocks;
 
+    @BeforeMethod
     public void setUp() {
         mocks = MockitoAnnotations.openMocks(this);
     }

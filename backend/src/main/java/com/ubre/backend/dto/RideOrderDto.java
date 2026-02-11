@@ -4,6 +4,7 @@ package com.ubre.backend.dto;
 
 import com.ubre.backend.enums.VehicleType;
 import com.ubre.backend.model.Waypoint;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class RideOrderDto {
     @NotNull(message = "Creator ID cannot be null")
     private Long creatorId;
     private List<String> passengersEmails;
+    @Valid
     @NotEmpty(message = "Waypoints cannot be empty")
     private List<WaypointDto> waypoints;
     @NotNull(message = "Vehicle type cannot be null")
