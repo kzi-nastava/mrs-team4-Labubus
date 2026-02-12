@@ -26,6 +26,7 @@
 
       <button class="item"
               [class.danger]="it.action === 'logout'"
+              [attr.data-testid]="it.action === 'login' ? 'side-menu-login' : null"
               (click)="onItem(it.action)">
         <img [src]="it.icon" alt="">
         <span>{{ it.label }}</span>
