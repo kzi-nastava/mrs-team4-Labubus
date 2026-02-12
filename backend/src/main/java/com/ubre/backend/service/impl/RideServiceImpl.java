@@ -1,10 +1,7 @@
 package com.ubre.backend.service.impl;
 
 import com.ubre.backend.dto.*;
-import com.ubre.backend.enums.NotificationType;
-import com.ubre.backend.enums.RideStatus;
-import com.ubre.backend.enums.Role;
-import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.enums.*;
 import com.ubre.backend.model.*;
 import com.ubre.backend.repository.*;
 import com.ubre.backend.service.EmailService;
@@ -148,7 +145,7 @@ public class RideServiceImpl implements RideService {
         ride.setStatus(RideStatus.COMPLETED);
         ride.getDriver().setStatus(UserStatus.ACTIVE);
 
-        if (ride.getWaypoints().stream().noneMatch( w ->w.getVisited() == null || !w.getVisited())) {
+        if (ride.getWaypoints().stream().allMatch( w ->w.getVisited() == null || !w.getVisited())) {
             ride.setPrice(0.0);
             ride.setDistance(0.0);
         }
@@ -157,7 +154,8 @@ public class RideServiceImpl implements RideService {
             Waypoint endLocation = new Waypoint(
                     waypoint.getLabel(),
                     waypoint.getLatitude(),
-                    waypoint.getLongitude()
+                    waypoint.getLongitude(),
+                    true
             );
 
             ride.getWaypoints().removeIf(w ->w.getVisited() == null || !w.getVisited());
@@ -180,19 +178,23 @@ public class RideServiceImpl implements RideService {
     }
 
     private double estimateNewPrice(Ride ride) {
-        LocalDateTime start = ride.getStartTime();
-        LocalDateTime end = LocalDateTime.now();
+        double STANDARD_BASE_FARE = 5.0;
+        double VAN_BASE_FARE = 8.0;
+        double LUXURY_BASE_FARE = 20.0;
+        double PER_KM_RATE = 1.2;
 
-        long elapsedMinutes = Duration.between(start, end).toMinutes();
+        double baseFare;
+        VehicleType vehicleType = ride.getDriver().getVehicle().getType();
 
-        long standardMinutes = 20;
+        if (vehicleType == VehicleType.STANDARD) {
+            baseFare = STANDARD_BASE_FARE;
+        } else if (vehicleType == VehicleType.VAN) {
+            baseFare = VAN_BASE_FARE;
+        } else {
+            baseFare = LUXURY_BASE_FARE;
+        }
 
-        double factor = (double) elapsedMinutes / standardMinutes;
-
-        factor = Math.max(0.5, Math.min(factor, 1.0));
-
-        double price = ride.getPrice() * factor;
-
+        double price = baseFare + (PER_KM_RATE * ride.getDistance());
         double finalPrice = Math.round(price * 100.0) / 100.0;
 
         return finalPrice;
@@ -620,7 +622,8 @@ public class RideServiceImpl implements RideService {
 
     private void checkRidePrivilege(Long userId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) auth.getPrincipal();
+        String username = auth.getName();
+        User user = userRepository.findByEmail(username).orElseThrow();
 
         if (!userId.equals(user.getId()))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your ride");
