@@ -26,6 +26,7 @@ export class ReviewModal {
     text: ""
   }
   error : boolean = false;
+  readonly stars  = Array.from({ length: 5 })
 
   onClose(event : Event) {
     if (event.target === event.currentTarget) {
@@ -36,6 +37,8 @@ export class ReviewModal {
   onSelectRating(rating : number) {
     if ([1, 2, 3, 4, 5].includes(rating))
       this.review.rating = rating as 1 | 2 | 3 | 4 | 5
+    else
+      this.onError.emit(new Error("Rating must be in range 1-5"))
   }
 
   onSetText(event : Event) {
