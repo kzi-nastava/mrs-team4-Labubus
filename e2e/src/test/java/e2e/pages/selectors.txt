@@ -17,6 +17,9 @@ private final By destProceed = By.cssSelector("[data-testid='dest-proceed']");
 // Favorites – first ride card
 private final By favoriteRideCardFirst = By.cssSelector("[data-testid='favorite-ride-card-0']");
 
+// After favourite ride is open - button for ride reorder
+private final By reorderRide = By.cssSelector("[data-testid='reorder-ride']");
+
 // Ride options
 private final By rideOptionsVehicleStandard = By.cssSelector("[data-testid='ride-options-vehicle-standard']");
 private final By rideOptionsVehicleLuxury = By.cssSelector("[data-testid='ride-options-vehicle-luxury']");
@@ -44,3 +47,7 @@ private final By toastMessage = By.cssSelector("[data-testid='toast-message']");
 
 // Stat card - checkout modal
 private final By checkoutEstimatedPrice = By.cssSelector("[data-testid='checkout-estimated-price']");
+
+// Examlples how to target ride cards in favorites or history (first and second card in the list)
+private final By favoriteRideCardSecond = By.cssSelector("[data-testid='favorite-ride-card-1']");
+private final By favoriteRideCardThird = By.cssSelector("[data-testid='favorite-ride-card-2']");

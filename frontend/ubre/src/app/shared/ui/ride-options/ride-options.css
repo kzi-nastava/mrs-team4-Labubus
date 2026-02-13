@@ -1,4 +1,4 @@
-/* RIDE OPTIONS MODAL */
+/* RIDE OPTIONS MODAL - auto so modal blocks map; rd-wrap is none so buttons get the click */
 .ro-modal {
   position: fixed;
   left: 16px;
@@ -64,6 +64,14 @@
   flex-direction: column;
   gap: 14px;
   font-family: var(--font-family);
+  pointer-events: none;
+}
+
+.rd-wrap .ro-back,
+.rd-wrap .rd-pill,
+.rd-wrap .rd-switch,
+.rd-wrap .ro-btn {
+  pointer-events: auto;
 }
 
 .rd-pills {
