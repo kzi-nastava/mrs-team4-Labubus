@@ -42,14 +42,14 @@ describe('ReviewModal', () => {
     modalOpen.next(true);
     fixture.detectChanges();
 
-    expect((fixture.debugElement.query(By.css(`div[testId="review-backdrop"]`)).nativeElement as HTMLElement).classList.contains("fade")).toBe(false)
+    expect((fixture.debugElement.query(By.css(`div[data-testId="review-backdrop"]`)).nativeElement as HTMLElement).classList.contains("fade")).toBe(false)
   });
 
   it('should close', async () => {
     modalOpen.next(false);
     fixture.detectChanges();
 
-    expect((fixture.debugElement.query(By.css(`div[testId="review-backdrop"]`)).nativeElement as HTMLElement).classList.contains("fade")).toBe(true)
+    expect((fixture.debugElement.query(By.css(`div[data-testId="review-backdrop"]`)).nativeElement as HTMLElement).classList.contains("fade")).toBe(true)
   });
 
   it('should set review rating', async () => {
@@ -58,9 +58,9 @@ describe('ReviewModal', () => {
 
     expect(component.review.rating).toBe(3)
     for (let i = 0; i < 3; i++)
-      expect(fixture.debugElement.query(By.css(`img[testId="review-start-${i}"]`)).nativeElement.getAttribute('src')).toBe('star_filled.svg')
-    expect(fixture.debugElement.query(By.css(`img[testId="review-start-3"]`)).nativeElement.getAttribute('src')).toBe('star_outline.svg')
-    expect(fixture.debugElement.query(By.css(`img[testId="review-start-4"]`)).nativeElement.getAttribute('src')).toBe('star_outline.svg')
+      expect(fixture.debugElement.query(By.css(`img[data-testId="review-start-${i}"]`)).nativeElement.getAttribute('src')).toBe('star_filled.svg')
+    expect(fixture.debugElement.query(By.css(`img[data-testId="review-start-3"]`)).nativeElement.getAttribute('src')).toBe('star_outline.svg')
+    expect(fixture.debugElement.query(By.css(`img[data-testId="review-start-4"]`)).nativeElement.getAttribute('src')).toBe('star_outline.svg')
   });
 
   it('should not accept invalid rating', () => {
