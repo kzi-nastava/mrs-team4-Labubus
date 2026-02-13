@@ -8,19 +8,19 @@
     </div>
 
     <div class="rd-pills">
-      <button type="button" class="rd-pill"
+      <button type="button" class="rd-pill" data-testid="ride-options-vehicle-standard"
               [class.active]="rideOptions.vehicleType === VehicleType.STANDARD"
               (click)="setRideType(VehicleType.STANDARD)">
         Standard
       </button>
 
-      <button type="button" class="rd-pill"
+      <button type="button" class="rd-pill" data-testid="ride-options-vehicle-luxury"
               [class.active]="rideOptions.vehicleType === VehicleType.LUXURY"
               (click)="setRideType(VehicleType.LUXURY)">
         Luxury
       </button>
 
-      <button type="button" class="rd-pill"
+      <button type="button" class="rd-pill" data-testid="ride-options-vehicle-van"
               [class.active]="rideOptions.vehicleType === VehicleType.VAN"
               (click)="setRideType(VehicleType.VAN)">
         Van
@@ -29,7 +29,7 @@
 
     <div class="rd-row">
       <div class="rd-row-label">Baby-friendly</div>
-      <button type="button" class="rd-switch"
+      <button type="button" class="rd-switch" data-testid="ride-options-baby-friendly"
               [class.on]="rideOptions.babyFriendly"
               (click)="toggleRideBaby()">
         <span class="rd-knob"></span>
@@ -38,7 +38,7 @@
 
     <div class="rd-row">
       <div class="rd-row-label">Pet-friendly</div>
-      <button type="button" class="rd-switch"
+      <button type="button" class="rd-switch" data-testid="ride-options-pet-friendly"
               [class.on]="rideOptions.petFriendly"
               (click)="toggleRidePet()">
         <span class="rd-knob"></span>
@@ -46,11 +46,11 @@
     </div>
 
     <div class="ro-actions">
-      <button type="button" class="ro-btn ro-btn-outline" (click)="onScheduleRide()">
+      <button type="button" class="ro-btn ro-btn-outline" data-testid="ride-options-schedule-ride" (click)="onScheduleRide()">
         Schedule ride
       </button>
 
-      <button type="button" class="ro-btn ro-btn-filled" (click)="onProceed()">
+      <button type="button" class="ro-btn ro-btn-filled" data-testid="ride-options-proceed" (click)="onProceed()">
         Proceed
       </button>
     </div>
