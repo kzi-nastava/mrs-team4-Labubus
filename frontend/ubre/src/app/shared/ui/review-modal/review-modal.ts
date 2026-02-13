@@ -26,6 +26,7 @@ export class ReviewModal {
     text: ""
   }
   error : boolean = false;
+  readonly stars  = Array.from({ length: 5 })
 
   onClose(event : Event) {
     if (event.target === event.currentTarget) {

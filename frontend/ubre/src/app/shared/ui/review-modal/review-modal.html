@@ -3,7 +3,7 @@
             <div class="inputs">
                   <div class="title">Leave a review</div>
                   <div class="rating">
-                        @for (item of [].constructor(5); track $index) {
+                        @for (item of stars; track $index) {
                             <img [attr.testId]="'review-start-' + $index" [src]="$index > review.rating - 1 ? 'star_outline.svg' : 'star_filled.svg'" alt="" class="star" (click)="onSelectRating($index + 1)">
                         }
                   </div>
