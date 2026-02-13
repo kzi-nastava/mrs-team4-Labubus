@@ -1,4 +1,4 @@
-<div class="ride-card" (click)="onSelect($event)" [class.selected]="selected">
+<div class="ride-card" (click)="onSelect($event)" [class.selected]="selected" [attr.data-testid]="testId">
     <img [src]="iconUrl" alt="" class="action-icon icon" (click)="onAction()">
 
     <img [src]="selected ? 'clock-surface.svg' : 'clock-primary.svg'" alt="" class="time-icon icon">

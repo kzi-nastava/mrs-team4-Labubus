@@ -1,0 +1,53 @@
+// Side menu
+private final By sideMenuUserName = By.cssSelector("[data-testid='side-menu-user-name']");
+private final By sideMenuLogin = By.cssSelector("[data-testid='side-menu-login']");
+private final By sideMenuFavourites = By.cssSelector("[data-testid='side-menu-favourites']");
+
+// Home – open menu
+private final By openSideMenu = By.cssSelector("[data-testid='open-side-menu']");
+
+// Login page
+private final By loginEmail = By.cssSelector("[data-testid='login-email']");
+private final By loginPassword = By.cssSelector("[data-testid='login-password']");
+private final By loginSubmit = By.cssSelector("[data-testid='login-submit']");
+
+// Choose destination (waypoints box)
+private final By destProceed = By.cssSelector("[data-testid='dest-proceed']");
+
+// Favorites – first ride card
+private final By favoriteRideCardFirst = By.cssSelector("[data-testid='favorite-ride-card-0']");
+
+// After favourite ride is open - button for ride reorder
+private final By reorderRide = By.cssSelector("[data-testid='reorder-ride']");
+
+// Ride options
+private final By rideOptionsVehicleStandard = By.cssSelector("[data-testid='ride-options-vehicle-standard']");
+private final By rideOptionsVehicleLuxury = By.cssSelector("[data-testid='ride-options-vehicle-luxury']");
+private final By rideOptionsVehicleVan = By.cssSelector("[data-testid='ride-options-vehicle-van']");
+private final By rideOptionsBabyFriendly = By.cssSelector("[data-testid='ride-options-baby-friendly']");
+private final By rideOptionsPetFriendly = By.cssSelector("[data-testid='ride-options-pet-friendly']");
+private final By rideOptionsScheduleRide = By.cssSelector("[data-testid='ride-options-schedule-ride']");
+private final By rideOptionsProceed = By.cssSelector("[data-testid='ride-options-proceed']");
+
+// Schedule timer
+private final By scheduleTimerCheckout = By.cssSelector("[data-testid='schedule-timer-checkout']");
+
+// Invite passengers
+private final By invitePassengersEmail = By.cssSelector("[data-testid='invite-passengers-email']");
+private final By invitePassengersAdd = By.cssSelector("[data-testid='invite-passengers-add']");
+private final By invitePassengersCheckout = By.cssSelector("[data-testid='invite-passengers-checkout']");
+
+// Checkout (price / confirm ride)
+private final By checkoutConfirmRide = By.cssSelector("[data-testid='checkout-confirm-ride']");
+
+// Toast
+private final By toast = By.cssSelector("[data-testid='toast']");
+private final By toastTitle = By.cssSelector("[data-testid='toast-title']");
+private final By toastMessage = By.cssSelector("[data-testid='toast-message']");
+
+// Stat card - checkout modal
+private final By checkoutEstimatedPrice = By.cssSelector("[data-testid='checkout-estimated-price']");
+
+// Examlples how to target ride cards in favorites or history (first and second card in the list)
+private final By favoriteRideCardSecond = By.cssSelector("[data-testid='favorite-ride-card-1']");
+private final By favoriteRideCardThird = By.cssSelector("[data-testid='favorite-ride-card-2']");

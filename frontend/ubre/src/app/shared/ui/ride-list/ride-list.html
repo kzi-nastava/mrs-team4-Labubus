@@ -1,7 +1,7 @@
 <app-modal-container class="list" [class.move-up]="open" (backPressed)="onBack()" [title]="title" (onScrollContent)="onScroll($event)">
       @if (rides != null && rides.length > 0) {
         @for (ride of rides; track ride.id) {
-          <app-ride-card [selected]="detailsOpen() && selectedRide().id === ride.id" [ride]="ride" [iconUrl]="ride.favorite ? 'favorite-red.svg' : 'favorite-grey.svg'" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card>
+          <app-ride-card [selected]="detailsOpen() && selectedRide().id === ride.id" [ride]="ride" [iconUrl]="ride.favorite ? 'favorite-red.svg' : 'favorite-grey.svg'" [testId]="cardTestIdPrefix ? cardTestIdPrefix + '-' + $index : null" (select)="onRideSelected($event)" (action)="onRideAction($event)"></app-ride-card>
         }
       }
       @else {

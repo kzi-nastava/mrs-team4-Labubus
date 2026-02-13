@@ -26,11 +26,13 @@
   flex-direction: column;
   box-sizing: border-box;
   font-family: var(--font-family);
+  pointer-events: none;
 }
 
-.panel.open{
-  transform:translateX(0);
-  opacity:1;
+.panel.open {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .header{

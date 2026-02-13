@@ -19,34 +19,31 @@
 }
 
 
-.cd-modal {
-  pointer-events: auto;
-  bottom: 16px;
-  right: 16px;
-  position: fixed;
-  z-index: 2100;
-}
-
-.cd-modal.show {
-  animation: slideUp 0.3s ease forwards;
-}
-
 :host .checkout-modal {
   bottom: 16px;
   left: 16px;
   width: 360px;
   position: fixed;
+  z-index: 2600;
   animation: slideUp 0.5s ease forwards;
   border-radius: var(--border-radius-icons);
   overflow: hidden;
   box-shadow: var(--drop-shadow);
 }
 
+/* Sheets (Favourites, Ride history, Scheduled) above ride-buttons */
+:host .favorite-rides,
+:host .ride-history,
+:host .scheduled-rides {
+  position: relative;
+  z-index: 2100;
+}
+
 :host .schedule-timer {
   bottom: 16px;
   left: 16px;
   position: fixed;
-  z-index: 2100;
+  z-index: 2600;
   pointer-events: auto;
   animation: slideUp 0.3s ease forwards;
 }
@@ -55,7 +52,7 @@
   bottom: 16px;
   left: 16px;
   position: fixed;
-  z-index: 2100;
+  z-index: 2600;
   pointer-events: auto;
 }
 
@@ -63,7 +60,7 @@
   bottom: 16px;
   left: 16px;
   position: fixed;
-  z-index: 2100;
+  z-index: 2600;
   pointer-events: auto;
 }
 
@@ -118,7 +115,7 @@
   display: flex;
   gap: 16px;
   pointer-events: auto;
-
+  z-index: 2000;
 }
 
 .ride-button {
@@ -520,7 +517,7 @@
   box-sizing:border-box;
   font-family:var(--font-family);
   pointer-events:auto;
-  z-index:2100;
+  z-index: 2600;
 
   transform: translateY(100%);
   opacity: 0;
