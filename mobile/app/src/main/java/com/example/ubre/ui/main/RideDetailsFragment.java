@@ -34,6 +34,7 @@ import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.dtos.WaypointDto;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.services.RideService;
+import com.example.ubre.ui.services.RouteService;
 import com.example.ubre.ui.services.UserService;
 import com.example.ubre.ui.services.VehicleService;
 import com.example.ubre.ui.storages.ReviewStorage;
@@ -265,7 +266,7 @@ public class RideDetailsFragment extends Fragment {
                 vehicleInfo.removeAllViews();
                 if (role.equals("ADMIN") || role.equals("REGISTERED_USER") && ride.getDriver() != null) {
                     UserDto driver = ride.getDriver();
-                    ProfileCardFragment profileCard = ProfileCardFragment.newInstance(driver.getId(), driver.getName(), "", R.drawable.ic_review);
+                    ProfileCardFragment profileCard = ProfileCardFragment.newInstance(driver.getId(), driver.getName() + " " + driver.getSurname(), "", R.drawable.ic_review);
                     root.findViewById(R.id.ride_details_driver_section).setVisibility(View.VISIBLE);
                     this.getActivity().getSupportFragmentManager().beginTransaction().add(R.id.ride_details_driver, profileCard).commit();
                 }
@@ -279,7 +280,7 @@ public class RideDetailsFragment extends Fragment {
                 if (role.equals("ADMIN") || role.equals("DRIVER") && !ride.getPassengers().isEmpty()) {
                     for (int i = 0; i < ride.getPassengers().size(); i++) {
                         UserDto passenger = ride.getPassengers().get(i);
-                        ProfileCardFragment profileCard = ProfileCardFragment.newInstance(passenger.getId(), passenger.getName(), "", i == 0 ? R.drawable.ic_ordering_customer : -1);
+                        ProfileCardFragment profileCard = ProfileCardFragment.newInstance(passenger.getId(), passenger.getName() + " " + passenger.getSurname(), "", i == 0 ? R.drawable.ic_ordering_customer : -1);
                         root.findViewById(R.id.ride_details_passenger_section).setVisibility(View.VISIBLE);
                         this.getActivity().getSupportFragmentManager().beginTransaction().add(R.id.ride_details_passengers, profileCard).commit();
                     }
@@ -374,6 +375,9 @@ public class RideDetailsFragment extends Fragment {
         BoundingBox boundingBox = new BoundingBox(north, east, south, west);
         map.zoomToBoundingBox(boundingBox, true, 200);
         map.invalidate();
+
+        // Crtanje rute između tačaka - koristi OSRM API i prikazuje na mapi, miljane proveri
+        RouteService.getInstance().drawRoute(map, waypoints);
     }
       
     public void onDestroyView() {
