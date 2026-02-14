@@ -148,7 +148,7 @@ public class RideServiceImpl implements RideService {
         ride.setStatus(RideStatus.COMPLETED);
         ride.getDriver().setStatus(UserStatus.ACTIVE);
 
-        if (ride.getWaypoints().stream().noneMatch( w ->w.getVisited() == null || !w.getVisited())) {
+        if (ride.getWaypoints().stream().allMatch( w ->w.getVisited() == null || !w.getVisited())) {
             ride.setPrice(0.0);
             ride.setDistance(0.0);
         }
