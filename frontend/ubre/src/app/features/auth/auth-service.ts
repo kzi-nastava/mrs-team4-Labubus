@@ -18,7 +18,6 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   apiHost = 'http://localhost:8080/';
-  //apiHost = 'https://ubre.notixdms.com/'; ??
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem('accessToken');
@@ -51,7 +50,7 @@ export class AuthService {
   }
 
   logout() {
-    return this.http.get('http://localhost:8080/api/auth/logout', { responseType: 'text' });
+    return this.http.get(this.apiHost + 'api/auth/logout', { responseType: 'text' });
   }
 
   removeToken() {
@@ -75,7 +74,7 @@ export class AuthService {
   }
 
   changeDriverStatus() {
-    return this.http.put('http://localhost:8080/api/auth/status', {}, { responseType: 'text' });
+    return this.http.put(this.apiHost+'api/auth/status', {}, { responseType: 'text' });
   }
 }
 
