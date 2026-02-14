@@ -170,7 +170,7 @@ export class Reports implements OnInit, AfterViewChecked, OnDestroy {
             tooltip: {
               ...commonOptions.plugins?.tooltip,
               callbacks: {
-                label: (c) => `${c.parsed['y']} vožnji`,
+                label: (c) => `${c.parsed['y']} rides`,
               },
             },
           },

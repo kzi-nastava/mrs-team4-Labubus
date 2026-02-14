@@ -81,7 +81,7 @@
   
       @if (data.dailyData.length > 0) {
         <section class="rp-chart-section">
-          <p class="rp-chart-caption">Broj vožnji po danu u izabranom opsegu.</p>
+          <p class="rp-chart-caption">Number of rides per day in the selected range.</p>
           <div class="rp-chart-scroll">
             <div class="rp-chart-canvas-wrap" [style.min-width.px]="chartMinWidth">
               <canvas #canvasRides></canvas>
@@ -90,7 +90,7 @@
         </section>
   
         <section class="rp-chart-section">
-          <p class="rp-chart-caption">Pređeni kilometri po danu (km).</p>
+          <p class="rp-chart-caption">Distance traveled per day (km).</p>
           <div class="rp-chart-scroll">
             <div class="rp-chart-canvas-wrap" [style.min-width.px]="chartMinWidth">
               <canvas #canvasDistance></canvas>
@@ -99,7 +99,7 @@
         </section>
   
         <section class="rp-chart-section">
-          <p class="rp-chart-caption">Potrošeno (negativno) ili zarađeno (pozitivno) u dolarima po danu.</p>
+          <p class="rp-chart-caption">Spent (negative) or earned (positive) in dollars per day.</p>
           <div class="rp-chart-scroll">
             <div class="rp-chart-canvas-wrap" [style.min-width.px]="chartMinWidth">
               <canvas #canvasMoney></canvas>
