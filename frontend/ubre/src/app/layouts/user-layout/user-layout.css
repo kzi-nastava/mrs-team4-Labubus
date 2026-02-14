@@ -31,7 +31,7 @@
   box-shadow: var(--drop-shadow);
 }
 
-/* Sheets (Favourites, Ride history, Scheduled) above ride-buttons */
+/* Sheets (Favourites, Ride history, Reports, Scheduled) above ride-buttons */
 :host .favorite-rides,
 :host .ride-history,
 :host .scheduled-rides {

@@ -637,6 +637,15 @@
       (onReorder)="onFavoriteReorder($event)"
       (onRenderWaypoints)="onRenderWaypoints($event)"></app-ride-history>
 
+    <!-- REPORTS SHEET (kao Account settings – u istom side meniju) -->
+    <app-sheet
+      [open]="ui.showReports"
+      title="Reports"
+      (closed)="closeReports()"
+      (back)="onReportsBack()">
+      <app-reports (onError)="onEmmitError($event)"></app-reports>
+    </app-sheet>
+
     <!-- FAVORITE RIDES SHEET -->
     <app-favorite-rides
       class="favorite-rides"

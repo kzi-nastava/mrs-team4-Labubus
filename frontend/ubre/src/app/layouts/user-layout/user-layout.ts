@@ -59,6 +59,7 @@ import { PanicToast } from '../../features/panic/panic-toast/panic-toast';
 import { ComplaintModal } from '../../shared/ui/complaint-modal/complaint-modal';
 import { ComplaintService } from '../../services/complaint-service';
 import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides';
+import { Reports } from '../../shared/ui/reports/reports';
 
 @Component({
   selector: 'app-user-layout',
@@ -69,7 +70,7 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
     AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
     RideOptions, FavoriteRides, DriverCancelDialog,
     ComplaintModal, PanicList, PanicButton, PanicToast,
-    ScheduledRides],
+    ScheduledRides, Reports],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -262,6 +263,7 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
     showRideHistory: false,
     showFavourites: false,
     showScheduledRides: false,
+    showReports: false,
     showCancelModal: false,
     panicListOpen: false,
     toastPanicOpen: false,
@@ -316,6 +318,7 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
     this.closeRideHistory();
     this.closeFavourites();
     this.closeScheduledRides();
+    this.closeReports();
     this.closeProfileChanges();
   }
 
@@ -354,6 +357,9 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
     }
     if (action === 'sign-up') {
       this.router.navigate(['/signup']);
+    }
+    if (action === 'reports') {
+      this.openReports();
     }
     if (action === 'profile-changes') {
       this.openProfileChanges();
@@ -738,6 +744,7 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   openRideHistory() {
     this.ui.showScheduledRides = false;
     this.ui.showFavourites = false;
+    this.ui.showReports = false;
     this.ui.showRideHistory = true;
     this.ui.menuOpen = false;
   }
@@ -790,6 +797,7 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   openFavourites() {
     this.ui.showScheduledRides = false;
     this.ui.showRideHistory = false;
+    this.ui.showReports = false;
     this.ui.showFavourites = true;
     this.ui.menuOpen = false;
   }
@@ -809,12 +817,30 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   openScheduledRides() {
     this.ui.showRideHistory = false;
     this.ui.showFavourites = false;
+    this.ui.showReports = false;
     this.ui.showScheduledRides = true;
     this.ui.menuOpen = false;
   }
 
   closeScheduledRides() {
     this.ui.showScheduledRides = false;
+  }
+
+  openReports() {
+    this.ui.showRideHistory = false;
+    this.ui.showFavourites = false;
+    this.ui.showScheduledRides = false;
+    this.ui.showReports = true;
+    this.ui.menuOpen = false;
+  }
+
+  onReportsBack() {
+    this.ui.showReports = false;
+    this.ui.menuOpen = true;
+  }
+
+  closeReports() {
+    this.ui.showReports = false;
   }
 
 
