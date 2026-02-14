@@ -51,3 +51,9 @@ private final By checkoutEstimatedPrice = By.cssSelector("[data-testid='checkout
 // Examlples how to target ride cards in favorites or history (first and second card in the list)
 private final By favoriteRideCardSecond = By.cssSelector("[data-testid='favorite-ride-card-1']");
 private final By favoriteRideCardThird = By.cssSelector("[data-testid='favorite-ride-card-2']");
+
+// Schedule ride timer - time input fields
+private final By scheduleTimerHours = By.cssSelector("[data-testid='schedule-timer-hours']");
+private final By scheduleTimerMinutes = By.cssSelector("[data-testid='schedule-timer-minutes']");
+private final By scheduleTimerAm = By.cssSelector("[data-testid='schedule-timer-am']");
+private final By scheduleTimerPm = By.cssSelector("[data-testid='schedule-timer-pm']");

@@ -18,7 +18,12 @@ public class RegisteredUserPage {
     private final By destProceed = By.cssSelector("[data-testid='dest-proceed']");
     private final By rideOptionsVehicleStandard = By.cssSelector("[data-testid='ride-options-vehicle-standard']");
     private final By rideOptionsVehicleLuxury = By.cssSelector("[data-testid='ride-options-vehicle-luxury']");
+    private final By rideOptionsScheduleRide = By.cssSelector("[data-testid='ride-options-schedule-ride']");
     private final By rideOptionsProceed = By.cssSelector("[data-testid='ride-options-proceed']");
+    private final By scheduleTimerHours = By.cssSelector("[data-testid='schedule-timer-hours']");
+    private final By scheduleTimerCheckout = By.cssSelector("[data-testid='schedule-timer-checkout']");
+    private final By invitePassengersEmail = By.cssSelector("[data-testid='invite-passengers-email']");
+    private final By invitePassengersAdd = By.cssSelector("[data-testid='invite-passengers-add']");
     private final By invitePassengersCheckout = By.cssSelector("[data-testid='invite-passengers-checkout']");
     private final By checkoutEstimatedPrice = By.cssSelector("[data-testid='checkout-estimated-price']");
     private final By checkoutConfirmRide = By.cssSelector("[data-testid='checkout-confirm-ride']");
@@ -72,7 +77,40 @@ public class RegisteredUserPage {
         clickFlowButton(rideOptionsProceed);
     }
 
+    public void openScheduleRide() {
+        clickFlowButton(rideOptionsScheduleRide);
+    }
+
+    public void increaseScheduleHours(int times) {
+        waitForElementClickable(scheduleTimerHours, 10);
+        for (int i = 0; i < times; i++) {
+            clickFlowButton(scheduleTimerHours);
+        }
+    }
+
+    public void confirmScheduleTime() {
+        clickFlowButton(scheduleTimerCheckout);
+    }
+
+    public void waitForPassengersSection() {
+        waitForElementClickable(invitePassengersEmail, 10);
+    }
+
+    public void addPassengers(String... emails) {
+        waitForPassengersSection();
+        WebElement input = driver.findElement(invitePassengersEmail);
+        for (String email : emails) {
+            input.clear();
+            input.sendKeys(email);
+            clickFlowButton(invitePassengersAdd);
+        }
+    }
+
     public void skipPassengers() {
+        clickFlowButton(invitePassengersCheckout);
+    }
+
+    public void proceedFromPassengers() {
         clickFlowButton(invitePassengersCheckout);
     }
 

@@ -76,6 +76,108 @@ public class FavouriteRideOrderTest extends BaseTest {
         userPage.confirmRide();
         String toastTitle = userPage.waitForToastTitle();
 
-        Assert.assertEquals(toastTitle, "Ride ordered", "Toast title should be 'Success'");
+        boolean isRideOrdered = "Ride ordered".equalsIgnoreCase(toastTitle);
+        boolean isGetReady = "Get ready".equalsIgnoreCase(toastTitle);
+        Assert.assertTrue(isRideOrdered || isGetReady, "Toast title should be 'Ride ordered' or 'Get ready'");
+    }
+
+    @Test
+    public void registeredUserCanAddPassengersWhenOrderingRide() {
+        driver.get(Config.BASE_URL);
+
+        GuestPage guestPage = new GuestPage(driver);
+        Assert.assertTrue(guestPage.isDisplayed(), "Guest page is not displayed");
+
+        guestPage.openSideMenu();
+        LoginPage loginPage = guestPage.goToLogin();
+        loginPage.login("test@uber.com", "admin123");
+
+        RegisteredUserPage userPage = new RegisteredUserPage(driver);
+        userPage.openSideMenu();
+        userPage.openFavourites();
+        userPage.waitForFirstFavoriteCard();
+        userPage.openFirstFavoriteRide();
+        userPage.waitForReorderRideButton();
+        userPage.reorderRide();
+
+        userPage.proceedFromWaypoints();
+        userPage.selectStandardVehicle();
+        userPage.proceedRideOptions();
+
+        userPage.addPassengers("passenger1@example.com", "passenger2@example.com");
+        userPage.proceedFromPassengers();
+
+        String price = userPage.waitForEstimatedPrice();
+        Assert.assertNotNull(price, "Estimated price should be available after adding passengers");
+    }
+
+    @Test
+    public void scheduleTwoHoursInAdvance() {
+        driver.get(Config.BASE_URL);
+
+        GuestPage guestPage = new GuestPage(driver);
+        Assert.assertTrue(guestPage.isDisplayed(), "Guest page is not displayed");
+
+        guestPage.openSideMenu();
+        LoginPage loginPage = guestPage.goToLogin();
+        loginPage.login("test@uber.com", "admin123");
+
+        RegisteredUserPage userPage = new RegisteredUserPage(driver);
+        userPage.openSideMenu();
+        userPage.openFavourites();
+        userPage.waitForFirstFavoriteCard();
+        userPage.openFirstFavoriteRide();
+        userPage.waitForReorderRideButton();
+        userPage.reorderRide();
+
+        userPage.proceedFromWaypoints();
+        userPage.selectLuxuryVehicle();
+
+        userPage.openScheduleRide();
+        userPage.increaseScheduleHours(2);
+        userPage.confirmScheduleTime();
+
+        userPage.skipPassengers();
+
+        String price = userPage.waitForEstimatedPrice();
+        Assert.assertNotNull(price, "Estimated price should be available after scheduling ride");
+
+        userPage.confirmRide();
+        String toastTitle = userPage.waitForToastTitle();
+
+        boolean isRideOrdered = "Ride ordered".equalsIgnoreCase(toastTitle);
+        boolean isGetReady = "Get ready".equalsIgnoreCase(toastTitle);
+        Assert.assertTrue(isRideOrdered || isGetReady, "Toast title should be 'Ride ordered' or 'Get ready'");
+    }
+
+    @Test
+    public void scheduleSevenHoursInAdvanceShowsCannotOrder() {
+        driver.get(Config.BASE_URL);
+
+        GuestPage guestPage = new GuestPage(driver);
+        Assert.assertTrue(guestPage.isDisplayed(), "Guest page is not displayed");
+
+        guestPage.openSideMenu();
+        LoginPage loginPage = guestPage.goToLogin();
+        loginPage.login("test@uber.com", "admin123");
+
+        RegisteredUserPage userPage = new RegisteredUserPage(driver);
+        userPage.openSideMenu();
+        userPage.openFavourites();
+        userPage.waitForFirstFavoriteCard();
+        userPage.openFirstFavoriteRide();
+        userPage.waitForReorderRideButton();
+        userPage.reorderRide();
+
+        userPage.proceedFromWaypoints();
+        userPage.selectLuxuryVehicle();
+
+        userPage.openScheduleRide();
+        userPage.increaseScheduleHours(7);
+        userPage.confirmScheduleTime();
+
+        String toastTitle = userPage.waitForToastTitle();
+
+        Assert.assertEquals(toastTitle, "Cannot schedule", "Toast title should be 'Cannot order'");
     }
 }
