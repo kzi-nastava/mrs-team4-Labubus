@@ -27,6 +27,7 @@ export class RideList {
   @Input() rides : RideCardDto[] | null = [];
   @Input() title : string = "";
   @Input() open : boolean = false;
+  @Input() cardTestIdPrefix: string | null = null;
   @Output() onClose = new EventEmitter<void>();
   @Output() onQueryChange = new EventEmitter<RideQueryDto>();
   @Output() onScrollToBottom = new EventEmitter<RideQueryDto>();

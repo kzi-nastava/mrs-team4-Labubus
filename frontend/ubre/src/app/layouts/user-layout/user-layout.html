@@ -60,7 +60,7 @@
         </div>
 
         <div class="dest-footer">
-          <button type="button" class="dest-btn dest-btn-filled" (click)="onCdProceed()">Proceed</button>
+          <button type="button" class="dest-btn dest-btn-filled" data-testid="dest-proceed" (click)="onCdProceed()">Proceed</button>
         </div>
       </div>
     }
@@ -94,21 +94,11 @@
       }
     
 
-    <!-- MAIN OVERLAY CONTENT -->
-
-    @if (ui.cdModalOpen) {
-      <app-modal class="cd-modal show"
-        title="Choose a destination"
-        message="Please select a valid destination"
-        buttonText="Continue"
-        (action)="onCdModalAction()">
-      </app-modal>
-    }
-
     <!-- ICONS -->
 
     <app-icon-button class="menu-button"
       iconUrl="side_navigation_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
+      testId="open-side-menu"
       (click)="openMenu()">
     </app-icon-button>
 
@@ -223,8 +213,8 @@
     <!-- CHECKOUT MODAL -->
     @if (ui.checkoutModalOpen) {
       <app-modal-container class="checkout-modal" title="Checkout" [showTitleBar]="true" (backPressed)="onCheckoutModalBack()">
-        <app-stat-card [value]="'$' + (ridePlanningStore.ridePlanningState$ | async)?.price" label="Estimated price" variant="dark"></app-stat-card> <!-- in euro -->
-        <app-button width="290px" (click)="onConfirmRide()">Confirm ride</app-button>
+        <app-stat-card [value]="'$' + (ridePlanningStore.ridePlanningState$ | async)?.price" label="Estimated price" variant="dark" testId="checkout-estimated-price"></app-stat-card> <!-- in euro -->
+        <app-button width="290px" testId="checkout-confirm-ride" (click)="onConfirmRide()">Confirm ride</app-button>
       </app-modal-container>
     }
 

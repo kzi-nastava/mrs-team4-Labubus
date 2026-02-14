@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { Button } from '../button/button';
 
 @Component({
@@ -8,10 +8,34 @@ import { Button } from '../button/button';
   templateUrl: './schedule-timer.html',
   styleUrl: './schedule-timer.css',
 })
-export class ScheduleTimer {
+export class ScheduleTimer implements OnInit {
   hours: number = 9; // 12-hour format (1-12)
   minutes: number = 30;
   isAM: boolean = true;
+
+  ngOnInit(): void {
+    this.setToCurrentTime();
+  }
+
+  private setToCurrentTime(): void {
+    const now = new Date();
+    const hours24 = now.getHours();
+    this.minutes = now.getMinutes();
+
+    if (hours24 === 0) {
+      this.hours = 12;
+      this.isAM = true;
+    } else if (hours24 === 12) {
+      this.hours = 12;
+      this.isAM = false;
+    } else if (hours24 < 12) {
+      this.hours = hours24;
+      this.isAM = true;
+    } else {
+      this.hours = hours24 - 12;
+      this.isAM = false;
+    }
+  }
 
   @Output() back = new EventEmitter<void>();
   @Output() checkout = new EventEmitter<{ hours: number; minutes: number; isAM: boolean }>();

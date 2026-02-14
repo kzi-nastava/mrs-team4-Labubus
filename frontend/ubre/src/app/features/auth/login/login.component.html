@@ -5,7 +5,7 @@
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
       <div class="form-group">
         <label>Email</label>
-        <input type="email" placeholder="Enter your email" formControlName="email" />
+        <input type="email" placeholder="Enter your email" formControlName="email" data-testid="login-email" />
         <div
           *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
           class="error"
@@ -21,6 +21,7 @@
             [type]="showPassword ? 'text' : 'password'"
             placeholder="Enter your password"
             formControlName="password"
+            data-testid="login-password"
           />
           <button
             type="button"
@@ -49,7 +50,7 @@
         <a href="/forgot-password" class="forgot-link">Forgot password?</a>
       </div>
 
-      <app-button type="submit" variant="filled" width="250px"> Log In </app-button>
+      <app-button type="submit" variant="filled" width="250px" testId="login-submit"> Log In </app-button>
 
       <div class="divider">
         <span>Or</span>

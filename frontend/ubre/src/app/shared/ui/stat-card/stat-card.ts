@@ -10,4 +10,5 @@ export class StatCard {
   @Input() value : string = "";
   @Input() label : string = "";
   @Input() variant : "light" | "dark" = "light";
+  @Input() testId: string | null = null;
 }

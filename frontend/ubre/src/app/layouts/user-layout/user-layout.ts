@@ -3,7 +3,6 @@ import { Map } from '../../services/ride-planning/map/map';
 import { IconButton } from '../../shared/ui/icon-button/icon-button';
 import { SideMenu } from '../../shared/ui/side-menu/side-menu';
 import { Toast } from '../../shared/ui/toast/toast';
-import { Modal } from '../../shared/ui/modal/modal';
 import { ModalContainer } from '../../shared/ui/modal-container/modal-container';
 import { StatCard } from '../../shared/ui/stat-card/stat-card';
 import { Button } from '../../shared/ui/button/button';
@@ -65,7 +64,7 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   selector: 'app-user-layout',
   standalone: true,
   imports: [Map,IconButton,SideMenu,Toast,
-    Modal,ModalContainer,StatCard,Button,
+    ModalContainer,StatCard,Button,
     Sheet,FormsModule,RideHistory,ProfileChangeCard,
     AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
     RideOptions, FavoriteRides, DriverCancelDialog,
@@ -247,7 +246,6 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   }
   ui = {
     menuOpen: false,
-    cdModalOpen: true,
     accountSettingsOpen: false,
     changePasswordOpen: false,
     vehicleInfoOpen: false,
@@ -277,7 +275,6 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
 
   toggleDest() {
     this.ridePlanningStore.toggleDestOpen();
-    if (this.ridePlanningStore.destOpen) this.ui.cdModalOpen = false;
   }
 
   onCdProceed() {
@@ -309,13 +306,6 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   closeMenu() {
     this.ui.menuOpen = false;
   }
-  openCdModal() {
-    this.ui.cdModalOpen = true;
-  }
-  closeCdModal() {
-    this.ui.cdModalOpen = false;
-  }
-
   closeAllSidePanels() {
     this.closeMenu();
     this.closeAccountSettings();
@@ -409,11 +399,6 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   
   hideToast() {
     this.ui.toastOpen = false;
-  }
-
-  onCdModalAction() {
-    this.ui.cdModalOpen = false;
-    this.ridePlanningStore.openDest();
   }
 
   openChat() {
@@ -914,10 +899,41 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   }
 
   onScheduleTimerCheckout(timeData: { hours: number; minutes: number; isAM: boolean }) {
+    const scheduledToday = this.scheduledTimeToDateTodayOnly(timeData);
+    const now = new Date();
+
+    if (scheduledToday.getTime() <= now.getTime()) {
+      this.showToast(
+        'Cannot schedule',
+        'You cannot schedule a ride in the past.'
+      );
+      return;
+    }
+
+    const maxHoursAhead = 5;
+    const diffMs = scheduledToday.getTime() - now.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
+    if (diffHours > maxHoursAhead) {
+      this.showToast(
+        'Cannot schedule',
+        'You can only schedule a ride up to 5 hours in advance.'
+      );
+      return;
+    }
+
     this.ui.scheduleTimerOpen = false;
     this.previousScreenBeforeInvite = 'schedule-timer';
     this.ui.invitePassengersOpen = true;
     this.ridePlanningStore.setScheduledTime(timeData);
+  }
+
+  /** Builds Date for selected time as today only (no shift to tomorrow). */
+  private scheduledTimeToDateTodayOnly(time: { hours: number; minutes: number; isAM: boolean }): Date {
+    const hours24 = time.isAM
+      ? (time.hours === 12 ? 0 : time.hours)
+      : (time.hours === 12 ? 12 : time.hours + 12);
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours24, time.minutes, 0, 0);
   }
 
 
@@ -994,8 +1010,6 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   onFavoriteReorder(ride: RideDto) {
     // close favourites sheet
     this.closeFavourites();
-    // close initial choose-destination modal
-    this.ui.cdModalOpen = false;
     // prepare state for new ride using existing waypoints
     this.ridePlanningStore.clearRidePlanningState();
     this.ridePlanningStore.setWaypoints(ride.waypoints);
@@ -1070,7 +1084,6 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
 
   onEstimateTime() {
     this.ui.timeEstimate = false;
-    this.ui.cdModalOpen = true;
     this.ridePlanningStore.setWaypoints([]);
     this.ridePlanningStore.clearRoute();
   }

@@ -1,17 +1,17 @@
-<div class="modal-backdrop fade" [class.fade]="!(show | async)" id="review-modal-backdrop" (click)="onClose($event)">
+<div data-testId="review-backdrop" class="modal-backdrop fade" [class.fade]="!(show | async)" id="review-modal-backdrop" (click)="onClose($event)">
       <app-modal-container class="review-modal" [showTitleBar] = false>
             <div class="inputs">
                   <div class="title">Leave a review</div>
                   <div class="rating">
-                        @for (item of [].constructor(5); track $index) {
-                            <img [src]="$index > review.rating - 1 ? 'star_outline.svg' : 'star_filled.svg'" alt="" class="star" (click)="onSelectRating($index + 1)">
+                        @for (item of stars; track $index) {
+                            <img [attr.data-testId]="'review-start-' + $index" [src]="$index > review.rating - 1 ? 'star_outline.svg' : 'star_filled.svg'" alt="" class="star" (click)="onSelectRating($index + 1)">
                         }
                   </div>
-                  <textarea class="review-text" placeholder="Write a review" (input)="onSetText($event)" [class.error]="error"></textarea>
+                  <textarea data-testId="review-text-input" class="review-text" placeholder="Write a review" (input)="onSetText($event)" [class.error]="error"></textarea>
             </div>
           <div class="btn-group">
-                <button class="cancel btn-outlined" (click)="onClose($event)">Cancel</button>
-                <button class="send btn-filled" (click)="onSubmit()">Send</button>
+                <button data-testId="review-cancel" class="cancel btn-outlined" (click)="onClose($event)">Cancel</button>
+                <button data-testId="review-send" class="send btn-filled" (click)="onSubmit()">Send</button>
           </div>
       </app-modal-container>
 </div>

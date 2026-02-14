@@ -15,7 +15,7 @@
          [src]="avatarSrc ?? 'default-avatar.jpg'"
          alt="avatar">
     <div class="meta">
-      <div class="name">{{ user ? (user.name + ' ' + user.surname).trim() : 'Guest' }}</div>
+      <div class="name" data-testid="side-menu-user-name">{{ user ? (user.name + ' ' + user.surname).trim() : 'Guest' }}</div>
       @if (user?.phone) { <div class="phone">{{ user?.phone }}</div> }
     </div>
   </div>
@@ -26,6 +26,7 @@
 
       <button class="item"
               [class.danger]="it.action === 'logout'"
+              [attr.data-testid]="it.action === 'login' ? 'side-menu-login' : it.action === 'favourites' ? 'side-menu-favourites' : null"
               (click)="onItem(it.action)">
         <img [src]="it.icon" alt="">
         <span>{{ it.label }}</span>

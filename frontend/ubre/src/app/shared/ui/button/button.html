@@ -6,6 +6,7 @@
   [disabled]="disabled"
   [class.shadow]="shadow"
   [style.width]="width"
+  [attr.data-testid]="testId"
   (click)="clicked.emit()"
 >
   <ng-content></ng-content>

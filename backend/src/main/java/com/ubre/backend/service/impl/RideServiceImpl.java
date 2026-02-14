@@ -421,19 +421,33 @@ public class RideServiceImpl implements RideService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Creator id is required to order a ride");
         }
 
+        // print in console current step - debugging
+        System.out.println("Ordering ride for creator id: " + rideOrderDto.getCreatorId());
+
         Boolean existsDriverWithActiveStatus = driverRepository.existsDriverWithActiveStatus(); // activer or on ride, same thing
         if (!existsDriverWithActiveStatus) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No available drivers found for the ride");
         }
+
+        System.out.println("There are drivers with active status");
         Boolean areAllDriversOnRideWithPendingRides = driverRepository.areAllDriversOnRideWithPendingRides();
         if (areAllDriversOnRideWithPendingRides) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "All drivers are currently busy");
         }
 
+        System.out.println("There are drivers that are not on ride or have no pending rides");
+
         // at this point, we can create the ride from a active driver or one that is not on ride, and has no pending rides
         // first try to find active driver
         Driver assignedDriver = null;
         List<Driver> activeDrivers = driverRepository.findByStatus(UserStatus.ACTIVE);
+
+        // print all active drivers in pretty format
+        System.out.println("Active drivers:");
+        for (Driver d : activeDrivers) {
+            System.out.println("Driver ID: " + d.getId() + ", Name: " + d.getName() + ", Active past 24 hours: " + (d.getStats() != null ? d.getStats().getActivePast24Hours() : "N/A") + " minutes, Vehicle type: " + (d.getVehicle() != null ? d.getVehicle().getType() : "N/A") + ", Baby friendly: " + (d.getVehicle() != null ? d.getVehicle().getBabyFriendly() : "N/A") + ", Pet friendly: " + (d.getVehicle() != null ? d.getVehicle().getPetFriendly() : "N/A"));
+        }
+
         List<Driver> eligibleDrivers = activeDrivers.stream()
                 .filter(d -> d.getStats() != null && d.getStats().getActivePast24Hours() <= 480 && d.getVehicle() != null // at most 8 hours active in past 24 hours
                         && d.getVehicle().getType() == rideOrderDto.getVehicleType()
@@ -441,11 +455,19 @@ public class RideServiceImpl implements RideService {
                         && (!rideOrderDto.getPetFriendly() || d.getVehicle().getPetFriendly())
                 ).toList();
 
+        // print eligible drivers in pretty format
+        System.out.println("Eligible active drivers (after filtration):");
+        for (Driver d : eligibleDrivers) {
+            System.out.println("Driver ID: " + d.getId() + ", Name: " + d.getName() + ", Active past 24 hours: " + (d.getStats() != null ? d.getStats().getActivePast24Hours() : "N/A") + " minutes, Vehicle type: " + (d.getVehicle() != null ? d.getVehicle().getType() : "N/A") + ", Baby friendly: " + (d.getVehicle() != null ? d.getVehicle().getBabyFriendly() : "N/A") + ", Pet friendly: " + (d.getVehicle() != null ? d.getVehicle().getPetFriendly() : "N/A"));
+        }
+
         if (!eligibleDrivers.isEmpty()) {
             // assign the first active driver found
+            System.out.println("Found eligible active drivers, assigning the first one");
             assignedDriver = eligibleDrivers.get(0); // we should actually calculate driver distance from starting point, but right now i don't have that data (where vehicle waypoints are stored)
             // TODO: implement distance calculation later
         } else {
+            System.out.println("No eligible active drivers found, looking for on ride drivers with no pending rides");
             // from drivers that are on ride, and has no pending rides, find one that is on ride that has closes end time to now
             List<Driver> onRideDrivers = driverRepository.findByStatus(UserStatus.ON_RIDE);
            // eliminate all that has a ride that has scheduled time in future
@@ -463,6 +485,8 @@ public class RideServiceImpl implements RideService {
                             && d.getStats() != null && d.getStats().getActivePast24Hours() <= 480 // at most 8 hours active in past 24 hours
                     ).toList();
 
+            System.out.println("Found " + eligibleDrivers.size() + " eligible on-ride drivers with no pending rides");
+
             if (eligibleDrivers.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable drivers found for the ride");
             }
@@ -470,9 +494,13 @@ public class RideServiceImpl implements RideService {
             assignedDriver = eligibleDrivers.get(0); // placeholder
         }
 
+        System.out.println("Driver assigned, checking if its null");
+
         if (assignedDriver == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable drivers found for the ride");
         }
+
+        System.out.println("Driver assigned successfully, creating ride entity");
 
         // create ride entity and save to database
         Ride newRide = new Ride();

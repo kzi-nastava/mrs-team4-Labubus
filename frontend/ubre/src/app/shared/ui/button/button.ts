@@ -13,6 +13,7 @@ export class Button {
   @Input() variant: 'filled' | 'outlined' = 'filled';
   @Input() shadow: boolean = false;
   @Input() width: string | null = null;
+  @Input() testId: string | null = null;
 
   @Output() clicked = new EventEmitter<void>();
 }

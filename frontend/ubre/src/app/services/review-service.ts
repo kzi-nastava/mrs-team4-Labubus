@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, Observer, take } from 'rxjs';
 import { ReviewDto } from '../dtos/review-dto';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { UserService } from './user-service';
 import { UserDto } from '../dtos/user-dto';
 
@@ -18,6 +18,10 @@ export class ReviewService {
 
   private rideId : number | undefined;
 
+  public getRideId() : number | undefined {
+    return this.rideId
+  }
+
   public newReview(rideId : number) : void {
     this.rideId = rideId;
     this.showReviewModal.next(true);
@@ -29,6 +33,24 @@ export class ReviewService {
   }
 
   public submitReview(review : ReviewDto, callback : Partial<Observer<ReviewDto>> | ((value: ReviewDto) => void) | undefined) : void {
+    if (review.text === "") {
+      if (typeof callback != 'function') {
+        const typedCallback = callback as Partial<Observer<ReviewDto>>
+        if (typedCallback.error)
+          typedCallback.error(new HttpErrorResponse({error:"Review text cannot be empty", status: 400}))
+      }
+      return
+    }
+
+    if (this.rideId === undefined) {
+      if (typeof callback != 'function') {
+        const typedCallback = callback as Partial<Observer<ReviewDto>>
+        if (typedCallback.error)
+          typedCallback.error(new HttpErrorResponse({error:"No ride selected for review", status: 400}))
+      }
+      return
+    }
+
     this.userService.getCurrentUser().pipe(take(1)).subscribe((currentUser : UserDto) => {
       review.userId = currentUser.id;
       this.http.post<ReviewDto>(`${this.BASE_URL}reviews/ride/${this.rideId}`, review).subscribe(callback)
