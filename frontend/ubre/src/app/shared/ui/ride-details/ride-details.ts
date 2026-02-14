@@ -30,6 +30,7 @@ export class RideDetails {
         phone: "",
         address: ""
       };
+  @Input() testIdPrefix: string | null = null;
   @Output() onError = new EventEmitter<Error>();
   @Output() onReorder = new EventEmitter<RideDto>();
 
@@ -52,6 +53,7 @@ export class RideDetails {
     if (changes['ride']) {
       this.start = new Date(this.ride.startTime)
       this.end = new Date(this.ride.endTime)
+      console.log(this.testIdPrefix, "This is the test id")
     }
   }
 
