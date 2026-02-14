@@ -13,6 +13,7 @@ import { RideCardDto } from '../../../dtos/ride-card-dto';
 export class ProfileCard {
   user = input.required<UserDto>();
   icon = input<string>();
+  @Input() testIdPrefix : string | null = null;
   @Output() onAction = new EventEmitter<void>();
 
   userService : UserService = inject(UserService);
@@ -23,6 +24,7 @@ export class ProfileCard {
       this.userService.getUserAvatar(this.user().id).subscribe({
         next: blob => this.avatarUrl.set(URL.createObjectURL(blob))
       });
+      console.log(this.testIdPrefix)
     });
   }
 

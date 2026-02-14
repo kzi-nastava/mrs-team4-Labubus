@@ -2,6 +2,7 @@
 private final By sideMenuUserName = By.cssSelector("[data-testid='side-menu-user-name']");
 private final By sideMenuLogin = By.cssSelector("[data-testid='side-menu-login']");
 private final By sideMenuFavourites = By.cssSelector("[data-testid='side-menu-favourites']");
+private final By sideMenuRideHistory = By.cssSelector("[data-testid='side-menu-ride-history']");
 
 // Home – open menu
 private final By openSideMenu = By.cssSelector("[data-testid='open-side-menu']");
@@ -16,6 +17,9 @@ private final By destProceed = By.cssSelector("[data-testid='dest-proceed']");
 
 // Favorites – first ride card
 private final By favoriteRideCardFirst = By.cssSelector("[data-testid='favorite-ride-card-0']");
+
+// Ride History - first ride card
+private final By historyRideCardFirst = By.cssSelector("[data-testid='history-ride-card-0']");
 
 // After favourite ride is open - button for ride reorder
 private final By reorderRide = By.cssSelector("[data-testid='reorder-ride']");
@@ -57,3 +61,10 @@ private final By scheduleTimerHours = By.cssSelector("[data-testid='schedule-tim
 private final By scheduleTimerMinutes = By.cssSelector("[data-testid='schedule-timer-minutes']");
 private final By scheduleTimerAm = By.cssSelector("[data-testid='schedule-timer-am']");
 private final By scheduleTimerPm = By.cssSelector("[data-testid='schedule-timer-pm']");
+
+// Review modal
+private final By reviewIcon = By.cssSelector("[data-testId='history-ride-details-driver']");
+private final By reviewModalBackdrop = By.cssSelector("[data-testId='review-backdrop']");
+private final By reviewTextInput = By.cssSelector("[data-testId='review-text-input']");
+private final By reviewSendButton = By.cssSelector("[data-testId='review-send']");
+private final By reviewCancelButton = By.cssSelector("[data-testId='review-cancel']");
