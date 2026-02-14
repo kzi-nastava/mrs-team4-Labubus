@@ -8,17 +8,18 @@
 
   <div class="time-selector-wrapper">
     <div class="time-selector">
-      <div class="time-box hours" (click)="incrementHours()">
+      <div class="time-box hours" data-testid="schedule-timer-hours" (click)="incrementHours()">
         {{ displayHours }}
       </div>
       <div class="separator">:</div>
-      <div class="time-box minutes" (click)="incrementMinutes()">
+      <div class="time-box minutes" data-testid="schedule-timer-minutes" (click)="incrementMinutes()">
         {{ formatTime(minutes) }}
       </div>
       <div class="ampm-selector">
         <button 
           type="button" 
           class="ampm-button am" 
+          data-testid="schedule-timer-am"
           [class.active]="isAM"
           (click)="toggleAMPM()">
           AM
@@ -26,6 +27,7 @@
         <button 
           type="button" 
           class="ampm-button pm" 
+          data-testid="schedule-timer-pm"
           [class.active]="!isAM"
           (click)="toggleAMPM()">
           PM

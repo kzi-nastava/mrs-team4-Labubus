@@ -899,10 +899,41 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   }
 
   onScheduleTimerCheckout(timeData: { hours: number; minutes: number; isAM: boolean }) {
+    const scheduledToday = this.scheduledTimeToDateTodayOnly(timeData);
+    const now = new Date();
+
+    if (scheduledToday.getTime() <= now.getTime()) {
+      this.showToast(
+        'Cannot schedule',
+        'You cannot schedule a ride in the past.'
+      );
+      return;
+    }
+
+    const maxHoursAhead = 5;
+    const diffMs = scheduledToday.getTime() - now.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
+    if (diffHours > maxHoursAhead) {
+      this.showToast(
+        'Cannot schedule',
+        'You can only schedule a ride up to 5 hours in advance.'
+      );
+      return;
+    }
+
     this.ui.scheduleTimerOpen = false;
     this.previousScreenBeforeInvite = 'schedule-timer';
     this.ui.invitePassengersOpen = true;
     this.ridePlanningStore.setScheduledTime(timeData);
+  }
+
+  /** Builds Date for selected time as today only (no shift to tomorrow). */
+  private scheduledTimeToDateTodayOnly(time: { hours: number; minutes: number; isAM: boolean }): Date {
+    const hours24 = time.isAM
+      ? (time.hours === 12 ? 0 : time.hours)
+      : (time.hours === 12 ? 12 : time.hours + 12);
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours24, time.minutes, 0, 0);
   }
 
 
