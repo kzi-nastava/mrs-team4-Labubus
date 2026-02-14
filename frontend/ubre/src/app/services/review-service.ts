@@ -56,4 +56,8 @@ export class ReviewService {
       this.http.post<ReviewDto>(`${this.BASE_URL}reviews/ride/${this.rideId}`, review).subscribe(callback)
     })
   } 
+
+  getReviewsForRide(rideId: number): Observable<ReviewDto> {
+    return this.http.get<ReviewDto>(`${this.BASE_URL}reviews/ride/${rideId}`);
+  }
 }

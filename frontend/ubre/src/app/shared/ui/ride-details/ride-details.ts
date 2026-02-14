@@ -11,10 +11,12 @@ import { UserDto } from '../../../dtos/user-dto';
 import { Role } from '../../../enums/role';
 import { ReviewService } from '../../../services/review-service';
 import { UserService } from '../../../services/user-service';
+import { RideHistoryReviews } from "../ride-history-reviews/ride-history-reviews";
+import { RideHistoryComplaints } from "../ride-history-complaints/ride-history-complaints";
 
 @Component({
   selector: 'app-ride-details',
-  imports: [ProfileCard, VehicleCard, ModalContainer, RouteTable, DatePipe, StatCard, Button],
+  imports: [ProfileCard, VehicleCard, ModalContainer, RouteTable, DatePipe, StatCard, Button, RideHistoryReviews, RideHistoryComplaints],
   templateUrl: './ride-details.html',
   styleUrl: './ride-details.css',
 })
