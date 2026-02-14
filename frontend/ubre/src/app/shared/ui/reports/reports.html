@@ -1,0 +1,134 @@
+<div class="reports-content">
+  <div class="rp-wrap">
+    <div class="rp-field">
+      <div class="rp-label">From</div>
+      <input type="date" [(ngModel)]="dateFrom" class="rp-input" />
+    </div>
+    <div class="rp-field">
+      <div class="rp-label">To</div>
+      <input type="date" [(ngModel)]="dateTo" class="rp-input" />
+    </div>
+    @if (isAdmin) {
+      <div class="rp-field rp-select-wrap">
+        <div class="rp-label">Scope</div>
+        <select [(ngModel)]="scope" class="rp-select">
+          @for (opt of scopeOptions; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+      </div>
+      @if (scope === 'single_user') {
+        <div class="rp-field">
+          <div class="rp-label">User email</div>
+          <input
+            type="email"
+            [(ngModel)]="userEmail"
+            class="rp-input"
+            placeholder="user&#64;example.com" />
+        </div>
+      }
+    }
+    <div class="rp-actions">
+      <app-button
+        type="button"
+        [disabled]="loading"
+        (clicked)="generateReport()">
+        {{ loading ? 'Loading…' : 'Generate report' }}
+      </app-button>
+    </div>
+    @if (errorMessage) {
+      <p class="rp-error">{{ errorMessage }}</p>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="rp-loading">Loading report…</div>
+  }
+
+  @if (data && !loading) {
+    <section class="rp-summary">
+        <div class="summary-grid">
+          <div class="summary-item">
+            <span class="summary-value">{{ data.summary.totalRides }}</span>
+            <span class="summary-label">Total rides</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-value">{{ data.summary.totalDistanceKm | number:'1.1-1' }} km</span>
+            <span class="summary-label">Total distance</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-value" [class.negative]="data.summary.totalAmountMoney < 0">
+              {{ formatMoney(data.summary.totalAmountMoney) }}
+            </span>
+            <span class="summary-label">Total amount</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-value">{{ data.summary.averageRidesPerDay | number:'1.1-1' }}</span>
+            <span class="summary-label">Avg rides/day</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-value">{{ data.summary.averageDistancePerDay | number:'1.1-1' }} km</span>
+            <span class="summary-label">Avg distance/day</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-value" [class.negative]="data.summary.averageMoneyPerDay < 0">
+              {{ formatMoney(data.summary.averageMoneyPerDay) }}
+            </span>
+            <span class="summary-label">Avg amount/day</span>
+          </div>
+    </div>
+    </section>
+
+    @if (data.dailyData.length > 0) {
+      <section class="rp-chart-section">
+          <div class="rp-chart-bars">
+            @for (entry of data.dailyData; track entry.date) {
+              <div class="rp-bar-wrap">
+                <div
+                  class="rp-bar rp-bar-rides"
+                  [style.height.%]="(entry.rideCount / maxRides(data.dailyData)) * 100">
+                </div>
+                <span class="rp-bar-label">{{ formatDayLabel(entry.date) }}</span>
+                <span class="rp-bar-value">{{ entry.rideCount }}</span>
+              </div>
+            }
+          </div>
+      </section>
+
+      <section class="rp-chart-section">
+          <div class="rp-chart-bars">
+            @for (entry of data.dailyData; track entry.date) {
+              <div class="rp-bar-wrap">
+                <div
+                  class="rp-bar rp-bar-distance"
+                  [style.height.%]="(entry.distanceKm / maxKm(data.dailyData)) * 100">
+                </div>
+                <span class="rp-bar-label">{{ formatDayLabel(entry.date) }}</span>
+                <span class="rp-bar-value">{{ entry.distanceKm | number:'1.0-0' }}</span>
+              </div>
+            }
+          </div>
+      </section>
+
+      <section class="rp-chart-section">
+          <div class="rp-chart-bars">
+            @for (entry of data.dailyData; track entry.date) {
+              <div class="rp-bar-wrap">
+                <div
+                  class="rp-bar rp-bar-money"
+                  [class.rp-bar-negative]="entry.amountMoney < 0"
+                  [style.height.%]="(Math.abs(entry.amountMoney) / maxMoney(data.dailyData)) * 100">
+                </div>
+                <span class="rp-bar-label">{{ formatDayLabel(entry.date) }}</span>
+                <span class="rp-bar-value" [class.rp-bar-negative]="entry.amountMoney < 0">
+                  {{ formatMoney(entry.amountMoney) }}
+                </span>
+              </div>
+            }
+          </div>
+      </section>
+    } @else {
+      <p class="rp-no-data">No daily data in this range.</p>
+    }
+  }
+</div>
