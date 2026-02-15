@@ -50,7 +50,7 @@ public class RideRepositoryEndRideTest extends AbstractTestNGSpringContextTests 
     public void find_drivers_current_ride() {
         Driver DRIVER_ON_A_RIDE = createDriverWithVehicle("driver@test.com", UserStatus.ON_RIDE);
         User USER_ON_A_RIDE = createPassenger("passenger@test.com");
-        Ride RIDE_IN_PROGRESS = createRide(USER_ON_A_RIDE, DRIVER_ON_A_RIDE, RideStatus.IN_PROGRESS, LocalDateTime.now().minusMinutes(5));
+        Ride RIDE_IN_PROGRESS = createRide(USER_ON_A_RIDE, DRIVER_ON_A_RIDE, RideStatus.IN_PROGRESS, LocalDateTime.now().minusMinutes(5), List.of(USER_ON_A_RIDE));
 
         Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeAsc(DRIVER_ON_A_RIDE, RideStatus.IN_PROGRESS);
         Assert.assertFalse(ride.isEmpty());
@@ -61,7 +61,7 @@ public class RideRepositoryEndRideTest extends AbstractTestNGSpringContextTests 
     public void find_users_current_ride() {
         Driver DRIVER_ON_A_RIDE = createDriverWithVehicle("driver@test.com", UserStatus.ON_RIDE);
         User USER_ON_A_RIDE = createPassenger("passenger@test.com");
-        Ride RIDE_IN_PROGRESS = createRide(USER_ON_A_RIDE, DRIVER_ON_A_RIDE, RideStatus.IN_PROGRESS, LocalDateTime.now().minusMinutes(5));
+        Ride RIDE_IN_PROGRESS = createRide(USER_ON_A_RIDE, DRIVER_ON_A_RIDE, RideStatus.IN_PROGRESS, LocalDateTime.now().minusMinutes(5), List.of(USER_ON_A_RIDE));
 
         Optional<Ride> ride = rideRepository.findFirstByCreatorAndStatusOrderByStartTimeAsc(USER_ON_A_RIDE, RideStatus.IN_PROGRESS);
         Assert.assertFalse(ride.isEmpty());
@@ -72,7 +72,7 @@ public class RideRepositoryEndRideTest extends AbstractTestNGSpringContextTests 
     public void find_drivers_scheduled_ride() {
         Driver DRIVER_WITH_SCHEDULED_RIDE = createDriverWithVehicle("driver@test.com", UserStatus.ON_RIDE);
         User USER_WITH_SCHEDULED_RIDE = createPassenger("passenger@test.com");
-        Ride SCHEDULED_RIDE = createRide(USER_WITH_SCHEDULED_RIDE, DRIVER_WITH_SCHEDULED_RIDE, RideStatus.PENDING, LocalDateTime.now().plusMinutes(30));
+        Ride SCHEDULED_RIDE = createRide(USER_WITH_SCHEDULED_RIDE, DRIVER_WITH_SCHEDULED_RIDE, RideStatus.PENDING, LocalDateTime.now().plusMinutes(30), List.of(USER_WITH_SCHEDULED_RIDE));
 
         Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusAndStartTimeBeforeOrderByStartTimeAsc(DRIVER_WITH_SCHEDULED_RIDE, RideStatus.PENDING, LocalDateTime.now());
         Assert.assertTrue(ride.isEmpty());
@@ -82,7 +82,7 @@ public class RideRepositoryEndRideTest extends AbstractTestNGSpringContextTests 
     public void find_users_scheduled_ride() {
         Driver DRIVER_WITH_SCHEDULED_RIDE = createDriverWithVehicle("driver@test.com", UserStatus.ON_RIDE);
         User USER_WITH_SCHEDULED_RIDE = createPassenger("passenger@test.com");
-        Ride SCHEDULED_RIDE = createRide(USER_WITH_SCHEDULED_RIDE, DRIVER_WITH_SCHEDULED_RIDE, RideStatus.PENDING, LocalDateTime.now().plusMinutes(30));
+        Ride SCHEDULED_RIDE = createRide(USER_WITH_SCHEDULED_RIDE, DRIVER_WITH_SCHEDULED_RIDE, RideStatus.PENDING, LocalDateTime.now().plusMinutes(30), List.of(USER_WITH_SCHEDULED_RIDE));
 
         Optional<Ride> ride = rideRepository.findFirstByCreatorAndStatusAndStartTimeBeforeOrderByStartTimeAsc(USER_WITH_SCHEDULED_RIDE, RideStatus.PENDING, LocalDateTime.now());
         Assert.assertTrue(ride.isEmpty());
@@ -92,7 +92,7 @@ public class RideRepositoryEndRideTest extends AbstractTestNGSpringContextTests 
     public void find_drivers_pending_ride() {
         Driver DRIVER_WITH_PENDING_RIDE = createDriverWithVehicle("driver@test.com", UserStatus.ACTIVE);
         User USER_WITH_PENDING_RIDE = createPassenger("passengere@test.com");
-        Ride PENDING_RIDE = createRide(USER_WITH_PENDING_RIDE, DRIVER_WITH_PENDING_RIDE, RideStatus.PENDING, LocalDateTime.now().minusMinutes(5));
+        Ride PENDING_RIDE = createRide(USER_WITH_PENDING_RIDE, DRIVER_WITH_PENDING_RIDE, RideStatus.PENDING, LocalDateTime.now().minusMinutes(5), List.of(USER_WITH_PENDING_RIDE));
 
         Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusAndStartTimeBeforeOrderByStartTimeAsc(DRIVER_WITH_PENDING_RIDE, RideStatus.PENDING, LocalDateTime.now());
         Assert.assertFalse(ride.isEmpty());
@@ -103,7 +103,7 @@ public class RideRepositoryEndRideTest extends AbstractTestNGSpringContextTests 
     public void find_users_pending_ride() {
         Driver DRIVER_WITH_PENDING_RIDE = createDriverWithVehicle("driver@test.com", UserStatus.ACTIVE);
         User USER_WITH_PENDING_RIDE = createPassenger("passenger@test.com");
-        Ride PENDING_RIDE = createRide(USER_WITH_PENDING_RIDE, DRIVER_WITH_PENDING_RIDE, RideStatus.PENDING, LocalDateTime.now().minusMinutes(5));
+        Ride PENDING_RIDE = createRide(USER_WITH_PENDING_RIDE, DRIVER_WITH_PENDING_RIDE, RideStatus.PENDING, LocalDateTime.now().minusMinutes(5), List.of(USER_WITH_PENDING_RIDE));
 
         Optional<Ride> ride = rideRepository.findFirstByCreatorAndStatusAndStartTimeBeforeOrderByStartTimeAsc(USER_WITH_PENDING_RIDE, RideStatus.PENDING, LocalDateTime.now());
         Assert.assertFalse(ride.isEmpty());
@@ -130,6 +130,18 @@ public class RideRepositoryEndRideTest extends AbstractTestNGSpringContextTests 
 
         Optional<Ride> pendingRide = rideRepository.findFirstByCreatorAndStatusAndStartTimeBeforeOrderByStartTimeAsc(USER_WITH_NO_RIDE, RideStatus.PENDING, LocalDateTime.now());
         Assert.assertTrue(pendingRide.isEmpty());
+    }
+
+    @Test
+    public void find_passengers_current_ride() {
+        Driver DRIVER_ON_A_RIDE = createDriverWithVehicle("driver@test.com", UserStatus.ON_RIDE);
+        User USER_ON_A_RIDE = createPassenger("passenger@test.com");
+        User PASSENGER = createPassenger("passenger2@test.com");
+        Ride RIDE_IN_PROGRESS = createRide(USER_ON_A_RIDE, DRIVER_ON_A_RIDE, RideStatus.IN_PROGRESS, LocalDateTime.now().minusMinutes(5), List.of(USER_ON_A_RIDE, PASSENGER));
+
+        Optional<Ride> ride = rideRepository.findFirstByPassengersIdAndStatusOrderByStartTimeAsc(PASSENGER.getId(), RideStatus.IN_PROGRESS);
+        Assert.assertFalse(ride.isEmpty());
+        Assert.assertEquals(ride.get().getId(), RIDE_IN_PROGRESS.getId());
     }
 
     private void cleanupDatabase() {
@@ -185,7 +197,7 @@ public class RideRepositoryEndRideTest extends AbstractTestNGSpringContextTests 
         return driverRepository.save(driver);
     }
 
-    private Ride createRide(User creator, Driver driver, RideStatus status, LocalDateTime startTime) {
+    private Ride createRide(User creator, Driver driver, RideStatus status, LocalDateTime startTime, List<User> passengers) {
         Ride ride = new Ride();
         ride.setCreator(creator);
         ride.setDriver(driver);
@@ -193,7 +205,7 @@ public class RideRepositoryEndRideTest extends AbstractTestNGSpringContextTests 
         ride.setStartTime(startTime);
         ride.setEndTime(null);
         ride.setWaypoints(List.of(new Waypoint("A", 45.0, 19.0), new Waypoint("B", 46.0, 20.0)));
-        ride.setPassengers(List.of(creator));
+        ride.setPassengers(passengers);
         ride.setDistance(1200.0);
         ride.setPrice(500.0);
         ride.setPanic(false);

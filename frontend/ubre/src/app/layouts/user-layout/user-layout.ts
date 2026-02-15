@@ -209,7 +209,6 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
       
           if (notification.status === NotificationType.RIDE_STARTED)
             this.showToast('Ride started', 'Your ride has been started successfully.');
-
           
           if (notification.status === NotificationType.RIDE_CANCELLED) 
           
@@ -222,13 +221,12 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
             this.showToast('Ride completed', "Ride completed.");
             this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
               this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
-                if (user.role == Role.REGISTERED_USER && this.ridePlanningStore.currentRideSubject$.value != null)
+                if (user.role == Role.REGISTERED_USER && this.ridePlanningStore.currentRideSubject$.value != null && this.ridePlanningStore.currentRideSubject$.value.createdBy == user.id)
                   this.reviewService.newReview(this.ridePlanningStore.currentRideSubject$.value.id)
               })
               this.ridePlanningStore.currentRideSubject$.next(nextRide)
             })
           }
-
 
           if (notification.ride)
             this.ridePlanningStore.currentRideSubject$.next(notification.ride);
@@ -1158,6 +1156,7 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
 
   canCancelRide(): boolean {
     const ride = this.ridePlanningStore.getCurrentRide();
+    console.log(ride)
     return !!ride && ride.status === 'PENDING';
   }
 
