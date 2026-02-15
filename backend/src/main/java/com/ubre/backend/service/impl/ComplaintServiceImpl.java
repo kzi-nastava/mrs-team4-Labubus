@@ -20,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ComplaintServiceImpl implements ComplaintService {
@@ -128,4 +129,26 @@ public class ComplaintServiceImpl implements ComplaintService {
         complaintRepository.delete(complaint.get());
         return new ComplaintDto(complaint.get());
     }
+
+    @Override
+    public List<ComplaintDto> getComplaintsForRide(Long rideId) {
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
+
+        List<Complaint> complaints = ride.getComplaints();
+
+        return complaints.stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    private ComplaintDto mapToDto(Complaint complaint) {
+        ComplaintDto dto = new ComplaintDto();
+        dto.setId(complaint.getId());
+        dto.setDriverId(complaint.getRide().getDriver().getId());
+        dto.setUserId(complaint.getUser().getId());
+        dto.setText(complaint.getText());
+        return dto;
+    }
+
 }

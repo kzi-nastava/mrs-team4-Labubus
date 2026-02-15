@@ -47,9 +47,18 @@
                   <app-vehicle-card [driverId]="ride.driver.id"></app-vehicle-card>
             </div>
       }
+      
 
       <app-stat-card [value]="'$' + ride.price" label="Final price" variant="dark"></app-stat-card>
       @if (user.role === 'REGISTERED_USER') {
             <app-button width="290px" testId="reorder-ride" (clicked)="onReorderClick()">Reorder ride</app-button>
+      }
+
+      @if (user.role === 'REGISTERED_USER' || user.role === 'ADMIN') {
+            <app-ride-history-reviews [rideId]="ride.id"></app-ride-history-reviews>
+      }
+
+      @if (user.role === 'REGISTERED_USER' || user.role === 'ADMIN') {
+            <app-ride-history-complaints [rideId]="ride.id"></app-ride-history-complaints>
       }
 </app-modal-container>

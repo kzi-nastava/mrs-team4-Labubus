@@ -15,4 +15,5 @@ public interface ReviewService {
     ReviewDto createReview(Long rideId, ReviewDto reviewDto) throws ResponseStatusException;
     ReviewDto updateReview(Long id, ReviewDto reviewDto) throws ResponseStatusException;
     ReviewDto deleteReview(Long id) throws ResponseStatusException;
+    ReviewDto getReviewsForRide(Long rideId);
 }
