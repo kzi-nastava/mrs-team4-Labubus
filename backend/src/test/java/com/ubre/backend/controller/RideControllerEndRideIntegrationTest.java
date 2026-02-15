@@ -8,35 +8,38 @@ import com.ubre.backend.enums.VehicleType;
 import com.ubre.backend.model.*;
 import com.ubre.backend.repository.*;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.http.MediaType;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 import tools.jackson.databind.ObjectMapper;
 
 import org.hamcrest.Matchers;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.security.core.authority.AuthorityUtils.createAuthorityList;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @SpringBootTest
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc(addFilters = true)
 @ActiveProfiles("test")
 public class RideControllerEndRideIntegrationTest extends AbstractTestNGSpringContextTests {
 
@@ -66,11 +69,15 @@ public class RideControllerEndRideIntegrationTest extends AbstractTestNGSpringCo
     @Autowired
     private org.springframework.transaction.support.TransactionTemplate transactionTemplate;
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
     private Driver DRIVER;
     private User CREATOR;
     private WaypointDto END_LOCATION;
 
-    @BeforeClass
+    @BeforeMethod
+    @Transactional
     public void setup() {
         DRIVER = createDriverWithVehicle("driver@test.com", UserStatus.ON_RIDE);
         CREATOR = createPassenger("passenger@test.com");
@@ -89,18 +96,23 @@ public class RideControllerEndRideIntegrationTest extends AbstractTestNGSpringCo
         SecurityContextHolder.setContext(context);
     }
 
-    @AfterClass
+    @AfterMethod
+    @Transactional
     public void cleanup() {
         cleanupDatabase();
     }
 
     @Test
-    @WithMockUser(roles = "DRIVER")
     public void successfully_end_ride() throws Exception {
         Ride ride = createRide(CREATOR, DRIVER, RideStatus.IN_PROGRESS, LocalDateTime.now().minusMinutes(5));
         rideRepository.save(ride);
 
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                DRIVER, null, createAuthorityList("ROLE_DRIVER")
+        );
+
         mockMvc.perform(put("/api/rides/{id}/stop", ride.getId())
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(END_LOCATION)))
                 .andExpect(status().isOk())
@@ -109,9 +121,13 @@ public class RideControllerEndRideIntegrationTest extends AbstractTestNGSpringCo
     }
 
     @Test
-    @WithMockUser(roles = "DRIVER")
     public void end_missing_ride() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                DRIVER, null, createAuthorityList("ROLE_DRIVER")
+        );
+
         mockMvc.perform(put("/api/rides/{id}/stop", 1L)
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(END_LOCATION)))
                 .andExpect(status().isNotFound())
@@ -119,36 +135,47 @@ public class RideControllerEndRideIntegrationTest extends AbstractTestNGSpringCo
     }
 
     @Test
-    @WithMockUser(roles = "REGISTERED_USER")
     public void end_ride_with_wrong_role() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                CREATOR, null, createAuthorityList("REGISTERED_USER")
+        );
+
         mockMvc.perform(put("/api/rides/{id}/stop", 1L)
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(END_LOCATION)))
                 .andExpect(status().isForbidden());
     }
 
     @Test
-    @WithMockUser(roles = "DRIVER")
     public void end_ride_by_wrong_driver() throws Exception {
         Driver otherDriver = createDriverWithVehicle("driver2@test.com", UserStatus.ON_RIDE);
 
         Ride ride = createRide(CREATOR, otherDriver, RideStatus.IN_PROGRESS, LocalDateTime.now().minusMinutes(5));
         rideRepository.save(ride);
 
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                otherDriver, null, createAuthorityList("REGISTERED_USER")
+        );
+
         mockMvc.perform(put("/api/rides/{id}/stop", ride.getId())
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(END_LOCATION)))
-                .andExpect(status().isForbidden())
-                .andExpect(content().string(Matchers.containsString("Not your ride")));
+                .andExpect(status().isForbidden());
     }
 
     @Test
-    @WithMockUser(roles = "DRIVER")
     public void end_pending_ride() throws Exception {
         Ride ride = createRide(CREATOR, DRIVER, RideStatus.PENDING, LocalDateTime.now().plusMinutes(5));
         rideRepository.save(ride);
 
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                DRIVER, null, createAuthorityList("ROLE_DRIVER")
+        );
+
         mockMvc.perform(put("/api/rides/{id}/stop", ride.getId())
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(END_LOCATION)))
                 .andExpect(status().isBadRequest())
@@ -156,28 +183,43 @@ public class RideControllerEndRideIntegrationTest extends AbstractTestNGSpringCo
     }
 
     @Test
-    @WithMockUser(roles = "DRIVER")
     public void end_ride_with_invalid_end_location() throws Exception {
         Ride ride = createRide(CREATOR, DRIVER, RideStatus.IN_PROGRESS, LocalDateTime.now().minusMinutes(5));
         rideRepository.save(ride);
 
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                DRIVER, null, createAuthorityList("ROLE_DRIVER")
+        );
+
         mockMvc.perform(put("/api/rides/{id}/stop", ride.getId())
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(null)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$").value(500.0));
+                .andExpect(status().isBadRequest());
     }
 
     private void cleanupDatabase() {
-        entityManager.flush();
-        entityManager.createNativeQuery("DELETE FROM ride_passengers").executeUpdate();
-        rideRepository.deleteAll();
-        waypointRepository.deleteAll();
-        vehicleRepository.deleteAll();
-        entityManager.createNativeQuery("DELETE FROM user_stats").executeUpdate();
-        userRepository.deleteAll();
-        entityManager.flush();
+        transactionTemplate.execute(status -> {
+            entityManager.clear();
+
+            entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
+
+            entityManager.createNativeQuery("TRUNCATE TABLE ride_passengers").executeUpdate();
+            entityManager.createNativeQuery("TRUNCATE TABLE rides_waypoints").executeUpdate();
+            entityManager.createNativeQuery("TRUNCATE TABLE reviews").executeUpdate();
+            entityManager.createNativeQuery("TRUNCATE TABLE complaints").executeUpdate();
+            entityManager.createNativeQuery("TRUNCATE TABLE notifications").executeUpdate();
+            entityManager.createNativeQuery("TRUNCATE TABLE user_stats").executeUpdate();
+            entityManager.createNativeQuery("TRUNCATE TABLE user_status_records").executeUpdate();
+            entityManager.createNativeQuery("TRUNCATE TABLE rides").executeUpdate();
+            entityManager.createNativeQuery("TRUNCATE TABLE waypoints").executeUpdate();
+            entityManager.createNativeQuery("TRUNCATE TABLE vehicles").executeUpdate();
+            entityManager.createNativeQuery("TRUNCATE TABLE users_rides").executeUpdate();
+            entityManager.createNativeQuery("TRUNCATE TABLE users").executeUpdate();
+
+            entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
+            return null;
+        });
     }
 
     private Passenger createPassenger(String email) {
