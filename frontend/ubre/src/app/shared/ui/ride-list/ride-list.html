@@ -6,7 +6,7 @@
       }
       @else {
         <div class="ride-list-placeholder">
-          <div class="placeholder-title">No rides found</div>
+          <div class="placeholder-title" data-testid="no-rides-found">No rides found</div>
           <div class="placeholder-subtitle">Might take a second to load</div>
         </div>
       }
@@ -15,29 +15,29 @@
 <div class="options" [class.move-up]="open">
   <div class="sort">
     <app-modal-container [showTitleBar] = false>
-        <input type="datetime-local" placeholder="Date created" (input)="onSelectDate($event)">
+        <input type="datetime-local" placeholder="Date created" data-testId="filter-date" (input)="onSelectDate($event)">
         @if (user().role === 'ADMIN') {
-          <input type="text" placeholder="User" [value]="filterUser()" (input)="onInputFilter($event)">
+          <input type="text" placeholder="User" data-testId="filter-user" [value]="filterUser()" (input)="onInputFilter($event)">
           @if (userList().length >= 1) {
-          <div class="fieldSelection">
+          <div class="fieldSelection" data-testId="user-list-dropdown">
               @for (user of userList(); track user.id) {
-                <div class="field" (click)="onInputUser($event, user.id)">{{ user.name + ' ' + user.surname }}</div>
+                <div class="field" (click)="onInputUser($event, user.id)" [attr.data-testId]="'user-option-' + user.id">{{ user.name + ' ' + user.surname }}</div>
               }
           </div>
           }
         }
          <div class="selectedField">
-           <input readonly placeholder="Sort by" [value]="selectedField">
-           <img [class.flip]="sortOpen" src="arrow-down-surface.svg" alt="" class="drop-down" (click)="onToggleSort()">
-           <img [class.flip]="query.ascending" src="sort-direction-primary-text.svg" alt="" class="sort-direction" (click)="onToggleSortDirection()">
+           <input readonly placeholder="Sort by" [value]="selectedField" data-testId="sort-by-field">
+           <img [class.flip]="sortOpen" src="arrow-down-surface.svg" alt="" class="drop-down" (click)="onToggleSort()" data-testid="sort-dropdown-toggle">
+           <img [class.flip]="query.ascending" src="sort-direction-primary-text.svg" alt="" class="sort-direction" (click)="onToggleSortDirection()" data-testid="sort-direction-toggle">
          </div>
          @if (sortOpen) {
-          <div class="fieldSelection">
-                <div class="field" (click)="onSelectField($event, 'startTime')">Start time</div>
-                <div class="field" (click)="onSelectField($event, 'endTime')">End time</div>
-                <div class="field" (click)="onSelectField($event, 'price')">Price</div>
-                <div class="field" (click)="onSelectField($event, 'distance')">Distance</div>
-                <div class="field" (click)="onSelectField($event, 'driver')">Driver</div>
+          <div class="fieldSelection" data-testId="sort-field-dropdown">
+                <div class="field" (click)="onSelectField($event, 'startTime')" data-testId="sort-option-startTime">Start time</div>
+                <div class="field" (click)="onSelectField($event, 'endTime')" data-testId="sort-option-endTime">End time</div>
+                <div class="field" (click)="onSelectField($event, 'price')" data-testId="sort-option-price">Price</div>
+                <div class="field" (click)="onSelectField($event, 'distance')" data-testId="sort-option-distance">Distance</div>
+                <div class="field" (click)="onSelectField($event, 'driver')" data-testId="sort-option-driver">Driver</div>
           </div>
           }
     </app-modal-container>
