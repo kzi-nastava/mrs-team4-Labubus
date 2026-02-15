@@ -362,7 +362,7 @@ public class EmailServiceImpl implements EmailService {
 
                   <p style="font-size:14px; color:#374151;">
                     If you believe this invitation was a mistake fell free to
-                    ignore this message until the ride ends or decline the invitation.
+                    ignore this message until the ride ends.
                   </p>
 
                   <hr style="border:none; border-top:1px solid #e5e7eb; margin:24px 0;"/>
