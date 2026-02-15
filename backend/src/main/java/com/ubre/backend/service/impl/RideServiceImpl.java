@@ -411,15 +411,6 @@ public class RideServiceImpl implements RideService {
     // TODO: make changes later if necessary
     @Override
     public RideDto orderRide(RideOrderDto rideOrderDto) {
-        // provera da li je korsisnik blokiran, ako jeste, nije u mogućnosti da poruči vožnju
-         Optional<User> creatorOpt = userRepository.findById(rideOrderDto.getCreatorId());
-         if (creatorOpt.isEmpty()) {
-             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Creator user not found");
-         }
-         User creatorr = creatorOpt.get();
-         if (Boolean.TRUE.equals(creatorr.getIsBlocked())) {
-             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Blocked users cannot order rides");
-         }
 
         // if there are no waypoints throw error
         if (rideOrderDto.getWaypoints() == null || rideOrderDto.getWaypoints().size() == 1 || rideOrderDto.getWaypoints().isEmpty()) {
@@ -522,6 +513,10 @@ public class RideServiceImpl implements RideService {
         // create ride entity and save to database
         Ride newRide = new Ride();
         User creator = userRepository.findById(rideOrderDto.getCreatorId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Creator user not found"));
+        // quick check if creator is blocked, if yes, throw error
+        if (Boolean.TRUE.equals(creator.getIsBlocked())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is blocked from creating rides");
+        }
         // start time comes from frontend in string format ready for conversion in LocalDateTime
         String t = rideOrderDto.getScheduledTime();
 
