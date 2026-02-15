@@ -103,7 +103,7 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
     },
     {
       label: 'Block users',
-      icon: 'person_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg',
+      icon: 'person_off_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg',
       action: 'block-users',
     },
     {

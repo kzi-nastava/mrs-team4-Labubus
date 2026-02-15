@@ -3,7 +3,7 @@
   position: fixed;
   top: 16px;
   left: 316px; /* vozač: desno od ikone za status (menu 16, status 216+84, gap 16) */
-  z-index: 5000;
+  z-index: 2500; /* ispod side menija (backdrop 3000, panel 3100) da ne prekriva meni */
 }
 
 /* Registrovani korisnik: map je na 116px – toast desno od mape da ne prekriva ikonicu */
