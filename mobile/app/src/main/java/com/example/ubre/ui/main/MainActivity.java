@@ -208,6 +208,9 @@ public class MainActivity extends AppCompatActivity {
             else if (itemId == R.id.nav_profile_changes) {
                 showFragment(ProfileChangesFragment.newInstance());
                 return true;
+            } else if (itemId == R.id.nav_register_driver) {
+                showFragment(RegisterDriverFragment.newInstance());
+                return true;
             } else if (itemId == R.id.nav_log_out) {
                 logout();
                 return true;
