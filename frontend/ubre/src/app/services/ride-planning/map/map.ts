@@ -224,7 +224,6 @@ export class Map implements AfterViewInit, OnChanges {
   }
 
   private renderRoute(): void {
-    console.log('renderRoute', this.routeGeometry);
     this.routeLayer.clearLayers();
     if (!this.routeGeometry) return;
 

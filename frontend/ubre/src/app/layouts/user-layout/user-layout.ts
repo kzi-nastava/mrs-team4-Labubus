@@ -779,9 +779,7 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
 
     this.routingService.route(waypoints).pipe(take(1)).subscribe({
       next: (routeInfo) => {
-          console.log(waypoints)
           this.selectedRideWaypoints.next(waypoints)
-          console.log(this.selectedRideWaypoints.value)
           this.selectedRideRoute.next(routeInfo)
         },
         error: (err) => {
@@ -1156,7 +1154,6 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
 
   canCancelRide(): boolean {
     const ride = this.ridePlanningStore.getCurrentRide();
-    console.log(ride)
     return !!ride && ride.status === 'PENDING';
   }
 
@@ -1184,8 +1181,6 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
                 visited: false,
                 id: 0,
               };
-
-              console.log("Stop waypoint DTO:", stopWaypoint);
 
               this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
                 next: (price) => {
@@ -1226,8 +1221,6 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
                 visited: false,
                 id: 0,
               };
-
-              console.log("Stop waypoint DTO:", stopWaypoint);
 
               this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
                 next: (price) => {
@@ -1279,7 +1272,6 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
   }
 
   subscribeToPanicNotifications() {
-    console.log(this.authService.getRole())
     if (this.authService.getRole() === "ADMIN") { 
         this.panicSubscription = this.webSocketService
         .panicNotifications()
