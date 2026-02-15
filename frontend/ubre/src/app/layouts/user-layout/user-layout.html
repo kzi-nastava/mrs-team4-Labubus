@@ -204,7 +204,7 @@
       [open]="ui.menuOpen"
       title="Account"
       [role]="(userService.currentUser$ | async)?.role ?? Role.GUEST"
-      [user]="(userService.currentUser$ | async) ?? { id: 0, role: Role.GUEST, name: '', surname: '', email: '', avatarUrl: 'default-avatar.jpg', phone: '', address: '' }"
+      [user]="(userService.currentUser$ | async) ?? { id: 0, role: Role.GUEST, name: '', surname: '', email: '', avatarUrl: 'default-avatar.jpg', phone: '', address: '', isBlocked: false }"
       [avatarSrc]="(userService.avatarSrc$ | async) ?? 'default-avatar.jpg'"
       (closed)="closeMenu()"
       (action)="handleMenuAction($event)">
@@ -692,6 +692,14 @@
       title="Panic Notifications"
       (back)="ui.panicListOpen=false; ui.menuOpen = true">
       <app-panic-list></app-panic-list>
+    </app-sheet>
+  }
+
+  @if ((userService.currentUser$ | async)?.role === Role.ADMIN) {
+    <app-sheet [open]="ui.blockUsersOpen"
+      title="Block users"
+      (back)="onBlockUsersBack()">
+      <app-block-users-list></app-block-users-list>
     </app-sheet>
   }
 

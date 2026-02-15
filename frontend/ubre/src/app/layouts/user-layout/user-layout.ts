@@ -60,6 +60,7 @@ import { ComplaintModal } from '../../shared/ui/complaint-modal/complaint-modal'
 import { ComplaintService } from '../../services/complaint-service';
 import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides';
 import { Reports } from '../../shared/ui/reports/reports';
+import { BlockUsersList } from '../../features/block-users/block-users-list/block-users-list';
 
 @Component({
   selector: 'app-user-layout',
@@ -70,7 +71,7 @@ import { Reports } from '../../shared/ui/reports/reports';
     AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
     RideOptions, FavoriteRides, DriverCancelDialog,
     ComplaintModal, PanicList, PanicButton, PanicToast,
-    ScheduledRides, Reports],
+    ScheduledRides, Reports, BlockUsersList],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -267,6 +268,7 @@ import { Reports } from '../../shared/ui/reports/reports';
     showCancelModal: false,
     panicListOpen: false,
     toastPanicOpen: false,
+    blockUsersOpen: false,
   };
 
   private previousScreenBeforeInvite: 'schedule-timer' | 'ride-options' | null = null;
@@ -320,6 +322,7 @@ import { Reports } from '../../shared/ui/reports/reports';
     this.closeScheduledRides();
     this.closeReports();
     this.closeProfileChanges();
+    this.closeBlockUsers();
   }
 
   handleMenuAction(action: string) {
@@ -369,6 +372,9 @@ import { Reports } from '../../shared/ui/reports/reports';
     }
     if (action === 'admin-panics') {
       this.ui.panicListOpen = true;
+    }
+    if (action === 'block-users') {
+      this.openBlockUsers();
     }
    
     this.closeMenu();
@@ -1089,6 +1095,20 @@ import { Reports } from '../../shared/ui/reports/reports';
 
   onProfileChangesBack() {
     this.closeProfileChanges();
+    this.ui.menuOpen = true;
+  }
+
+  openBlockUsers() {
+    this.ui.menuOpen = false;
+    this.ui.blockUsersOpen = true;
+  }
+
+  closeBlockUsers() {
+    this.ui.blockUsersOpen = false;
+  }
+
+  onBlockUsersBack() {
+    this.closeBlockUsers();
     this.ui.menuOpen = true;
   }
 

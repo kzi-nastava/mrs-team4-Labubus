@@ -411,6 +411,8 @@ public class RideServiceImpl implements RideService {
     // TODO: make changes later if necessary
     @Override
     public RideDto orderRide(RideOrderDto rideOrderDto) {
+
+        // very first thing, check wether user is blocked or not
         // if there are no waypoints throw error
         if (rideOrderDto.getWaypoints() == null || rideOrderDto.getWaypoints().size() == 1 || rideOrderDto.getWaypoints().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one waypoint is required to order a ride");

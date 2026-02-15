@@ -13,7 +13,7 @@ export class UserService {
   private readonly http = inject(HttpClient);
   private readonly api = 'http://localhost:8080/api';
 
-  private readonly currentUserSubject = new BehaviorSubject<UserDto>({ email: '', name: 'Guest', surname: '', avatarUrl: 'default-avatar.jpg', role: Role.GUEST, id: 0, phone: '', address: '' });
+  private readonly currentUserSubject = new BehaviorSubject<UserDto>({ email: '', name: 'Guest', surname: '', avatarUrl: 'default-avatar.jpg', role: Role.GUEST, id: 0, phone: '', address: '', isBlocked: false });
   readonly currentUser$ = this.currentUserSubject.asObservable();
 
   private readonly avatarSrcSubject = new BehaviorSubject<string>('default-avatar.jpg');
@@ -51,7 +51,7 @@ export class UserService {
   // --- actions ---
   setCurrentUserById(id: number) {
     if (id === 0 || id === null) {
-      this.currentUserSubject.next({ id: 0, role: Role.GUEST, name: 'Guest', surname: '', email: '', avatarUrl: 'default-avatar.jpg', phone: '', address: '' });
+      this.currentUserSubject.next({ id: 0, role: Role.GUEST, name: 'Guest', surname: '', email: '', avatarUrl: 'default-avatar.jpg', phone: '', address: '', isBlocked: false });
       return;
     }
     this.getUserById(id).pipe(take(1)).subscribe({
