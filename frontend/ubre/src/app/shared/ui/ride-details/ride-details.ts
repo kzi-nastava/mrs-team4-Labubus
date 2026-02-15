@@ -28,7 +28,8 @@ export class RideDetails {
         role: Role.GUEST,
         id: 0,
         phone: "",
-        address: ""
+        address: "",
+        isBlocked: false
       };
   @Input() testIdPrefix: string | null = null;
   @Output() onError = new EventEmitter<Error>();

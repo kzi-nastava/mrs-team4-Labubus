@@ -69,7 +69,8 @@ public class DriverServiceImpl implements DriverService {
                     driver.getSurname(),
                     driver.getPhone(),
                     driver.getAddress(),
-                    driver.getStatus()
+                    driver.getStatus(),
+                    driver.getIsBlocked()
             );
             driverDtos.add(dto);
         }
@@ -91,7 +92,8 @@ public class DriverServiceImpl implements DriverService {
                     driver.getSurname(),
                     driver.getPhone(),
                     driver.getAddress(),
-                    driver.getStatus()
+                    driver.getStatus(),
+                    driver.getIsBlocked()
             );
             driverDtos.add(dto);
         }
@@ -112,7 +114,8 @@ public class DriverServiceImpl implements DriverService {
                 driver.getSurname(),
                 driver.getPhone(),
                 driver.getAddress(),
-                driver.getStatus()
+                driver.getStatus(),
+                driver.getIsBlocked()
         );
     }
 
@@ -228,7 +231,8 @@ public class DriverServiceImpl implements DriverService {
                 savedDriver.getSurname(),
                 savedDriver.getPhone(),
                 savedDriver.getAddress(),
-                savedDriver.getStatus()
+                savedDriver.getStatus(),
+                savedDriver.getIsBlocked()
         );
     }
 
@@ -331,7 +335,8 @@ public class DriverServiceImpl implements DriverService {
                 driver.getSurname(),
                 driver.getPhone(),
                 driver.getAddress(),
-                driver.getStatus()
+                driver.getStatus(),
+                driver.getIsBlocked()
         )));
     }
 

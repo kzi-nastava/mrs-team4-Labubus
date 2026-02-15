@@ -173,4 +173,32 @@ public class UserController {
         List<UserDto> users = userService.getUsersByFullName(fullName);
         return ResponseEntity.status(HttpStatus.OK).body(users);
     }
+
+    @GetMapping(value = "/get-all", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        List<UserDto> users = userService.getAllUsers();
+        return ResponseEntity.status(HttpStatus.OK).body(users);
+    }
+
+    @PutMapping(value = "/{id}/block")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> blockUser(@PathVariable Long id, @RequestBody(required = false) BlockUserNoteDto noteDto) {
+        String note = noteDto != null ? noteDto.getNote() : null;
+        userService.blockUser(id, note);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
+    @PutMapping(value = "/{id}/unblock")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> unblockUser(@PathVariable Long id) {
+        userService.unblockUser(id);
+        return ResponseEntity.status(HttpStatus.OK).body(null);
+    }
+
+    @GetMapping(value = "/{id}/block-note", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> getLatestBlockNote(@PathVariable Long id) {
+        String note = userService.getLatestBlockNote(id);
+        return ResponseEntity.status(HttpStatus.OK).body(note);
+    }
 }

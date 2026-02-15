@@ -18,7 +18,7 @@ describe('ReviewService', () => {
   const expectedBody = new ReviewDto(1, 1, 3, 4, "Test review")
   const invalidReview = new ReviewDto(2, 1, 2, 4, "")
 
-  const currentUser = new UserDto(3, Role.REGISTERED_USER, "", "", "", "", "", "")
+  const currentUser = new UserDto(3, Role.REGISTERED_USER, "", "", "", "", "", "", false)
 
   beforeEach(() => {
     mockUserService = jasmine.createSpyObj<UserService>(['getCurrentUser'])

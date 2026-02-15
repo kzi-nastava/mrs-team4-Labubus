@@ -16,8 +16,9 @@ public interface UserService {
     List<UserDto> getAllUsers();
     UserDto updateUser(UserDto userDto);
     void deleteUser(Long id);
-    void blockUser(Long id);
+    void blockUser(Long id, String note);
     void unblockUser(Long id);
+    String getLatestBlockNote(Long userId);
     UserStatsDto getUserStats(Long id);
     void changePassword(PasswordChangeDto passwordChangeDto);
     void activateUser(Long id);

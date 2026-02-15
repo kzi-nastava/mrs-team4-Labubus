@@ -1,4 +1,40 @@
+/* Block warning – isti stil kao toast, ista visina kao ikonice */
+.block-warning-toast {
+  position: fixed;
+  top: 16px;
+  left: 316px; /* vozač: desno od ikone za status (menu 16, status 216+84, gap 16) */
+  z-index: 2500; /* ispod side menija (backdrop 3000, panel 3100) da ne prekriva meni */
+}
 
+/* Registrovani korisnik: map je na 116px – toast desno od mape da ne prekriva ikonicu */
+.block-warning-toast--passenger {
+  left: 216px; /* map 116+84, gap 16 */
+  height: 84px;
+  min-width: 200px;
+  max-width: 320px;
+  padding: 0 22px 0 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #b71c1c;
+  color: #fff;
+  border-radius: var(--border-radius-icons);
+  box-shadow: var(--drop-shadow);
+  font-family: var(--font-family);
+  pointer-events: auto;
+}
+
+.block-warning-title {
+  font-size: var(--font-size-medium);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.1;
+}
+
+.block-warning-msg {
+  margin-top: 4px;
+  font-size: var(--font-size-small);
+  color: rgba(255, 255, 255, 0.95);
+}
 
 .screen {
   position: relative;

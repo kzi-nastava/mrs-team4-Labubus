@@ -239,6 +239,7 @@ describe('SignupComponent', () => {
       address: '123 Main St',
       role: Role.REGISTERED_USER,
       avatarUrl: 'default-avatar.jpg',
+      isBlocked: false,
     };
 
     authService.register.and.returnValue(of(mockUser));
@@ -276,6 +277,7 @@ describe('SignupComponent', () => {
       address: '123 Main St',
       role: Role.REGISTERED_USER,
       avatarUrl: 'default-avatar.jpg',
+      isBlocked: false,
     };
 
     authService.register.and.returnValue(of(mockUser));
@@ -350,6 +352,7 @@ describe('SignupComponent', () => {
       address: '123 Main St',
       role: Role.REGISTERED_USER,
       avatarUrl: 'test@example.com_my-photo.jpg',
+      isBlocked: false,
     };
 
     authService.register.and.returnValue(of(mockUser));
@@ -386,6 +389,7 @@ describe('SignupComponent', () => {
       address: '123 Main St',
       role: Role.REGISTERED_USER,
       avatarUrl: 'default-avatar.jpg',
+      isBlocked: false,
     };
 
     authService.register.and.returnValue(of(mockUser));
@@ -422,6 +426,7 @@ describe('SignupComponent', () => {
       address: '123 Main St',
       role: Role.REGISTERED_USER,
       avatarUrl: 'test@example.com_avatar.jpg',
+      isBlocked: false,
     };
 
     authService.register.and.returnValue(of(mockUser));

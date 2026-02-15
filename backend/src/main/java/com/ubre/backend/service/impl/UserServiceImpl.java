@@ -7,6 +7,7 @@ import com.ubre.backend.enums.UserStatus;
 import com.ubre.backend.model.*;
 import com.ubre.backend.repository.ActivationTokenRepository;
 import com.ubre.backend.repository.RideRepository;
+import com.ubre.backend.repository.UserBlockNoteRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.service.EmailService;
 import com.ubre.backend.repository.UserStatusRecordRepository;
@@ -18,6 +19,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -40,12 +42,6 @@ public class UserServiceImpl implements UserService {
     private static List<ProfileChangeDto> profileChangeRequests = new ArrayList<>();
     private static List<String> passengerRequests = new ArrayList<>();
 
-    public UserServiceImpl() {
-        users.add(new UserDto(1L, Role.DRIVER, "avatar1.png", "john@doe.com", "John", "Doe", "1234567890", "123 Main St", UserStatus.ACTIVE));
-        users.add(new UserDto(2L, Role.REGISTERED_USER, "avatar2.png", "jane@doe.com", "Jane", "Doe", "0987654321", "456 Elm St", UserStatus.INACTIVE));
-        users.add(new UserDto(3L, Role.DRIVER, "avatar3.png", "king@cobra.com", "King", "Cobra", "1122334455", "789 Oak St", UserStatus.ON_RIDE));
-    }
-
     // real repository
     @Autowired
     private UserRepository userRepository;
@@ -64,6 +60,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RideRepository rideRepository;
+
+    @Autowired
+    private UserBlockNoteRepository userBlockNoteRepository;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -185,7 +184,8 @@ public class UserServiceImpl implements UserService {
                 user.getSurname(),
                 user.getPhone(),
                 user.getAddress(),
-                user.getStatus()
+                user.getStatus(),
+                user.getIsBlocked()
         );
     }
 
@@ -203,13 +203,15 @@ public class UserServiceImpl implements UserService {
                 user.getSurname(),
                 user.getPhone(),
                 user.getAddress(),
-                user.getStatus()
+                user.getStatus(),
+                user.getIsBlocked()
         );
     }
 
     @Override
     public List<UserDto> getAllUsers() {
-        return users;
+        List<User> users = userRepository.findAll();
+        return users.stream().map(UserDto::new).toList();
     }
 
 //    @Override
@@ -263,18 +265,40 @@ public class UserServiceImpl implements UserService {
                 updatedUser.getSurname(),
                 updatedUser.getPhone(),
                 updatedUser.getAddress(),
-                updatedUser.getStatus()
+                updatedUser.getStatus(),
+                updatedUser.getIsBlocked()
         );
     }
 
     @Override
-    public void blockUser(Long id) {
-        // todo: implement block user logic
+    public void blockUser(Long id, String note) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        user.setIsBlocked(true);
+        userRepository.save(user);
+        if (note != null && !note.isBlank()) {
+            UserBlockNote blockNote = new UserBlockNote();
+            blockNote.setUserId(user.getId());
+            blockNote.setNote(note.trim());
+            blockNote.setCreatedAt(LocalDateTime.now());
+            userBlockNoteRepository.save(blockNote);
+        }
     }
 
     @Override
+    @Transactional
     public void unblockUser(Long id) {
-        // todo: same sh
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        user.setIsBlocked(false);
+        userRepository.save(user);
+        userBlockNoteRepository.deleteByUserId(user.getId());
+    }
+
+    @Override
+    public String getLatestBlockNote(Long userId) {
+        UserBlockNote note = userBlockNoteRepository.findTopByUserIdOrderByCreatedAtDesc(userId);
+        return note != null ? note.getNote() : "";
     }
 
     // get user stats by id
@@ -453,7 +477,8 @@ public class UserServiceImpl implements UserService {
                 savedAdmin.getSurname(),
                 savedAdmin.getPhone(),
                 savedAdmin.getAddress(),
-                savedAdmin.getStatus()
+                savedAdmin.getStatus(),
+                savedAdmin.getIsBlocked()
         );
     }
 

@@ -83,6 +83,7 @@ describe('UserLayout – Driver registration form and submit', () => {
         avatarUrl: '',
         phone: '',
         address: '',
+        isBlocked: false,
       })
     );
 
@@ -109,7 +110,7 @@ describe('UserLayout – Driver registration form and submit', () => {
 
   it('should call register when validation would return no errors', () => {
     mockDriverRegistrationService.register.and.returnValue(
-      of({ id: 1, role: Role.DRIVER, name: '', surname: '', email: '', avatarUrl: '', phone: '', address: '' })
+      of({ id: 1, role: Role.DRIVER, name: '', surname: '', email: '', avatarUrl: '', phone: '', address: '', isBlocked: false })
     );
     component.confirmPasswordDR = 'password123';
     component.onRegisterDriver();
@@ -118,7 +119,7 @@ describe('UserLayout – Driver registration form and submit', () => {
 
   it('should call resetDraft on successful submit', () => {
     mockDriverRegistrationService.register.and.returnValue(
-      of({ id: 1, role: Role.DRIVER, name: '', surname: '', email: '', avatarUrl: '', phone: '', address: '' })
+      of({ id: 1, role: Role.DRIVER, name: '', surname: '', email: '', avatarUrl: '', phone: '', address: '', isBlocked: false })
     );
     component.confirmPasswordDR = 'password123';
     component.onRegisterDriver();

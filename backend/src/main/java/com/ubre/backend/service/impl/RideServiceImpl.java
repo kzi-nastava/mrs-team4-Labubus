@@ -411,6 +411,7 @@ public class RideServiceImpl implements RideService {
     // TODO: make changes later if necessary
     @Override
     public RideDto orderRide(RideOrderDto rideOrderDto) {
+
         // if there are no waypoints throw error
         if (rideOrderDto.getWaypoints() == null || rideOrderDto.getWaypoints().size() == 1 || rideOrderDto.getWaypoints().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one waypoint is required to order a ride");
@@ -440,7 +441,10 @@ public class RideServiceImpl implements RideService {
         // at this point, we can create the ride from a active driver or one that is not on ride, and has no pending rides
         // first try to find active driver
         Driver assignedDriver = null;
-        List<Driver> activeDrivers = driverRepository.findByStatus(UserStatus.ACTIVE);
+        List<Driver> activeDrivers = driverRepository.findByStatus(UserStatus.ACTIVE)
+                .stream()
+                .filter(d -> !Boolean.TRUE.equals(d.getIsBlocked()))
+                .toList();
 
         // print all active drivers in pretty format
         System.out.println("Active drivers:");
@@ -469,8 +473,12 @@ public class RideServiceImpl implements RideService {
         } else {
             System.out.println("No eligible active drivers found, looking for on ride drivers with no pending rides");
             // from drivers that are on ride, and has no pending rides, find one that is on ride that has closes end time to now
-            List<Driver> onRideDrivers = driverRepository.findByStatus(UserStatus.ON_RIDE);
-           // eliminate all that has a ride that has scheduled time in future
+            List<Driver> onRideDrivers = driverRepository.findByStatus(UserStatus.ON_RIDE)
+                    .stream()
+                    .filter(d -> !Boolean.TRUE.equals(d.getIsBlocked()))
+                    .collect(Collectors.toList());
+
+            // eliminate all that has a ride that has scheduled time in future
             List<Ride> pendingRides = rideRepository.findByStatus(RideStatus.ACCEPTED);
             // for every ride, if driver is in onRideDrivers, remove him from onRideDrivers
             for (Ride ride : pendingRides) {
@@ -505,6 +513,10 @@ public class RideServiceImpl implements RideService {
         // create ride entity and save to database
         Ride newRide = new Ride();
         User creator = userRepository.findById(rideOrderDto.getCreatorId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Creator user not found"));
+        // quick check if creator is blocked, if yes, throw error
+        if (Boolean.TRUE.equals(creator.getIsBlocked())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is blocked from creating rides");
+        }
         // start time comes from frontend in string format ready for conversion in LocalDateTime
         String t = rideOrderDto.getScheduledTime();
 
