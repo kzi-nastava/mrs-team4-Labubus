@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserBlockNoteRepository extends JpaRepository<UserBlockNote, Long> {
+    void deleteByUserId(Long userId);
+    UserBlockNote findTopByUserIdOrderByCreatedAtDesc(Long userId);
 }

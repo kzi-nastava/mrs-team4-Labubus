@@ -19,6 +19,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -285,11 +286,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void unblockUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         user.setIsBlocked(false);
         userRepository.save(user);
+        userBlockNoteRepository.deleteByUserId(user.getId());
+    }
+
+    @Override
+    public String getLatestBlockNote(Long userId) {
+        UserBlockNote note = userBlockNoteRepository.findTopByUserIdOrderByCreatedAtDesc(userId);
+        return note != null ? note.getNote() : "";
     }
 
     // get user stats by id

@@ -195,4 +195,10 @@ public class UserController {
         userService.unblockUser(id);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
+
+    @GetMapping(value = "/{id}/block-note", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> getLatestBlockNote(@PathVariable Long id) {
+        String note = userService.getLatestBlockNote(id);
+        return ResponseEntity.status(HttpStatus.OK).body(note);
+    }
 }

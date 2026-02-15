@@ -94,6 +94,14 @@
       }
     
 
+    <!-- BLOCK WARNING (toast style, next to status icon) -->
+    @if ((userService.currentUser$ | async)?.isBlocked) {
+      <div class="block-warning-toast" [class.block-warning-toast--passenger]="(userService.currentUser$ | async)?.role === Role.REGISTERED_USER" role="alert">
+        <div class="block-warning-title">You have been blocked</div>
+        <div class="block-warning-msg">{{ (userService.currentUserBlockNote$ | async) ?? 'There is no reason provided' }}</div>
+      </div>
+    }
+
     <!-- ICONS -->
 
     <app-icon-button class="menu-button"
