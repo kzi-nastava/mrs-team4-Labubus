@@ -568,7 +568,31 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Current location not available yet.", Toast.LENGTH_SHORT).show();
             return;
         }
-        addWaypoint("My location", myLocationOverlay.getMyLocation());
+        GeoPoint point = myLocationOverlay.getMyLocation();
+        addWaypoint("My location", point);
+        int index = RidePlanningStorage.getInstance().getWaypointsSnapshot().size() - 1;
+        if (geocodingService != null) {
+            geocodeInFlight++;
+            updateLoadingSpinner();
+            geocodingService.reverse(point.getLatitude(), point.getLongitude(), new GeocodingService.GeocodingCallback() {
+                @Override
+                public void onResult(com.example.ubre.ui.dtos.GeocodingResult result) {
+                    geocodeInFlight = Math.max(0, geocodeInFlight - 1);
+                    updateLoadingSpinner();
+                    if (result == null || result.displayName == null) {
+                        return;
+                    }
+                    String label = formatShortLabel(result.displayName);
+                    runOnUiThread(() -> RidePlanningService.getInstance().updateWaypointLabelAt(index, label));
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    geocodeInFlight = Math.max(0, geocodeInFlight - 1);
+                    updateLoadingSpinner();
+                }
+            });
+        }
     }
 
     private void addWaypointFromMap(GeoPoint point) {
@@ -788,6 +812,7 @@ public class MainActivity extends AppCompatActivity {
             myLocationOverlay.setDrawAccuracyEnabled(true);
             Drawable pin = ContextCompat.getDrawable(this, R.drawable.ic_my_location_blue);
             myLocationOverlay.setPersonIcon(drawableToBitmap(pin, dpToPx(56), dpToPx(56)));
+            myLocationOverlay.setPersonAnchor(0.5f, 1.0f);
             map.getOverlays().add(myLocationOverlay);
 
             myLocationOverlay.runOnFirstFix(() -> map.post(() -> {
