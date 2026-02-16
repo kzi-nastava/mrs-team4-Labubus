@@ -59,6 +59,7 @@ import { PanicButton } from "../../shared/ui/panic-button/panic-button";
 import { PanicToast } from '../../features/panic/panic-toast/panic-toast';
 import { ComplaintModal } from '../../shared/ui/complaint-modal/complaint-modal';
 import { ComplaintService } from '../../services/complaint-service';
+import { PricingService } from '../../services/pricing-service';
 import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides';
 
 @Component({
@@ -96,6 +97,7 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
 
     public vehicleService = inject(VehicleService)
     public rideTrackingStore = inject(RideTrackingStore)
+    public pricingService = inject(PricingService);
 
   Role = Role;
   VehicleType = VehicleType;
@@ -267,6 +269,7 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
     showCancelModal: false,
     panicListOpen: false,
     toastPanicOpen: false,
+    priceAdjustmentOpen: false,
   };
 
   private previousScreenBeforeInvite: 'schedule-timer' | 'ride-options' | null = null;
@@ -374,7 +377,10 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
     if (action === 'admin-panics') {
       this.ui.panicListOpen = true;
     }
-   
+    if (action === 'price-adjustment') {
+      this.openPriceAdjustment();
+    }
+
     this.closeMenu();
   }
   
@@ -1249,6 +1255,51 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
         this.showToast('Error', err.error || 'Could not change status');
       }
     });
+  }
+
+
+  // PRICE ADJUSTMENT SHEET LOGIC
+  openPriceAdjustment() {
+    this.pricingService.loadPricing();
+    this.ui.priceAdjustmentOpen = true;
+  }
+
+  closePriceAdjustment() {
+    this.ui.priceAdjustmentOpen = false;
+  }
+
+  onPriceAdjustmentBack() {
+    this.closePriceAdjustment();
+    this.ui.menuOpen = true;
+  }
+
+  incPriceField(field: 'pricePerKm' | 'standardBasePrice' | 'luxuryBasePrice' | 'vanBasePrice') {
+    if (this.pricingService.draft) {
+      this.pricingService.draft[field] = +(this.pricingService.draft[field] + 1).toFixed(2);
+    }
+  }
+
+  decPriceField(field: 'pricePerKm' | 'standardBasePrice' | 'luxuryBasePrice' | 'vanBasePrice') {
+    if (this.pricingService.draft && this.pricingService.draft[field] > 0) {
+      this.pricingService.draft[field] = +(this.pricingService.draft[field] - 1).toFixed(2);
+    }
+  }
+
+  savePriceAdjustment() {
+    this.pricingService.savePricing().pipe(take(1)).subscribe({
+      next: () => {
+        this.showToast('Pricing updated', 'Ride prices have been updated successfully.');
+        this.closePriceAdjustment();
+      },
+      error: (err: any) => {
+        this.showToast('Error', err.error || 'Could not update pricing.');
+      }
+    });
+  }
+
+  discardPriceAdjustment() {
+    this.pricingService.discardChanges();
+    this.closePriceAdjustment();
   }
 
 }

@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- HEADER -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            style="@style/HeaderRow">
+
+            <ImageView
+                android:id="@+id/btn_back"
+                android:src="@drawable/ic_back"
+                style="@style/HeaderBackIcon"
+                android:layout_marginEnd="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/price_adjustment"
+                android:includeFontPadding="false"
+                style="@style/HeaderTitle" />
+        </LinearLayout>
+
+        <!-- Price per km -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_price_per_km"
+            style="@style/InputBoxLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:hint="@string/price_per_km">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_price_per_km"
+                style="@style/InputBoxEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Base price per type section header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="10dp">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="@color/neutral_dark_gray" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:text="@string/base_price_per_type"
+                style="@style/SectionTitle" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="@color/neutral_dark_gray" />
+        </LinearLayout>
+
+        <!-- Standard base price -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_standard"
+            style="@style/InputBoxLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/standard">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_standard"
+                style="@style/InputBoxEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Luxury base price -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_luxury"
+            style="@style/InputBoxLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/luxury">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_luxury"
+                style="@style/InputBoxEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Van base price -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_van"
+            style="@style/InputBoxLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="@string/van">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_van"
+                style="@style/InputBoxEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Save button -->
+        <Button
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="24dp"
+            android:text="@string/save"
+            android:textAllCaps="false"
+            style="@style/BtnFilled" />
+
+        <!-- Discard button -->
+        <Button
+            android:id="@+id/btn_discard"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/discard"
+            android:textAllCaps="false"
+            style="@style/BtnOutlined" />
+
+    </LinearLayout>
+</ScrollView>

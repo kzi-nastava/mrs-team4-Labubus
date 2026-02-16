@@ -696,6 +696,62 @@
     </app-sheet>
   }
 
+  @if ((userService.currentUser$ | async)?.role === Role.ADMIN && pricingService.draft) {
+    <app-sheet
+      [open]="ui.priceAdjustmentOpen"
+      title="Price adjustment"
+      (closed)="closePriceAdjustment()"
+      (back)="onPriceAdjustmentBack()">
+
+      <div class="pa-wrap">
+
+        <div class="pa-row">
+          <div class="pa-row-label">Price per km</div>
+          <div class="pa-stepper">
+            <button class="pa-step" type="button" (click)="decPriceField('pricePerKm')">−</button>
+            <div class="pa-step-value">{{ pricingService.draft!.pricePerKm }}</div>
+            <button class="pa-step" type="button" (click)="incPriceField('pricePerKm')">+</button>
+          </div>
+        </div>
+
+        <div class="pa-section-title"><span>Base price per type</span></div>
+
+        <div class="pa-pill-row">
+          <div class="pa-pill-label">Standard</div>
+          <div class="pa-stepper">
+            <button class="pa-step" type="button" (click)="decPriceField('standardBasePrice')">−</button>
+            <div class="pa-step-value">{{ pricingService.draft!.standardBasePrice }}</div>
+            <button class="pa-step" type="button" (click)="incPriceField('standardBasePrice')">+</button>
+          </div>
+        </div>
+
+        <div class="pa-pill-row">
+          <div class="pa-pill-label">Luxury</div>
+          <div class="pa-stepper">
+            <button class="pa-step" type="button" (click)="decPriceField('luxuryBasePrice')">−</button>
+            <div class="pa-step-value">{{ pricingService.draft!.luxuryBasePrice }}</div>
+            <button class="pa-step" type="button" (click)="incPriceField('luxuryBasePrice')">+</button>
+          </div>
+        </div>
+
+        <div class="pa-pill-row">
+          <div class="pa-pill-label">Van</div>
+          <div class="pa-stepper">
+            <button class="pa-step" type="button" (click)="decPriceField('vanBasePrice')">−</button>
+            <div class="pa-step-value">{{ pricingService.draft!.vanBasePrice }}</div>
+            <button class="pa-step" type="button" (click)="incPriceField('vanBasePrice')">+</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="footer-actions" sheetFooter>
+        <app-button (clicked)="savePriceAdjustment()">Save</app-button>
+        <app-button variant="outlined" (clicked)="discardPriceAdjustment()">Discard</app-button>
+      </div>
+    </app-sheet>
+  }
+
   </div>
 
   <app-review-modal [show]="ui.reviewModalOpen" (onError)="onEmmitError($event)"></app-review-modal>

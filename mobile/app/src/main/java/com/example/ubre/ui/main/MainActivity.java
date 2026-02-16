@@ -205,7 +205,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             else if (itemId == R.id.nav_ride_history) { showFragment(RideHistoryFragment.newInstance()); return true; }
-            else if (itemId == R.id.nav_profile_changes) {
+            else if (itemId == R.id.nav_price_adjustment) {
+                showFragment(PriceAdjustmentFragment.newInstance());
+                return true;
+            } else if (itemId == R.id.nav_profile_changes) {
                 showFragment(ProfileChangesFragment.newInstance());
                 return true;
             } else if (itemId == R.id.nav_log_out) {
