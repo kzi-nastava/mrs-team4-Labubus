@@ -703,43 +703,43 @@
       (closed)="closePriceAdjustment()"
       (back)="onPriceAdjustmentBack()">
 
-      <div class="pa-wrap">
+      <div class="rd-wrap">
 
-        <div class="pa-row">
-          <div class="pa-row-label">Price per km</div>
-          <div class="pa-stepper">
-            <button class="pa-step" type="button" (click)="decPriceField('pricePerKm')">−</button>
-            <div class="pa-step-value">{{ pricingService.draft!.pricePerKm }}</div>
-            <button class="pa-step" type="button" (click)="incPriceField('pricePerKm')">+</button>
+        <div class="rd-row">
+          <div class="rd-row-label">Price per km</div>
+          <div class="rd-stepper">
+            <button class="rd-step" type="button" (click)="decPriceField('pricePerKm')">−</button>
+            <div class="rd-step-value">{{ pricingService.draft!.pricePerKm }}</div>
+            <button class="rd-step" type="button" (click)="incPriceField('pricePerKm')">+</button>
           </div>
         </div>
 
-        <div class="pa-section-title"><span>Base price per type</span></div>
+        <div class="rd-section-title"><span>Base price per type</span></div>
 
-        <div class="pa-pill-row">
-          <div class="pa-pill-label">Standard</div>
-          <div class="pa-stepper">
-            <button class="pa-step" type="button" (click)="decPriceField('standardBasePrice')">−</button>
-            <div class="pa-step-value">{{ pricingService.draft!.standardBasePrice }}</div>
-            <button class="pa-step" type="button" (click)="incPriceField('standardBasePrice')">+</button>
+        <div class="rd-pill pa-pill-row">
+          <span>Standard</span>
+          <div class="rd-stepper">
+            <button class="rd-step" type="button" (click)="decPriceField('standardBasePrice')">−</button>
+            <div class="rd-step-value">{{ pricingService.draft!.standardBasePrice }}</div>
+            <button class="rd-step" type="button" (click)="incPriceField('standardBasePrice')">+</button>
           </div>
         </div>
 
-        <div class="pa-pill-row">
-          <div class="pa-pill-label">Luxury</div>
-          <div class="pa-stepper">
-            <button class="pa-step" type="button" (click)="decPriceField('luxuryBasePrice')">−</button>
-            <div class="pa-step-value">{{ pricingService.draft!.luxuryBasePrice }}</div>
-            <button class="pa-step" type="button" (click)="incPriceField('luxuryBasePrice')">+</button>
+        <div class="rd-pill pa-pill-row">
+          <span>Luxury</span>
+          <div class="rd-stepper">
+            <button class="rd-step" type="button" (click)="decPriceField('luxuryBasePrice')">−</button>
+            <div class="rd-step-value">{{ pricingService.draft!.luxuryBasePrice }}</div>
+            <button class="rd-step" type="button" (click)="incPriceField('luxuryBasePrice')">+</button>
           </div>
         </div>
 
-        <div class="pa-pill-row">
-          <div class="pa-pill-label">Van</div>
-          <div class="pa-stepper">
-            <button class="pa-step" type="button" (click)="decPriceField('vanBasePrice')">−</button>
-            <div class="pa-step-value">{{ pricingService.draft!.vanBasePrice }}</div>
-            <button class="pa-step" type="button" (click)="incPriceField('vanBasePrice')">+</button>
+        <div class="rd-pill pa-pill-row">
+          <span>Van</span>
+          <div class="rd-stepper">
+            <button class="rd-step" type="button" (click)="decPriceField('vanBasePrice')">−</button>
+            <div class="rd-step-value">{{ pricingService.draft!.vanBasePrice }}</div>
+            <button class="rd-step" type="button" (click)="incPriceField('vanBasePrice')">+</button>
           </div>
         </div>
 
