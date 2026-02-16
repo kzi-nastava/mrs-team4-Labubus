@@ -1,6 +1,7 @@
 package com.ubre.backend.websocket;
 
 import com.ubre.backend.dto.CancellationDto;
+import com.ubre.backend.dto.ChatMessageDto;
 import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.model.PanicNotification;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -15,6 +16,7 @@ public class WebSocketNotificationService {
     private static final String CURRENT_RIDES_TOPIC_PREFIX = "/topic/current-rides/";
     private static final String VEHICLE_LOCATION_TOPIC_PREFIX = "/topic/vehicle-locations";
     private static final String PANIC_TOPIC_PREFIX = "/topic/panic";
+    private static final String CHAT_TOPIC_PREFIX = "/topic/chat";
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -57,5 +59,10 @@ public class WebSocketNotificationService {
 
     public void sendPanicNotification(PanicNotification panic) {
         messagingTemplate.convertAndSend(PANIC_TOPIC_PREFIX, panic);
+    }
+
+    public void sendChatMessage(Long userId, ChatMessageDto message) {
+        messagingTemplate.convertAndSend(CHAT_TOPIC_PREFIX + userId, message);
+        messagingTemplate.convertAndSend(CHAT_TOPIC_PREFIX + "/admin", message);
     }
 }
