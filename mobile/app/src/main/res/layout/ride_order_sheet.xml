@@ -43,7 +43,9 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:overScrollMode="never"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:clipToPadding="false"
+        android:paddingBottom="12dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -173,6 +175,278 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:orientation="vertical"/>
+
+            <TextView
+                android:id="@+id/ride_order_options_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/poppins_regular"
+                android:text="Ride options"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"/>
+
+            <LinearLayout
+                android:id="@+id/ride_order_options_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:paddingStart="2dp"
+                android:paddingEnd="2dp"
+                android:paddingBottom="8dp"
+                android:clipToPadding="false"
+                android:orientation="vertical">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ride_option_standard"
+                    android:layout_width="match_parent"
+                    android:layout_height="58dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/bg_ride_option_pill_selector"
+                    app:backgroundTint="@null"
+                    android:elevation="3dp"
+                    android:stateListAnimator="@null"
+                    android:paddingStart="20dp"
+                    android:gravity="center_vertical|start"
+                    android:text="Standard"
+                    android:textAllCaps="false"
+                    android:textColor="@color/ride_option_text"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/poppins_medium"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ride_option_luxury"
+                    android:layout_width="match_parent"
+                    android:layout_height="58dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/bg_ride_option_pill_selector"
+                    app:backgroundTint="@null"
+                    android:elevation="3dp"
+                    android:stateListAnimator="@null"
+                    android:paddingStart="20dp"
+                    android:gravity="center_vertical|start"
+                    android:text="Luxury"
+                    android:textAllCaps="false"
+                    android:textColor="@color/ride_option_text"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/poppins_medium"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ride_option_van"
+                    android:layout_width="match_parent"
+                    android:layout_height="58dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/bg_ride_option_pill_selector"
+                    app:backgroundTint="@null"
+                    android:elevation="3dp"
+                    android:stateListAnimator="@null"
+                    android:paddingStart="20dp"
+                    android:gravity="center_vertical|start"
+                    android:text="Van"
+                    android:textAllCaps="false"
+                    android:textColor="@color/ride_option_text"
+                    android:textSize="16sp"
+                    android:fontFamily="@font/poppins_medium"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ride_order_extra_options"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="8dp"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:clipToPadding="false"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
+                android:paddingBottom="6dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ride_order_baby_friendly"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/bg_ride_option_pill_selector"
+                    app:backgroundTint="@null"
+                    android:elevation="2dp"
+                    android:stateListAnimator="@null"
+                    android:paddingStart="16dp"
+                    android:gravity="center_vertical|start"
+                    android:text="Baby friendly"
+                    android:textAllCaps="false"
+                    android:textColor="@color/ride_option_text"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/poppins_medium"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ride_order_pet_friendly"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/bg_ride_option_pill_selector"
+                    app:backgroundTint="@null"
+                    android:elevation="2dp"
+                    android:stateListAnimator="@null"
+                    android:paddingStart="16dp"
+                    android:gravity="center_vertical|start"
+                    android:text="Pet friendly"
+                    android:textAllCaps="false"
+                    android:textColor="@color/ride_option_text"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/poppins_medium"/>
+            </LinearLayout>
+
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/ride_order_schedule_check"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="8dp"
+                android:text="Schedule in advance"
+                android:textColor="@color/text_primary"
+                android:fontFamily="@font/poppins_medium"/>
+
+            <LinearLayout
+                android:id="@+id/ride_order_schedule_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
+                android:background="@drawable/bg_autocomplete_dropdown"
+                android:padding="12dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/ride_order_schedule_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Select time"
+                    android:textColor="@color/text_primary"
+                    android:textSize="14sp"
+                    android:fontFamily="@font/poppins_medium"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/ride_order_time_hour_layout"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="HH"
+                        app:boxBackgroundColor="@color/surface"
+                        app:boxStrokeColor="@color/primary_light"
+                        app:boxStrokeWidth="1dp"
+                        app:boxStrokeWidthFocused="2dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:hintTextColor="@color/text_secondary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/ride_order_time_hour_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:maxLength="2"
+                            android:textSize="24sp"
+                            android:gravity="start"
+                            android:fontFamily="@font/poppins_regular"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:text=":"
+                        android:textSize="18sp"
+                        android:textColor="@color/text_primary"
+                        android:fontFamily="@font/poppins_medium"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/ride_order_time_minute_layout"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="MM"
+                        app:boxBackgroundColor="@color/surface"
+                        app:boxStrokeColor="@color/primary_light"
+                        app:boxStrokeWidth="1dp"
+                        app:boxStrokeWidthFocused="2dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:hintTextColor="@color/text_secondary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/ride_order_time_minute_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:maxLength="2"
+                            android:textSize="24sp"
+                            android:gravity="start"
+                            android:fontFamily="@font/poppins_regular"/>
+                    </com.google.android.material.textfield.TextInputLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/ride_order_invite_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/poppins_regular"
+                android:text="Invite passengers"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"/>
+
+            <LinearLayout
+                android:id="@+id/ride_order_invite_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical"/>
+
+            <FrameLayout
+                android:id="@+id/ride_order_price_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/ride_order_confirm"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:backgroundTint="@color/primary"
+                android:text="Confirm ride"
+                android:textAllCaps="false"
+                android:textColor="@color/surface"
+                android:textSize="16sp"
+                android:fontFamily="@font/poppins_medium"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

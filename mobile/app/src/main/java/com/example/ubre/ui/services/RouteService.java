@@ -27,6 +27,10 @@ public class RouteService {
     public interface RouteLoadingListener {
         void onLoadingChanged(boolean isLoading);
     }
+    public interface RouteInfoListener {
+        void onRouteInfo(double meters, double durationSeconds);
+        void onRouteCleared();
+    }
 
     private static final String TAG = "RouteService";
     private static final String OSRM_BASE_URL = "https://router.project-osrm.org/";
@@ -37,6 +41,7 @@ public class RouteService {
     private Call<JsonObject> lastRouteCall;
     private int routeRequestSeq = 0;
     private RouteLoadingListener loadingListener;
+    private RouteInfoListener routeInfoListener;
 
     private RouteService() {
         Retrofit retrofit = new Retrofit.Builder()
@@ -55,6 +60,10 @@ public class RouteService {
 
     public void setRouteLoadingListener(RouteLoadingListener listener) {
         this.loadingListener = listener;
+    }
+
+    public void setRouteInfoListener(RouteInfoListener listener) {
+        this.routeInfoListener = listener;
     }
 
     public void drawRoute(MapView mapView, List<WaypointDto> waypoints) {
@@ -106,7 +115,15 @@ public class RouteService {
                                 return;
                             }
 
-                            JsonArray coordinates = routes.get(0).getAsJsonObject()
+                            JsonObject firstRoute = routes.get(0).getAsJsonObject();
+                            if (routeInfoListener != null && firstRoute.has("distance") && firstRoute.has("duration")) {
+                                routeInfoListener.onRouteInfo(
+                                        firstRoute.get("distance").getAsDouble(),
+                                        firstRoute.get("duration").getAsDouble()
+                                );
+                            }
+
+                            JsonArray coordinates = firstRoute
                                     .getAsJsonObject("geometry")
                                     .getAsJsonArray("coordinates");
 
@@ -168,6 +185,9 @@ public class RouteService {
         }
         if (loadingListener != null) {
             loadingListener.onLoadingChanged(false);
+        }
+        if (routeInfoListener != null) {
+            routeInfoListener.onRouteCleared();
         }
     }
 }

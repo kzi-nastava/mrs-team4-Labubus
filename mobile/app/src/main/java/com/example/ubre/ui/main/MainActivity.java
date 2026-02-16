@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.text.Editable;
 import android.text.TextWatcher;
+import java.time.LocalTime;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -45,8 +46,8 @@ import androidx.fragment.app.Fragment;
 
 import com.example.ubre.R;
 import com.example.ubre.ui.apis.ApiClient;
+import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.enums.Role;
-import com.example.ubre.ui.enums.VehicleType;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.apis.LoginApi;
@@ -80,6 +81,16 @@ import com.example.ubre.ui.storages.RidePlanningStorage;
 import com.example.ubre.ui.services.GeocodingService;
 import com.example.ubre.ui.utils.TextNormalizer;
 import com.example.ubre.ui.adapters.AutocompleteAdapter;
+import com.example.ubre.ui.services.PriceEstimateService;
+import com.example.ubre.ui.enums.VehicleType;
+import com.example.ubre.ui.dtos.RideOrderRequest;
+import com.example.ubre.ui.dtos.RideOrderWaypoint;
+import com.example.ubre.ui.services.RideService;
+import com.example.ubre.ui.utils.TopToast;
+import com.example.ubre.ui.dtos.RideOrderRequest;
+import com.example.ubre.ui.dtos.RideOrderWaypoint;
+import com.example.ubre.ui.services.RideService;
+import com.example.ubre.ui.utils.TopToast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,6 +116,26 @@ public class MainActivity extends AppCompatActivity {
     private View rideOrderPickOnMap;
     private LinearLayout rideOrderStopsContainer;
     private View rideOrderHandle;
+    private View rideOptionStandard;
+    private View rideOptionLuxury;
+    private View rideOptionVan;
+    private View rideOptionBabyFriendly;
+    private View rideOptionPetFriendly;
+    private FrameLayout rideOrderPriceContainer;
+    private TextView rideOrderPriceValue;
+    private Double lastRouteDistanceMeters;
+    private Double lastRouteDurationSeconds;
+    private Double lastPriceEstimate;
+    private VehicleType selectedVehicleType = VehicleType.STANDARD;
+    private View rideOrderConfirmButton;
+    private int priceRequestSeq = 0;
+    private Double lastPriceDistanceMeters;
+    private Integer lastPriceVehicleType;
+    private com.google.android.material.checkbox.MaterialCheckBox rideOrderScheduleCheck;
+    private View rideOrderScheduleContainer;
+    private com.google.android.material.textfield.TextInputEditText rideOrderHourInput;
+    private com.google.android.material.textfield.TextInputEditText rideOrderMinuteInput;
+    private LinearLayout rideOrderInviteContainer;
     private RecyclerView rideOrderFromSuggestionsView;
     private RecyclerView rideOrderToSuggestionsView;
     private AutocompleteAdapter fromSuggestionsAdapter;
@@ -329,6 +360,18 @@ public class MainActivity extends AppCompatActivity {
         rideOrderPickOnMap = findViewById(R.id.ride_order_pick_on_map);
         rideOrderStopsContainer = findViewById(R.id.ride_order_stops_container);
         rideOrderHandle = findViewById(R.id.ride_order_handle);
+        rideOptionStandard = findViewById(R.id.ride_option_standard);
+        rideOptionLuxury = findViewById(R.id.ride_option_luxury);
+        rideOptionVan = findViewById(R.id.ride_option_van);
+        rideOptionBabyFriendly = findViewById(R.id.ride_order_baby_friendly);
+        rideOptionPetFriendly = findViewById(R.id.ride_order_pet_friendly);
+        rideOrderPriceContainer = findViewById(R.id.ride_order_price_container);
+        rideOrderScheduleCheck = findViewById(R.id.ride_order_schedule_check);
+        rideOrderScheduleContainer = findViewById(R.id.ride_order_schedule_container);
+        rideOrderHourInput = findViewById(R.id.ride_order_time_hour_input);
+        rideOrderMinuteInput = findViewById(R.id.ride_order_time_minute_input);
+        rideOrderInviteContainer = findViewById(R.id.ride_order_invite_container);
+        rideOrderConfirmButton = findViewById(R.id.ride_order_confirm);
         rideOrderFromSuggestionsView = findViewById(R.id.ride_order_from_suggestions);
         rideOrderToSuggestionsView = findViewById(R.id.ride_order_to_suggestions);
 
@@ -358,6 +401,23 @@ public class MainActivity extends AppCompatActivity {
         });
 
         rideOrderHandle.setOnClickListener(v -> toggleRideOrderSheetCollapsed());
+
+        rideOptionStandard.setOnClickListener(v -> selectRideOption(rideOptionStandard));
+        rideOptionLuxury.setOnClickListener(v -> selectRideOption(rideOptionLuxury));
+        rideOptionVan.setOnClickListener(v -> selectRideOption(rideOptionVan));
+        selectRideOption(rideOptionStandard);
+
+        initRidePriceCard();
+        rideOptionBabyFriendly.setOnClickListener(v -> toggleExtraOption(rideOptionBabyFriendly));
+        rideOptionPetFriendly.setOnClickListener(v -> toggleExtraOption(rideOptionPetFriendly));
+
+        rideOrderScheduleCheck.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            rideOrderScheduleContainer.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+        });
+
+        initScheduleTimeInputs();
+        addInviteEmailRow();
+        rideOrderConfirmButton.setOnClickListener(v -> submitRideOrder());
 
         rideOrderFromInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
@@ -405,6 +465,11 @@ public class MainActivity extends AppCompatActivity {
             List<WaypointDto> safeWaypoints = waypoints == null ? new ArrayList<>() : waypoints;
             renderRideOrderWaypoints(safeWaypoints);
             syncRideOrderMarkers(safeWaypoints);
+            // Invalidate current price until we have fresh route info for this set of waypoints
+            lastRouteDistanceMeters = null;
+            lastRouteDurationSeconds = null;
+            lastPriceEstimate = null;
+            updatePriceEstimate(null);
             if (safeWaypoints.size() >= 2) {
                 RouteService.getInstance().drawRoute(map, safeWaypoints);
             } else {
@@ -415,6 +480,21 @@ public class MainActivity extends AppCompatActivity {
         RouteService.getInstance().setRouteLoadingListener(isLoading -> {
             routeLoading = isLoading;
             updateLoadingSpinner();
+        });
+        RouteService.getInstance().setRouteInfoListener(new RouteService.RouteInfoListener() {
+            @Override
+            public void onRouteInfo(double meters, double durationSeconds) {
+                lastRouteDistanceMeters = meters;
+                lastRouteDurationSeconds = durationSeconds;
+                requestPriceEstimate();
+            }
+
+            @Override
+            public void onRouteCleared() {
+                lastRouteDistanceMeters = null;
+                lastRouteDurationSeconds = null;
+                updatePriceEstimate(null);
+            }
         });
 
 
@@ -741,6 +821,326 @@ public class MainActivity extends AppCompatActivity {
         }
         boolean show = routeLoading || geocodeInFlight > 0;
         routeLoadingSpinner.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    private void selectRideOption(View selected) {
+        rideOptionStandard.setSelected(selected == rideOptionStandard);
+        rideOptionLuxury.setSelected(selected == rideOptionLuxury);
+        rideOptionVan.setSelected(selected == rideOptionVan);
+        applyRideOptionScale(rideOptionStandard, selected == rideOptionStandard);
+        applyRideOptionScale(rideOptionLuxury, selected == rideOptionLuxury);
+        applyRideOptionScale(rideOptionVan, selected == rideOptionVan);
+        if (selected == rideOptionStandard) {
+            selectedVehicleType = VehicleType.STANDARD;
+        } else if (selected == rideOptionVan) {
+            selectedVehicleType = VehicleType.VAN;
+        } else if (selected == rideOptionLuxury) {
+            selectedVehicleType = VehicleType.LUXURY;
+        }
+        requestPriceEstimate();
+    }
+
+    private void toggleExtraOption(View option) {
+        option.setSelected(!option.isSelected());
+        applyRideOptionScale(option, option.isSelected());
+    }
+
+    private void applyRideOptionScale(View option, boolean selected) {
+        option.animate()
+                .scaleX(selected ? 1.01f : 1.0f)
+                .scaleY(selected ? 1.01f : 1.0f)
+                .setDuration(120)
+                .start();
+        option.setElevation(dpToPx(3));
+    }
+
+    private void initScheduleTimeInputs() {
+        if (rideOrderHourInput == null || rideOrderMinuteInput == null) {
+            return;
+        }
+
+        LocalTime now = LocalTime.now();
+        rideOrderHourInput.setText(String.format("%02d", now.getHour()));
+        rideOrderMinuteInput.setText(String.format("%02d", now.getMinute()));
+
+        rideOrderHourInput.addTextChangedListener(new TimeFieldWatcher(0, 23, rideOrderMinuteInput));
+        rideOrderMinuteInput.addTextChangedListener(new TimeFieldWatcher(0, 59, null));
+    }
+
+    private void initRidePriceCard() {
+        if (rideOrderPriceContainer == null) {
+            return;
+        }
+        rideOrderPriceContainer.removeAllViews();
+        View card = getLayoutInflater().inflate(R.layout.stat_card, rideOrderPriceContainer, false);
+
+        TextView tvValue = card.findViewById(R.id.stat_value);
+        TextView tvLabel = card.findViewById(R.id.stat_label);
+
+        tvValue.setText("--");
+        tvLabel.setText("Estimated price");
+
+        rideOrderPriceContainer.addView(card);
+        rideOrderPriceValue = tvValue;
+    }
+
+    private void requestPriceEstimate() {
+        if (lastRouteDistanceMeters == null) {
+            updatePriceEstimate(null);
+            return;
+        }
+        int vehicleTypeValue = mapVehicleType(selectedVehicleType);
+        priceRequestSeq++;
+        int requestId = priceRequestSeq;
+        lastPriceDistanceMeters = lastRouteDistanceMeters;
+        lastPriceVehicleType = vehicleTypeValue;
+        lastPriceEstimate = null;
+        updatePriceEstimate(null);
+
+        PriceEstimateService.getInstance(this).estimate(lastRouteDistanceMeters, vehicleTypeValue, new PriceEstimateService.PriceEstimateCallback() {
+            @Override
+            public void onResult(Double price) {
+                runOnUiThread(() -> {
+                    if (requestId != priceRequestSeq) return;
+                    if (lastRouteDistanceMeters == null || lastPriceDistanceMeters == null) return;
+                    if (Math.abs(lastRouteDistanceMeters - lastPriceDistanceMeters) > 0.5) return;
+                    if (lastPriceVehicleType == null || lastPriceVehicleType != mapVehicleType(selectedVehicleType)) return;
+                    updatePriceEstimate(price);
+                });
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                runOnUiThread(() -> {
+                    if (requestId != priceRequestSeq) return;
+                    updatePriceEstimate(null);
+                });
+            }
+        });
+    }
+
+    private void updatePriceEstimate(Double price) {
+        if (rideOrderPriceValue == null) {
+            return;
+        }
+        if (price == null) {
+            rideOrderPriceValue.setText("--");
+            lastPriceEstimate = null;
+        } else {
+            rideOrderPriceValue.setText("$" + String.format("%.2f", price));
+            lastPriceEstimate = price;
+        }
+    }
+
+    private int mapVehicleType(VehicleType type) {
+        switch (type) {
+            case STANDARD:
+                return 0;
+            case LUXURY:
+                return 1;
+            case VAN:
+                return 2;
+            default:
+                return 0;
+        }
+    }
+
+    private void submitRideOrder() {
+        List<WaypointDto> waypoints = RidePlanningStorage.getInstance().getWaypointsSnapshot();
+        if (waypoints.size() < 2) {
+            TopToast.show(this, "Order error", "Please select at least 2 waypoints.");
+            return;
+        }
+        if (lastRouteDistanceMeters == null || lastRouteDurationSeconds == null) {
+            TopToast.show(this, "Order error", "Route info is not ready yet.");
+            return;
+        }
+        if (lastPriceEstimate == null) {
+            TopToast.show(this, "Order error", "Price estimate is not ready yet.");
+            return;
+        }
+
+        Long creatorId = UserStorage.getInstance().getCurrentUser().getValue() != null
+                ? UserStorage.getInstance().getCurrentUser().getValue().getId()
+                : null;
+        if (creatorId == null) {
+            TopToast.show(this, "Order error", "User not authenticated.");
+            return;
+        }
+
+        List<String> passengers = collectPassengerEmails();
+        List<RideOrderWaypoint> orderWaypoints = new ArrayList<>();
+        for (WaypointDto wp : waypoints) {
+            orderWaypoints.add(new RideOrderWaypoint(
+                    0L,
+                    wp.getLabel(),
+                    wp.getLatitude(),
+                    wp.getLongitude(),
+                    false
+            ));
+        }
+
+        String scheduledTime = buildScheduledTimeOrEmpty();
+        int vehicleTypeValue = mapVehicleType(selectedVehicleType);
+
+        RideOrderRequest request = new RideOrderRequest(
+                0L,
+                creatorId,
+                passengers,
+                orderWaypoints,
+                vehicleTypeValue,
+                rideOptionBabyFriendly.isSelected(),
+                rideOptionPetFriendly.isSelected(),
+                scheduledTime,
+                lastRouteDistanceMeters,
+                lastRouteDurationSeconds,
+                lastPriceEstimate
+        );
+
+        RideService.getInstance().orderRide(this, request, new RideService.OrderCallback() {
+            @Override
+            public void onSuccess(RideDto ride) {
+                clearRidePlanningState();
+                TopToast.show(MainActivity.this, "Ride order", "Ride ordered successfully.");
+            }
+
+            @Override
+            public void onError(String message) {
+                TopToast.show(MainActivity.this, "Order error", message);
+            }
+        });
+    }
+
+    private List<String> collectPassengerEmails() {
+        List<String> emails = new ArrayList<>();
+        if (rideOrderInviteContainer == null) {
+            return emails;
+        }
+        for (int i = 0; i < rideOrderInviteContainer.getChildCount(); i++) {
+            View row = rideOrderInviteContainer.getChildAt(i);
+            com.google.android.material.textfield.TextInputEditText input =
+                    row.findViewById(R.id.invite_email_input);
+            if (input != null && input.getText() != null) {
+                String value = input.getText().toString().trim();
+                if (!value.isEmpty()) {
+                    emails.add(value);
+                }
+            }
+        }
+        return emails;
+    }
+
+    private String buildScheduledTimeOrEmpty() {
+        if (rideOrderScheduleCheck == null || !rideOrderScheduleCheck.isChecked()) {
+            return "";
+        }
+        if (rideOrderHourInput == null || rideOrderMinuteInput == null
+                || rideOrderHourInput.getText() == null || rideOrderMinuteInput.getText() == null) {
+            return "";
+        }
+        String hh = rideOrderHourInput.getText().toString().trim();
+        String mm = rideOrderMinuteInput.getText().toString().trim();
+        if (hh.isEmpty() || mm.isEmpty()) {
+            return "";
+        }
+        int hour = Integer.parseInt(hh);
+        int minute = Integer.parseInt(mm);
+        java.time.LocalDate today = java.time.LocalDate.now();
+        return String.format("%sT%02d:%02d:00", today, hour, minute);
+    }
+
+    private void clearRidePlanningState() {
+        RidePlanningService.getInstance().clear();
+        if (rideOrderInviteContainer != null) {
+            rideOrderInviteContainer.removeAllViews();
+            addInviteEmailRow();
+        }
+        lastRouteDistanceMeters = null;
+        lastRouteDurationSeconds = null;
+        lastPriceEstimate = null;
+        updatePriceEstimate(null);
+        RouteService.getInstance().clearRoute(map);
+        for (Marker marker : rideOrderMarkers) {
+            map.getOverlays().remove(marker);
+        }
+        rideOrderMarkers.clear();
+        map.invalidate();
+    }
+
+    private void addInviteEmailRow() {
+        if (rideOrderInviteContainer == null) {
+            return;
+        }
+        View row = getLayoutInflater().inflate(R.layout.invite_passenger_item, rideOrderInviteContainer, false);
+        View remove = row.findViewById(R.id.invite_remove);
+        com.google.android.material.textfield.TextInputEditText input =
+                row.findViewById(R.id.invite_email_input);
+
+        remove.setOnClickListener(v -> {
+            if (rideOrderInviteContainer.getChildCount() <= 1) {
+                input.setText("");
+                input.requestFocus();
+                return;
+            }
+            rideOrderInviteContainer.removeView(row);
+        });
+
+        int index = rideOrderInviteContainer.getChildCount() + 1;
+        input.setAutofillHints("invite_email_" + index);
+        input.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_YES);
+
+        input.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_DONE) {
+                addInviteEmailRow();
+                return true;
+            }
+            return false;
+        });
+
+        rideOrderInviteContainer.addView(row);
+        input.requestFocus();
+    }
+
+    private class TimeFieldWatcher implements TextWatcher {
+        private final int min;
+        private final int max;
+        private final View nextFocus;
+
+        TimeFieldWatcher(int min, int max, View nextFocus) {
+            this.min = min;
+            this.max = max;
+            this.nextFocus = nextFocus;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if (s == null) {
+                return;
+            }
+            String text = s.toString();
+            if (text.length() == 2 && nextFocus != null) {
+                nextFocus.requestFocus();
+            }
+            if (text.isEmpty()) {
+                return;
+            }
+            try {
+                int value = Integer.parseInt(text);
+                if (value < min || value > max) {
+                    s.replace(0, s.length(), String.format("%02d", min));
+                }
+            } catch (NumberFormatException e) {
+                s.clear();
+            }
+        }
     }
 
     private void requestAutocomplete(String rawQuery, boolean isFrom) {

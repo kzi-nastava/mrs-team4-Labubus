@@ -9,6 +9,7 @@ import com.example.ubre.ui.apis.ApiClient;
 import com.example.ubre.ui.apis.RideApi;
 import com.example.ubre.ui.dtos.RideCardDto;
 import com.example.ubre.ui.dtos.RideDto;
+import com.example.ubre.ui.dtos.RideOrderRequest;
 import com.example.ubre.ui.storages.RideDetailsStorage;
 import com.example.ubre.ui.storages.RideHistoryStorage;
 import com.example.ubre.ui.storages.UserStorage;
@@ -20,6 +21,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import org.json.JSONObject;
 
 public class RideService {
     private static RideService instance;
@@ -135,5 +137,81 @@ public class RideService {
             api.removeFromFavorites("Bearer " + token, userId, ride.getId()).enqueue(callback);
         else
             api.addToFavorites("Bearer " + token, userId, ride.getId()).enqueue(callback);
+    }
+
+    public interface OrderCallback {
+        void onSuccess(RideDto ride);
+        void onError(String message);
+    }
+
+    public void orderRide(Context context, RideOrderRequest request, OrderCallback callback) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            callback.onError("Unauthorized. Please login again.");
+            return;
+        }
+
+        api.orderRide("Bearer " + token, request).enqueue(new Callback<RideDto>() {
+            @Override
+            public void onResponse(Call<RideDto> call, Response<RideDto> response) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    callback.onError(buildOrderErrorMessage(response, null));
+                    return;
+                }
+                RideDetailsStorage.getInstance().setSelectedRide(response.body());
+                callback.onSuccess(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<RideDto> call, Throwable t) {
+                callback.onError(buildOrderErrorMessage(null, t));
+            }
+        });
+    }
+
+    private String buildOrderErrorMessage(Response<?> response, Throwable t) {
+        if (response != null) {
+            int code = response.code();
+            if (code == 401) return "Unauthorized. Please login again.";
+            if (code == 403) return "Forbidden. You are not authorized to access this resource.";
+
+            String body = readErrorBody(response.errorBody());
+            if (body != null && !body.trim().isEmpty()) {
+                String detail = tryGetDetail(body);
+                if (detail != null) return detail;
+                if (!looksLikeJson(body)) return body.trim();
+            }
+
+            String reason = body != null && !body.trim().isEmpty() ? body.trim() : response.message();
+            return "Order couldn't be completed. " + reason + " (Error " + code + ").";
+        }
+
+        String reason = (t != null && t.getMessage() != null) ? t.getMessage() : "Unknown error";
+        return "Order couldn't be completed. " + reason + " (Error 0).";
+    }
+
+    private String readErrorBody(ResponseBody errorBody) {
+        if (errorBody == null) return null;
+        try {
+            return errorBody.string();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String tryGetDetail(String body) {
+        try {
+            JSONObject obj = new JSONObject(body);
+            if (obj.has("detail")) return obj.getString("detail");
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    private boolean looksLikeJson(String body) {
+        String s = body.trim();
+        return s.startsWith("{") || s.startsWith("[");
     }
 }

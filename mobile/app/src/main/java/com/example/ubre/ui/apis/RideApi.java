@@ -9,12 +9,15 @@ import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
+import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.Body;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import com.example.ubre.ui.dtos.RideOrderRequest;
 
 public interface RideApi {
     @Headers({
@@ -34,4 +37,7 @@ public interface RideApi {
 
     @DELETE("api/rides/{userId}/favorites/{rideId}")
     Call<ResponseBody> removeFromFavorites(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Path("rideId") Long rideId);
+
+    @POST("api/rides/order")
+    Call<RideDto> orderRide(@Header("Authorization") String authHeader, @Body RideOrderRequest request);
 }
