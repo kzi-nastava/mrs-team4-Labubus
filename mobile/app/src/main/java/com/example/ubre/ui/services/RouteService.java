@@ -29,6 +29,7 @@ public class RouteService {
 
     private static RouteService instance;
     private final OSRMApi osrmApi;
+    private Polyline lastRoutePolyline;
 
     private RouteService() {
         Retrofit retrofit = new Retrofit.Builder()
@@ -65,6 +66,13 @@ public class RouteService {
                     public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
                         if (!response.isSuccessful() || response.body() == null) {
                             Log.e(TAG, "OSRM response error: " + response.code());
+                            if (response.errorBody() != null) {
+                                try {
+                                    Log.e(TAG, "OSRM error body: " + response.errorBody().string());
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Failed to read OSRM error body", e);
+                                }
+                            }
                             return;
                         }
 
@@ -94,7 +102,11 @@ public class RouteService {
                                 polyline.getOutlinePaint().setStrokeWidth(10f);
                                 polyline.getOutlinePaint().setAntiAlias(true);
 
+                                if (lastRoutePolyline != null) {
+                                    mapView.getOverlays().remove(lastRoutePolyline);
+                                }
                                 mapView.getOverlays().add(0, polyline);
+                                lastRoutePolyline = polyline;
                                 mapView.invalidate();
                             });
 
