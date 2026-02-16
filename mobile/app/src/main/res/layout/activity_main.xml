@@ -43,6 +43,16 @@
             app:layout_constraintStart_toStartOf="parent"
             />
 
+        <ImageButton
+            android:id="@+id/btn_map_search"
+            android:src="@drawable/ic_map_search"
+            style="@style/IconButtonWhite"
+            android:layout_marginTop="32dp"
+            android:layout_marginStart="8dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btn_menu"
+            />
+
         <!-- chat menu icon bottom right -->
         <ImageButton
             android:id="@+id/btn_chat"

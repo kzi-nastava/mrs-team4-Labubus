@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private MapView map;
     private View btnMenu;
+    private View btnMapSearch;
     private View btnChat;
     private DrawerLayout drawer;
     LoginApi loginApi = ApiClient.getClient().create(LoginApi.class);
@@ -90,11 +91,13 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
                 if (map != null) map.setVisibility(View.INVISIBLE);
                 if (btnMenu != null) btnMenu.setVisibility(View.GONE);
+                if (btnMapSearch != null) btnMapSearch.setVisibility(View.GONE);
                 if (btnChat != null) btnChat.setVisibility(View.GONE);
             } else {
                 findViewById(R.id.fragment_container).setVisibility(View.GONE);
                 if (map != null) map.setVisibility(View.VISIBLE);
                 if (btnMenu != null) btnMenu.setVisibility(View.VISIBLE);
+                if (btnMapSearch != null) btnMapSearch.setVisibility(View.VISIBLE);
                 if (btnChat != null) btnChat.setVisibility(View.VISIBLE);
             }
         });
@@ -231,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnMenu = findViewById(R.id.btn_menu);
+        btnMapSearch = findViewById(R.id.btn_map_search);
         btnChat = findViewById(R.id.btn_chat);
 
 
@@ -320,6 +324,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
         map.setVisibility(View.INVISIBLE);
         if (btnMenu != null) btnMenu.setVisibility(View.GONE);
+        if (btnMapSearch != null) btnMapSearch.setVisibility(View.GONE);
         if (btnChat != null) btnChat.setVisibility(View.GONE);
 
         getSupportFragmentManager()
