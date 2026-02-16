@@ -3,6 +3,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -17,6 +20,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import androidx.core.app.ActivityCompat;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -52,6 +58,8 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapController;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.events.MapEventsReceiver;
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -61,12 +69,14 @@ import retrofit2.Response;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    private static final int LOCATION_PERMISSION_REQUEST = 2001;
     private MapView map;
     private View btnMenu;
     private View btnMapSearch;
     private View btnChat;
     private DrawerLayout drawer;
     private BottomSheetBehavior<View> rideOrderSheetBehavior;
+    private MyLocationNewOverlay myLocationOverlay;
     LoginApi loginApi = ApiClient.getClient().create(LoginApi.class);
 
 
@@ -136,6 +146,8 @@ public class MainActivity extends AppCompatActivity {
         MapController controller = (MapController) map.getController();
         controller.setZoom(14.0);
         controller.setCenter(new GeoPoint(45.2671, 19.8335));
+
+        setupLocationOverlay();
 
         drawer = findViewById(R.id.main);
 
@@ -285,12 +297,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (map != null) map.onResume();
+        if (myLocationOverlay != null) myLocationOverlay.enableMyLocation();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         if (map != null) map.onPause();
+        if (myLocationOverlay != null) myLocationOverlay.disableMyLocation();
     }
 
     private void setMenuOptions(Role role) {
@@ -451,5 +465,69 @@ public class MainActivity extends AppCompatActivity {
                 dp,
                 getResources().getDisplayMetrics()
         );
+    }
+
+    private void setupLocationOverlay() {
+        if (!hasLocationPermission()) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[] {
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    },
+                    LOCATION_PERMISSION_REQUEST
+            );
+            return;
+        }
+
+        if (myLocationOverlay == null) {
+            myLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this), map);
+            myLocationOverlay.setDrawAccuracyEnabled(true);
+            Drawable pin = ContextCompat.getDrawable(this, R.drawable.ic_my_location_blue);
+            myLocationOverlay.setPersonIcon(drawableToBitmap(pin, dpToPx(40), dpToPx(40)));
+            map.getOverlays().add(myLocationOverlay);
+
+            myLocationOverlay.runOnFirstFix(() -> map.post(() -> {
+                if (myLocationOverlay.getMyLocation() != null) {
+                    map.getController().animateTo(myLocationOverlay.getMyLocation());
+                }
+            }));
+        }
+        myLocationOverlay.enableMyLocation();
+    }
+
+    private boolean hasLocationPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST) {
+            boolean granted = false;
+            for (int result : grantResults) {
+                if (result == PackageManager.PERMISSION_GRANTED) {
+                    granted = true;
+                    break;
+                }
+            }
+            if (granted) {
+                setupLocationOverlay();
+            } else {
+                Toast.makeText(this, "Location permission is required to show your position.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private Bitmap drawableToBitmap(Drawable drawable, int widthPx, int heightPx) {
+        if (drawable == null) {
+            return null;
+        }
+        Bitmap bitmap = Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, widthPx, heightPx);
+        drawable.draw(canvas);
+        return bitmap;
     }
 }
