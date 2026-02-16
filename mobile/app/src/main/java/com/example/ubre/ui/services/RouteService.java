@@ -101,6 +101,8 @@ public class RouteService {
                                 polyline.getOutlinePaint().setColor(Color.parseColor("#1565C0"));
                                 polyline.getOutlinePaint().setStrokeWidth(10f);
                                 polyline.getOutlinePaint().setAntiAlias(true);
+                                polyline.getOutlinePaint().setStrokeCap(android.graphics.Paint.Cap.ROUND);
+                                polyline.getOutlinePaint().setStrokeJoin(android.graphics.Paint.Join.ROUND);
 
                                 if (lastRoutePolyline != null) {
                                     mapView.getOverlays().remove(lastRoutePolyline);

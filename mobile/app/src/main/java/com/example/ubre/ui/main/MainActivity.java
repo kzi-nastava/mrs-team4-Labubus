@@ -42,6 +42,7 @@ import com.example.ubre.ui.storages.ProfileChangeStorage;
 import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.navigation.NavigationView;
 import com.bumptech.glide.Glide;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -49,6 +50,8 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.MapController;
+import org.osmdroid.views.overlay.MapEventsOverlay;
+import org.osmdroid.events.MapEventsReceiver;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -63,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
     private View btnMapSearch;
     private View btnChat;
     private DrawerLayout drawer;
+    private BottomSheetBehavior<View> rideOrderSheetBehavior;
     LoginApi loginApi = ApiClient.getClient().create(LoginApi.class);
 
 
@@ -115,6 +119,18 @@ public class MainActivity extends AppCompatActivity {
         map.getZoomController().setVisibility(
                 CustomZoomButtonsController.Visibility.NEVER
         );
+        map.getOverlays().add(new MapEventsOverlay(new MapEventsReceiver() {
+            @Override
+            public boolean singleTapConfirmedHelper(GeoPoint p) {
+                collapseRideOrderSheet();
+                return false;
+            }
+
+            @Override
+            public boolean longPressHelper(GeoPoint p) {
+                return false;
+            }
+        }));
 
 
         MapController controller = (MapController) map.getController();
@@ -237,6 +253,21 @@ public class MainActivity extends AppCompatActivity {
         btnMapSearch = findViewById(R.id.btn_map_search);
         btnChat = findViewById(R.id.btn_chat);
 
+        View rideOrderSheet = findViewById(R.id.ride_order_sheet);
+        rideOrderSheetBehavior = BottomSheetBehavior.from(rideOrderSheet);
+        rideOrderSheetBehavior.setHideable(true);
+        rideOrderSheetBehavior.setPeekHeight(dpToPx(96), true);
+        rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+        btnMapSearch.setOnClickListener(v -> toggleRideOrderSheet());
+
+        drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                hideRideOrderSheet();
+            }
+        });
+
 
         // Adding an observer that opens review modal when it's state is set
         ReviewStorage.getInstance().getRideId().observe(this, (rideId) -> {
@@ -321,6 +352,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showFragment(Fragment f) {
+        hideRideOrderSheet();
         findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
         map.setVisibility(View.INVISIBLE);
         if (btnMenu != null) btnMenu.setVisibility(View.GONE);
@@ -335,6 +367,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showModal(Fragment f) {
+        hideRideOrderSheet();
         findViewById(R.id.modal_container).setVisibility(View.VISIBLE);
 
         getSupportFragmentManager()
@@ -387,5 +420,36 @@ public class MainActivity extends AppCompatActivity {
         // It is necessary because the driver can't logout in certain situations.
         // Thanks for deleting half of my code without checking with me first.
 
+    }
+
+    private void toggleRideOrderSheet() {
+        int state = rideOrderSheetBehavior.getState();
+        if (state == BottomSheetBehavior.STATE_HIDDEN) {
+            rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        } else {
+            rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        }
+    }
+
+    private void hideRideOrderSheet() {
+        if (rideOrderSheetBehavior != null &&
+                rideOrderSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+            rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        }
+    }
+
+    private void collapseRideOrderSheet() {
+        if (rideOrderSheetBehavior != null &&
+                rideOrderSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+            rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
+    }
+
+    private int dpToPx(int dp) {
+        return (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dp,
+                getResources().getDisplayMetrics()
+        );
     }
 }

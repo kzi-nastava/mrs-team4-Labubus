@@ -389,4 +389,5 @@ public class RideDetailsFragment extends Fragment {
     private int toDP(int value) {
         return  (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,  value, this.getResources().getDisplayMetrics());
     }
+
 }
