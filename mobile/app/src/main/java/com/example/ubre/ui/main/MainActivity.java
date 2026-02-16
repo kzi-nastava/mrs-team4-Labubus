@@ -109,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
     private View btnMenu;
     private View btnMapSearch;
     private View btnChat;
+    private Role currentRole = Role.GUEST;
     private DrawerLayout drawer;
     private BottomSheetBehavior<View> rideOrderSheetBehavior;
     private MyLocationNewOverlay myLocationOverlay;
@@ -182,13 +183,13 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
                 if (map != null) map.setVisibility(View.INVISIBLE);
                 if (btnMenu != null) btnMenu.setVisibility(View.GONE);
-                if (btnMapSearch != null) btnMapSearch.setVisibility(View.GONE);
+                updateMapSearchVisibility();
                 if (btnChat != null) btnChat.setVisibility(View.GONE);
             } else {
                 findViewById(R.id.fragment_container).setVisibility(View.GONE);
                 if (map != null) map.setVisibility(View.VISIBLE);
                 if (btnMenu != null) btnMenu.setVisibility(View.VISIBLE);
-                if (btnMapSearch != null) btnMapSearch.setVisibility(View.VISIBLE);
+                updateMapSearchVisibility();
                 if (btnChat != null) btnChat.setVisibility(View.VISIBLE);
             }
         });
@@ -347,6 +348,8 @@ public class MainActivity extends AppCompatActivity {
         btnMenu = findViewById(R.id.btn_menu);
         btnMapSearch = findViewById(R.id.btn_map_search);
         btnChat = findViewById(R.id.btn_chat);
+        updateMapSearchVisibility();
+        updateGuestRideOrderState();
         routeLoadingSpinner = findViewById(R.id.route_loading_spinner);
 
         View rideOrderSheet = findViewById(R.id.ride_order_sheet);
@@ -528,6 +531,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setMenuOptions(Role role) {
+        currentRole = role == null ? Role.GUEST : role;
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.getMenu().clear();
 
@@ -554,6 +558,9 @@ public class MainActivity extends AppCompatActivity {
         backIcon.setOnClickListener(v ->
                 drawer.closeDrawer(GravityCompat.START)
         );
+
+        updateMapSearchVisibility();
+        updateGuestRideOrderState();
     }
 
     @SuppressLint("SetTextI18n")
@@ -632,6 +639,7 @@ public class MainActivity extends AppCompatActivity {
                     sharedPreferences.edit().clear().apply();
                     UserStorage.getInstance().clearUserStorage();
                     ProfileChangeStorage.getInstance().clearProfileChangeStorage();
+                    RidePlanningStorage.getInstance().clear();
                     Toast.makeText(getApplicationContext(), "Logout successful", Toast.LENGTH_SHORT).show();
 
                     Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
@@ -683,6 +691,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void updateMapSearchVisibility() {
+        if (btnMapSearch == null) {
+            return;
+        }
+        boolean hasFragments = getSupportFragmentManager().getBackStackEntryCount() > 0;
+        boolean allowedRole = currentRole == Role.GUEST || currentRole == Role.REGISTERED_USER;
+        btnMapSearch.setVisibility(!hasFragments && allowedRole ? View.VISIBLE : View.GONE);
+    }
+
+    private boolean canGuestAddWaypoint() {
+        if (currentRole != Role.GUEST) {
+            return true;
+        }
+        return RidePlanningStorage.getInstance().getWaypointsSnapshot().size() < 2;
+    }
+
+    private void updateGuestRideOrderState() {
+        if (rideOrderConfirmButton == null) {
+            return;
+        }
+        boolean isGuest = currentRole == Role.GUEST;
+        rideOrderConfirmButton.setEnabled(!isGuest);
+        rideOrderConfirmButton.setAlpha(isGuest ? 0.5f : 1.0f);
+    }
+
     private void collapseRideOrderSheet() {
         if (rideOrderSheetBehavior != null &&
                 rideOrderSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
@@ -700,6 +733,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void addWaypointFromMyLocation() {
+        if (!canGuestAddWaypoint()) {
+            TopToast.show(this, "Guest limit", "Guests can add up to 2 waypoints.");
+            return;
+        }
         if (myLocationOverlay == null || myLocationOverlay.getMyLocation() == null) {
             Toast.makeText(this, "Current location not available yet.", Toast.LENGTH_SHORT).show();
             return;
@@ -732,6 +769,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addWaypointFromMap(GeoPoint point) {
+        if (!canGuestAddWaypoint()) {
+            TopToast.show(this, "Guest limit", "Guests can add up to 2 waypoints.");
+            return;
+        }
         addWaypoint("Pinned location", point);
         int index = RidePlanningStorage.getInstance().getWaypointsSnapshot().size() - 1;
         if (geocodingService != null) {
@@ -759,6 +800,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addWaypoint(String baseLabel, GeoPoint point) {
+        if (!canGuestAddWaypoint()) {
+            TopToast.show(this, "Guest limit", "Guests can add up to 2 waypoints.");
+            return;
+        }
         int index = RidePlanningStorage.getInstance().getWaypointsSnapshot().size() + 1;
         String label = baseLabel + " " + index;
         WaypointDto waypoint = new WaypointDto(null, label, point.getLatitude(), point.getLongitude());
@@ -948,6 +993,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void submitRideOrder() {
+        if (currentRole == Role.GUEST) {
+            TopToast.show(this, "Guest limit", "Guests cannot place orders.");
+            return;
+        }
         List<WaypointDto> waypoints = RidePlanningStorage.getInstance().getWaypointsSnapshot();
         if (waypoints.size() < 2) {
             TopToast.show(this, "Order error", "Please select at least 2 waypoints.");

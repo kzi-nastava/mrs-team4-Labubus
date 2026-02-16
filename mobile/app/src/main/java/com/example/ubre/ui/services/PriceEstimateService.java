@@ -38,11 +38,8 @@ public class PriceEstimateService {
         PriceEstimateRequest request = new PriceEstimateRequest(distanceMeters, vehicleType);
         SharedPreferences sharedPreferences = appContext.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
         String token = sharedPreferences.getString("jwt", null);
-        if (token == null) {
-            callback.onResult(null);
-            return;
-        }
-        api.estimatePrice("Bearer " + token, request).enqueue(new Callback<Double>() {
+        String authHeader = token == null ? null : "Bearer " + token;
+        api.estimatePrice(authHeader, request).enqueue(new Callback<Double>() {
             @Override
             public void onResponse(Call<Double> call, Response<Double> response) {
                 if (!response.isSuccessful()) {
