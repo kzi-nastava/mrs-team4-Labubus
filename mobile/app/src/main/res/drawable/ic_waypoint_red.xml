@@ -5,10 +5,8 @@
     android:viewportHeight="24">
   <group>
     <path
-        android:pathData="M12,22s7,-4.6 7,-11a7,7 0,1 0,-14 0c0,6.4 7,11 7,11Z"
+        android:fillType="evenOdd"
+        android:pathData="M12,22s7,-4.6 7,-11a7,7 0,1 0,-14 0c0,6.4 7,11 7,11Z M12,11m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"
         android:fillColor="#E53935"/>
-    <path
-        android:pathData="M12,11m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"
-        android:fillColor="@color/surface"/>
   </group>
 </vector>
