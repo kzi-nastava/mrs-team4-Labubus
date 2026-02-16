@@ -18,7 +18,9 @@ import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.text.Editable;
 import android.text.TextWatcher;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Duration;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -981,6 +983,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         String scheduledTime = buildScheduledTimeOrEmpty();
+        if (!scheduledTime.isEmpty() && !validateScheduledTimeWindow(scheduledTime)) {
+            return;
+        }
         int vehicleTypeValue = mapVehicleType(selectedVehicleType);
 
         RideOrderRequest request = new RideOrderRequest(
@@ -1009,6 +1014,26 @@ public class MainActivity extends AppCompatActivity {
                 TopToast.show(MainActivity.this, "Order error", message);
             }
         });
+    }
+
+    private boolean validateScheduledTimeWindow(String scheduledTime) {
+        try {
+            LocalDateTime scheduled = LocalDateTime.parse(scheduledTime);
+            LocalDateTime now = LocalDateTime.now();
+            if (scheduled.isBefore(now)) {
+                TopToast.show(this, "Order error", "Scheduled time cannot be in the past.");
+                return false;
+            }
+            long minutesAhead = Duration.between(now, scheduled).toMinutes();
+            if (minutesAhead > 300) {
+                TopToast.show(this, "Order error", "Scheduled time must be within 5 hours.");
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            TopToast.show(this, "Order error", "Invalid scheduled time.");
+            return false;
+        }
     }
 
     private List<String> collectPassengerEmails() {
