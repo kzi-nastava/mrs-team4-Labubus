@@ -32,10 +32,16 @@
     <string name="vehicle_information">Vehicle information</string>
     <string name="vehicle_model">Vehicle model</string>
     <string name="vehicle_type">Vehicle type\n</string>
+    <string name="vehicle_type_standard">Standard</string>
+    <string name="vehicle_type_luxury">Luxury</string>
+    <string name="vehicle_type_van">Van</string>
     <string name="license_plates">License plates</string>
     <string name="number_of_seats">Number of seats</string>
     <string name="baby_friendly">Baby friendly\n</string>
     <string name="pet_friendly">Pet friendly\n</string>
+    <string name="baby_friendly_option">Baby friendly</string>
+    <string name="pet_friendly_option">Pet friendly</string>
+    <string name="ride_options">Ride options</string>
     <string name="statistics">Statistics</string>
     <string name="profile_changes">Profile changes</string>
     <string name="account">Account</string>
@@ -57,6 +63,10 @@
     <string name="forgot_password">Forgot password?</string>
     <string name="remember_me">Remember me</string>
     <string name="don_t_have_an_account">Don\'t have an account?</string>
+    <string name="driver_photo">Driver photo</string>
+    <string name="attach_photo">Attach photo</string>
+    <string name="register_driver">Register driver</string>
+    <string name="cancel">Cancel</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

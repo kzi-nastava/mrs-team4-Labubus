@@ -1,0 +1,7 @@
+<resources>
+    <string-array name="vehicle_types">
+        <item>@string/vehicle_type_standard</item>
+        <item>@string/vehicle_type_luxury</item>
+        <item>@string/vehicle_type_van</item>
+    </string-array>
+</resources>
