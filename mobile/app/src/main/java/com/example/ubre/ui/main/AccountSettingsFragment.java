@@ -117,9 +117,10 @@ public class AccountSettingsFragment extends Fragment {
 
                 if (isDriver) {
                     UserStatsDto stats = UserStorage.getInstance().getCurrentUserStats().getValue();
-                    if (stats != null) {
-                        renderStats(statsContainer, stats);
-                    }
+                    if (stats != null) renderStats(statsContainer, stats);
+
+                    try { UserService.getInstance(requireContext()).loadCurrentUserStats(); }
+                    catch (Exception e) { Log.e(TAG, "Error loading user stats", e); }
                 } else {
                     // we must hide stats title section as well
                     View statsHeader = view.findViewById(R.id.stats_header);
@@ -150,6 +151,12 @@ public class AccountSettingsFragment extends Fragment {
                 Glide.with(this).asBitmap().load(avatarBytes).circleCrop().into(avatar);
             } else {
                 Glide.with(this).load(R.drawable.img_default_avatar).circleCrop().into(avatar);
+            }
+        });
+
+        UserStorage.getInstance().getCurrentUserStats().observe(getViewLifecycleOwner(), stats -> {
+            if (statsContainer != null && stats != null) {
+                renderStats(statsContainer, stats);
             }
         });
 
@@ -240,7 +247,6 @@ public class AccountSettingsFragment extends Fragment {
             requireActivity().getSupportFragmentManager().popBackStack();
         });
     }
-    
     private void renderStats(LinearLayout container, UserStatsDto stats) {
         container.removeAllViews();
 

@@ -18,6 +18,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.ubre.R;
 import com.example.ubre.ui.enums.VehicleType;
+import com.example.ubre.ui.services.DriverService;
 import com.example.ubre.ui.utils.TopToast;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
@@ -222,7 +223,51 @@ public class RegisterDriverFragment extends Fragment {
                 return;
             }
 
-            // TODO: Hook up service call for registration.
+            String email = etEmail.getText().toString().trim();
+            String password = etPassword.getText().toString();
+            String name = etName.getText().toString().trim();
+            String surname = etSurname.getText().toString().trim();
+            String address = etAddress.getText().toString().trim();
+            String phone = etPhone.getText().toString().trim();
+            String vehicleModel = etVehicleModel.getText().toString().trim();
+            String plates = etLicensePlates.getText().toString().trim();
+            int seats = parseSeats(etSeats, 2);
+            boolean babyFriendly = v.findViewById(R.id.chip_baby_friendly) instanceof com.google.android.material.chip.Chip
+                    && ((com.google.android.material.chip.Chip) v.findViewById(R.id.chip_baby_friendly)).isChecked();
+            boolean petFriendly = v.findViewById(R.id.chip_pet_friendly) instanceof com.google.android.material.chip.Chip
+                    && ((com.google.android.material.chip.Chip) v.findViewById(R.id.chip_pet_friendly)).isChecked();
+
+            VehicleType type = parseVehicleType(etVehicleType.getText().toString());
+            if (type == null) {
+                tilVehicleType.setError("Required");
+                TopToast.show(v.getContext(), "Form error", "Please fix highlighted fields.");
+                return;
+            }
+
+            String avatarUrl = selectedAvatarUri != null ? email + "_avatar.jpg" : "default-avatar.jpg";
+
+            com.example.ubre.ui.dtos.VehicleDto vehicle = new com.example.ubre.ui.dtos.VehicleDto(
+                    null, vehicleModel, type, plates, seats, babyFriendly, petFriendly
+            );
+
+            com.example.ubre.ui.dtos.DriverRegistrationDto dto =
+                    new com.example.ubre.ui.dtos.DriverRegistrationDto(
+                            null, avatarUrl, email, password, name, surname, phone, address, vehicle
+                    );
+
+            DriverService.getInstance(requireContext()).registerDriver(dto, selectedAvatarUri,
+                    new DriverService.Listener() {
+                        @Override public void onSuccess(com.example.ubre.ui.dtos.UserDto user) {
+                            TopToast.show(requireContext(), "Registration complete", "Driver registered successfully.");
+                            setLoading(v, false);
+                            resetForm(v);
+                        }
+                        @Override public void onFailure() {
+                            setLoading(v, false);
+                        }
+                    });
+
+            setLoading(v, true);
         });
     }
 
@@ -232,6 +277,64 @@ public class RegisterDriverFragment extends Fragment {
 
     private boolean isValidEmail(String email) {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+    }
+
+    private VehicleType parseVehicleType(String value) {
+        if (value == null) return null;
+        String normalized = value.trim().toUpperCase(Locale.ROOT);
+        try {
+            return VehicleType.valueOf(normalized);
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
+    private void setLoading(View root, boolean loading) {
+        View btnRegister = root.findViewById(R.id.btn_register_driver);
+        View btnCancel = root.findViewById(R.id.btn_cancel);
+        if (btnRegister != null) btnRegister.setEnabled(!loading);
+        if (btnCancel != null) btnCancel.setEnabled(!loading);
+    }
+
+    private void resetForm(View root) {
+        TextInputEditText etEmail = root.findViewById(R.id.et_email);
+        TextInputEditText etPassword = root.findViewById(R.id.et_password);
+        TextInputEditText etConfirmPassword = root.findViewById(R.id.et_confirm_password);
+        TextInputEditText etName = root.findViewById(R.id.et_name);
+        TextInputEditText etSurname = root.findViewById(R.id.et_surname);
+        TextInputEditText etAddress = root.findViewById(R.id.et_address);
+        TextInputEditText etPhone = root.findViewById(R.id.et_phone);
+        TextInputEditText etVehicleModel = root.findViewById(R.id.et_vehicle_model);
+        MaterialAutoCompleteTextView etVehicleType = root.findViewById(R.id.et_vehicle_type);
+        TextInputEditText etLicensePlates = root.findViewById(R.id.et_license_plates);
+        TextInputEditText etSeats = root.findViewById(R.id.et_seats);
+
+        if (etEmail != null) etEmail.setText("");
+        if (etPassword != null) etPassword.setText("");
+        if (etConfirmPassword != null) etConfirmPassword.setText("");
+        if (etName != null) etName.setText("");
+        if (etSurname != null) etSurname.setText("");
+        if (etAddress != null) etAddress.setText("");
+        if (etPhone != null) etPhone.setText("");
+        if (etVehicleModel != null) etVehicleModel.setText("");
+        if (etVehicleType != null) etVehicleType.setText("");
+        if (etLicensePlates != null) etLicensePlates.setText("");
+        if (etSeats != null) etSeats.setText("2");
+
+        View chipBaby = root.findViewById(R.id.chip_baby_friendly);
+        if (chipBaby instanceof com.google.android.material.chip.Chip) {
+            ((com.google.android.material.chip.Chip) chipBaby).setChecked(false);
+        }
+        View chipPet = root.findViewById(R.id.chip_pet_friendly);
+        if (chipPet instanceof com.google.android.material.chip.Chip) {
+            ((com.google.android.material.chip.Chip) chipPet).setChecked(false);
+        }
+
+        ImageView avatar = root.findViewById(R.id.img_driver_photo);
+        if (avatar != null) {
+            Glide.with(this).load(R.drawable.img_default_avatar).circleCrop().into(avatar);
+        }
+        selectedAvatarUri = null;
     }
 
     private void clearErrorOnType(android.widget.TextView et, TextInputLayout til) {
