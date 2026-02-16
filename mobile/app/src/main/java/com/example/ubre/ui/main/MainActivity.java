@@ -16,6 +16,8 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -25,6 +27,8 @@ import android.widget.ProgressBar;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Looper;
 import androidx.core.app.ActivityCompat;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -54,6 +58,8 @@ import com.google.android.material.navigation.NavigationView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.textfield.TextInputEditText;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -73,6 +79,7 @@ import com.example.ubre.ui.services.RidePlanningService;
 import com.example.ubre.ui.storages.RidePlanningStorage;
 import com.example.ubre.ui.services.GeocodingService;
 import com.example.ubre.ui.utils.TextNormalizer;
+import com.example.ubre.ui.adapters.AutocompleteAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,12 +105,22 @@ public class MainActivity extends AppCompatActivity {
     private View rideOrderPickOnMap;
     private LinearLayout rideOrderStopsContainer;
     private View rideOrderHandle;
+    private RecyclerView rideOrderFromSuggestionsView;
+    private RecyclerView rideOrderToSuggestionsView;
+    private AutocompleteAdapter fromSuggestionsAdapter;
+    private AutocompleteAdapter toSuggestionsAdapter;
     private final List<Marker> rideOrderMarkers = new ArrayList<>();
     private boolean isPickOnMapActive = false;
     private GeocodingService geocodingService;
     private ProgressBar routeLoadingSpinner;
     private int geocodeInFlight = 0;
     private boolean routeLoading = false;
+    private final Handler autocompleteHandler = new Handler(Looper.getMainLooper());
+    private Runnable fromAutocompleteRunnable;
+    private Runnable toAutocompleteRunnable;
+    private java.util.List<com.example.ubre.ui.dtos.GeocodingResult> fromSuggestions = new ArrayList<>();
+    private java.util.List<com.example.ubre.ui.dtos.GeocodingResult> toSuggestions = new ArrayList<>();
+    private boolean suppressAutocomplete = false;
     LoginApi loginApi = ApiClient.getClient().create(LoginApi.class);
 
 
@@ -312,6 +329,26 @@ public class MainActivity extends AppCompatActivity {
         rideOrderPickOnMap = findViewById(R.id.ride_order_pick_on_map);
         rideOrderStopsContainer = findViewById(R.id.ride_order_stops_container);
         rideOrderHandle = findViewById(R.id.ride_order_handle);
+        rideOrderFromSuggestionsView = findViewById(R.id.ride_order_from_suggestions);
+        rideOrderToSuggestionsView = findViewById(R.id.ride_order_to_suggestions);
+
+        fromSuggestionsAdapter = new AutocompleteAdapter(position -> {
+            if (position >= 0 && position < fromSuggestions.size()) {
+                applySuggestion(fromSuggestions.get(position), true);
+                hideFromSuggestions();
+            }
+        });
+        toSuggestionsAdapter = new AutocompleteAdapter(position -> {
+            if (position >= 0 && position < toSuggestions.size()) {
+                applySuggestion(toSuggestions.get(position), false);
+                hideToSuggestions();
+            }
+        });
+
+        rideOrderFromSuggestionsView.setLayoutManager(new LinearLayoutManager(this));
+        rideOrderFromSuggestionsView.setAdapter(fromSuggestionsAdapter);
+        rideOrderToSuggestionsView.setLayoutManager(new LinearLayoutManager(this));
+        rideOrderToSuggestionsView.setAdapter(toSuggestionsAdapter);
 
         rideOrderUseMyLocation.setOnClickListener(v -> addWaypointFromMyLocation());
         rideOrderPickOnMap.setOnClickListener(v -> {
@@ -325,6 +362,7 @@ public class MainActivity extends AppCompatActivity {
         rideOrderFromInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
                 geocodeFromInput(rideOrderFromInput, true);
+                hideFromSuggestions();
                 return true;
             }
             return false;
@@ -333,10 +371,26 @@ public class MainActivity extends AppCompatActivity {
         rideOrderToInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
                 geocodeFromInput(rideOrderToInput, false);
+                hideToSuggestions();
                 return true;
             }
             return false;
         });
+
+        rideOrderFromInput.addTextChangedListener(new SimpleAutocompleteWatcher(true));
+        rideOrderToInput.addTextChangedListener(new SimpleAutocompleteWatcher(false));
+
+        rideOrderFromInput.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                hideFromSuggestions();
+            }
+        });
+        rideOrderToInput.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                hideToSuggestions();
+            }
+        });
+
 
         btnMapSearch.setOnClickListener(v -> toggleRideOrderSheet());
 
@@ -633,7 +687,7 @@ public class MainActivity extends AppCompatActivity {
         if (geocodingService == null || input.getText() == null) {
             return;
         }
-        String query = input.getText().toString().trim();
+        String query = TextNormalizer.toLatin(input.getText().toString().trim());
         if (query.isEmpty()) {
             return;
         }
@@ -688,6 +742,140 @@ public class MainActivity extends AppCompatActivity {
         boolean show = routeLoading || geocodeInFlight > 0;
         routeLoadingSpinner.setVisibility(show ? View.VISIBLE : View.GONE);
     }
+
+    private void requestAutocomplete(String rawQuery, boolean isFrom) {
+        if (geocodingService == null) {
+            return;
+        }
+        if (isFrom && !rideOrderFromInput.hasFocus()) {
+            hideFromSuggestions();
+            return;
+        }
+        if (!isFrom && !rideOrderToInput.hasFocus()) {
+            hideToSuggestions();
+            return;
+        }
+        String query = TextNormalizer.toLatin(rawQuery.trim());
+        if (query.length() < 3) {
+            if (isFrom) {
+                fromSuggestions = new ArrayList<>();
+                fromSuggestionsAdapter.setItems(new ArrayList<>());
+                hideFromSuggestions();
+            } else {
+                toSuggestions = new ArrayList<>();
+                toSuggestionsAdapter.setItems(new ArrayList<>());
+                hideToSuggestions();
+            }
+            return;
+        }
+
+        geocodingService.search(query, 6, new GeocodingService.SearchCallback() {
+            @Override
+            public void onResult(List<com.example.ubre.ui.dtos.GeocodingResult> results) {
+                runOnUiThread(() -> {
+                    List<com.example.ubre.ui.dtos.GeocodingResult> safe = results == null ? new ArrayList<>() : results;
+                    ArrayList<String> labels = new ArrayList<>();
+                    for (com.example.ubre.ui.dtos.GeocodingResult r : safe) {
+                        if (r != null && r.displayName != null) {
+                            labels.add(TextNormalizer.toLatin(r.displayName));
+                        }
+                    }
+                    if (isFrom) {
+                        fromSuggestions = safe;
+                        fromSuggestionsAdapter.setQuery(query);
+                        fromSuggestionsAdapter.setItems(labels);
+                        rideOrderFromSuggestionsView.setVisibility(labels.isEmpty() ? View.GONE : View.VISIBLE);
+                    } else {
+                        toSuggestions = safe;
+                        toSuggestionsAdapter.setQuery(query);
+                        toSuggestionsAdapter.setItems(labels);
+                        rideOrderToSuggestionsView.setVisibility(labels.isEmpty() ? View.GONE : View.VISIBLE);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(Throwable t) {
+            }
+        });
+    }
+
+    private void hideFromSuggestions() {
+        rideOrderFromSuggestionsView.setVisibility(View.GONE);
+    }
+
+    private void hideToSuggestions() {
+        rideOrderToSuggestionsView.setVisibility(View.GONE);
+    }
+
+    private void applySuggestion(com.example.ubre.ui.dtos.GeocodingResult result, boolean isFrom) {
+        if (result == null || result.lat == null || result.lon == null) {
+            return;
+        }
+        double lat = Double.parseDouble(result.lat);
+        double lon = Double.parseDouble(result.lon);
+        String label = result.displayName == null ? "" : TextNormalizer.toLatin(result.displayName);
+        WaypointDto waypoint = new WaypointDto(null, label, lat, lon);
+        suppressAutocomplete = true;
+        List<WaypointDto> current = RidePlanningStorage.getInstance().getWaypointsSnapshot();
+        if (isFrom) {
+            if (current.isEmpty()) {
+                RidePlanningService.getInstance().addWaypoint(waypoint);
+            } else {
+                RidePlanningService.getInstance().updateWaypointAt(0, waypoint);
+            }
+            hideFromSuggestions();
+            rideOrderFromInput.setText(label);
+            rideOrderFromInput.clearFocus();
+        } else {
+            if (current.size() < 2) {
+                RidePlanningService.getInstance().addWaypoint(waypoint);
+            } else {
+                RidePlanningService.getInstance().updateWaypointAt(1, waypoint);
+            }
+            hideToSuggestions();
+            rideOrderToInput.setText(label);
+            rideOrderToInput.clearFocus();
+        }
+        suppressAutocomplete = false;
+    }
+
+    private class SimpleAutocompleteWatcher implements TextWatcher {
+        private final boolean isFrom;
+
+        SimpleAutocompleteWatcher(boolean isFrom) {
+            this.isFrom = isFrom;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if (suppressAutocomplete) {
+                return;
+            }
+            if (isFrom) {
+                if (fromAutocompleteRunnable != null) {
+                    autocompleteHandler.removeCallbacks(fromAutocompleteRunnable);
+                }
+                fromAutocompleteRunnable = () -> requestAutocomplete(s.toString(), true);
+                autocompleteHandler.postDelayed(fromAutocompleteRunnable, 350);
+            } else {
+                if (toAutocompleteRunnable != null) {
+                    autocompleteHandler.removeCallbacks(toAutocompleteRunnable);
+                }
+                toAutocompleteRunnable = () -> requestAutocomplete(s.toString(), false);
+                autocompleteHandler.postDelayed(toAutocompleteRunnable, 350);
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+        }
+    }
+
 
     private String formatShortLabel(String displayName) {
         return TextNormalizer.toLatin(displayName).trim();

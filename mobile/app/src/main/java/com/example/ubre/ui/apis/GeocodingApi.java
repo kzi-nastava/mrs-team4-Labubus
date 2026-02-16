@@ -16,7 +16,10 @@ public interface GeocodingApi {
             @Query("format") String format,
             @Query("limit") int limit,
             @Query("addressdetails") int addressDetails,
-            @Query("accept-language") String language
+            @Query("accept-language") String language,
+            @Query("countrycodes") String countryCodes,
+            @Query("viewbox") String viewbox,
+            @Query("bounded") int bounded
     );
 
     @GET("reverse")

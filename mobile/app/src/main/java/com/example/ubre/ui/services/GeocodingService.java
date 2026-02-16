@@ -52,7 +52,7 @@ public class GeocodingService {
     }
 
     public void geocode(String query, GeocodingCallback callback) {
-        api.search(query, "json", 1, 1, "en")
+        api.search(query, "json", 1, 1, "en", null, null, 0)
                 .enqueue(new Callback<List<GeocodingResult>>() {
                     @Override
                     public void onResponse(Call<List<GeocodingResult>> call, Response<List<GeocodingResult>> response) {
@@ -61,6 +61,27 @@ public class GeocodingService {
                             return;
                         }
                         callback.onResult(response.body().get(0));
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<GeocodingResult>> call, Throwable t) {
+                        callback.onError(t);
+                    }
+                });
+    }
+
+    public void search(String query, int limit, SearchCallback callback) {
+        // Limit results to Novi Sad area
+        String viewbox = "19.756,45.330,19.933,45.215";
+        api.search(query, "json", limit, 1, "en", "rs", viewbox, 1)
+                .enqueue(new Callback<List<GeocodingResult>>() {
+                    @Override
+                    public void onResponse(Call<List<GeocodingResult>> call, Response<List<GeocodingResult>> response) {
+                        if (!response.isSuccessful() || response.body() == null) {
+                            callback.onResult(null);
+                            return;
+                        }
+                        callback.onResult(response.body());
                     }
 
                     @Override
@@ -87,5 +108,10 @@ public class GeocodingService {
                         callback.onError(t);
                     }
                 });
+    }
+
+    public interface SearchCallback {
+        void onResult(List<GeocodingResult> results);
+        void onError(Throwable t);
     }
 }
