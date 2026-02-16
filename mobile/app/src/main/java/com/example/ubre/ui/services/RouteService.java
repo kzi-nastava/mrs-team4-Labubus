@@ -24,12 +24,19 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RouteService {
 
+    public interface RouteLoadingListener {
+        void onLoadingChanged(boolean isLoading);
+    }
+
     private static final String TAG = "RouteService";
     private static final String OSRM_BASE_URL = "https://router.project-osrm.org/";
 
     private static RouteService instance;
     private final OSRMApi osrmApi;
     private Polyline lastRoutePolyline;
+    private Call<JsonObject> lastRouteCall;
+    private int routeRequestSeq = 0;
+    private RouteLoadingListener loadingListener;
 
     private RouteService() {
         Retrofit retrofit = new Retrofit.Builder()
@@ -46,10 +53,22 @@ public class RouteService {
         return instance;
     }
 
+    public void setRouteLoadingListener(RouteLoadingListener listener) {
+        this.loadingListener = listener;
+    }
+
     public void drawRoute(MapView mapView, List<WaypointDto> waypoints) {
         if (waypoints == null || waypoints.size() < 2) {
             Log.w(TAG, "Need at least 2 waypoints to draw a route");
             return;
+        }
+        // Cancel any in-flight request to avoid stale callbacks drawing old routes
+        if (lastRouteCall != null && !lastRouteCall.isCanceled()) {
+            lastRouteCall.cancel();
+        }
+        final int requestId = ++routeRequestSeq;
+        if (loadingListener != null) {
+            loadingListener.onLoadingChanged(true);
         }
 
         StringBuilder coordsBuilder = new StringBuilder();
@@ -60,10 +79,14 @@ public class RouteService {
                     .append(waypoints.get(i).getLatitude());
         }
 
-        osrmApi.getRoute(coordsBuilder.toString(), "full", "geojson")
+        lastRouteCall = osrmApi.getRoute(coordsBuilder.toString(), "full", "geojson");
+        lastRouteCall
                 .enqueue(new Callback<JsonObject>() {
                     @Override
                     public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                        if (requestId != routeRequestSeq) {
+                            return;
+                        }
                         if (!response.isSuccessful() || response.body() == null) {
                             Log.e(TAG, "OSRM response error: " + response.code());
                             if (response.errorBody() != null) {
@@ -115,12 +138,36 @@ public class RouteService {
                         } catch (Exception e) {
                             Log.e(TAG, "Error parsing OSRM response", e);
                         }
+                        if (loadingListener != null) {
+                            loadingListener.onLoadingChanged(false);
+                        }
                     }
 
                     @Override
                     public void onFailure(Call<JsonObject> call, Throwable t) {
+                        if (requestId != routeRequestSeq || call.isCanceled()) {
+                            return;
+                        }
                         Log.e(TAG, "OSRM request failed", t);
+                        if (loadingListener != null) {
+                            loadingListener.onLoadingChanged(false);
+                        }
                     }
                 });
+    }
+
+    public void clearRoute(MapView mapView) {
+        if (lastRouteCall != null && !lastRouteCall.isCanceled()) {
+            lastRouteCall.cancel();
+        }
+        routeRequestSeq++;
+        if (lastRoutePolyline != null) {
+            mapView.getOverlays().remove(lastRoutePolyline);
+            mapView.invalidate();
+            lastRoutePolyline = null;
+        }
+        if (loadingListener != null) {
+            loadingListener.onLoadingChanged(false);
+        }
     }
 }

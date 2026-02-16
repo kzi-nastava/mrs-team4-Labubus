@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/ride_order_sheet_root"
     android:layout_width="match_parent"
-    android:layout_height="300dp"
+    android:layout_height="520dp"
     android:orientation="vertical"
     android:background="@drawable/bg_bottom_sheet_rounded"
     android:padding="16dp"
@@ -11,22 +11,154 @@
     app:behavior_peekHeight="0dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-    <View
-        android:layout_width="48dp"
-        android:layout_height="4dp"
-        android:layout_gravity="center_horizontal"
-        android:background="@drawable/bg_bottom_modal"/>
+    <LinearLayout
+        android:id="@+id/ride_order_handle"
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:gravity="center">
+
+        <View
+            android:id="@+id/ride_order_handle_bar"
+            android:layout_width="80dp"
+            android:layout_height="6dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@color/surface"/>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/ride_order_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_marginStart="12dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginStart="16dp"
         android:fontFamily="@font/poppins_medium"
         android:text="Order a ride"
         android:textColor="@color/text_primary"
-        android:textSize="20sp"
+        android:textSize="24sp"
         android:textStyle="bold"/>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/ride_order_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:overScrollMode="never"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ride_order_from_layout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:hint="From"
+                app:boxBackgroundColor="@color/surface"
+                app:boxStrokeColor="@color/primary_light"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="2dp"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:hintTextColor="@color/text_secondary"
+                app:startIconDrawable="@drawable/ic_circle_primary">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/ride_order_from_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_regular"
+                    android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ride_order_to_layout"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="To"
+                app:boxBackgroundColor="@color/surface"
+                app:boxStrokeColor="@color/primary_light"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="2dp"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp"
+                app:hintTextColor="@color/text_secondary"
+                app:startIconDrawable="@drawable/ic_location_primary">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/ride_order_to_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins_regular"
+                    android:inputType="text" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:id="@+id/ride_order_actions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ride_order_use_my_location"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/primary"
+                    android:gravity="center"
+                    app:strokeColor="@color/primary"
+                    app:strokeWidth="1dp"
+                    android:text="Use my location"
+                    android:textColor="@color/surface"
+                    android:textAllCaps="false"
+                    android:fontFamily="@font/poppins_medium"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/ride_order_pick_on_map"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:backgroundTint="@color/primary"
+                    android:gravity="center"
+                    app:strokeColor="@color/primary"
+                    app:strokeWidth="1dp"
+                    android:text="Pick on map"
+                    android:textColor="@color/surface"
+                    android:textAllCaps="false"
+                    android:fontFamily="@font/poppins_medium"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/ride_order_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/poppins_regular"
+                android:text="Tap on the map to add a waypoint."
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"/>
+
+            <LinearLayout
+                android:id="@+id/ride_order_stops_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>

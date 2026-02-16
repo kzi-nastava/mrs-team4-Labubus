@@ -15,10 +15,13 @@ import android.view.View;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.MenuItem;
+import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -26,6 +29,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -49,6 +53,7 @@ import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.navigation.NavigationView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.textfield.TextInputEditText;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
@@ -60,7 +65,17 @@ import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
+import org.osmdroid.views.overlay.Marker;
 
+import com.example.ubre.ui.dtos.WaypointDto;
+import com.example.ubre.ui.services.RouteService;
+import com.example.ubre.ui.services.RidePlanningService;
+import com.example.ubre.ui.storages.RidePlanningStorage;
+import com.example.ubre.ui.services.GeocodingService;
+import com.example.ubre.ui.utils.TextNormalizer;
+
+import java.util.ArrayList;
+import java.util.List;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -77,6 +92,18 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawer;
     private BottomSheetBehavior<View> rideOrderSheetBehavior;
     private MyLocationNewOverlay myLocationOverlay;
+    private TextInputEditText rideOrderFromInput;
+    private TextInputEditText rideOrderToInput;
+    private View rideOrderUseMyLocation;
+    private View rideOrderPickOnMap;
+    private LinearLayout rideOrderStopsContainer;
+    private View rideOrderHandle;
+    private final List<Marker> rideOrderMarkers = new ArrayList<>();
+    private boolean isPickOnMapActive = false;
+    private GeocodingService geocodingService;
+    private ProgressBar routeLoadingSpinner;
+    private int geocodeInFlight = 0;
+    private boolean routeLoading = false;
     LoginApi loginApi = ApiClient.getClient().create(LoginApi.class);
 
 
@@ -132,7 +159,12 @@ public class MainActivity extends AppCompatActivity {
         map.getOverlays().add(new MapEventsOverlay(new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
-                collapseRideOrderSheet();
+                if (rideOrderSheetBehavior != null &&
+                        rideOrderSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
+                    addWaypointFromMap(p);
+                    collapseRideOrderSheet();
+                    isPickOnMapActive = false;
+                }
                 return false;
             }
 
@@ -148,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
         controller.setCenter(new GeoPoint(45.2671, 19.8335));
 
         setupLocationOverlay();
+        geocodingService = GeocodingService.getInstance(this);
 
         drawer = findViewById(R.id.main);
 
@@ -264,12 +297,46 @@ public class MainActivity extends AppCompatActivity {
         btnMenu = findViewById(R.id.btn_menu);
         btnMapSearch = findViewById(R.id.btn_map_search);
         btnChat = findViewById(R.id.btn_chat);
+        routeLoadingSpinner = findViewById(R.id.route_loading_spinner);
 
         View rideOrderSheet = findViewById(R.id.ride_order_sheet);
         rideOrderSheetBehavior = BottomSheetBehavior.from(rideOrderSheet);
         rideOrderSheetBehavior.setHideable(true);
         rideOrderSheetBehavior.setPeekHeight(dpToPx(96), true);
         rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        rideOrderSheetBehavior.setDraggable(true);
+
+        rideOrderFromInput = findViewById(R.id.ride_order_from_input);
+        rideOrderToInput = findViewById(R.id.ride_order_to_input);
+        rideOrderUseMyLocation = findViewById(R.id.ride_order_use_my_location);
+        rideOrderPickOnMap = findViewById(R.id.ride_order_pick_on_map);
+        rideOrderStopsContainer = findViewById(R.id.ride_order_stops_container);
+        rideOrderHandle = findViewById(R.id.ride_order_handle);
+
+        rideOrderUseMyLocation.setOnClickListener(v -> addWaypointFromMyLocation());
+        rideOrderPickOnMap.setOnClickListener(v -> {
+            isPickOnMapActive = true;
+            collapseRideOrderSheet();
+            Toast.makeText(this, "Tap on the map to add a waypoint.", Toast.LENGTH_SHORT).show();
+        });
+
+        rideOrderHandle.setOnClickListener(v -> toggleRideOrderSheetCollapsed());
+
+        rideOrderFromInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
+                geocodeFromInput(rideOrderFromInput, true);
+                return true;
+            }
+            return false;
+        });
+
+        rideOrderToInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
+                geocodeFromInput(rideOrderToInput, false);
+                return true;
+            }
+            return false;
+        });
 
         btnMapSearch.setOnClickListener(v -> toggleRideOrderSheet());
 
@@ -279,6 +346,23 @@ public class MainActivity extends AppCompatActivity {
                 hideRideOrderSheet();
             }
         });
+
+        RidePlanningStorage.getInstance().getWaypointsReadOnly().observe(this, waypoints -> {
+            List<WaypointDto> safeWaypoints = waypoints == null ? new ArrayList<>() : waypoints;
+            renderRideOrderWaypoints(safeWaypoints);
+            syncRideOrderMarkers(safeWaypoints);
+            if (safeWaypoints.size() >= 2) {
+                RouteService.getInstance().drawRoute(map, safeWaypoints);
+            } else {
+                RouteService.getInstance().clearRoute(map);
+            }
+        });
+
+        RouteService.getInstance().setRouteLoadingListener(isLoading -> {
+            routeLoading = isLoading;
+            updateLoadingSpinner();
+        });
+
 
 
         // Adding an observer that opens review modal when it's state is set
@@ -445,6 +529,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void toggleRideOrderSheetCollapsed() {
+        int state = rideOrderSheetBehavior.getState();
+        if (state == BottomSheetBehavior.STATE_EXPANDED) {
+            rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        } else if (state == BottomSheetBehavior.STATE_COLLAPSED) {
+            rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        } else if (state == BottomSheetBehavior.STATE_HIDDEN) {
+            rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        }
+    }
+
     private void hideRideOrderSheet() {
         if (rideOrderSheetBehavior != null &&
                 rideOrderSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
@@ -467,6 +562,214 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+
+    private void addWaypointFromMyLocation() {
+        if (myLocationOverlay == null || myLocationOverlay.getMyLocation() == null) {
+            Toast.makeText(this, "Current location not available yet.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        addWaypoint("My location", myLocationOverlay.getMyLocation());
+    }
+
+    private void addWaypointFromMap(GeoPoint point) {
+        addWaypoint("Pinned location", point);
+        int index = RidePlanningStorage.getInstance().getWaypointsSnapshot().size() - 1;
+        if (geocodingService != null) {
+            geocodeInFlight++;
+            updateLoadingSpinner();
+            geocodingService.reverse(point.getLatitude(), point.getLongitude(), new GeocodingService.GeocodingCallback() {
+                @Override
+                public void onResult(com.example.ubre.ui.dtos.GeocodingResult result) {
+                    geocodeInFlight = Math.max(0, geocodeInFlight - 1);
+                    updateLoadingSpinner();
+                    if (result == null || result.displayName == null) {
+                        return;
+                    }
+                    String label = formatShortLabel(result.displayName);
+                    runOnUiThread(() -> RidePlanningService.getInstance().updateWaypointLabelAt(index, label));
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    geocodeInFlight = Math.max(0, geocodeInFlight - 1);
+                    updateLoadingSpinner();
+                }
+            });
+        }
+    }
+
+    private void addWaypoint(String baseLabel, GeoPoint point) {
+        int index = RidePlanningStorage.getInstance().getWaypointsSnapshot().size() + 1;
+        String label = baseLabel + " " + index;
+        WaypointDto waypoint = new WaypointDto(null, label, point.getLatitude(), point.getLongitude());
+        RidePlanningService.getInstance().addWaypoint(waypoint);
+    }
+
+    private void geocodeFromInput(TextInputEditText input, boolean isFrom) {
+        if (geocodingService == null || input.getText() == null) {
+            return;
+        }
+        String query = input.getText().toString().trim();
+        if (query.isEmpty()) {
+            return;
+        }
+
+        geocodingService.geocode(query, new GeocodingService.GeocodingCallback() {
+            @Override
+            public void onResult(com.example.ubre.ui.dtos.GeocodingResult result) {
+                geocodeInFlight = Math.max(0, geocodeInFlight - 1);
+                updateLoadingSpinner();
+                if (result == null || result.lat == null || result.lon == null) {
+                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "No results found.", Toast.LENGTH_SHORT).show());
+                    return;
+                }
+                double lat = Double.parseDouble(result.lat);
+                double lon = Double.parseDouble(result.lon);
+                String label = result.displayName == null ? query : formatShortLabel(result.displayName);
+                WaypointDto waypoint = new WaypointDto(null, label, lat, lon);
+
+                runOnUiThread(() -> {
+                    List<WaypointDto> current = RidePlanningStorage.getInstance().getWaypointsSnapshot();
+                    if (isFrom) {
+                        if (current.isEmpty()) {
+                            RidePlanningService.getInstance().addWaypoint(waypoint);
+                        } else {
+                            RidePlanningService.getInstance().updateWaypointAt(0, waypoint);
+                        }
+                    } else {
+                        if (current.size() < 2) {
+                            RidePlanningService.getInstance().addWaypoint(waypoint);
+                        } else {
+                            RidePlanningService.getInstance().updateWaypointAt(1, waypoint);
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                geocodeInFlight = Math.max(0, geocodeInFlight - 1);
+                updateLoadingSpinner();
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Geocoding failed.", Toast.LENGTH_SHORT).show());
+            }
+        });
+        geocodeInFlight++;
+        updateLoadingSpinner();
+    }
+
+    private void updateLoadingSpinner() {
+        if (routeLoadingSpinner == null) {
+            return;
+        }
+        boolean show = routeLoading || geocodeInFlight > 0;
+        routeLoadingSpinner.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    private String formatShortLabel(String displayName) {
+        return TextNormalizer.toLatin(displayName).trim();
+    }
+
+    private String ellipsizeLabel(String text, int maxChars) {
+        if (text == null) {
+            return "";
+        }
+        if (text.length() <= maxChars) {
+            return text;
+        }
+        return text.substring(0, Math.max(0, maxChars - 3)).trim() + "...";
+    }
+
+    private void renderRideOrderWaypoints(List<WaypointDto> waypoints) {
+        if (waypoints.isEmpty()) {
+            rideOrderFromInput.setText("");
+            rideOrderToInput.setText("");
+            rideOrderUseMyLocation.setVisibility(View.VISIBLE);
+            rideOrderStopsContainer.removeAllViews();
+            return;
+        }
+
+        WaypointDto first = waypoints.get(0);
+        rideOrderFromInput.setText(first.getLabel());
+        rideOrderUseMyLocation.setVisibility(View.GONE);
+
+        if (waypoints.size() >= 2) {
+            WaypointDto second = waypoints.get(1);
+            rideOrderToInput.setText(second.getLabel());
+        } else {
+            rideOrderToInput.setText("");
+        }
+
+        rideOrderStopsContainer.removeAllViews();
+        for (int i = 0; i < waypoints.size(); i++) {
+            int index = i;
+            WaypointDto waypoint = waypoints.get(i);
+
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            row.setBackground(ContextCompat.getDrawable(this, R.drawable.bg_waypoint_chip));
+            row.setPadding(dpToPx(12), dpToPx(8), dpToPx(8), dpToPx(8));
+
+            TextView label = new TextView(this);
+            String displayLabel = ellipsizeLabel(waypoint.getLabel(), 44);
+            label.setText((i + 1) + ".\u00A0\u00A0" + displayLabel);
+            label.setTextColor(ContextCompat.getColor(this, R.color.text_primary));
+            label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+            label.setTypeface(ResourcesCompat.getFont(this, R.font.poppins_medium));
+            LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f
+            );
+            label.setLayoutParams(labelParams);
+
+            ImageView remove = new ImageView(this);
+            remove.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_cancel));
+            remove.setColorFilter(ContextCompat.getColor(this, R.color.text_secondary));
+            LinearLayout.LayoutParams removeParams = new LinearLayout.LayoutParams(
+                    dpToPx(18),
+                    dpToPx(18)
+            );
+            remove.setLayoutParams(removeParams);
+            remove.setOnClickListener(v -> removeWaypointAt(index));
+
+            row.addView(label);
+            row.addView(remove);
+
+            LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            rowParams.setMargins(0, dpToPx(6), 0, 0);
+            row.setLayoutParams(rowParams);
+
+            rideOrderStopsContainer.addView(row);
+        }
+    }
+
+    private void removeWaypointAt(int index) {
+        RidePlanningService.getInstance().removeWaypointAt(index);
+    }
+
+    private void syncRideOrderMarkers(List<WaypointDto> waypoints) {
+        for (Marker marker : rideOrderMarkers) {
+            map.getOverlays().remove(marker);
+        }
+        rideOrderMarkers.clear();
+
+        for (WaypointDto waypoint : waypoints) {
+            GeoPoint point = new GeoPoint(waypoint.getLatitude(), waypoint.getLongitude());
+            Marker marker = new Marker(map);
+            marker.setPosition(point);
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
+            marker.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_waypoint_red));
+            marker.setTitle(waypoint.getLabel());
+            map.getOverlays().add(marker);
+            rideOrderMarkers.add(marker);
+        }
+        map.invalidate();
+    }
+
     private void setupLocationOverlay() {
         if (!hasLocationPermission()) {
             ActivityCompat.requestPermissions(
@@ -484,7 +787,7 @@ public class MainActivity extends AppCompatActivity {
             myLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this), map);
             myLocationOverlay.setDrawAccuracyEnabled(true);
             Drawable pin = ContextCompat.getDrawable(this, R.drawable.ic_my_location_blue);
-            myLocationOverlay.setPersonIcon(drawableToBitmap(pin, dpToPx(40), dpToPx(40)));
+            myLocationOverlay.setPersonIcon(drawableToBitmap(pin, dpToPx(56), dpToPx(56)));
             map.getOverlays().add(myLocationOverlay);
 
             myLocationOverlay.runOnFirstFix(() -> map.post(() -> {
