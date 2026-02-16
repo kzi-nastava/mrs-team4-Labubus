@@ -24,7 +24,6 @@ export class ProfileCard {
       this.userService.getUserAvatar(this.user().id).subscribe({
         next: blob => this.avatarUrl.set(URL.createObjectURL(blob))
       });
-      console.log(this.testIdPrefix)
     });
   }
 

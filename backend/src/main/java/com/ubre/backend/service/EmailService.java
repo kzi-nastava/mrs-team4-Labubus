@@ -12,4 +12,6 @@ public interface EmailService {
     void sendRideCompletedEmail(String recipientEmail, Ride ride);
     @Async
     void sendPassengerActivationEmail(String recipientEmail, String activationToken);
+    @Async
+    void sendPassengerRideInvitationEmail(String recipientEmail, Ride ride);
 }

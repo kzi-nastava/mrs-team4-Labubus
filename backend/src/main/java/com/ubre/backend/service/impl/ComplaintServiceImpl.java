@@ -88,7 +88,7 @@ public class ComplaintServiceImpl implements ComplaintService {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User jwtUser = (User) auth.getPrincipal();
-        if (!ride.get().getCreator().getId().equals(complaintDto.getUserId()) || !jwtUser.getId().equals(complaintDto.getUserId()))
+        if (ride.get().getPassengers().stream().noneMatch(passenger -> passenger.getId().equals(complaintDto.getUserId())) || ride.get().getPassengers().stream().noneMatch(passenger -> passenger.getId().equals(jwtUser.getId())))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the customer may submit a complaint");
 
         complaintDto.setId(null);

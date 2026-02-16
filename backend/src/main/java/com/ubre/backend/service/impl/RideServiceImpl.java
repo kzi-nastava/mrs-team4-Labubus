@@ -101,10 +101,12 @@ public class RideServiceImpl implements RideService {
         ride.setStatus(RideStatus.IN_PROGRESS);
         ride.getDriver().setStatus(UserStatus.ON_RIDE);
         rideRepository.save(ride);
-        webSocketNotificationService.sendCurrentRideUpdate(ride.getCreator().getId(), new CurrentRideNotification(
-                NotificationType.RIDE_STARTED.name(),
-                new RideDto(ride)
-        ));
+        for (User passenger : ride.getPassengers()) {
+            webSocketNotificationService.sendCurrentRideUpdate(passenger.getId(), new CurrentRideNotification(
+                    NotificationType.RIDE_STARTED.name(),
+                    new RideDto(ride)
+            ));
+        }
     }
 
     @Override
@@ -171,9 +173,10 @@ public class RideServiceImpl implements RideService {
                 null
         );
 
-        this.webSocketNotificationService.sendCurrentRideUpdate(ride.getCreator().getId(), currentRideNotification);
-        for (User user : ride.getPassengers())
+        for (User user : ride.getPassengers()) {
+            this.webSocketNotificationService.sendCurrentRideUpdate(user.getId(), currentRideNotification);
             emailService.sendRideCompletedEmail(user.getEmail(), ride);
+        }
         return ride.getPrice();
     }
 
@@ -380,6 +383,10 @@ public class RideServiceImpl implements RideService {
                 return new RideDto(ride.get());
 
             ride = rideRepository.findFirstByCreatorAndStatusAndStartTimeBeforeOrderByStartTimeAsc(user.get(), RideStatus.PENDING, LocalDateTime.now().plusMinutes(1));
+            if (ride.isPresent())
+                return new RideDto(ride.get());
+
+            ride = rideRepository.findFirstByPassengersIdAndStatusOrderByStartTimeAsc(user.get().getId(), RideStatus.IN_PROGRESS);
             return ride.map(RideDto::new).orElse(null);
         }
     }
@@ -569,6 +576,7 @@ public class RideServiceImpl implements RideService {
         createdRideDto.setDistance(newRide.getDistance());
         createdRideDto.setPrice(newRide.getPrice());
         createdRideDto.setStatus(newRide.getStatus());
+        createdRideDto.setCreatedBy(creator.getId());
 
         webSocketNotificationService.sendRideAssigned(assignedDriver.getId(), new RideAssignmentNotification(
                 NotificationType.RIDE_ASSIGNED.name(),
@@ -580,9 +588,12 @@ public class RideServiceImpl implements RideService {
         }
 
         // schedule a current ride upadte
-        rideReminderService.sendCurrentRideUpdate(rideOrderDto.getCreatorId(), createdRideDto, newRide.getStartTime());
         rideReminderService.sendCurrentRideUpdate(assignedDriver.getId(), createdRideDto, newRide.getStartTime());
-
+        for (User passenger : passengers) {
+            rideReminderService.sendCurrentRideUpdate(passenger.getId(), createdRideDto, newRide.getStartTime());
+            if (!passenger.getId().equals(newRide.getCreator().getId()))
+                emailService.sendPassengerRideInvitationEmail(passenger.getEmail(), newRide);
+        }
 
         return createdRideDto;
     }

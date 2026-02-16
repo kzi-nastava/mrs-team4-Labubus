@@ -209,7 +209,6 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
       
           if (notification.status === NotificationType.RIDE_STARTED)
             this.showToast('Ride started', 'Your ride has been started successfully.');
-
           
           if (notification.status === NotificationType.RIDE_CANCELLED) 
           
@@ -222,13 +221,12 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
             this.showToast('Ride completed', "Ride completed.");
             this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
               this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
-                if (user.role == Role.REGISTERED_USER && this.ridePlanningStore.currentRideSubject$.value != null)
+                if (user.role == Role.REGISTERED_USER && this.ridePlanningStore.currentRideSubject$.value != null && this.ridePlanningStore.currentRideSubject$.value.createdBy == user.id)
                   this.reviewService.newReview(this.ridePlanningStore.currentRideSubject$.value.id)
               })
               this.ridePlanningStore.currentRideSubject$.next(nextRide)
             })
           }
-
 
           if (notification.ride)
             this.ridePlanningStore.currentRideSubject$.next(notification.ride);
@@ -781,9 +779,7 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
 
     this.routingService.route(waypoints).pipe(take(1)).subscribe({
       next: (routeInfo) => {
-          console.log(waypoints)
           this.selectedRideWaypoints.next(waypoints)
-          console.log(this.selectedRideWaypoints.value)
           this.selectedRideRoute.next(routeInfo)
         },
         error: (err) => {
@@ -1186,8 +1182,6 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
                 id: 0,
               };
 
-              console.log("Stop waypoint DTO:", stopWaypoint);
-
               this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
                 next: (price) => {
                   const finalPrice = price;
@@ -1227,8 +1221,6 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
                 visited: false,
                 id: 0,
               };
-
-              console.log("Stop waypoint DTO:", stopWaypoint);
 
               this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
                 next: (price) => {
@@ -1280,7 +1272,6 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
   }
 
   subscribeToPanicNotifications() {
-    console.log(this.authService.getRole())
     if (this.authService.getRole() === "ADMIN") { 
         this.panicSubscription = this.webSocketService
         .panicNotifications()

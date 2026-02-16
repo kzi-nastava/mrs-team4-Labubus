@@ -29,6 +29,7 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     Optional<Ride> findFirstByCreatorAndStatusOrderByStartTimeAsc(User creator, RideStatus status);
     Optional<Ride> findFirstByDriverAndStatusAndStartTimeBeforeOrderByStartTimeAsc(Driver driver, RideStatus status, LocalDateTime max);
     Optional<Ride> findFirstByCreatorAndStatusAndStartTimeBeforeOrderByStartTimeAsc(User creator, RideStatus status, LocalDateTime max);
+    Optional<Ride> findFirstByPassengersIdAndStatusOrderByStartTimeAsc(Long id, RideStatus status);
 
 //    List<Ride> findByRideStatus(RideStatus status);
     

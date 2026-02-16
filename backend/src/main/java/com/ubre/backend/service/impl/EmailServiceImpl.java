@@ -136,7 +136,7 @@ public class EmailServiceImpl implements EmailService {
            helper.setFrom("Ubre <" + fromAddress + ">");
            mailSender.send(message);
        } catch (MessagingException ex) {
-           throw new IllegalStateException("Failed to send activation email.", ex);
+           throw new IllegalStateException("Failed to send ride receipt.", ex);
        }
    }
 
@@ -168,6 +168,29 @@ public class EmailServiceImpl implements EmailService {
             throw new IllegalStateException("Failed to send activation email.", ex);
         }
     }
+
+    @Override
+    public void sendPassengerRideInvitationEmail(String recipientEmail, Ride ride) {
+        String subject = "Your ride receipt";
+        String body = buildPassengerRideInvitationEmailBody(ride);
+
+        MimeMessage message = mailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name()
+            );
+            helper.setTo(recipientEmail);
+            helper.setSubject(subject);
+            helper.setText(body, true);
+            helper.setFrom("Ubre <" + fromAddress + ">");
+            mailSender.send(message);
+        } catch (MessagingException ex) {
+            throw new IllegalStateException("Failed to send invitation email.", ex);
+        }
+    }
+
 
     private String buildPasswordResetEmailBody(String resetLink) {
         return """
@@ -281,5 +304,74 @@ public class EmailServiceImpl implements EmailService {
                   </p>
                 </div>
                 """.formatted(ride.getStartTime().format(fmt), ride.getEndTime().format(fmt), ride.getDistance(), ride.getPrice());
+    }
+
+    private String buildPassengerRideInvitationEmailBody(Ride ride) {
+        String creatorFullName = ride.getCreator().getName() + " " + ride.getCreator().getSurname();
+        String creatorEmail = ride.getCreator().getEmail();
+
+        String startingLocation = ride.getWaypoints().get(0).getLabel();
+        startingLocation = startingLocation.length() >= 30 ? startingLocation.substring(0, 27) + "..." : startingLocation;
+
+        String endLocation = ride.getWaypoints().get(ride.getWaypoints().size()-1).getLabel();
+        endLocation = endLocation.length() >= 30 ? endLocation.substring(0, 27) + "..." : endLocation;
+
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
+        String startTime = ride.getStartTime().format(fmt);
+
+        return """
+                <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1f2937; max-width:600px; margin:0 auto; background:#ffffff; padding:24px; border-radius:8px;">
+                  
+                  <h2 style="color:#111827; margin-bottom:12px;">You have been invited to a ride!</h2>
+                  
+                  <p>
+                    You were invited to a ride by %s (%s)! To see details about the ride
+                    like the starting location and time checkout the ride details below.
+                  </p>
+                  
+                  <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:16px; margin:20px 0;">
+                    <h3 style="margin:0 0 12px 0; color:#111827;">Ride details</h3>
+                    
+                    <ul style="list-style:none; padding:0; margin:0; font-size:14px; color:#374151;">
+                        <li style="display:flex; justify-content:space-between; padding:6px 0;">
+                          <span>From: </span>
+                          <strong>%s</strong>
+                        </li>
+                        <li style="display:flex; justify-content:space-between; padding:6px 0;">
+                          <span>To: </span>
+                          <strong>%s</strong>
+                        </li>
+                        <li style="display:flex; justify-content:space-between; padding:6px 0; border-top:1px solid #e5e7eb; margin-top:8px;">
+                          <span>Start: </span>
+                          <strong>%s</strong>
+                        </li>
+                      </ul>
+                  </div>
+                  
+                  <p>
+                    Once it starts you can track the ride by logging on to your
+                    account (follow the link below to the website).
+                  </p>
+
+                  <div style="text-align:center; margin:24px 0;">
+                    <a href="http://localhost:4200"
+                       style="background:#2563eb; color:#ffffff; padding:12px 20px; text-decoration:none; border-radius:6px; font-weight:600; display:inline-block;">
+                      Track ride
+                    </a>
+                  </div>
+
+                  <p style="font-size:14px; color:#374151;">
+                    If you believe this invitation was a mistake fell free to
+                    ignore this message until the ride ends.
+                  </p>
+
+                  <hr style="border:none; border-top:1px solid #e5e7eb; margin:24px 0;"/>
+
+                  <p style="font-size:14px; color:#6b7280;">
+                    Hope you enjoy your ride,<br/>
+                    <strong>Ubre Team</strong>
+                  </p>
+                </div>
+                """.formatted(creatorFullName, creatorEmail, startingLocation, endLocation, startTime);
     }
 }

@@ -189,8 +189,8 @@
       @if ((userService.currentUser$ | async)?.role === Role.REGISTERED_USER) {
         <button 
           class="ride-button"
-          [class.disabled]="!canCancelRide()"
-          [disabled]="!canCancelRide()"
+          [class.disabled]="!canCancelRide() || (userService.currentUser$ | async)?.id !== (this.ridePlanningStore.currentRide$ | async)?.createdBy"
+          [disabled]="!canCancelRide() || (userService.currentUser$ | async)?.id !== (this.ridePlanningStore.currentRide$ | async)?.createdBy"
           (click)="onCancelUserClick()">
           <span class="ride-text">Cancel</span>
         </button> 

@@ -56,7 +56,6 @@ export class RideDetails {
     if (changes['ride']) {
       this.start = new Date(this.ride.startTime)
       this.end = new Date(this.ride.endTime)
-      console.log(this.testIdPrefix, "This is the test id")
     }
   }
 
