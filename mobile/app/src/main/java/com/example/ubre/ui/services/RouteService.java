@@ -182,6 +182,27 @@ public class RouteService {
             mapView.getOverlays().remove(lastRoutePolyline);
             mapView.invalidate();
             lastRoutePolyline = null;
+        } else {
+            // Fallback: remove any leftover route polylines that match our style.
+            List<org.osmdroid.views.overlay.Overlay> overlays = new ArrayList<>(mapView.getOverlays());
+            boolean removed = false;
+            for (org.osmdroid.views.overlay.Overlay overlay : overlays) {
+                if (overlay instanceof Polyline) {
+                    Polyline line = (Polyline) overlay;
+                    try {
+                        int color = line.getOutlinePaint().getColor();
+                        float width = line.getOutlinePaint().getStrokeWidth();
+                        if (color == Color.parseColor("#1565C0") && Math.abs(width - 10f) < 0.1f) {
+                            mapView.getOverlays().remove(overlay);
+                            removed = true;
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+            if (removed) {
+                mapView.invalidate();
+            }
         }
         if (loadingListener != null) {
             loadingListener.onLoadingChanged(false);

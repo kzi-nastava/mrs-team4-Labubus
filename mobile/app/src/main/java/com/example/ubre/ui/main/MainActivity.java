@@ -15,9 +15,6 @@ import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.text.Editable;
 import android.text.TextWatcher;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Duration;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -27,13 +24,10 @@ import android.widget.ProgressBar;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.os.Handler;
-import android.os.Looper;
 import androidx.core.app.ActivityCompat;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -45,7 +39,6 @@ import androidx.fragment.app.Fragment;
 
 import com.example.ubre.R;
 import com.example.ubre.ui.apis.ApiClient;
-import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
@@ -57,10 +50,8 @@ import com.example.ubre.ui.storages.ProfileChangeStorage;
 import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.navigation.NavigationView;
 import com.bumptech.glide.Glide;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.textfield.TextInputEditText;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import org.osmdroid.config.Configuration;
 import org.osmdroid.util.GeoPoint;
@@ -68,21 +59,10 @@ import org.osmdroid.views.MapView;
 
 import com.example.ubre.ui.dtos.WaypointDto;
 import com.example.ubre.ui.services.RouteService;
-import com.example.ubre.ui.services.RidePlanningService;
 import com.example.ubre.ui.storages.RidePlanningStorage;
 import com.example.ubre.ui.services.GeocodingService;
 import com.example.ubre.ui.utils.TextNormalizer;
-import com.example.ubre.ui.adapters.AutocompleteAdapter;
-import com.example.ubre.ui.services.PriceEstimateService;
 import com.example.ubre.ui.enums.VehicleType;
-import com.example.ubre.ui.dtos.RideOrderRequest;
-import com.example.ubre.ui.dtos.RideOrderWaypoint;
-import com.example.ubre.ui.services.RideService;
-import com.example.ubre.ui.utils.TopToast;
-import com.example.ubre.ui.dtos.RideOrderRequest;
-import com.example.ubre.ui.dtos.RideOrderWaypoint;
-import com.example.ubre.ui.services.RideService;
-import com.example.ubre.ui.utils.TopToast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,51 +82,36 @@ public class MainActivity extends AppCompatActivity {
     private View btnChat;
     private Role currentRole = Role.GUEST;
     private DrawerLayout drawer;
-    private BottomSheetBehavior<View> rideOrderSheetBehavior;
+    private RideOrderSheetController rideOrderSheetController;
+    private RideOrderUiController rideOrderUiController;
     private TextInputEditText rideOrderFromInput;
     private TextInputEditText rideOrderToInput;
     private View rideOrderUseMyLocation;
     private View rideOrderPickOnMap;
     private LinearLayout rideOrderStopsContainer;
-    private View rideOrderHandle;
     private View rideOptionStandard;
     private View rideOptionLuxury;
     private View rideOptionVan;
     private View rideOptionBabyFriendly;
     private View rideOptionPetFriendly;
     private FrameLayout rideOrderPriceContainer;
-    private TextView rideOrderPriceValue;
-    private Double lastRouteDistanceMeters;
-    private Double lastRouteDurationSeconds;
-    private Double lastPriceEstimate;
     private VehicleType selectedVehicleType = VehicleType.STANDARD;
     private View rideOrderConfirmButton;
-    private int priceRequestSeq = 0;
-    private Double lastPriceDistanceMeters;
-    private Integer lastPriceVehicleType;
+    private RideOrderLogicController rideOrderLogicController;
+    private RideOrderWaypointsController rideOrderWaypointsController;
+    private RideOrderAddWaypointController rideOrderAddWaypointController;
     private com.google.android.material.checkbox.MaterialCheckBox rideOrderScheduleCheck;
-    private View rideOrderScheduleContainer;
     private com.google.android.material.textfield.TextInputEditText rideOrderHourInput;
     private com.google.android.material.textfield.TextInputEditText rideOrderMinuteInput;
     private LinearLayout rideOrderInviteContainer;
     private RecyclerView rideOrderFromSuggestionsView;
     private RecyclerView rideOrderToSuggestionsView;
-    private AutocompleteAdapter fromSuggestionsAdapter;
-    private AutocompleteAdapter toSuggestionsAdapter;
     private boolean isPickOnMapActive = false;
     private GeocodingService geocodingService;
     private ProgressBar routeLoadingSpinner;
-    private int geocodeInFlight = 0;
-    private boolean routeLoading = false;
-    private final Handler autocompleteHandler = new Handler(Looper.getMainLooper());
-    private Runnable fromAutocompleteRunnable;
-    private Runnable toAutocompleteRunnable;
-    private java.util.List<com.example.ubre.ui.dtos.GeocodingResult> fromSuggestions = new ArrayList<>();
-    private java.util.List<com.example.ubre.ui.dtos.GeocodingResult> toSuggestions = new ArrayList<>();
-    private boolean suppressAutocomplete = false;
+    private LoadingIndicatorController loadingIndicatorController;
+    private AutocompleteController autocompleteController;
     LoginApi loginApi = ApiClient.getClient().create(LoginApi.class);
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -189,325 +154,13 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        initCoreUi();
+        initMapLayer();
+        initControllers();
+        bindRideOrderUi();
+        bindObservers();
+        loadUserIfAuthenticated();
 
-        mapView = findViewById(R.id.map);
-        mapUiController = new MapUiController(this, mapView);
-        mapUiController.init(new MapUiController.OnMapTapListener() {
-            @Override
-            public void onSingleTap(GeoPoint point) {
-                if (rideOrderSheetBehavior != null &&
-                        rideOrderSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
-                    addWaypointFromMap(point);
-                    collapseRideOrderSheet();
-                    isPickOnMapActive = false;
-                }
-            }
-
-            @Override
-            public void onLongPress(GeoPoint point) {
-            }
-        });
-        mapUiController.setupLocationOverlay(hasLocationPermission(), () -> ActivityCompat.requestPermissions(
-                this,
-                new String[]{
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                },
-                LOCATION_PERMISSION_REQUEST
-        ));
-        geocodingService = GeocodingService.getInstance(this);
-
-        drawer = findViewById(R.id.main);
-
-        findViewById(R.id.btn_menu).setOnClickListener(v ->
-                drawer.openDrawer(GravityCompat.START)
-        );
-
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        String token = sharedPreferences.getString("jwt", null);
-
-        setMenuOptions(Role.GUEST);
-
-        if (token != null && !token.isEmpty()) {
-            try { UserService.getInstance(getApplicationContext()).loadCurrentUser(); }
-            catch (Exception e) { Log.e(TAG, "Failed to load current user", e); }
-            try { UserService.getInstance(getApplicationContext()).loadCurrentUserAvatar(); }
-            catch (Exception e) { Log.e(TAG, "Failed to load current user avatar", e); }
-            // driver only (extract role from shared pref
-            String roleString = sharedPreferences.getString("role", "GUEST");
-            Role role = Role.valueOf(roleString);
-            if (role == Role.DRIVER) {
-                try { UserService.getInstance(getApplicationContext()).loadCurrentUserVehicle(); }
-                catch (Exception e) { Log.e(TAG, "Failed to load current user vehicle", e); }
-                try { UserService.getInstance(getApplicationContext()).loadCurrentUserStats(); }
-                catch (Exception e) { Log.e(TAG, "Failed to load current user stats", e); }
-            }
-        }
-
-
-
-
-
-
-
-
-
-
-        // SEKCIJA ZA OSLUŠKIVANJE PROMENA KORISNIKA
-
-        UserStorage.getInstance().getCurrentUser().observe(this, currentUser -> {
-            SharedPreferences sp2 = getSharedPreferences("app_prefs", MODE_PRIVATE);
-            String token2 = sp2.getString("jwt", null);
-            if (currentUser == null) {
-                if (token2 != null && !token2.isEmpty()) { // user se učitava, samo čekaj
-                    return;
-                }
-                // ako nema ni korisnika a ni tokena, onda je gost
-                setMenuOptions(Role.GUEST);
-                WsConnectionOwner.getInstance(getApplicationContext())
-                        .stop("MainActivity.currentUser=null");
-                return;
-            }
-            setMenuOptions(currentUser.getRole());
-            fillDrawerHeader();
-            Long userId = currentUser.getId();
-            if (userId == null || userId == 0L) {
-                return;
-            }
-            WsConnectionOwner.getInstance(getApplicationContext())
-                    .requestConnectForUser(userId, "MainActivity.currentUser");
-        });
-
-        UserStorage.getInstance().getCurrentUserAvatar().observe(this, avatar -> {
-            fillDrawerHeader();
-        });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setItemIconTintList(null);
-        navigationView.setNavigationItemSelectedListener(item -> {
-            drawer.closeDrawer(GravityCompat.START);
-
-            int itemId = item.getItemId();
-
-            if (itemId == R.id.nav_account_settings) {
-                if (UserStorage.getInstance().getCurrentUser().getValue() != null && UserStorage.getInstance().getCurrentUser().getValue().getRole() == Role.DRIVER) {
-                    showFragment(AccountSettingsFragment.newInstance());
-                    return true;
-                } else {
-                    showFragment(AccountSettingsFragment.newInstance());
-                    return true;
-                }
-            }
-            else if (itemId == R.id.nav_ride_history) { showFragment(RideHistoryFragment.newInstance()); return true; }
-            else if (itemId == R.id.nav_profile_changes) {
-                showFragment(ProfileChangesFragment.newInstance());
-                return true;
-            } else if (itemId == R.id.nav_register_driver) {
-                showFragment(RegisterDriverFragment.newInstance());
-                return true;
-            } else if (itemId == R.id.nav_log_out) {
-                logout();
-                return true;
-            } else if (itemId == R.id.nav_log_in) {
-                Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
-                startActivity(intent);
-                finish();
-                return true;
-            }
-            else if (itemId == R.id.nav_register) {
-                Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
-                startActivity(intent);
-                finish();
-                return true;
-            }
-
-            return true;
-        });
-
-        btnMenu = findViewById(R.id.btn_menu);
-        btnMapSearch = findViewById(R.id.btn_map_search);
-        btnChat = findViewById(R.id.btn_chat);
-        updateMapSearchVisibility();
-        updateGuestRideOrderState();
-        routeLoadingSpinner = findViewById(R.id.route_loading_spinner);
-
-        View rideOrderSheet = findViewById(R.id.ride_order_sheet);
-        rideOrderSheetBehavior = BottomSheetBehavior.from(rideOrderSheet);
-        rideOrderSheetBehavior.setHideable(true);
-        rideOrderSheetBehavior.setPeekHeight(dpToPx(96), true);
-        rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        rideOrderSheetBehavior.setDraggable(true);
-
-        rideOrderFromInput = findViewById(R.id.ride_order_from_input);
-        rideOrderToInput = findViewById(R.id.ride_order_to_input);
-        rideOrderUseMyLocation = findViewById(R.id.ride_order_use_my_location);
-        rideOrderPickOnMap = findViewById(R.id.ride_order_pick_on_map);
-        rideOrderStopsContainer = findViewById(R.id.ride_order_stops_container);
-        rideOrderHandle = findViewById(R.id.ride_order_handle);
-        rideOptionStandard = findViewById(R.id.ride_option_standard);
-        rideOptionLuxury = findViewById(R.id.ride_option_luxury);
-        rideOptionVan = findViewById(R.id.ride_option_van);
-        rideOptionBabyFriendly = findViewById(R.id.ride_order_baby_friendly);
-        rideOptionPetFriendly = findViewById(R.id.ride_order_pet_friendly);
-        rideOrderPriceContainer = findViewById(R.id.ride_order_price_container);
-        rideOrderScheduleCheck = findViewById(R.id.ride_order_schedule_check);
-        rideOrderScheduleContainer = findViewById(R.id.ride_order_schedule_container);
-        rideOrderHourInput = findViewById(R.id.ride_order_time_hour_input);
-        rideOrderMinuteInput = findViewById(R.id.ride_order_time_minute_input);
-        rideOrderInviteContainer = findViewById(R.id.ride_order_invite_container);
-        rideOrderConfirmButton = findViewById(R.id.ride_order_confirm);
-        rideOrderFromSuggestionsView = findViewById(R.id.ride_order_from_suggestions);
-        rideOrderToSuggestionsView = findViewById(R.id.ride_order_to_suggestions);
-
-        fromSuggestionsAdapter = new AutocompleteAdapter(position -> {
-            if (position >= 0 && position < fromSuggestions.size()) {
-                applySuggestion(fromSuggestions.get(position), true);
-                hideFromSuggestions();
-            }
-        });
-        toSuggestionsAdapter = new AutocompleteAdapter(position -> {
-            if (position >= 0 && position < toSuggestions.size()) {
-                applySuggestion(toSuggestions.get(position), false);
-                hideToSuggestions();
-            }
-        });
-
-        rideOrderFromSuggestionsView.setLayoutManager(new LinearLayoutManager(this));
-        rideOrderFromSuggestionsView.setAdapter(fromSuggestionsAdapter);
-        rideOrderToSuggestionsView.setLayoutManager(new LinearLayoutManager(this));
-        rideOrderToSuggestionsView.setAdapter(toSuggestionsAdapter);
-
-        rideOrderUseMyLocation.setOnClickListener(v -> addWaypointFromMyLocation());
-        rideOrderPickOnMap.setOnClickListener(v -> {
-            isPickOnMapActive = true;
-            collapseRideOrderSheet();
-            Toast.makeText(this, "Tap on the map to add a waypoint.", Toast.LENGTH_SHORT).show();
-        });
-
-        rideOrderHandle.setOnClickListener(v -> toggleRideOrderSheetCollapsed());
-
-        rideOptionStandard.setOnClickListener(v -> selectRideOption(rideOptionStandard));
-        rideOptionLuxury.setOnClickListener(v -> selectRideOption(rideOptionLuxury));
-        rideOptionVan.setOnClickListener(v -> selectRideOption(rideOptionVan));
-        selectRideOption(rideOptionStandard);
-
-        initRidePriceCard();
-        rideOptionBabyFriendly.setOnClickListener(v -> toggleExtraOption(rideOptionBabyFriendly));
-        rideOptionPetFriendly.setOnClickListener(v -> toggleExtraOption(rideOptionPetFriendly));
-
-        rideOrderScheduleCheck.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            rideOrderScheduleContainer.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-        });
-
-        initScheduleTimeInputs();
-        addInviteEmailRow();
-        rideOrderConfirmButton.setOnClickListener(v -> submitRideOrder());
-
-        rideOrderFromInput.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
-                geocodeFromInput(rideOrderFromInput, true);
-                hideFromSuggestions();
-                return true;
-            }
-            return false;
-        });
-
-        rideOrderToInput.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
-                geocodeFromInput(rideOrderToInput, false);
-                hideToSuggestions();
-                return true;
-            }
-            return false;
-        });
-
-        rideOrderFromInput.addTextChangedListener(new SimpleAutocompleteWatcher(true));
-        rideOrderToInput.addTextChangedListener(new SimpleAutocompleteWatcher(false));
-
-        rideOrderFromInput.setOnFocusChangeListener((v, hasFocus) -> {
-            if (!hasFocus) {
-                hideFromSuggestions();
-            }
-        });
-        rideOrderToInput.setOnFocusChangeListener((v, hasFocus) -> {
-            if (!hasFocus) {
-                hideToSuggestions();
-            }
-        });
-
-
-        btnMapSearch.setOnClickListener(v -> toggleRideOrderSheet());
-
-        drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                hideRideOrderSheet();
-            }
-        });
-
-        RidePlanningStorage.getInstance().getWaypointsReadOnly().observe(this, waypoints -> {
-            List<WaypointDto> safeWaypoints = waypoints == null ? new ArrayList<>() : waypoints;
-            renderRideOrderWaypoints(safeWaypoints);
-            if (mapUiController != null) {
-                mapUiController.syncRideOrderMarkers(safeWaypoints);
-            }
-            // Invalidate current price until we have fresh route info for this set of waypoints
-            lastRouteDistanceMeters = null;
-            lastRouteDurationSeconds = null;
-            lastPriceEstimate = null;
-            updatePriceEstimate(null);
-            if (safeWaypoints.size() >= 2) {
-                RouteService.getInstance().drawRoute(mapView, safeWaypoints);
-            } else {
-                RouteService.getInstance().clearRoute(mapView);
-            }
-        });
-
-        RouteService.getInstance().setRouteLoadingListener(isLoading -> {
-            routeLoading = isLoading;
-            updateLoadingSpinner();
-        });
-        RouteService.getInstance().setRouteInfoListener(new RouteService.RouteInfoListener() {
-            @Override
-            public void onRouteInfo(double meters, double durationSeconds) {
-                lastRouteDistanceMeters = meters;
-                lastRouteDurationSeconds = durationSeconds;
-                requestPriceEstimate();
-            }
-
-            @Override
-            public void onRouteCleared() {
-                lastRouteDistanceMeters = null;
-                lastRouteDurationSeconds = null;
-                updatePriceEstimate(null);
-            }
-        });
-
-
-
-        // Adding an observer that opens review modal when it's state is set
-        ReviewStorage.getInstance().getRideId().observe(this, (rideId) -> {
-            if (rideId != null)
-                showModal(new ReviewModalFragment());
-            else {
-                FrameLayout modalContainer = findViewById(R.id.modal_container);
-                modalContainer.setVisibility(View.GONE);
-                modalContainer.removeAllViews();
-            }
-        });
     }
 
     @Override
@@ -654,39 +307,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
         // 3) (optional) Notify backend about logout - this is not strictly necessary if using stateless JWTs
         // It is necessary because the driver can't logout in certain situations.
         // Thanks for deleting half of my code without checking with me first.
 
-    }
-
-    private void toggleRideOrderSheet() {
-        int state = rideOrderSheetBehavior.getState();
-        if (state == BottomSheetBehavior.STATE_HIDDEN) {
-            rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        } else {
-            rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        }
-    }
-
-    private void toggleRideOrderSheetCollapsed() {
-        int state = rideOrderSheetBehavior.getState();
-        if (state == BottomSheetBehavior.STATE_EXPANDED) {
-            rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        } else if (state == BottomSheetBehavior.STATE_COLLAPSED) {
-            rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        } else if (state == BottomSheetBehavior.STATE_HIDDEN) {
-            rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-        }
-    }
-
-    private void hideRideOrderSheet() {
-        if (rideOrderSheetBehavior != null &&
-                rideOrderSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
-            rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        }
     }
 
     private void updateMapSearchVisibility() {
@@ -698,27 +322,33 @@ public class MainActivity extends AppCompatActivity {
         btnMapSearch.setVisibility(!hasFragments && allowedRole ? View.VISIBLE : View.GONE);
     }
 
+    private boolean isRideOrderSheetHidden() {
+        return rideOrderSheetController == null || rideOrderSheetController.isHidden();
+    }
+
+    private void hideRideOrderSheet() {
+        if (rideOrderSheetController != null) {
+            rideOrderSheetController.hide();
+        }
+    }
+
+    private void collapseRideOrderSheet() {
+        if (rideOrderSheetController != null) {
+            rideOrderSheetController.collapse();
+        }
+    }
+
+    private void updateGuestRideOrderState() {
+        if (rideOrderSheetController != null) {
+            rideOrderSheetController.updateGuestState(currentRole == Role.GUEST);
+        }
+    }
+
     private boolean canGuestAddWaypoint() {
         if (currentRole != Role.GUEST) {
             return true;
         }
         return RidePlanningStorage.getInstance().getWaypointsSnapshot().size() < 2;
-    }
-
-    private void updateGuestRideOrderState() {
-        if (rideOrderConfirmButton == null) {
-            return;
-        }
-        boolean isGuest = currentRole == Role.GUEST;
-        rideOrderConfirmButton.setEnabled(!isGuest);
-        rideOrderConfirmButton.setAlpha(isGuest ? 0.5f : 1.0f);
-    }
-
-    private void collapseRideOrderSheet() {
-        if (rideOrderSheetBehavior != null &&
-                rideOrderSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
-            rideOrderSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        }
     }
 
     private int dpToPx(int dp) {
@@ -727,145 +357,6 @@ public class MainActivity extends AppCompatActivity {
                 dp,
                 getResources().getDisplayMetrics()
         );
-    }
-
-
-    private void addWaypointFromMyLocation() {
-        if (!canGuestAddWaypoint()) {
-            TopToast.show(this, "Guest limit", "Guests can add up to 2 waypoints.");
-            return;
-        }
-        if (mapUiController == null || mapUiController.getMyLocation() == null) {
-            Toast.makeText(this, "Current location not available yet.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        GeoPoint point = mapUiController.getMyLocation();
-        addWaypoint("My location", point);
-        int index = RidePlanningStorage.getInstance().getWaypointsSnapshot().size() - 1;
-        if (geocodingService != null) {
-            geocodeInFlight++;
-            updateLoadingSpinner();
-            geocodingService.reverse(point.getLatitude(), point.getLongitude(), new GeocodingService.GeocodingCallback() {
-                @Override
-                public void onResult(com.example.ubre.ui.dtos.GeocodingResult result) {
-                    geocodeInFlight = Math.max(0, geocodeInFlight - 1);
-                    updateLoadingSpinner();
-                    if (result == null || result.displayName == null) {
-                        return;
-                    }
-                    String label = formatShortLabel(result.displayName);
-                    runOnUiThread(() -> RidePlanningService.getInstance().updateWaypointLabelAt(index, label));
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                    geocodeInFlight = Math.max(0, geocodeInFlight - 1);
-                    updateLoadingSpinner();
-                }
-            });
-        }
-    }
-
-    private void addWaypointFromMap(GeoPoint point) {
-        if (!canGuestAddWaypoint()) {
-            TopToast.show(this, "Guest limit", "Guests can add up to 2 waypoints.");
-            return;
-        }
-        addWaypoint("Pinned location", point);
-        int index = RidePlanningStorage.getInstance().getWaypointsSnapshot().size() - 1;
-        if (geocodingService != null) {
-            geocodeInFlight++;
-            updateLoadingSpinner();
-            geocodingService.reverse(point.getLatitude(), point.getLongitude(), new GeocodingService.GeocodingCallback() {
-                @Override
-                public void onResult(com.example.ubre.ui.dtos.GeocodingResult result) {
-                    geocodeInFlight = Math.max(0, geocodeInFlight - 1);
-                    updateLoadingSpinner();
-                    if (result == null || result.displayName == null) {
-                        return;
-                    }
-                    String label = formatShortLabel(result.displayName);
-                    runOnUiThread(() -> RidePlanningService.getInstance().updateWaypointLabelAt(index, label));
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                    geocodeInFlight = Math.max(0, geocodeInFlight - 1);
-                    updateLoadingSpinner();
-                }
-            });
-        }
-    }
-
-    private void addWaypoint(String baseLabel, GeoPoint point) {
-        if (!canGuestAddWaypoint()) {
-            TopToast.show(this, "Guest limit", "Guests can add up to 2 waypoints.");
-            return;
-        }
-        int index = RidePlanningStorage.getInstance().getWaypointsSnapshot().size() + 1;
-        String label = baseLabel + " " + index;
-        WaypointDto waypoint = new WaypointDto(null, label, point.getLatitude(), point.getLongitude());
-        RidePlanningService.getInstance().addWaypoint(waypoint);
-    }
-
-    private void geocodeFromInput(TextInputEditText input, boolean isFrom) {
-        if (geocodingService == null || input.getText() == null) {
-            return;
-        }
-        String query = TextNormalizer.toLatin(input.getText().toString().trim());
-        if (query.isEmpty()) {
-            return;
-        }
-
-        geocodingService.geocode(query, new GeocodingService.GeocodingCallback() {
-            @Override
-            public void onResult(com.example.ubre.ui.dtos.GeocodingResult result) {
-                geocodeInFlight = Math.max(0, geocodeInFlight - 1);
-                updateLoadingSpinner();
-                if (result == null || result.lat == null || result.lon == null) {
-                    runOnUiThread(() -> Toast.makeText(MainActivity.this, "No results found.", Toast.LENGTH_SHORT).show());
-                    return;
-                }
-                double lat = Double.parseDouble(result.lat);
-                double lon = Double.parseDouble(result.lon);
-                String label = result.displayName == null ? query : formatShortLabel(result.displayName);
-                WaypointDto waypoint = new WaypointDto(null, label, lat, lon);
-
-                runOnUiThread(() -> {
-                    List<WaypointDto> current = RidePlanningStorage.getInstance().getWaypointsSnapshot();
-                    if (isFrom) {
-                        if (current.isEmpty()) {
-                            RidePlanningService.getInstance().addWaypoint(waypoint);
-                        } else {
-                            RidePlanningService.getInstance().updateWaypointAt(0, waypoint);
-                        }
-                    } else {
-                        if (current.size() < 2) {
-                            RidePlanningService.getInstance().addWaypoint(waypoint);
-                        } else {
-                            RidePlanningService.getInstance().updateWaypointAt(1, waypoint);
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                geocodeInFlight = Math.max(0, geocodeInFlight - 1);
-                updateLoadingSpinner();
-                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Geocoding failed.", Toast.LENGTH_SHORT).show());
-            }
-        });
-        geocodeInFlight++;
-        updateLoadingSpinner();
-    }
-
-    private void updateLoadingSpinner() {
-        if (routeLoadingSpinner == null) {
-            return;
-        }
-        boolean show = routeLoading || geocodeInFlight > 0;
-        routeLoadingSpinner.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void selectRideOption(View selected) {
@@ -882,7 +373,7 @@ public class MainActivity extends AppCompatActivity {
         } else if (selected == rideOptionLuxury) {
             selectedVehicleType = VehicleType.LUXURY;
         }
-        requestPriceEstimate();
+        rideOrderLogicController.requestPriceEstimate(selectedVehicleType);
     }
 
     private void toggleExtraOption(View option) {
@@ -897,278 +388,6 @@ public class MainActivity extends AppCompatActivity {
                 .setDuration(120)
                 .start();
         option.setElevation(dpToPx(3));
-    }
-
-    private void initScheduleTimeInputs() {
-        if (rideOrderHourInput == null || rideOrderMinuteInput == null) {
-            return;
-        }
-
-        LocalTime now = LocalTime.now();
-        rideOrderHourInput.setText(String.format("%02d", now.getHour()));
-        rideOrderMinuteInput.setText(String.format("%02d", now.getMinute()));
-
-        rideOrderHourInput.addTextChangedListener(new TimeFieldWatcher(0, 23, rideOrderMinuteInput));
-        rideOrderMinuteInput.addTextChangedListener(new TimeFieldWatcher(0, 59, null));
-    }
-
-    private void initRidePriceCard() {
-        if (rideOrderPriceContainer == null) {
-            return;
-        }
-        rideOrderPriceContainer.removeAllViews();
-        View card = getLayoutInflater().inflate(R.layout.stat_card, rideOrderPriceContainer, false);
-
-        TextView tvValue = card.findViewById(R.id.stat_value);
-        TextView tvLabel = card.findViewById(R.id.stat_label);
-
-        tvValue.setText("--");
-        tvLabel.setText("Estimated price");
-
-        rideOrderPriceContainer.addView(card);
-        rideOrderPriceValue = tvValue;
-    }
-
-    private void requestPriceEstimate() {
-        if (lastRouteDistanceMeters == null) {
-            updatePriceEstimate(null);
-            return;
-        }
-        int vehicleTypeValue = mapVehicleType(selectedVehicleType);
-        priceRequestSeq++;
-        int requestId = priceRequestSeq;
-        lastPriceDistanceMeters = lastRouteDistanceMeters;
-        lastPriceVehicleType = vehicleTypeValue;
-        lastPriceEstimate = null;
-        updatePriceEstimate(null);
-
-        PriceEstimateService.getInstance(this).estimate(lastRouteDistanceMeters, vehicleTypeValue, new PriceEstimateService.PriceEstimateCallback() {
-            @Override
-            public void onResult(Double price) {
-                runOnUiThread(() -> {
-                    if (requestId != priceRequestSeq) return;
-                    if (lastRouteDistanceMeters == null || lastPriceDistanceMeters == null) return;
-                    if (Math.abs(lastRouteDistanceMeters - lastPriceDistanceMeters) > 0.5) return;
-                    if (lastPriceVehicleType == null || lastPriceVehicleType != mapVehicleType(selectedVehicleType)) return;
-                    updatePriceEstimate(price);
-                });
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                runOnUiThread(() -> {
-                    if (requestId != priceRequestSeq) return;
-                    updatePriceEstimate(null);
-                });
-            }
-        });
-    }
-
-    private void updatePriceEstimate(Double price) {
-        if (rideOrderPriceValue == null) {
-            return;
-        }
-        if (price == null) {
-            rideOrderPriceValue.setText("--");
-            lastPriceEstimate = null;
-        } else {
-            rideOrderPriceValue.setText("$" + String.format("%.2f", price));
-            lastPriceEstimate = price;
-        }
-    }
-
-    private int mapVehicleType(VehicleType type) {
-        switch (type) {
-            case STANDARD:
-                return 0;
-            case LUXURY:
-                return 1;
-            case VAN:
-                return 2;
-            default:
-                return 0;
-        }
-    }
-
-    private void submitRideOrder() {
-        if (currentRole == Role.GUEST) {
-            TopToast.show(this, "Guest limit", "Guests cannot place orders.");
-            return;
-        }
-        List<WaypointDto> waypoints = RidePlanningStorage.getInstance().getWaypointsSnapshot();
-        if (waypoints.size() < 2) {
-            TopToast.show(this, "Order error", "Please select at least 2 waypoints.");
-            return;
-        }
-        if (lastRouteDistanceMeters == null || lastRouteDurationSeconds == null) {
-            TopToast.show(this, "Order error", "Route info is not ready yet.");
-            return;
-        }
-        if (lastPriceEstimate == null) {
-            TopToast.show(this, "Order error", "Price estimate is not ready yet.");
-            return;
-        }
-
-        Long creatorId = UserStorage.getInstance().getCurrentUser().getValue() != null
-                ? UserStorage.getInstance().getCurrentUser().getValue().getId()
-                : null;
-        if (creatorId == null) {
-            TopToast.show(this, "Order error", "User not authenticated.");
-            return;
-        }
-
-        List<String> passengers = collectPassengerEmails();
-        List<RideOrderWaypoint> orderWaypoints = new ArrayList<>();
-        for (WaypointDto wp : waypoints) {
-            orderWaypoints.add(new RideOrderWaypoint(
-                    0L,
-                    wp.getLabel(),
-                    wp.getLatitude(),
-                    wp.getLongitude(),
-                    false
-            ));
-        }
-
-        String scheduledTime = buildScheduledTimeOrEmpty();
-        if (!scheduledTime.isEmpty() && !validateScheduledTimeWindow(scheduledTime)) {
-            return;
-        }
-        int vehicleTypeValue = mapVehicleType(selectedVehicleType);
-
-        RideOrderRequest request = new RideOrderRequest(
-                0L,
-                creatorId,
-                passengers,
-                orderWaypoints,
-                vehicleTypeValue,
-                rideOptionBabyFriendly.isSelected(),
-                rideOptionPetFriendly.isSelected(),
-                scheduledTime,
-                lastRouteDistanceMeters,
-                lastRouteDurationSeconds,
-                lastPriceEstimate
-        );
-
-        RideService.getInstance().orderRide(this, request, new RideService.OrderCallback() {
-            @Override
-            public void onSuccess(RideDto ride) {
-                clearRidePlanningState();
-                TopToast.show(MainActivity.this, "Ride order", "Ride ordered successfully.");
-            }
-
-            @Override
-            public void onError(String message) {
-                TopToast.show(MainActivity.this, "Order error", message);
-            }
-        });
-    }
-
-    private boolean validateScheduledTimeWindow(String scheduledTime) {
-        try {
-            LocalDateTime scheduled = LocalDateTime.parse(scheduledTime);
-            LocalDateTime now = LocalDateTime.now();
-            if (scheduled.isBefore(now)) {
-                TopToast.show(this, "Order error", "Scheduled time cannot be in the past.");
-                return false;
-            }
-            long minutesAhead = Duration.between(now, scheduled).toMinutes();
-            if (minutesAhead > 300) {
-                TopToast.show(this, "Order error", "Scheduled time must be within 5 hours.");
-                return false;
-            }
-            return true;
-        } catch (Exception e) {
-            TopToast.show(this, "Order error", "Invalid scheduled time.");
-            return false;
-        }
-    }
-
-    private List<String> collectPassengerEmails() {
-        List<String> emails = new ArrayList<>();
-        if (rideOrderInviteContainer == null) {
-            return emails;
-        }
-        for (int i = 0; i < rideOrderInviteContainer.getChildCount(); i++) {
-            View row = rideOrderInviteContainer.getChildAt(i);
-            com.google.android.material.textfield.TextInputEditText input =
-                    row.findViewById(R.id.invite_email_input);
-            if (input != null && input.getText() != null) {
-                String value = input.getText().toString().trim();
-                if (!value.isEmpty()) {
-                    emails.add(value);
-                }
-            }
-        }
-        return emails;
-    }
-
-    private String buildScheduledTimeOrEmpty() {
-        if (rideOrderScheduleCheck == null || !rideOrderScheduleCheck.isChecked()) {
-            return "";
-        }
-        if (rideOrderHourInput == null || rideOrderMinuteInput == null
-                || rideOrderHourInput.getText() == null || rideOrderMinuteInput.getText() == null) {
-            return "";
-        }
-        String hh = rideOrderHourInput.getText().toString().trim();
-        String mm = rideOrderMinuteInput.getText().toString().trim();
-        if (hh.isEmpty() || mm.isEmpty()) {
-            return "";
-        }
-        int hour = Integer.parseInt(hh);
-        int minute = Integer.parseInt(mm);
-        java.time.LocalDate today = java.time.LocalDate.now();
-        return String.format("%sT%02d:%02d:00", today, hour, minute);
-    }
-
-    private void clearRidePlanningState() {
-        RidePlanningService.getInstance().clear();
-        if (rideOrderInviteContainer != null) {
-            rideOrderInviteContainer.removeAllViews();
-            addInviteEmailRow();
-        }
-        lastRouteDistanceMeters = null;
-        lastRouteDurationSeconds = null;
-        lastPriceEstimate = null;
-        updatePriceEstimate(null);
-        RouteService.getInstance().clearRoute(mapView);
-        if (mapUiController != null) {
-            mapUiController.clearRideOrderMarkers();
-        }
-    }
-
-    private void addInviteEmailRow() {
-        if (rideOrderInviteContainer == null) {
-            return;
-        }
-        View row = getLayoutInflater().inflate(R.layout.invite_passenger_item, rideOrderInviteContainer, false);
-        View remove = row.findViewById(R.id.invite_remove);
-        com.google.android.material.textfield.TextInputEditText input =
-                row.findViewById(R.id.invite_email_input);
-
-        remove.setOnClickListener(v -> {
-            if (rideOrderInviteContainer.getChildCount() <= 1) {
-                input.setText("");
-                input.requestFocus();
-                return;
-            }
-            rideOrderInviteContainer.removeView(row);
-        });
-
-        int index = rideOrderInviteContainer.getChildCount() + 1;
-        input.setAutofillHints("invite_email_" + index);
-        input.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_YES);
-
-        input.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_DONE) {
-                addInviteEmailRow();
-                return true;
-            }
-            return false;
-        });
-
-        rideOrderInviteContainer.addView(row);
-        input.requestFocus();
     }
 
     private class TimeFieldWatcher implements TextWatcher {
@@ -1213,229 +432,383 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void requestAutocomplete(String rawQuery, boolean isFrom) {
-        if (geocodingService == null) {
-            return;
-        }
-        if (isFrom && !rideOrderFromInput.hasFocus()) {
-            hideFromSuggestions();
-            return;
-        }
-        if (!isFrom && !rideOrderToInput.hasFocus()) {
-            hideToSuggestions();
-            return;
-        }
-        String query = TextNormalizer.toLatin(rawQuery.trim());
-        if (query.length() < 3) {
-            if (isFrom) {
-                fromSuggestions = new ArrayList<>();
-                fromSuggestionsAdapter.setItems(new ArrayList<>());
-                hideFromSuggestions();
-            } else {
-                toSuggestions = new ArrayList<>();
-                toSuggestionsAdapter.setItems(new ArrayList<>());
-                hideToSuggestions();
-            }
-            return;
-        }
-
-        geocodingService.search(query, 6, new GeocodingService.SearchCallback() {
-            @Override
-            public void onResult(List<com.example.ubre.ui.dtos.GeocodingResult> results) {
-                runOnUiThread(() -> {
-                    List<com.example.ubre.ui.dtos.GeocodingResult> safe = results == null ? new ArrayList<>() : results;
-                    ArrayList<String> labels = new ArrayList<>();
-                    for (com.example.ubre.ui.dtos.GeocodingResult r : safe) {
-                        if (r != null && r.displayName != null) {
-                            labels.add(TextNormalizer.toLatin(r.displayName));
-                        }
-                    }
-                    if (isFrom) {
-                        fromSuggestions = safe;
-                        fromSuggestionsAdapter.setQuery(query);
-                        fromSuggestionsAdapter.setItems(labels);
-                        rideOrderFromSuggestionsView.setVisibility(labels.isEmpty() ? View.GONE : View.VISIBLE);
-                    } else {
-                        toSuggestions = safe;
-                        toSuggestionsAdapter.setQuery(query);
-                        toSuggestionsAdapter.setItems(labels);
-                        rideOrderToSuggestionsView.setVisibility(labels.isEmpty() ? View.GONE : View.VISIBLE);
-                    }
-                });
-            }
-
-            @Override
-            public void onError(Throwable t) {
-            }
-        });
-    }
-
-    private void hideFromSuggestions() {
-        rideOrderFromSuggestionsView.setVisibility(View.GONE);
-    }
-
-    private void hideToSuggestions() {
-        rideOrderToSuggestionsView.setVisibility(View.GONE);
-    }
-
-    private void applySuggestion(com.example.ubre.ui.dtos.GeocodingResult result, boolean isFrom) {
-        if (result == null || result.lat == null || result.lon == null) {
-            return;
-        }
-        double lat = Double.parseDouble(result.lat);
-        double lon = Double.parseDouble(result.lon);
-        String label = result.displayName == null ? "" : TextNormalizer.toLatin(result.displayName);
-        WaypointDto waypoint = new WaypointDto(null, label, lat, lon);
-        suppressAutocomplete = true;
-        List<WaypointDto> current = RidePlanningStorage.getInstance().getWaypointsSnapshot();
-        if (isFrom) {
-            if (current.isEmpty()) {
-                RidePlanningService.getInstance().addWaypoint(waypoint);
-            } else {
-                RidePlanningService.getInstance().updateWaypointAt(0, waypoint);
-            }
-            hideFromSuggestions();
-            rideOrderFromInput.setText(label);
-            rideOrderFromInput.clearFocus();
-        } else {
-            if (current.size() < 2) {
-                RidePlanningService.getInstance().addWaypoint(waypoint);
-            } else {
-                RidePlanningService.getInstance().updateWaypointAt(1, waypoint);
-            }
-            hideToSuggestions();
-            rideOrderToInput.setText(label);
-            rideOrderToInput.clearFocus();
-        }
-        suppressAutocomplete = false;
-    }
-
-    private class SimpleAutocompleteWatcher implements TextWatcher {
-        private final boolean isFrom;
-
-        SimpleAutocompleteWatcher(boolean isFrom) {
-            this.isFrom = isFrom;
-        }
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            if (suppressAutocomplete) {
-                return;
-            }
-            if (isFrom) {
-                if (fromAutocompleteRunnable != null) {
-                    autocompleteHandler.removeCallbacks(fromAutocompleteRunnable);
-                }
-                fromAutocompleteRunnable = () -> requestAutocomplete(s.toString(), true);
-                autocompleteHandler.postDelayed(fromAutocompleteRunnable, 350);
-            } else {
-                if (toAutocompleteRunnable != null) {
-                    autocompleteHandler.removeCallbacks(toAutocompleteRunnable);
-                }
-                toAutocompleteRunnable = () -> requestAutocomplete(s.toString(), false);
-                autocompleteHandler.postDelayed(toAutocompleteRunnable, 350);
-            }
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-        }
-    }
-
-
     private String formatShortLabel(String displayName) {
         return TextNormalizer.toLatin(displayName).trim();
-    }
-
-    private String ellipsizeLabel(String text, int maxChars) {
-        if (text == null) {
-            return "";
-        }
-        if (text.length() <= maxChars) {
-            return text;
-        }
-        return text.substring(0, Math.max(0, maxChars - 3)).trim() + "...";
-    }
-
-    private void renderRideOrderWaypoints(List<WaypointDto> waypoints) {
-        if (waypoints.isEmpty()) {
-            rideOrderFromInput.setText("");
-            rideOrderToInput.setText("");
-            rideOrderUseMyLocation.setVisibility(View.VISIBLE);
-            rideOrderStopsContainer.removeAllViews();
-            return;
-        }
-
-        WaypointDto first = waypoints.get(0);
-        rideOrderFromInput.setText(first.getLabel());
-        rideOrderUseMyLocation.setVisibility(View.GONE);
-
-        if (waypoints.size() >= 2) {
-            WaypointDto second = waypoints.get(1);
-            rideOrderToInput.setText(second.getLabel());
-        } else {
-            rideOrderToInput.setText("");
-        }
-
-        rideOrderStopsContainer.removeAllViews();
-        for (int i = 0; i < waypoints.size(); i++) {
-            int index = i;
-            WaypointDto waypoint = waypoints.get(i);
-
-            LinearLayout row = new LinearLayout(this);
-            row.setOrientation(LinearLayout.HORIZONTAL);
-            row.setGravity(android.view.Gravity.CENTER_VERTICAL);
-            row.setBackground(ContextCompat.getDrawable(this, R.drawable.bg_waypoint_chip));
-            row.setPadding(dpToPx(12), dpToPx(8), dpToPx(8), dpToPx(8));
-
-            TextView label = new TextView(this);
-            String displayLabel = ellipsizeLabel(waypoint.getLabel(), 44);
-            label.setText((i + 1) + ".\u00A0\u00A0" + displayLabel);
-            label.setTextColor(ContextCompat.getColor(this, R.color.text_primary));
-            label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-            label.setTypeface(ResourcesCompat.getFont(this, R.font.poppins_medium));
-            LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(
-                    0,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    1f
-            );
-            label.setLayoutParams(labelParams);
-
-            ImageView remove = new ImageView(this);
-            remove.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_cancel));
-            remove.setColorFilter(ContextCompat.getColor(this, R.color.text_secondary));
-            LinearLayout.LayoutParams removeParams = new LinearLayout.LayoutParams(
-                    dpToPx(18),
-                    dpToPx(18)
-            );
-            remove.setLayoutParams(removeParams);
-            remove.setOnClickListener(v -> removeWaypointAt(index));
-
-            row.addView(label);
-            row.addView(remove);
-
-            LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            rowParams.setMargins(0, dpToPx(6), 0, 0);
-            row.setLayoutParams(rowParams);
-
-            rideOrderStopsContainer.addView(row);
-        }
-    }
-
-    private void removeWaypointAt(int index) {
-        RidePlanningService.getInstance().removeWaypointAt(index);
     }
 
     private boolean hasLocationPermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void initMapLayer() {
+        mapView = findViewById(R.id.map);
+        mapUiController = new MapUiController(this, mapView);
+        mapUiController.init(new MapUiController.OnMapTapListener() {
+            @Override
+            public void onSingleTap(GeoPoint point) {
+                if (!isRideOrderSheetHidden()) {
+                    if (rideOrderAddWaypointController != null) {
+                        rideOrderAddWaypointController.addFromMap(point);
+                    }
+                    collapseRideOrderSheet();
+                    isPickOnMapActive = false;
+                }
+            }
+
+            @Override
+            public void onLongPress(GeoPoint point) {
+            }
+        });
+        mapUiController.setupLocationOverlay(hasLocationPermission(), () -> ActivityCompat.requestPermissions(
+                this,
+                new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                },
+                LOCATION_PERMISSION_REQUEST
+        ));
+        geocodingService = GeocodingService.getInstance(this);
+    }
+
+    private void initCoreUi() {
+        drawer = findViewById(R.id.main);
+        findViewById(R.id.btn_menu).setOnClickListener(v ->
+                drawer.openDrawer(GravityCompat.START)
+        );
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setItemIconTintList(null);
+        navigationView.setNavigationItemSelectedListener(item -> {
+            drawer.closeDrawer(GravityCompat.START);
+
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_account_settings) {
+                if (UserStorage.getInstance().getCurrentUser().getValue() != null && UserStorage.getInstance().getCurrentUser().getValue().getRole() == Role.DRIVER) {
+                    showFragment(AccountSettingsFragment.newInstance());
+                    return true;
+                } else {
+                    showFragment(AccountSettingsFragment.newInstance());
+                    return true;
+                }
+            }
+            else if (itemId == R.id.nav_ride_history) { showFragment(RideHistoryFragment.newInstance()); return true; }
+            else if (itemId == R.id.nav_profile_changes) {
+                showFragment(ProfileChangesFragment.newInstance());
+                return true;
+            } else if (itemId == R.id.nav_register_driver) {
+                showFragment(RegisterDriverFragment.newInstance());
+                return true;
+            } else if (itemId == R.id.nav_log_out) {
+                logout();
+                return true;
+            } else if (itemId == R.id.nav_log_in) {
+                Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
+                startActivity(intent);
+                finish();
+                return true;
+            }
+            else if (itemId == R.id.nav_register) {
+                Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
+                startActivity(intent);
+                finish();
+                return true;
+            }
+
+            return true;
+        });
+
+        btnMenu = findViewById(R.id.btn_menu);
+        btnMapSearch = findViewById(R.id.btn_map_search);
+        btnChat = findViewById(R.id.btn_chat);
+        updateMapSearchVisibility();
+        routeLoadingSpinner = findViewById(R.id.route_loading_spinner);
+        loadingIndicatorController = new LoadingIndicatorController(routeLoadingSpinner);
+    }
+
+    private void initControllers() {
+        rideOrderUiController = new RideOrderUiController(this);
+        rideOrderFromInput = rideOrderUiController.fromInput;
+        rideOrderToInput = rideOrderUiController.toInput;
+        rideOrderUseMyLocation = rideOrderUiController.useMyLocation;
+        rideOrderPickOnMap = rideOrderUiController.pickOnMap;
+        rideOrderStopsContainer = (LinearLayout) rideOrderUiController.stopsContainer;
+        rideOptionStandard = rideOrderUiController.optionStandard;
+        rideOptionLuxury = rideOrderUiController.optionLuxury;
+        rideOptionVan = rideOrderUiController.optionVan;
+        rideOptionBabyFriendly = rideOrderUiController.optionBaby;
+        rideOptionPetFriendly = rideOrderUiController.optionPet;
+        rideOrderPriceContainer = (FrameLayout) rideOrderUiController.priceContainer;
+        rideOrderScheduleCheck = rideOrderUiController.scheduleCheck;
+        rideOrderHourInput = rideOrderUiController.hourInput;
+        rideOrderMinuteInput = rideOrderUiController.minuteInput;
+        rideOrderInviteContainer = (LinearLayout) rideOrderUiController.inviteContainer;
+        rideOrderConfirmButton = rideOrderUiController.confirmButton;
+        rideOrderFromSuggestionsView = rideOrderUiController.fromSuggestionsView;
+        rideOrderToSuggestionsView = rideOrderUiController.toSuggestionsView;
+
+        rideOrderSheetController = new RideOrderSheetController(
+                rideOrderUiController.rideOrderSheet,
+                rideOrderConfirmButton,
+                dpToPx(96)
+        );
+        updateGuestRideOrderState();
+
+        rideOrderLogicController = new RideOrderLogicController(
+                this,
+                rideOrderPriceContainer,
+                rideOrderScheduleCheck,
+                rideOrderHourInput,
+                rideOrderMinuteInput,
+                rideOrderInviteContainer,
+                mapView,
+                mapUiController
+        );
+        rideOrderWaypointsController = new RideOrderWaypointsController(
+                this,
+                rideOrderStopsContainer,
+                rideOrderFromInput,
+                rideOrderToInput,
+                rideOrderUseMyLocation
+        );
+        rideOrderAddWaypointController = new RideOrderAddWaypointController(
+                this,
+                mapUiController,
+                geocodingService,
+                this::canGuestAddWaypoint,
+                this::formatShortLabel,
+                new RideOrderAddWaypointController.GeocodeCallbacks() {
+                    @Override
+                    public void onStart() {
+                        if (loadingIndicatorController != null) {
+                            loadingIndicatorController.onGeocodeStart();
+                        }
+                    }
+
+                    @Override
+                    public void onEnd() {
+                        if (loadingIndicatorController != null) {
+                            loadingIndicatorController.onGeocodeEnd();
+                        }
+                    }
+                }
+        );
+
+        autocompleteController = new AutocompleteController(
+                this,
+                geocodingService,
+                rideOrderFromInput,
+                rideOrderToInput,
+                rideOrderFromSuggestionsView,
+                rideOrderToSuggestionsView,
+                this::formatShortLabel,
+                new AutocompleteController.LoadingCallbacks() {
+                    @Override
+                    public void onStart() {
+                        if (loadingIndicatorController != null) {
+                            loadingIndicatorController.onGeocodeStart();
+                        }
+                    }
+
+                    @Override
+                    public void onEnd() {
+                        if (loadingIndicatorController != null) {
+                            loadingIndicatorController.onGeocodeEnd();
+                        }
+                    }
+                }
+        );
+        rideOrderUiController.bindAdapters(
+                autocompleteController.getFromAdapter(),
+                autocompleteController.getToAdapter()
+        );
+        autocompleteController.bind();
+    }
+
+    private void bindRideOrderUi() {
+        rideOrderUiController.bindCallbacks(new RideOrderUiController.Callbacks() {
+            @Override
+            public void onUseMyLocation() {
+                if (rideOrderAddWaypointController != null) {
+                    rideOrderAddWaypointController.addFromMyLocation();
+                }
+            }
+
+            @Override
+            public void onPickOnMap() {
+                isPickOnMapActive = true;
+                collapseRideOrderSheet();
+                Toast.makeText(MainActivity.this, "Tap on the map to add a waypoint.", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onToggleCollapsed() {
+                rideOrderSheetController.toggleCollapsed();
+            }
+
+            @Override
+            public void onSelectOption(View option) {
+                selectRideOption(option);
+            }
+
+            @Override
+            public void onToggleExtra(View option) {
+                toggleExtraOption(option);
+            }
+
+            @Override
+            public void onConfirm() {
+                rideOrderLogicController.submitRideOrder(
+                        currentRole,
+                        selectedVehicleType,
+                        rideOptionBabyFriendly.isSelected(),
+                        rideOptionPetFriendly.isSelected()
+                );
+            }
+
+            @Override
+            public boolean onFromEditorAction(int actionId) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    if (autocompleteController != null) {
+                        autocompleteController.geocodeFromInput(rideOrderFromInput, true);
+                        autocompleteController.hideFromSuggestions();
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onToEditorAction(int actionId) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    if (autocompleteController != null) {
+                        autocompleteController.geocodeFromInput(rideOrderToInput, false);
+                        autocompleteController.hideToSuggestions();
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void onFromFocusLost() {
+                if (autocompleteController != null) {
+                    autocompleteController.hideFromSuggestions();
+                }
+            }
+
+            @Override
+            public void onToFocusLost() {
+                if (autocompleteController != null) {
+                    autocompleteController.hideToSuggestions();
+                }
+            }
+        });
+
+        selectRideOption(rideOptionStandard);
+        rideOrderLogicController.initRidePriceCard();
+        rideOrderLogicController.initScheduleTimeInputs((min, max, next) -> new TimeFieldWatcher(min, max, next));
+        rideOrderLogicController.addInviteEmailRow();
+
+        btnMapSearch.setOnClickListener(v -> rideOrderSheetController.toggle());
+        drawer.addDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                hideRideOrderSheet();
+            }
+        });
+    }
+
+    private void bindObservers() {
+        RidePlanningStorage.getInstance().getWaypointsReadOnly().observe(this, waypoints -> {
+            List<WaypointDto> safeWaypoints = waypoints == null ? new ArrayList<>() : waypoints;
+            rideOrderWaypointsController.renderWaypoints(safeWaypoints);
+            if (mapUiController != null) {
+                mapUiController.syncRideOrderMarkers(safeWaypoints);
+            }
+            rideOrderLogicController.resetRouteAndPriceOnWaypointsChanged();
+            if (safeWaypoints.size() >= 2) {
+                RouteService.getInstance().drawRoute(mapView, safeWaypoints);
+            } else {
+                RouteService.getInstance().clearRoute(mapView);
+            }
+        });
+
+        RouteService.getInstance().setRouteLoadingListener(isLoading -> {
+            if (loadingIndicatorController != null) {
+                loadingIndicatorController.onRouteLoadingChanged(isLoading);
+            }
+        });
+        RouteService.getInstance().setRouteInfoListener(new RouteService.RouteInfoListener() {
+            @Override
+            public void onRouteInfo(double meters, double durationSeconds) {
+                rideOrderLogicController.onRouteInfo(meters, durationSeconds, selectedVehicleType);
+            }
+
+            @Override
+            public void onRouteCleared() {
+                rideOrderLogicController.onRouteCleared();
+            }
+        });
+
+        ReviewStorage.getInstance().getRideId().observe(this, (rideId) -> {
+            if (rideId != null)
+                showModal(new ReviewModalFragment());
+            else {
+                FrameLayout modalContainer = findViewById(R.id.modal_container);
+                modalContainer.setVisibility(View.GONE);
+                modalContainer.removeAllViews();
+            }
+        });
+
+        UserStorage.getInstance().getCurrentUser().observe(this, currentUser -> {
+            SharedPreferences sp2 = getSharedPreferences("app_prefs", MODE_PRIVATE);
+            String token2 = sp2.getString("jwt", null);
+            if (currentUser == null) {
+                if (token2 != null && !token2.isEmpty()) {
+                    return;
+                }
+                setMenuOptions(Role.GUEST);
+                WsConnectionOwner.getInstance(getApplicationContext())
+                        .stop("MainActivity.currentUser=null");
+                return;
+            }
+            setMenuOptions(currentUser.getRole());
+            fillDrawerHeader();
+            Long userId = currentUser.getId();
+            if (userId == null || userId == 0L) {
+                return;
+            }
+            WsConnectionOwner.getInstance(getApplicationContext())
+                    .requestConnectForUser(userId, "MainActivity.currentUser");
+        });
+
+        UserStorage.getInstance().getCurrentUserAvatar().observe(this, avatar -> {
+            fillDrawerHeader();
+        });
+    }
+
+    private void loadUserIfAuthenticated() {
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        setMenuOptions(Role.GUEST);
+
+        if (token != null && !token.isEmpty()) {
+            try { UserService.getInstance(getApplicationContext()).loadCurrentUser(); }
+            catch (Exception e) { Log.e(TAG, "Failed to load current user", e); }
+            try { UserService.getInstance(getApplicationContext()).loadCurrentUserAvatar(); }
+            catch (Exception e) { Log.e(TAG, "Failed to load current user avatar", e); }
+            String roleString = sharedPreferences.getString("role", "GUEST");
+            Role role = Role.valueOf(roleString);
+            if (role == Role.DRIVER) {
+                try { UserService.getInstance(getApplicationContext()).loadCurrentUserVehicle(); }
+                catch (Exception e) { Log.e(TAG, "Failed to load current user vehicle", e); }
+                try { UserService.getInstance(getApplicationContext()).loadCurrentUserStats(); }
+                catch (Exception e) { Log.e(TAG, "Failed to load current user stats", e); }
+            }
+        }
     }
 
     @Override
