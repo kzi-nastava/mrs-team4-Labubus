@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.example.ubre.ui.enums.Role;
+import com.example.ubre.ui.services.RideService;
 import com.example.ubre.ui.services.UserService;
 
 class AuthLoader {
@@ -32,6 +33,8 @@ class AuthLoader {
             catch (Exception e) { Log.e(TAG, "Failed to load current user", e); }
             try { UserService.getInstance(appContext).loadCurrentUserAvatar(); }
             catch (Exception e) { Log.e(TAG, "Failed to load current user avatar", e); }
+            try { RideService.getInstance().getCurrentRide(appContext); }
+            catch (Exception e) { Log.e(TAG, "Failed to load current ride", e); }
             String roleString = sharedPreferences.getString("role", "GUEST");
             Role role;
             try {

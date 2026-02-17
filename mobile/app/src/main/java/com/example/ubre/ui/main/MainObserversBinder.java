@@ -9,6 +9,7 @@ import com.example.ubre.ui.dtos.WaypointDto;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.services.RouteService;
 import com.example.ubre.ui.services.WsConnectionOwner;
+import com.example.ubre.ui.storages.CurrentRideStorage;
 import com.example.ubre.ui.storages.ReviewStorage;
 import com.example.ubre.ui.storages.RidePlanningStorage;
 import com.example.ubre.ui.storages.UserStorage;
@@ -58,18 +59,60 @@ class MainObserversBinder {
         bound = true;
         bindRidePlanning();
         bindRoute();
+        bindCurrentRide();
         bindReviewModal();
         bindUser();
     }
 
     private void bindRidePlanning() {
         RidePlanningStorage.getInstance().getWaypointsReadOnly().observe(activity, waypoints -> {
+            if (CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue() != null) {
+                return;
+            }
             List<WaypointDto> safeWaypoints = waypoints == null ? new ArrayList<>() : new ArrayList<>(waypoints);
             rideOrderWaypointsController.renderWaypoints(safeWaypoints);
             if (mapUiController != null) {
                 mapUiController.syncRideOrderMarkers(safeWaypoints);
             }
             rideOrderLogicController.resetRouteAndPriceOnWaypointsChanged();
+            if (safeWaypoints.size() >= 2) {
+                RouteService.getInstance().drawRoute(mapView, safeWaypoints);
+            } else {
+                RouteService.getInstance().clearRoute(mapView);
+            }
+        });
+    }
+
+    private void bindCurrentRide() {
+        CurrentRideStorage.getInstance().getCurrentRideReadOnly().observe(activity, ride -> {
+            activity.setCurrentRideActive(ride != null);
+            if (mapUiController == null || mapView == null) {
+                return;
+            }
+            if (ride == null) {
+                List<WaypointDto> planning = RidePlanningStorage.getInstance().getWaypointsSnapshot();
+                if (planning == null || planning.isEmpty()) {
+                    mapUiController.clearRideOrderMarkers();
+                    RouteService.getInstance().clearRoute(mapView);
+                } else {
+                    mapUiController.syncRideOrderMarkers(planning);
+                    if (planning.size() >= 2) {
+                        RouteService.getInstance().drawRoute(mapView, planning);
+                    } else {
+                        RouteService.getInstance().clearRoute(mapView);
+                    }
+                }
+                return;
+            }
+
+            List<WaypointDto> waypoints = ride.getWaypoints();
+            List<WaypointDto> safeWaypoints = waypoints == null ? new ArrayList<>() : new ArrayList<>(waypoints);
+            if (safeWaypoints.isEmpty()) {
+                mapUiController.clearRideOrderMarkers();
+                RouteService.getInstance().clearRoute(mapView);
+                return;
+            }
+            mapUiController.syncRideOrderMarkers(safeWaypoints);
             if (safeWaypoints.size() >= 2) {
                 RouteService.getInstance().drawRoute(mapView, safeWaypoints);
             } else {

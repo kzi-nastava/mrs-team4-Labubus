@@ -13,6 +13,7 @@ import com.example.ubre.ui.notifications.RideAssignmentNotification;
 import com.example.ubre.ui.notifications.CurrentRideNotification;
 import com.example.ubre.ui.notifications.RideReminderNotification;
 import com.example.ubre.ui.utils.TopToast;
+import com.example.ubre.ui.storages.CurrentRideStorage;
 import com.google.gson.Gson;
 
 public class WsConnectionOwner {
@@ -217,16 +218,19 @@ public class WsConnectionOwner {
             return;
         }
         if (notification.getStatus() == NotificationType.TIME_FOR_A_RIDE) {
-            onTimeForRide();
+            onTimeForRide(notification);
         } else if (notification.getStatus() == NotificationType.RIDE_STARTED) {
             onRideStarted();
         }
     }
 
-    private void onTimeForRide() {
-        mainHandler.post(() ->
-                TopToast.show(appContext, "Get ready", "Your ride is starting soon...")
-        );
+    private void onTimeForRide(CurrentRideNotification notification) {
+        mainHandler.post(() -> {
+            TopToast.show(appContext, "Get ready", "Your ride is starting soon...");
+            if (notification != null && notification.getRide() != null) {
+                CurrentRideStorage.getInstance().setCurrentRide(notification.getRide());
+            }
+        });
     }
 
     private void onRideStarted() {

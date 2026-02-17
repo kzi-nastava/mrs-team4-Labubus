@@ -40,4 +40,10 @@ public interface RideApi {
 
     @POST("api/rides/order")
     Call<RideDto> orderRide(@Header("Authorization") String authHeader, @Body RideOrderRequest request);
+
+    @GET("api/rides/current")
+    Call<ResponseBody> getCurrentRide(@Header("Authorization") String authHeader);
+
+    @POST("api/rides/{id}/start")
+    Call<ResponseBody> startRide(@Header("Authorization") String authHeader, @Path("id") Long id);
 }

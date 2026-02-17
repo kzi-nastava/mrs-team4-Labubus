@@ -17,6 +17,7 @@ import com.example.ubre.ui.services.PriceEstimateService;
 import com.example.ubre.ui.services.RidePlanningService;
 import com.example.ubre.ui.services.RideService;
 import com.example.ubre.ui.services.RouteService;
+import com.example.ubre.ui.storages.CurrentRideStorage;
 import com.example.ubre.ui.storages.RidePlanningStorage;
 import com.example.ubre.ui.storages.UserStorage;
 import com.example.ubre.ui.utils.TopToast;
@@ -217,6 +218,7 @@ public class RideOrderLogicController {
             @Override
             public void onSuccess(RideDto ride) {
                 clearRidePlanningState();
+                CurrentRideStorage.getInstance().setCurrentRide(ride);
                 TopToast.show(activity, "Ride order", "Ride ordered successfully.");
             }
 

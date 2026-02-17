@@ -22,6 +22,7 @@ import com.example.ubre.ui.apis.LoginApi;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.services.WsConnectionOwner;
+import com.example.ubre.ui.storages.CurrentRideStorage;
 import com.example.ubre.ui.storages.ProfileChangeStorage;
 import com.example.ubre.ui.storages.RidePlanningStorage;
 import com.example.ubre.ui.storages.UserStorage;
@@ -181,6 +182,7 @@ public class MainDrawerController {
                     UserStorage.getInstance().clearUserStorage();
                     ProfileChangeStorage.getInstance().clearProfileChangeStorage();
                     RidePlanningStorage.getInstance().clear();
+                    CurrentRideStorage.getInstance().clear();
                     Toast.makeText(activity.getApplicationContext(), "Logout successful", Toast.LENGTH_SHORT).show();
                     goToLogin();
                 } else {

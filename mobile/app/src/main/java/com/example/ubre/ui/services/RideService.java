@@ -10,9 +10,13 @@ import com.example.ubre.ui.apis.RideApi;
 import com.example.ubre.ui.dtos.RideCardDto;
 import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.dtos.RideOrderRequest;
+import com.example.ubre.ui.enums.RideStatus;
+import com.example.ubre.ui.utils.TopToast;
 import com.example.ubre.ui.storages.RideDetailsStorage;
 import com.example.ubre.ui.storages.RideHistoryStorage;
 import com.example.ubre.ui.storages.UserStorage;
+import com.example.ubre.ui.storages.CurrentRideStorage;
+import com.google.gson.Gson;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -27,6 +31,7 @@ public class RideService {
     private static RideService instance;
 
     private RideApi api;
+    private final Gson gson = new Gson();
 
     private RideService() {
         this.api = ApiClient.getClient().create(RideApi.class);
@@ -98,6 +103,63 @@ public class RideService {
         api.getRideById("Bearer " + token, id).enqueue(callback);
     }
 
+    public void getCurrentRide(Context context) throws Exception {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            throw new Exception("User not authenticated");
+        }
+
+        Callback<ResponseBody> callback = new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.code() == 404) {
+                    CurrentRideStorage.getInstance().clear();
+                    return;
+                }
+                if (!response.isSuccessful()) {
+                    Toast.makeText(context, "Current ride fetch failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                ResponseBody body = response.body();
+                if (body == null) {
+                    CurrentRideStorage.getInstance().clear();
+                    return;
+                }
+                String raw;
+                try {
+                    raw = body.string();
+                } catch (Exception e) {
+                    Toast.makeText(context, "Current ride parse error", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (raw == null || raw.trim().isEmpty()) {
+                    CurrentRideStorage.getInstance().clear();
+                    return;
+                }
+                try {
+                    RideDto ride = gson.fromJson(raw, RideDto.class);
+                    if (ride != null) {
+                        CurrentRideStorage.getInstance().setCurrentRide(ride);
+                    } else {
+                        CurrentRideStorage.getInstance().clear();
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(context, "Current ride parse error", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("CURRENT RIDE FETCH", t.getMessage());
+            }
+        };
+
+        api.getCurrentRide("Bearer " + token).enqueue(callback);
+    }
+
     public void toggleFavorite(Context context, RideCardDto ride) throws Exception {
         SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
         String token = sharedPreferences.getString("jwt", null);
@@ -167,6 +229,40 @@ public class RideService {
             @Override
             public void onFailure(Call<RideDto> call, Throwable t) {
                 callback.onError(buildOrderErrorMessage(null, t));
+            }
+        });
+    }
+
+    public void startRide(Context context, Long rideId) throws Exception {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            throw new Exception("User not authenticated");
+        }
+        if (rideId == null || rideId == 0L) {
+            throw new Exception("Invalid ride id");
+        }
+
+        api.startRide("Bearer " + token, rideId).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (!response.isSuccessful()) {
+                    Toast.makeText(context, "Start ride failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                RideDto current = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue();
+                if (current != null) {
+                    current.setStatus(RideStatus.IN_PROGRESS);
+                    CurrentRideStorage.getInstance().setCurrentRide(current);
+                }
+                TopToast.show(context, "Ride started", "Please drive carefully and enjoy your ride.");
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("START RIDE", t.getMessage());
             }
         });
     }

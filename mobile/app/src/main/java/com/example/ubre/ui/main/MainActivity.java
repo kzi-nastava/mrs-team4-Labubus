@@ -22,6 +22,9 @@ import androidx.fragment.app.Fragment;
 
 import com.example.ubre.R;
 import com.example.ubre.ui.enums.Role;
+import com.example.ubre.ui.enums.RideStatus;
+import com.example.ubre.ui.services.RideService;
+import com.example.ubre.ui.storages.CurrentRideStorage;
 import com.example.ubre.ui.storages.ProfileChangeStorage;
 import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.navigation.NavigationView;
@@ -44,7 +47,9 @@ public class MainActivity extends AppCompatActivity {
     private View btnMenu;
     private View btnMapSearch;
     private View btnChat;
+    private View btnStartRide;
     private Role currentRole = Role.GUEST;
+    private boolean hasCurrentRide = false;
     private DrawerLayout drawer;
     private MainDrawerController drawerController;
     private MapLayerController mapLayerController;
@@ -104,12 +109,14 @@ public class MainActivity extends AppCompatActivity {
                 if (mapView != null) mapView.setVisibility(View.INVISIBLE);
                 if (btnMenu != null) btnMenu.setVisibility(View.GONE);
                 updateMapSearchVisibility();
+                updateStartRideState();
                 if (btnChat != null) btnChat.setVisibility(View.GONE);
             } else {
                 findViewById(R.id.fragment_container).setVisibility(View.GONE);
                 if (mapView != null) mapView.setVisibility(View.VISIBLE);
                 if (btnMenu != null) btnMenu.setVisibility(View.VISIBLE);
                 updateMapSearchVisibility();
+                updateStartRideState();
                 if (btnChat != null) btnChat.setVisibility(View.VISIBLE);
             }
         });
@@ -175,7 +182,13 @@ public class MainActivity extends AppCompatActivity {
         }
         boolean hasFragments = getSupportFragmentManager().getBackStackEntryCount() > 0;
         boolean allowedRole = currentRole == Role.GUEST || currentRole == Role.REGISTERED_USER;
-        btnMapSearch.setVisibility(!hasFragments && allowedRole ? View.VISIBLE : View.GONE);
+        boolean visible = !hasFragments && allowedRole;
+        btnMapSearch.setVisibility(visible ? View.VISIBLE : View.GONE);
+        if (visible) {
+            boolean enabled = !hasCurrentRide;
+            btnMapSearch.setEnabled(enabled);
+            btnMapSearch.setAlpha(enabled ? 1.0f : 0.5f);
+        }
     }
 
     private boolean isRideOrderSheetHidden() {
@@ -197,7 +210,28 @@ public class MainActivity extends AppCompatActivity {
 
     void updateGuestRideOrderState() {
         if (rideOrderSheetController != null) {
-            rideOrderSheetController.updateGuestState(currentRole == Role.GUEST);
+            rideOrderSheetController.updateGuestState(currentRole == Role.GUEST || hasCurrentRide);
+        }
+    }
+
+    private void updateStartRideState() {
+        if (btnStartRide == null) {
+            return;
+        }
+        boolean isDriver = currentRole == Role.DRIVER;
+        boolean hasFragments = getSupportFragmentManager().getBackStackEntryCount() > 0;
+        btnStartRide.setVisibility(isDriver && !hasFragments ? View.VISIBLE : View.GONE);
+        if (isDriver) {
+            boolean canStart = hasCurrentRide;
+            if (canStart) {
+                if (CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue() == null) {
+                    canStart = false;
+                } else if (CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue().getStatus() == RideStatus.IN_PROGRESS) {
+                    canStart = false;
+                }
+            }
+            btnStartRide.setEnabled(canStart);
+            btnStartRide.setAlpha(canStart ? 1.0f : 0.5f);
         }
     }
 
@@ -249,7 +283,30 @@ public class MainActivity extends AppCompatActivity {
         btnMenu = findViewById(R.id.btn_menu);
         btnMapSearch = findViewById(R.id.btn_map_search);
         btnChat = findViewById(R.id.btn_chat);
+        btnStartRide = findViewById(R.id.btn_start_ride);
+        if (btnStartRide != null) {
+            btnStartRide.setOnClickListener(v -> {
+                if (currentRole != Role.DRIVER) {
+                    return;
+                }
+                if (!hasCurrentRide) {
+                    return;
+                }
+                if (CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue() == null) {
+                    return;
+                }
+                Long rideId = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue().getId();
+                if (rideId == null || rideId == 0L) {
+                    return;
+                }
+                try {
+                    RideService.getInstance().startRide(this, rideId);
+                } catch (Exception ignored) {
+                }
+            });
+        }
         updateMapSearchVisibility();
+        updateStartRideState();
         routeLoadingSpinner = findViewById(R.id.route_loading_spinner);
         loadingIndicatorController = new LoadingIndicatorController(routeLoadingSpinner);
     }
@@ -406,6 +463,17 @@ public class MainActivity extends AppCompatActivity {
 
     void setCurrentRole(Role role) {
         currentRole = role == null ? Role.GUEST : role;
+        updateStartRideState();
+    }
+
+    void setCurrentRideActive(boolean active) {
+        hasCurrentRide = active;
+        if (hasCurrentRide) {
+            hideRideOrderSheet();
+        }
+        updateMapSearchVisibility();
+        updateGuestRideOrderState();
+        updateStartRideState();
     }
 
     @Override
