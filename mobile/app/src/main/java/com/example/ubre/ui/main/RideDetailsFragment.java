@@ -239,7 +239,7 @@ public class RideDetailsFragment extends Fragment {
 
                 LinearLayout markers = root.findViewById(R.id.ride_details_markers);
                 markers.removeAllViews();
-                if (ride.getPanic()) {
+                if (Boolean.TRUE.equals(ride.getPanic())) {
                     ImageView panicIndicator = new ImageView(this.getActivity());
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(toDP(30), toDP(30));
                     params.setMargins(toDP(5), 0, 0, 0);
@@ -389,4 +389,5 @@ public class RideDetailsFragment extends Fragment {
     private int toDP(int value) {
         return  (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,  value, this.getResources().getDisplayMetrics());
     }
+
 }

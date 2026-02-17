@@ -24,11 +24,24 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RouteService {
 
+    public interface RouteLoadingListener {
+        void onLoadingChanged(boolean isLoading);
+    }
+    public interface RouteInfoListener {
+        void onRouteInfo(double meters, double durationSeconds);
+        void onRouteCleared();
+    }
+
     private static final String TAG = "RouteService";
     private static final String OSRM_BASE_URL = "https://router.project-osrm.org/";
 
     private static RouteService instance;
     private final OSRMApi osrmApi;
+    private Polyline lastRoutePolyline;
+    private Call<JsonObject> lastRouteCall;
+    private int routeRequestSeq = 0;
+    private RouteLoadingListener loadingListener;
+    private RouteInfoListener routeInfoListener;
 
     private RouteService() {
         Retrofit retrofit = new Retrofit.Builder()
@@ -45,10 +58,26 @@ public class RouteService {
         return instance;
     }
 
+    public void setRouteLoadingListener(RouteLoadingListener listener) {
+        this.loadingListener = listener;
+    }
+
+    public void setRouteInfoListener(RouteInfoListener listener) {
+        this.routeInfoListener = listener;
+    }
+
     public void drawRoute(MapView mapView, List<WaypointDto> waypoints) {
         if (waypoints == null || waypoints.size() < 2) {
             Log.w(TAG, "Need at least 2 waypoints to draw a route");
             return;
+        }
+        // Cancel any in-flight request to avoid stale callbacks drawing old routes
+        if (lastRouteCall != null && !lastRouteCall.isCanceled()) {
+            lastRouteCall.cancel();
+        }
+        final int requestId = ++routeRequestSeq;
+        if (loadingListener != null) {
+            loadingListener.onLoadingChanged(true);
         }
 
         StringBuilder coordsBuilder = new StringBuilder();
@@ -59,12 +88,23 @@ public class RouteService {
                     .append(waypoints.get(i).getLatitude());
         }
 
-        osrmApi.getRoute(coordsBuilder.toString(), "full", "geojson")
+        lastRouteCall = osrmApi.getRoute(coordsBuilder.toString(), "full", "geojson");
+        lastRouteCall
                 .enqueue(new Callback<JsonObject>() {
                     @Override
                     public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                        if (requestId != routeRequestSeq) {
+                            return;
+                        }
                         if (!response.isSuccessful() || response.body() == null) {
                             Log.e(TAG, "OSRM response error: " + response.code());
+                            if (response.errorBody() != null) {
+                                try {
+                                    Log.e(TAG, "OSRM error body: " + response.errorBody().string());
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Failed to read OSRM error body", e);
+                                }
+                            }
                             return;
                         }
 
@@ -75,7 +115,15 @@ public class RouteService {
                                 return;
                             }
 
-                            JsonArray coordinates = routes.get(0).getAsJsonObject()
+                            JsonObject firstRoute = routes.get(0).getAsJsonObject();
+                            if (routeInfoListener != null && firstRoute.has("distance") && firstRoute.has("duration")) {
+                                routeInfoListener.onRouteInfo(
+                                        firstRoute.get("distance").getAsDouble(),
+                                        firstRoute.get("duration").getAsDouble()
+                                );
+                            }
+
+                            JsonArray coordinates = firstRoute
                                     .getAsJsonObject("geometry")
                                     .getAsJsonArray("coordinates");
 
@@ -93,20 +141,74 @@ public class RouteService {
                                 polyline.getOutlinePaint().setColor(Color.parseColor("#1565C0"));
                                 polyline.getOutlinePaint().setStrokeWidth(10f);
                                 polyline.getOutlinePaint().setAntiAlias(true);
+                                polyline.getOutlinePaint().setStrokeCap(android.graphics.Paint.Cap.ROUND);
+                                polyline.getOutlinePaint().setStrokeJoin(android.graphics.Paint.Join.ROUND);
 
+                                if (lastRoutePolyline != null) {
+                                    mapView.getOverlays().remove(lastRoutePolyline);
+                                }
                                 mapView.getOverlays().add(0, polyline);
+                                lastRoutePolyline = polyline;
                                 mapView.invalidate();
                             });
 
                         } catch (Exception e) {
                             Log.e(TAG, "Error parsing OSRM response", e);
                         }
+                        if (loadingListener != null) {
+                            loadingListener.onLoadingChanged(false);
+                        }
                     }
 
                     @Override
                     public void onFailure(Call<JsonObject> call, Throwable t) {
+                        if (requestId != routeRequestSeq || call.isCanceled()) {
+                            return;
+                        }
                         Log.e(TAG, "OSRM request failed", t);
+                        if (loadingListener != null) {
+                            loadingListener.onLoadingChanged(false);
+                        }
                     }
                 });
+    }
+
+    public void clearRoute(MapView mapView) {
+        if (lastRouteCall != null && !lastRouteCall.isCanceled()) {
+            lastRouteCall.cancel();
+        }
+        routeRequestSeq++;
+        if (lastRoutePolyline != null) {
+            mapView.getOverlays().remove(lastRoutePolyline);
+            mapView.invalidate();
+            lastRoutePolyline = null;
+        } else {
+            // Fallback: remove any leftover route polylines that match our style.
+            List<org.osmdroid.views.overlay.Overlay> overlays = new ArrayList<>(mapView.getOverlays());
+            boolean removed = false;
+            for (org.osmdroid.views.overlay.Overlay overlay : overlays) {
+                if (overlay instanceof Polyline) {
+                    Polyline line = (Polyline) overlay;
+                    try {
+                        int color = line.getOutlinePaint().getColor();
+                        float width = line.getOutlinePaint().getStrokeWidth();
+                        if (color == Color.parseColor("#1565C0") && Math.abs(width - 10f) < 0.1f) {
+                            mapView.getOverlays().remove(overlay);
+                            removed = true;
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+            if (removed) {
+                mapView.invalidate();
+            }
+        }
+        if (loadingListener != null) {
+            loadingListener.onLoadingChanged(false);
+        }
+        if (routeInfoListener != null) {
+            routeInfoListener.onRouteCleared();
+        }
     }
 }

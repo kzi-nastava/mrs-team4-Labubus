@@ -75,6 +75,9 @@ public class RideDto implements Serializable {
     public RideStatus getStatus() {
         return status;
     }
+    public void setStatus(RideStatus status) {
+        this.status = status;
+    }
     public Long getCreatedBy() {
         return createdBy;
     }

@@ -1,21 +1,12 @@
 package com.example.ubre.ui.main;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
-import android.view.MenuItem;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,41 +21,68 @@ import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.ubre.R;
-import com.example.ubre.ui.apis.ApiClient;
 import com.example.ubre.ui.enums.Role;
-import com.example.ubre.ui.enums.VehicleType;
-import com.example.ubre.ui.dtos.UserDto;
-import com.example.ubre.ui.dtos.VehicleDto;
-import com.example.ubre.ui.apis.LoginApi;
-import com.example.ubre.ui.services.UserService;
-import com.example.ubre.ui.storages.ReviewStorage;
+import com.example.ubre.ui.enums.RideStatus;
+import com.example.ubre.ui.services.RideService;
+import com.example.ubre.ui.storages.CurrentRideStorage;
 import com.example.ubre.ui.storages.ProfileChangeStorage;
 import com.example.ubre.ui.storages.UserStorage;
 import com.google.android.material.navigation.NavigationView;
-import com.bumptech.glide.Glide;
+import com.google.android.material.textfield.TextInputEditText;
+import androidx.recyclerview.widget.RecyclerView;
 
 import org.osmdroid.config.Configuration;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
-import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.MapController;
 
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import com.example.ubre.ui.storages.RidePlanningStorage;
+import com.example.ubre.ui.services.GeocodingService;
+import com.example.ubre.ui.utils.TextNormalizer;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-    private MapView map;
+    private static final int LOCATION_PERMISSION_REQUEST = 2001;
+    private MapView mapView;
+    private MapUiController mapUiController;
     private View btnMenu;
+    private View btnMapSearch;
     private View btnChat;
+    private View btnStartRide;
+    private Role currentRole = Role.GUEST;
+    private boolean hasCurrentRide = false;
     private DrawerLayout drawer;
-    LoginApi loginApi = ApiClient.getClient().create(LoginApi.class);
-
-
+    private MainDrawerController drawerController;
+    private MapLayerController mapLayerController;
+    private RideOrderCoordinator rideOrderCoordinator;
+    private MainObserversBinder observersBinder;
+    private AuthLoader authLoader;
+    private RideOrderSheetController rideOrderSheetController;
+    private RideOrderUiController rideOrderUiController;
+    private TextInputEditText rideOrderFromInput;
+    private TextInputEditText rideOrderToInput;
+    private View rideOrderUseMyLocation;
+    private LinearLayout rideOrderStopsContainer;
+    private View rideOptionStandard;
+    private View rideOptionLuxury;
+    private View rideOptionVan;
+    private View rideOptionBabyFriendly;
+    private View rideOptionPetFriendly;
+    private FrameLayout rideOrderPriceContainer;
+    private View rideOrderConfirmButton;
+    private RideOrderLogicController rideOrderLogicController;
+    private RideOrderWaypointsController rideOrderWaypointsController;
+    private RideOrderAddWaypointController rideOrderAddWaypointController;
+    private com.google.android.material.checkbox.MaterialCheckBox rideOrderScheduleCheck;
+    private com.google.android.material.textfield.TextInputEditText rideOrderHourInput;
+    private com.google.android.material.textfield.TextInputEditText rideOrderMinuteInput;
+    private LinearLayout rideOrderInviteContainer;
+    private RecyclerView rideOrderFromSuggestionsView;
+    private RecyclerView rideOrderToSuggestionsView;
+    private boolean isPickOnMapActive = false;
+    private GeocodingService geocodingService;
+    private ProgressBar routeLoadingSpinner;
+    private LoadingIndicatorController loadingIndicatorController;
+    private AutocompleteController autocompleteController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,13 +106,17 @@ public class MainActivity extends AppCompatActivity {
 
             if (hasFragments) {
                 findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
-                if (map != null) map.setVisibility(View.INVISIBLE);
+                if (mapView != null) mapView.setVisibility(View.INVISIBLE);
                 if (btnMenu != null) btnMenu.setVisibility(View.GONE);
+                updateMapSearchVisibility();
+                updateStartRideState();
                 if (btnChat != null) btnChat.setVisibility(View.GONE);
             } else {
                 findViewById(R.id.fragment_container).setVisibility(View.GONE);
-                if (map != null) map.setVisibility(View.VISIBLE);
+                if (mapView != null) mapView.setVisibility(View.VISIBLE);
                 if (btnMenu != null) btnMenu.setVisibility(View.VISIBLE);
+                updateMapSearchVisibility();
+                updateStartRideState();
                 if (btnChat != null) btnChat.setVisibility(View.VISIBLE);
             }
         });
@@ -105,221 +127,35 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        initCoreUi();
+        initMapLayer();
+        initControllers();
+        bindRideOrderUi();
+        bindObservers();
+        loadUserIfAuthenticated();
 
-        map = findViewById(R.id.map);
-        map.setTileSource(TileSourceFactory.MAPNIK);
-        map.setMultiTouchControls(true);
-        map.getZoomController().setVisibility(
-                CustomZoomButtonsController.Visibility.NEVER
-        );
-
-
-        MapController controller = (MapController) map.getController();
-        controller.setZoom(14.0);
-        controller.setCenter(new GeoPoint(45.2671, 19.8335));
-
-        drawer = findViewById(R.id.main);
-
-        findViewById(R.id.btn_menu).setOnClickListener(v ->
-                drawer.openDrawer(GravityCompat.START)
-        );
-
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        String token = sharedPreferences.getString("jwt", null);
-
-        setMenuOptions(Role.GUEST);
-
-        if (token != null && !token.isEmpty()) {
-            try { UserService.getInstance(getApplicationContext()).loadCurrentUser(); }
-            catch (Exception e) { Log.e(TAG, "Failed to load current user", e); }
-            try { UserService.getInstance(getApplicationContext()).loadCurrentUserAvatar(); }
-            catch (Exception e) { Log.e(TAG, "Failed to load current user avatar", e); }
-            // driver only (extract role from shared pref
-            String roleString = sharedPreferences.getString("role", "GUEST");
-            Role role = Role.valueOf(roleString);
-            if (role == Role.DRIVER) {
-                try { UserService.getInstance(getApplicationContext()).loadCurrentUserVehicle(); }
-                catch (Exception e) { Log.e(TAG, "Failed to load current user vehicle", e); }
-                try { UserService.getInstance(getApplicationContext()).loadCurrentUserStats(); }
-                catch (Exception e) { Log.e(TAG, "Failed to load current user stats", e); }
-            }
-        }
-
-
-
-
-
-
-
-
-
-
-        // SEKCIJA ZA OSLUŠKIVANJE PROMENA KORISNIKA
-
-        UserStorage.getInstance().getCurrentUser().observe(this, currentUser -> {
-            SharedPreferences sp2 = getSharedPreferences("app_prefs", MODE_PRIVATE);
-            String token2 = sp2.getString("jwt", null);
-            if (currentUser == null) {
-                if (token2 != null && !token2.isEmpty()) { // user se učitava, samo čekaj
-                    return;
-                }
-                // ako nema ni korisnika a ni tokena, onda je gost
-                setMenuOptions(Role.GUEST);
-                return;
-            }
-            setMenuOptions(currentUser.getRole());
-            fillDrawerHeader();
-        });
-
-        UserStorage.getInstance().getCurrentUserAvatar().observe(this, avatar -> {
-            fillDrawerHeader();
-        });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setItemIconTintList(null);
-        navigationView.setNavigationItemSelectedListener(item -> {
-            drawer.closeDrawer(GravityCompat.START);
-
-            int itemId = item.getItemId();
-
-            if (itemId == R.id.nav_account_settings) {
-                if (UserStorage.getInstance().getCurrentUser().getValue() != null && UserStorage.getInstance().getCurrentUser().getValue().getRole() == Role.DRIVER) {
-                    showFragment(AccountSettingsFragment.newInstance());
-                    return true;
-                } else {
-                    showFragment(AccountSettingsFragment.newInstance());
-                    return true;
-                }
-            }
-            else if (itemId == R.id.nav_ride_history) { showFragment(RideHistoryFragment.newInstance()); return true; }
-            else if (itemId == R.id.nav_profile_changes) {
-                showFragment(ProfileChangesFragment.newInstance());
-                return true;
-            } else if (itemId == R.id.nav_register_driver) {
-                showFragment(RegisterDriverFragment.newInstance());
-                return true;
-            } else if (itemId == R.id.nav_log_out) {
-                logout();
-                return true;
-            } else if (itemId == R.id.nav_log_in) {
-                Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
-                startActivity(intent);
-                finish();
-                return true;
-            }
-            else if (itemId == R.id.nav_register) {
-                Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
-                startActivity(intent);
-                finish();
-                return true;
-            }
-
-            return true;
-        });
-
-        btnMenu = findViewById(R.id.btn_menu);
-        btnChat = findViewById(R.id.btn_chat);
-
-
-        // Adding an observer that opens review modal when it's state is set
-        ReviewStorage.getInstance().getRideId().observe(this, (rideId) -> {
-            if (rideId != null)
-                showModal(new ReviewModalFragment());
-            else {
-                FrameLayout modalContainer = findViewById(R.id.modal_container);
-                modalContainer.setVisibility(View.GONE);
-                modalContainer.removeAllViews();
-            }
-        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (map != null) map.onResume();
+        if (mapUiController != null) mapUiController.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (map != null) map.onPause();
-    }
-
-    private void setMenuOptions(Role role) {
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.getMenu().clear();
-
-        int menuRes; // Variable to hold the menu resource ID
-        switch (role) {
-            case ADMIN: menuRes = R.menu.drawer_admin; break;
-            case DRIVER: menuRes = R.menu.drawer_driver; break;
-            case REGISTERED_USER: menuRes = R.menu.drawer_registered_user; break;
-            default: menuRes = R.menu.drawer_guest; break;
-        }
-
-        navigationView.inflateMenu(menuRes);
-
-        MenuItem logout = navigationView.getMenu().findItem(R.id.nav_log_out);
-        if (logout != null) {
-            SpannableString logoutText = new SpannableString(logout.getTitle());
-            logoutText.setSpan(new ForegroundColorSpan(ContextCompat.getColor(this, R.color.error)), 0, logoutText.length(), 0);
-            logout.setTitle(logoutText);
-        }
-
-        View header = navigationView.getHeaderView(0);
-        ImageView backIcon = header.findViewById(R.id.nav_back);
-
-        backIcon.setOnClickListener(v ->
-                drawer.closeDrawer(GravityCompat.START)
-        );
-    }
-
-    @SuppressLint("SetTextI18n")
-    private void fillDrawerHeader() {
-        UserDto user = UserStorage.getInstance().getCurrentUser().getValue();
-
-        NavigationView nav = findViewById(R.id.nav_view);
-
-        ImageView avatar = nav.getHeaderView(0).findViewById(R.id.img_avatar);
-        TextView name = nav.getHeaderView(0).findViewById(R.id.txt_name);
-        TextView phone = nav.getHeaderView(0).findViewById(R.id.txt_phone);
-
-        if (user == null) {
-            name.setText("John Doe");
-            phone.setText("+381 XX XXX XXXX");
-            Glide.with(this).load(R.drawable.img_default_avatar).circleCrop().into(avatar);
-            return;
-        }
-
-        name.setText(user.getName() + " " + user.getSurname());
-        phone.setText(user.getPhone());
-
-        byte[] avatarBytes = UserStorage.getInstance().getCurrentUserAvatar().getValue();
-
-        if (avatarBytes != null) {
-            Glide.with(this).asBitmap().load(avatarBytes).circleCrop().into(avatar);
-        } else {
-            Glide.with(this).load(R.drawable.img_default_avatar).circleCrop().into(avatar);
-        }
+        if (mapUiController != null) mapUiController.onPause();
     }
 
     public void showFragment(Fragment f) {
+        hideRideOrderSheet();
         findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
-        map.setVisibility(View.INVISIBLE);
+        if (mapView != null) {
+            mapView.setVisibility(View.INVISIBLE);
+        }
         if (btnMenu != null) btnMenu.setVisibility(View.GONE);
+        if (btnMapSearch != null) btnMapSearch.setVisibility(View.GONE);
         if (btnChat != null) btnChat.setVisibility(View.GONE);
 
         getSupportFragmentManager()
@@ -330,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showModal(Fragment f) {
+        hideRideOrderSheet();
         findViewById(R.id.modal_container).setVisibility(View.VISIBLE);
 
         getSupportFragmentManager()
@@ -339,48 +176,312 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
-    private void logout() {
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
-        String token = sharedPreferences.getString("jwt", null);
-
-        if (token == null) {
-            Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
-            startActivity(intent);
-            finish();
+    void updateMapSearchVisibility() {
+        if (btnMapSearch == null) {
             return;
         }
+        boolean hasFragments = getSupportFragmentManager().getBackStackEntryCount() > 0;
+        boolean allowedRole = currentRole == Role.GUEST || currentRole == Role.REGISTERED_USER;
+        boolean visible = !hasFragments && allowedRole;
+        btnMapSearch.setVisibility(visible ? View.VISIBLE : View.GONE);
+        if (visible) {
+            boolean enabled = !hasCurrentRide;
+            btnMapSearch.setEnabled(enabled);
+            btnMapSearch.setAlpha(enabled ? 1.0f : 0.5f);
+        }
+    }
 
-        loginApi.logout("Bearer " + token).enqueue(new Callback<ResponseBody>() {
+    private boolean isRideOrderSheetHidden() {
+        return rideOrderSheetController == null || rideOrderSheetController.isHidden();
+    }
 
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.d("Logout", "Logout");
+    private void hideRideOrderSheet() {
+        if (rideOrderSheetController != null) {
+            rideOrderSheetController.hide();
+        }
+        isPickOnMapActive = false;
+    }
 
-                if (response.isSuccessful()) {
-                    sharedPreferences.edit().clear().apply();
-                    UserStorage.getInstance().clearUserStorage();
-                    ProfileChangeStorage.getInstance().clearProfileChangeStorage();
-                    Toast.makeText(getApplicationContext(), "Logout successful", Toast.LENGTH_SHORT).show();
+    private void collapseRideOrderSheet() {
+        if (rideOrderSheetController != null) {
+            rideOrderSheetController.collapse();
+        }
+    }
 
-                    Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
-                    startActivity(intent);
-                    finish();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Logout failed: " + response.code(), Toast.LENGTH_SHORT).show();
+    void updateGuestRideOrderState() {
+        if (rideOrderSheetController != null) {
+            rideOrderSheetController.updateGuestState(currentRole == Role.GUEST || hasCurrentRide);
+        }
+    }
+
+    private void updateStartRideState() {
+        if (btnStartRide == null) {
+            return;
+        }
+        boolean isDriver = currentRole == Role.DRIVER;
+        boolean hasFragments = getSupportFragmentManager().getBackStackEntryCount() > 0;
+        btnStartRide.setVisibility(isDriver && !hasFragments ? View.VISIBLE : View.GONE);
+        if (isDriver) {
+            boolean canStart = hasCurrentRide;
+            if (canStart) {
+                if (CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue() == null) {
+                    canStart = false;
+                } else if (CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue().getStatus() == RideStatus.IN_PROGRESS) {
+                    canStart = false;
                 }
             }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-
-
-        // 3) (optional) Notify backend about logout - this is not strictly necessary if using stateless JWTs
-        // It is necessary because the driver can't logout in certain situations.
-        // Thanks for deleting half of my code without checking with me first.
-
+            btnStartRide.setEnabled(canStart);
+            btnStartRide.setAlpha(canStart ? 1.0f : 0.5f);
+        }
     }
+
+    private boolean canGuestAddWaypoint() {
+        if (currentRole != Role.GUEST) {
+            return true;
+        }
+        return RidePlanningStorage.getInstance().getWaypointsSnapshot().size() < 2;
+    }
+
+    private int dpToPx(int dp) {
+        return (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dp,
+                getResources().getDisplayMetrics()
+        );
+    }
+
+    private String formatShortLabel(String displayName) {
+        return TextNormalizer.toLatin(displayName).trim();
+    }
+
+    private void initMapLayer() {
+        mapLayerController = new MapLayerController(
+                this,
+                () -> isPickOnMapActive,
+                value -> isPickOnMapActive = value,
+                this::isRideOrderSheetHidden,
+                this::collapseRideOrderSheet,
+                () -> rideOrderAddWaypointController,
+                LOCATION_PERMISSION_REQUEST
+        );
+        mapLayerController.init();
+        mapView = mapLayerController.getMapView();
+        mapUiController = mapLayerController.getMapUiController();
+        geocodingService = mapLayerController.getGeocodingService();
+    }
+
+    private void initCoreUi() {
+        drawer = findViewById(R.id.main);
+        findViewById(R.id.btn_menu).setOnClickListener(v ->
+                drawer.openDrawer(GravityCompat.START)
+        );
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        drawerController = new MainDrawerController(this, drawer, navigationView);
+        drawerController.init();
+
+        btnMenu = findViewById(R.id.btn_menu);
+        btnMapSearch = findViewById(R.id.btn_map_search);
+        btnChat = findViewById(R.id.btn_chat);
+        btnStartRide = findViewById(R.id.btn_start_ride);
+        if (btnStartRide != null) {
+            btnStartRide.setOnClickListener(v -> {
+                if (currentRole != Role.DRIVER) {
+                    return;
+                }
+                if (!hasCurrentRide) {
+                    return;
+                }
+                if (CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue() == null) {
+                    return;
+                }
+                Long rideId = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue().getId();
+                if (rideId == null || rideId == 0L) {
+                    return;
+                }
+                try {
+                    RideService.getInstance().startRide(this, rideId);
+                } catch (Exception ignored) {
+                }
+            });
+        }
+        updateMapSearchVisibility();
+        updateStartRideState();
+        routeLoadingSpinner = findViewById(R.id.route_loading_spinner);
+        loadingIndicatorController = new LoadingIndicatorController(routeLoadingSpinner);
+    }
+
+    private void initControllers() {
+        rideOrderUiController = new RideOrderUiController(this);
+        rideOrderFromInput = rideOrderUiController.fromInput;
+        rideOrderToInput = rideOrderUiController.toInput;
+        rideOrderUseMyLocation = rideOrderUiController.useMyLocation;
+        rideOrderStopsContainer = (LinearLayout) rideOrderUiController.stopsContainer;
+        rideOptionStandard = rideOrderUiController.optionStandard;
+        rideOptionLuxury = rideOrderUiController.optionLuxury;
+        rideOptionVan = rideOrderUiController.optionVan;
+        rideOptionBabyFriendly = rideOrderUiController.optionBaby;
+        rideOptionPetFriendly = rideOrderUiController.optionPet;
+        rideOrderPriceContainer = (FrameLayout) rideOrderUiController.priceContainer;
+        rideOrderScheduleCheck = rideOrderUiController.scheduleCheck;
+        rideOrderHourInput = rideOrderUiController.hourInput;
+        rideOrderMinuteInput = rideOrderUiController.minuteInput;
+        rideOrderInviteContainer = (LinearLayout) rideOrderUiController.inviteContainer;
+        rideOrderConfirmButton = rideOrderUiController.confirmButton;
+        rideOrderFromSuggestionsView = rideOrderUiController.fromSuggestionsView;
+        rideOrderToSuggestionsView = rideOrderUiController.toSuggestionsView;
+
+        rideOrderSheetController = new RideOrderSheetController(
+                rideOrderUiController.rideOrderSheet,
+                rideOrderConfirmButton,
+                dpToPx(96)
+        );
+        updateGuestRideOrderState();
+
+        rideOrderLogicController = new RideOrderLogicController(
+                this,
+                rideOrderPriceContainer,
+                rideOrderScheduleCheck,
+                rideOrderHourInput,
+                rideOrderMinuteInput,
+                rideOrderInviteContainer,
+                mapView,
+                mapUiController
+        );
+        rideOrderWaypointsController = new RideOrderWaypointsController(
+                this,
+                rideOrderStopsContainer,
+                rideOrderFromInput,
+                rideOrderToInput,
+                rideOrderUseMyLocation
+        );
+        rideOrderAddWaypointController = new RideOrderAddWaypointController(
+                this,
+                mapUiController,
+                geocodingService,
+                this::canGuestAddWaypoint,
+                this::formatShortLabel,
+                new RideOrderAddWaypointController.GeocodeCallbacks() {
+                    @Override
+                    public void onStart() {
+                        if (loadingIndicatorController != null) {
+                            loadingIndicatorController.onGeocodeStart();
+                        }
+                    }
+
+                    @Override
+                    public void onEnd() {
+                        if (loadingIndicatorController != null) {
+                            loadingIndicatorController.onGeocodeEnd();
+                        }
+                    }
+                }
+        );
+
+        autocompleteController = new AutocompleteController(
+                this,
+                geocodingService,
+                rideOrderFromInput,
+                rideOrderToInput,
+                rideOrderFromSuggestionsView,
+                rideOrderToSuggestionsView,
+                this::formatShortLabel,
+                new AutocompleteController.LoadingCallbacks() {
+                    @Override
+                    public void onStart() {
+                        if (loadingIndicatorController != null) {
+                            loadingIndicatorController.onGeocodeStart();
+                        }
+                    }
+
+                    @Override
+                    public void onEnd() {
+                        if (loadingIndicatorController != null) {
+                            loadingIndicatorController.onGeocodeEnd();
+                        }
+                    }
+                }
+        );
+        rideOrderUiController.bindAdapters(
+                autocompleteController.getFromAdapter(),
+                autocompleteController.getToAdapter()
+        );
+        autocompleteController.bind();
+
+        rideOrderCoordinator = new RideOrderCoordinator(
+                this,
+                rideOrderUiController,
+                rideOrderSheetController,
+                rideOrderLogicController,
+                rideOrderAddWaypointController,
+                autocompleteController,
+                rideOrderFromInput,
+                rideOrderToInput,
+                rideOptionStandard,
+                rideOptionLuxury,
+                rideOptionVan,
+                rideOptionBabyFriendly,
+                rideOptionPetFriendly,
+                btnMapSearch,
+                drawer,
+                this::dpToPx,
+                () -> currentRole,
+                value -> isPickOnMapActive = value,
+                this::collapseRideOrderSheet,
+                this::hideRideOrderSheet
+        );
+    }
+
+    private void bindRideOrderUi() {
+        if (rideOrderCoordinator != null) {
+            rideOrderCoordinator.bind();
+        }
+    }
+
+    private void bindObservers() {
+        if (observersBinder == null) {
+            observersBinder = new MainObserversBinder(
+                    this,
+                    rideOrderWaypointsController,
+                    rideOrderLogicController,
+                    mapUiController,
+                    mapView,
+                    loadingIndicatorController,
+                    rideOrderCoordinator,
+                    drawerController
+            );
+            observersBinder.bind();
+        }
+    }
+
+    private void loadUserIfAuthenticated() {
+        if (authLoader == null) {
+            authLoader = new AuthLoader(getApplicationContext(), drawerController);
+        }
+        authLoader.loadUserIfAuthenticated();
+    }
+
+    void setCurrentRole(Role role) {
+        currentRole = role == null ? Role.GUEST : role;
+        updateStartRideState();
+    }
+
+    void setCurrentRideActive(boolean active) {
+        hasCurrentRide = active;
+        if (hasCurrentRide) {
+            hideRideOrderSheet();
+        }
+        updateMapSearchVisibility();
+        updateGuestRideOrderState();
+        updateStartRideState();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (mapLayerController != null) {
+            mapLayerController.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
 }
