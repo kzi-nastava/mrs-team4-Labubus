@@ -12,4 +12,5 @@ public interface ChatService {
     public void sendChatMessage(ChatMessageDto message);
     public Long getUnreadCount();
     public void markAsRead(Long messageId);
+    public ChatDto findMyChat();
 }

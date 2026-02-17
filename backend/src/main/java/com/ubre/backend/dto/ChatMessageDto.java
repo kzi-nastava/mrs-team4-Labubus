@@ -1,6 +1,7 @@
 package com.ubre.backend.dto;
 
 import com.ubre.backend.model.ChatMessage;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ChatMessageDto {
     private Long id;
-    @NotNull(message = "Message can not have empty text")
+    @NotEmpty(message = "Message can not have empty text")
     private String text;
     private LocalDateTime sentAt;
     private Boolean isRead = false;

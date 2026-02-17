@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -54,19 +56,27 @@ public class ChatController {
         return ResponseEntity.status(HttpStatus.OK).body(messages);
     }
 
-    @GetMapping(value = "messages/{messageId}/mark",
+    @PutMapping(value = "/messages/{messageId}/mark",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Void> getUnreadCount(@PathVariable Long messageId) { // this represents ride id
+    public ResponseEntity<Void> markAsRead(@PathVariable Long messageId) { // this represents ride id
         chatService.markAsRead(messageId);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    @PutMapping(value = "/unread",
+    @GetMapping(value = "/unread",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Long> getUnreadCount() { // this represents ride id
         Long unreadCount = chatService.getUnreadCount();
         return ResponseEntity.status(HttpStatus.OK).body(unreadCount);
+    }
+
+    @GetMapping(value = "/my",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<ChatDto> getMyChat() { // this represents ride id
+        ChatDto chat = chatService.findMyChat();
+        return ResponseEntity.status(HttpStatus.OK).body(chat);
     }
 }

@@ -54,10 +54,15 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public void sendChatMessage(ChatMessageDto message) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User jwtUser = (User) auth.getPrincipal();
+        User jwtUser = getCurrentUser();
 
-        Chat chat = checkChatAccessCredentials(message.getChatId());
+        Chat chat;
+        if (jwtUser.getRole() == Role.ADMIN)
+            chat = checkChatAccessCredentials(message.getChatId());
+        else {
+            Optional<Chat> myChat = chatRepository.findByUser(jwtUser);
+            chat = myChat.orElseGet(() -> new Chat(jwtUser));
+        }
 
         ChatMessage messageModel = new ChatMessage(message);
         messageModel.setChat(chat);
@@ -71,10 +76,7 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public Long getUnreadCount() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User jwtUser = (User) auth.getPrincipal();
-        if (jwtUser == null)
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unregistered users may not use the live support");
+        User jwtUser = getCurrentUser();
 
         if (jwtUser.getRole() == Role.ADMIN)
             return chatMessageRepository.countBySenderRoleNotAndIsReadFalse(Role.ADMIN);
@@ -82,39 +84,49 @@ public class ChatServiceImpl implements ChatService {
         Optional<Chat> chat = chatRepository.findByUser(jwtUser);
         if (chat.isEmpty())
             return 0L;
-        return chat.get().getMessages().stream().filter(message -> !message.isRead()).count();
+        return chat.get().getMessages().stream().filter(message -> !message.isRead() && !message.getSender().getId().equals(jwtUser.getId())).count();
     }
 
     public void markAsRead(Long messageId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User jwtUser = (User) auth.getPrincipal();
-        if (jwtUser == null)
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unregistered users may not use the live support");
+        User jwtUser = getCurrentUser();
 
         Optional<ChatMessage> message = chatMessageRepository.findById(messageId);
         if (message.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
 
-        if (jwtUser.getRole() != Role.ADMIN && message.get().getChat().getUser().getId().equals(jwtUser.getId()))
+        if (jwtUser.getRole() != Role.ADMIN && !message.get().getChat().getUser().getId().equals(jwtUser.getId()))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to access this chat");
 
         message.get().setRead(true);
         chatMessageRepository.save(message.get());
     }
 
+    public ChatDto findMyChat() {
+        User jwtUser = getCurrentUser();
+
+        Optional<Chat> chat = chatRepository.findByUser(jwtUser);
+        return chat.map(ChatDto::new).orElse(null);
+    }
+
     private Chat checkChatAccessCredentials(Long chatId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User jwtUser = (User) auth.getPrincipal();
-        if (jwtUser == null)
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unregistered users may not use the live support");
+        User jwtUser = getCurrentUser();
 
         Optional<Chat> chat = chatRepository.findById(chatId);
         if (chat.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Chat not found");
 
-        if (jwtUser.getRole() != Role.ADMIN && chat.get().getUser().getId().equals(jwtUser.getId()))
+        if (jwtUser.getRole() != Role.ADMIN && !chat.get().getUser().getId().equals(jwtUser.getId()))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not allowed to access this chat");
 
         return chat.get();
+    }
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if (jwtUser == null)
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unregistered users may not use the live support");
+
+        return jwtUser;
     }
 }

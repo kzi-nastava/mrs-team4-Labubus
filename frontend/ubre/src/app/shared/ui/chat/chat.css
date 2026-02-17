@@ -1,0 +1,152 @@
+:host .chatModal {
+  bottom: 0px;
+  width: 360px;
+  height: 70vh;
+  position: fixed;
+  transition: transform 0.3s ease;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: var(--border-radius-icons);
+  border-bottom-left-radius: 0px; 
+  border-bottom-right-radius: 0px;
+  font-family: var(--font-family);
+  transform: translateY(100%);
+  padding-bottom: calc();
+}
+
+:host .chatModal {
+  right: 16px;
+  box-shadow: var(--drop-shadow);
+  --modal-height: 100%
+}
+
+:host .chatModal.move-up {
+  transform: translateY(0);
+}
+
+.chat-card {
+    cursor: pointer;
+}
+
+.userList, .chatMessages {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: scroll;
+}
+
+.chatMessages {
+    flex-direction: column-reverse;
+}
+
+.chat {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.chatMessages .message {
+    max-width: 75%;
+    position: relative;
+    align-self: flex-end;
+    display: flex;
+    flex-direction: column;
+}
+
+.chatMessages .message .bubble {
+    border-radius: var(--border-radius-buttons-small) var(--border-radius-buttons-small) 0 var(--border-radius-buttons-small);
+    background-color: var(--color-primary-dark);
+    color: var(--color-surface);
+    padding: var(--padding-regular) var(--padding-regular) var(--padding-regular) var(--padding-regular);
+    overflow-wrap: anywhere;
+}
+
+.chatMessages .message .bubble-tail {
+    height: 10px;
+    background-color: var(--color-primary-dark);
+}
+
+.chatMessages .message .overlay {
+    height: 100%;
+    border-radius: 0 var(--border-radius-buttons-small) 0 0;
+    background-color: var(--color-surface);
+}
+
+.chatMessages .message.other {
+    align-self: flex-start;
+}
+
+.chatMessages .message.other .bubble {
+    border-radius: var(--border-radius-buttons-small) var(--border-radius-buttons-small) var(--border-radius-buttons-small) 0;
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+}
+
+.chatMessages .message.other .bubble-tail {
+    background-color: var(--color-background);
+}
+
+.chatMessages .message.other .overlay {
+    left: auto;
+    right: 0;
+    border-radius: var(--border-radius-buttons-small) 0 0 0;
+}
+
+.chatMessages .info {
+    font-size: var(--font-size-placeholder);
+    color: var(--color-neutral-dark-gray);
+    font-weight: var(--font-weight-regular);
+}
+
+.chatMessages .timestamp {
+    text-align: center;
+    margin: 10px;
+}
+
+.chatMessages .message .sender {
+    text-align: right;
+    margin-bottom: 5px;
+}
+
+.chatMessages .message.other .sender {
+    text-align: left;
+}
+
+.messageInput {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: var(--padding-regular) 0;
+}
+
+input{
+  width:100%; height:44px; padding:0 14px;
+  border:1px solid var(--color-neutral-light-gray); border-radius:12px; box-sizing:border-box;
+  outline:none; font-size:14px; background:#fff;
+}
+
+.icon {
+    aspect-ratio: 1/1;
+    width: 30px;
+    cursor: pointer;
+}
+
+.chatModal div {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.chatModal div::-webkit-scrollbar {
+  display: none;
+}
+
+.chatModal .error {
+    color: var(--color-error);
+    border-color: var(--color-error);
+}
+
+.chatModal .error::placeholder {
+    color: var(--color-error);
+}

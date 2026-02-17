@@ -16,7 +16,7 @@ public class WebSocketNotificationService {
     private static final String CURRENT_RIDES_TOPIC_PREFIX = "/topic/current-rides/";
     private static final String VEHICLE_LOCATION_TOPIC_PREFIX = "/topic/vehicle-locations";
     private static final String PANIC_TOPIC_PREFIX = "/topic/panic";
-    private static final String CHAT_TOPIC_PREFIX = "/topic/chat";
+    private static final String CHAT_TOPIC_PREFIX = "/topic/chat/";
 
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -63,6 +63,6 @@ public class WebSocketNotificationService {
 
     public void sendChatMessage(Long userId, ChatMessageDto message) {
         messagingTemplate.convertAndSend(CHAT_TOPIC_PREFIX + userId, message);
-        messagingTemplate.convertAndSend(CHAT_TOPIC_PREFIX + "/admin", message);
+        messagingTemplate.convertAndSend(CHAT_TOPIC_PREFIX + "admin", message);
     }
 }

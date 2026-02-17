@@ -61,6 +61,8 @@ import { ComplaintService } from '../../services/complaint-service';
 import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides';
 import { Reports } from '../../shared/ui/reports/reports';
 import { BlockUsersList } from '../../features/block-users/block-users-list/block-users-list';
+import { Chat } from '../../shared/ui/chat/chat';
+import { ChatService } from '../../services/chat-service';
 
 @Component({
   selector: 'app-user-layout',
@@ -71,7 +73,7 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
     AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
     RideOptions, FavoriteRides, DriverCancelDialog,
     ComplaintModal, PanicList, PanicButton, PanicToast,
-    ScheduledRides, Reports, BlockUsersList],
+    ScheduledRides, Reports, BlockUsersList, Chat],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -97,6 +99,7 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
 
     public vehicleService = inject(VehicleService)
     public rideTrackingStore = inject(RideTrackingStore)
+    public chatService = inject(ChatService)
 
   Role = Role;
   VehicleType = VehicleType;
@@ -256,6 +259,7 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
     profileChangesOpen: false,
     reviewModalOpen: of(false),
     complaintModalOpen: of(false),
+    chatOpen: false,
     scheduleTimerOpen: false,
     invitePassengersOpen: false,
     timeEstimate: false,
@@ -321,6 +325,7 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
     this.closeReports();
     this.closeProfileChanges();
     this.closeBlockUsers();
+    this.closeChat();
   }
 
   handleMenuAction(action: string) {
@@ -409,10 +414,6 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
   
   hideToast() {
     this.ui.toastOpen = false;
-  }
-
-  openChat() {
-    // Open chat widget
   }
 
   openComplaintModal() {
@@ -845,9 +846,19 @@ import { BlockUsersList } from '../../features/block-users/block-users-list/bloc
     this.ui.showReports = false;
   }
 
+  // CHAT SHEET LOGIC
 
+  openChat() {
+    this.ui.chatOpen = true;
+    if (this.chatService.getCurrentChat() != null)
+      this.chatService.fetchChatMessages()
+  }
 
-
+  closeChat() {
+    this.ui.chatOpen = false;
+    if (this.chatService.getCurrentChat() != null)
+      this.chatService.setCurrentChatMessages(null);
+  }
 
 
 
