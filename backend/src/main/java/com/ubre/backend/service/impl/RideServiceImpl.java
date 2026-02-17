@@ -418,58 +418,6 @@ public class RideServiceImpl implements RideService {
     // TODO: make changes later if necessary
     @Override
     public RideDto orderRide(RideOrderDto rideOrderDto) {
-        // print whole dto in console for debugging (pretty print)
-        System.out.println("╔════════════════════════════════════════════════════════════════════╗");
-        System.out.println("║         NARUDŽBINA VOŽNJE - PRIMLJENI ZAHTEV                      ║");
-        System.out.println("╚════════════════════════════════════════════════════════════════════╝");
-        System.out.println();
-
-        System.out.println("📋 OSNOVNI PODACI:");
-        System.out.println("  • ID narudžbine:      " + (rideOrderDto.getId() != null ? rideOrderDto.getId() : "Nije postavljeno"));
-        System.out.println("  • ID kreatora:        " + (rideOrderDto.getCreatorId() != null ? rideOrderDto.getCreatorId() : "Nije postavljeno"));
-        System.out.println();
-
-        System.out.println("🚗 TIP VOZILA I OPCIJE:");
-        System.out.println("  • Tip vozila:         " + (rideOrderDto.getVehicleType() != null ? rideOrderDto.getVehicleType() : "Nije postavljeno"));
-        System.out.println("  • Prihvatan za bebe:  " + (rideOrderDto.getBabyFriendly() != null ? (rideOrderDto.getBabyFriendly() ? "✓ DA" : "✗ NE") : "Nije postavljeno"));
-        System.out.println("  • Prihvatan za kućne ljubimce: " + (rideOrderDto.getPetFriendly() != null ? (rideOrderDto.getPetFriendly() ? "✓ DA" : "✗ NE") : "Nije postavljeno"));
-        System.out.println();
-
-        System.out.println("📍 PUTNE TAČKE:");
-        if (rideOrderDto.getWaypoints() != null && !rideOrderDto.getWaypoints().isEmpty()) {
-            for (int i = 0; i < rideOrderDto.getWaypoints().size(); i++) {
-                WaypointDto wp = rideOrderDto.getWaypoints().get(i);
-                System.out.println("  " + (i + 1) + ". " + (wp.getLabel() != null ? wp.getLabel() : "Tačka " + (i + 1)));
-                System.out.println("     └─ Lat: " + (wp.getLatitude() != null ? wp.getLatitude() : "N/A") +
-                                   ", Lon: " + (wp.getLongitude() != null ? wp.getLongitude() : "N/A"));
-            }
-        } else {
-            System.out.println("  ⚠️  Nema putnih tačaka!");
-        }
-        System.out.println();
-
-        System.out.println("👥 PUTNICI:");
-        if (rideOrderDto.getPassengersEmails() != null && !rideOrderDto.getPassengersEmails().isEmpty()) {
-            for (int i = 0; i < rideOrderDto.getPassengersEmails().size(); i++) {
-                System.out.println("  " + (i + 1) + ". " + rideOrderDto.getPassengersEmails().get(i));
-            }
-        } else {
-            System.out.println("  Samo kreirajući korisnik");
-        }
-        System.out.println();
-
-        System.out.println("⏰ VREMENSKI DETALJI:");
-        System.out.println("  • Zakaženo vreme:     " + (rideOrderDto.getScheduledTime() != null && !rideOrderDto.getScheduledTime().isBlank() ?
-                                                          rideOrderDto.getScheduledTime() : "Odmah (bez zakazivanja)"));
-        System.out.println("  • Potrebno vreme:     " + (rideOrderDto.getRequiredTime() != null ? rideOrderDto.getRequiredTime() + " sekundi" : "Nije postavljeno"));
-        System.out.println();
-
-        System.out.println("💰 CENA I DISTANCA:");
-        System.out.println("  • Distanca:           " + (rideOrderDto.getDistance() != null ? rideOrderDto.getDistance() + " m" : "Nije postavljeno"));
-        System.out.println("  • Cena:               " + (rideOrderDto.getPrice() != null ? rideOrderDto.getPrice() + " EUR" : "Nije postavljeno"));
-        System.out.println();
-        System.out.println("╔════════════════════════════════════════════════════════════════════╗");
-        System.out.println();
 
         // if there are no waypoints throw error
         if (rideOrderDto.getWaypoints() == null || rideOrderDto.getWaypoints().size() == 1 || rideOrderDto.getWaypoints().isEmpty()) {
