@@ -41,7 +41,6 @@ import com.example.ubre.R;
 import com.example.ubre.ui.apis.ApiClient;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.dtos.UserDto;
-import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.apis.LoginApi;
 import com.example.ubre.ui.services.WsConnectionOwner;
 import com.example.ubre.ui.services.UserService;
@@ -87,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
     private TextInputEditText rideOrderFromInput;
     private TextInputEditText rideOrderToInput;
     private View rideOrderUseMyLocation;
-    private View rideOrderPickOnMap;
     private LinearLayout rideOrderStopsContainer;
     private View rideOptionStandard;
     private View rideOptionLuxury;
@@ -330,6 +328,7 @@ public class MainActivity extends AppCompatActivity {
         if (rideOrderSheetController != null) {
             rideOrderSheetController.hide();
         }
+        isPickOnMapActive = false;
     }
 
     private void collapseRideOrderSheet() {
@@ -447,13 +446,14 @@ public class MainActivity extends AppCompatActivity {
         mapUiController.init(new MapUiController.OnMapTapListener() {
             @Override
             public void onSingleTap(GeoPoint point) {
-                if (!isRideOrderSheetHidden()) {
-                    if (rideOrderAddWaypointController != null) {
-                        rideOrderAddWaypointController.addFromMap(point);
-                    }
-                    collapseRideOrderSheet();
-                    isPickOnMapActive = false;
+                if (!isPickOnMapActive && isRideOrderSheetHidden()) {
+                    return;
                 }
+                if (rideOrderAddWaypointController != null) {
+                    rideOrderAddWaypointController.addFromMap(point);
+                }
+                collapseRideOrderSheet();
+                isPickOnMapActive = false;
             }
 
             @Override
@@ -532,7 +532,6 @@ public class MainActivity extends AppCompatActivity {
         rideOrderFromInput = rideOrderUiController.fromInput;
         rideOrderToInput = rideOrderUiController.toInput;
         rideOrderUseMyLocation = rideOrderUiController.useMyLocation;
-        rideOrderPickOnMap = rideOrderUiController.pickOnMap;
         rideOrderStopsContainer = (LinearLayout) rideOrderUiController.stopsContainer;
         rideOptionStandard = rideOrderUiController.optionStandard;
         rideOptionLuxury = rideOrderUiController.optionLuxury;
