@@ -71,4 +71,5 @@ dependencies{
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.2")
     implementation("com.squareup.okhttp3:okhttp:4.9.2")
     implementation("com.auth0.android:jwtdecode:2.0.2")
+    implementation("com.github.PhilJay:MPAndroidChart:3.1.0")
 }
