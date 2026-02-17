@@ -3,9 +3,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -53,6 +50,7 @@ import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.apis.LoginApi;
+import com.example.ubre.ui.services.WsConnectionOwner;
 import com.example.ubre.ui.services.UserService;
 import com.example.ubre.ui.storages.ReviewStorage;
 import com.example.ubre.ui.storages.ProfileChangeStorage;
@@ -65,16 +63,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import org.osmdroid.config.Configuration;
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.CustomZoomButtonsController;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.MapController;
-import org.osmdroid.views.overlay.MapEventsOverlay;
-import org.osmdroid.events.MapEventsReceiver;
-import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
-import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
-import org.osmdroid.views.overlay.Marker;
 
 import com.example.ubre.ui.dtos.WaypointDto;
 import com.example.ubre.ui.services.RouteService;
@@ -105,14 +95,14 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private static final int LOCATION_PERMISSION_REQUEST = 2001;
-    private MapView map;
+    private MapView mapView;
+    private MapUiController mapUiController;
     private View btnMenu;
     private View btnMapSearch;
     private View btnChat;
     private Role currentRole = Role.GUEST;
     private DrawerLayout drawer;
     private BottomSheetBehavior<View> rideOrderSheetBehavior;
-    private MyLocationNewOverlay myLocationOverlay;
     private TextInputEditText rideOrderFromInput;
     private TextInputEditText rideOrderToInput;
     private View rideOrderUseMyLocation;
@@ -143,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rideOrderToSuggestionsView;
     private AutocompleteAdapter fromSuggestionsAdapter;
     private AutocompleteAdapter toSuggestionsAdapter;
-    private final List<Marker> rideOrderMarkers = new ArrayList<>();
     private boolean isPickOnMapActive = false;
     private GeocodingService geocodingService;
     private ProgressBar routeLoadingSpinner;
@@ -181,13 +170,13 @@ public class MainActivity extends AppCompatActivity {
 
             if (hasFragments) {
                 findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
-                if (map != null) map.setVisibility(View.INVISIBLE);
+                if (mapView != null) mapView.setVisibility(View.INVISIBLE);
                 if (btnMenu != null) btnMenu.setVisibility(View.GONE);
                 updateMapSearchVisibility();
                 if (btnChat != null) btnChat.setVisibility(View.GONE);
             } else {
                 findViewById(R.id.fragment_container).setVisibility(View.GONE);
-                if (map != null) map.setVisibility(View.VISIBLE);
+                if (mapView != null) mapView.setVisibility(View.VISIBLE);
                 if (btnMenu != null) btnMenu.setVisibility(View.VISIBLE);
                 updateMapSearchVisibility();
                 if (btnChat != null) btnChat.setVisibility(View.VISIBLE);
@@ -201,36 +190,31 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        map = findViewById(R.id.map);
-        map.setTileSource(TileSourceFactory.MAPNIK);
-        map.setMultiTouchControls(true);
-        map.getZoomController().setVisibility(
-                CustomZoomButtonsController.Visibility.NEVER
-        );
-        map.getOverlays().add(new MapEventsOverlay(new MapEventsReceiver() {
+        mapView = findViewById(R.id.map);
+        mapUiController = new MapUiController(this, mapView);
+        mapUiController.init(new MapUiController.OnMapTapListener() {
             @Override
-            public boolean singleTapConfirmedHelper(GeoPoint p) {
+            public void onSingleTap(GeoPoint point) {
                 if (rideOrderSheetBehavior != null &&
                         rideOrderSheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
-                    addWaypointFromMap(p);
+                    addWaypointFromMap(point);
                     collapseRideOrderSheet();
                     isPickOnMapActive = false;
                 }
-                return false;
             }
 
             @Override
-            public boolean longPressHelper(GeoPoint p) {
-                return false;
+            public void onLongPress(GeoPoint point) {
             }
-        }));
-
-
-        MapController controller = (MapController) map.getController();
-        controller.setZoom(14.0);
-        controller.setCenter(new GeoPoint(45.2671, 19.8335));
-
-        setupLocationOverlay();
+        });
+        mapUiController.setupLocationOverlay(hasLocationPermission(), () -> ActivityCompat.requestPermissions(
+                this,
+                new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                },
+                LOCATION_PERMISSION_REQUEST
+        ));
         geocodingService = GeocodingService.getInstance(this);
 
         drawer = findViewById(R.id.main);
@@ -280,10 +264,18 @@ public class MainActivity extends AppCompatActivity {
                 }
                 // ako nema ni korisnika a ni tokena, onda je gost
                 setMenuOptions(Role.GUEST);
+                WsConnectionOwner.getInstance(getApplicationContext())
+                        .stop("MainActivity.currentUser=null");
                 return;
             }
             setMenuOptions(currentUser.getRole());
             fillDrawerHeader();
+            Long userId = currentUser.getId();
+            if (userId == null || userId == 0L) {
+                return;
+            }
+            WsConnectionOwner.getInstance(getApplicationContext())
+                    .requestConnectForUser(userId, "MainActivity.currentUser");
         });
 
         UserStorage.getInstance().getCurrentUserAvatar().observe(this, avatar -> {
@@ -469,16 +461,18 @@ public class MainActivity extends AppCompatActivity {
         RidePlanningStorage.getInstance().getWaypointsReadOnly().observe(this, waypoints -> {
             List<WaypointDto> safeWaypoints = waypoints == null ? new ArrayList<>() : waypoints;
             renderRideOrderWaypoints(safeWaypoints);
-            syncRideOrderMarkers(safeWaypoints);
+            if (mapUiController != null) {
+                mapUiController.syncRideOrderMarkers(safeWaypoints);
+            }
             // Invalidate current price until we have fresh route info for this set of waypoints
             lastRouteDistanceMeters = null;
             lastRouteDurationSeconds = null;
             lastPriceEstimate = null;
             updatePriceEstimate(null);
             if (safeWaypoints.size() >= 2) {
-                RouteService.getInstance().drawRoute(map, safeWaypoints);
+                RouteService.getInstance().drawRoute(mapView, safeWaypoints);
             } else {
-                RouteService.getInstance().clearRoute(map);
+                RouteService.getInstance().clearRoute(mapView);
             }
         });
 
@@ -519,15 +513,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (map != null) map.onResume();
-        if (myLocationOverlay != null) myLocationOverlay.enableMyLocation();
+        if (mapUiController != null) mapUiController.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (map != null) map.onPause();
-        if (myLocationOverlay != null) myLocationOverlay.disableMyLocation();
+        if (mapUiController != null) mapUiController.onPause();
     }
 
     private void setMenuOptions(Role role) {
@@ -595,7 +587,7 @@ public class MainActivity extends AppCompatActivity {
     public void showFragment(Fragment f) {
         hideRideOrderSheet();
         findViewById(R.id.fragment_container).setVisibility(View.VISIBLE);
-        map.setVisibility(View.INVISIBLE);
+        mapView.setVisibility(View.INVISIBLE);
         if (btnMenu != null) btnMenu.setVisibility(View.GONE);
         if (btnMapSearch != null) btnMapSearch.setVisibility(View.GONE);
         if (btnChat != null) btnChat.setVisibility(View.GONE);
@@ -618,11 +610,15 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
     }
 
+    // WS connect/stop is owned by WsConnectionOwner (single owner).
+
     private void logout() {
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
         String token = sharedPreferences.getString("jwt", null);
 
         if (token == null) {
+            WsConnectionOwner.getInstance(getApplicationContext())
+                    .stop("Logout.noToken");
             Intent intent = new Intent(MainActivity.this, LoginSignupActivity.class);
             startActivity(intent);
             finish();
@@ -636,6 +632,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("Logout", "Logout");
 
                 if (response.isSuccessful()) {
+                    WsConnectionOwner.getInstance(getApplicationContext())
+                            .stop("Logout.success");
                     sharedPreferences.edit().clear().apply();
                     UserStorage.getInstance().clearUserStorage();
                     ProfileChangeStorage.getInstance().clearProfileChangeStorage();
@@ -737,11 +735,11 @@ public class MainActivity extends AppCompatActivity {
             TopToast.show(this, "Guest limit", "Guests can add up to 2 waypoints.");
             return;
         }
-        if (myLocationOverlay == null || myLocationOverlay.getMyLocation() == null) {
+        if (mapUiController == null || mapUiController.getMyLocation() == null) {
             Toast.makeText(this, "Current location not available yet.", Toast.LENGTH_SHORT).show();
             return;
         }
-        GeoPoint point = myLocationOverlay.getMyLocation();
+        GeoPoint point = mapUiController.getMyLocation();
         addWaypoint("My location", point);
         int index = RidePlanningStorage.getInstance().getWaypointsSnapshot().size() - 1;
         if (geocodingService != null) {
@@ -1133,12 +1131,10 @@ public class MainActivity extends AppCompatActivity {
         lastRouteDurationSeconds = null;
         lastPriceEstimate = null;
         updatePriceEstimate(null);
-        RouteService.getInstance().clearRoute(map);
-        for (Marker marker : rideOrderMarkers) {
-            map.getOverlays().remove(marker);
+        RouteService.getInstance().clearRoute(mapView);
+        if (mapUiController != null) {
+            mapUiController.clearRideOrderMarkers();
         }
-        rideOrderMarkers.clear();
-        map.invalidate();
     }
 
     private void addInviteEmailRow() {
@@ -1437,55 +1433,6 @@ public class MainActivity extends AppCompatActivity {
         RidePlanningService.getInstance().removeWaypointAt(index);
     }
 
-    private void syncRideOrderMarkers(List<WaypointDto> waypoints) {
-        for (Marker marker : rideOrderMarkers) {
-            map.getOverlays().remove(marker);
-        }
-        rideOrderMarkers.clear();
-
-        for (WaypointDto waypoint : waypoints) {
-            GeoPoint point = new GeoPoint(waypoint.getLatitude(), waypoint.getLongitude());
-            Marker marker = new Marker(map);
-            marker.setPosition(point);
-            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM);
-            marker.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_waypoint_red));
-            marker.setTitle(waypoint.getLabel());
-            map.getOverlays().add(marker);
-            rideOrderMarkers.add(marker);
-        }
-        map.invalidate();
-    }
-
-    private void setupLocationOverlay() {
-        if (!hasLocationPermission()) {
-            ActivityCompat.requestPermissions(
-                    this,
-                    new String[] {
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                    },
-                    LOCATION_PERMISSION_REQUEST
-            );
-            return;
-        }
-
-        if (myLocationOverlay == null) {
-            myLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(this), map);
-            myLocationOverlay.setDrawAccuracyEnabled(true);
-            Drawable pin = ContextCompat.getDrawable(this, R.drawable.ic_my_location_blue);
-            myLocationOverlay.setPersonIcon(drawableToBitmap(pin, dpToPx(56), dpToPx(56)));
-            myLocationOverlay.setPersonAnchor(0.5f, 1.0f);
-            map.getOverlays().add(myLocationOverlay);
-
-            myLocationOverlay.runOnFirstFix(() -> map.post(() -> {
-                if (myLocationOverlay.getMyLocation() != null) {
-                    map.getController().animateTo(myLocationOverlay.getMyLocation());
-                }
-            }));
-        }
-        myLocationOverlay.enableMyLocation();
-    }
-
     private boolean hasLocationPermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
@@ -1503,21 +1450,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             if (granted) {
-                setupLocationOverlay();
+                if (mapUiController != null) {
+                    mapUiController.setupLocationOverlay(true, null);
+                }
             } else {
                 Toast.makeText(this, "Location permission is required to show your position.", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
-    private Bitmap drawableToBitmap(Drawable drawable, int widthPx, int heightPx) {
-        if (drawable == null) {
-            return null;
-        }
-        Bitmap bitmap = Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, widthPx, heightPx);
-        drawable.draw(canvas);
-        return bitmap;
-    }
 }
