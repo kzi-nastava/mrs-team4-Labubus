@@ -212,6 +212,7 @@ public class MainActivity extends AppCompatActivity {
         if (rideOrderSheetController != null) {
             rideOrderSheetController.updateGuestState(currentRole == Role.GUEST || hasCurrentRide);
         }
+        rideOrderUiController.updateGuestState(currentRole == Role.GUEST || hasCurrentRide);
     }
 
     private void updateStartRideState() {

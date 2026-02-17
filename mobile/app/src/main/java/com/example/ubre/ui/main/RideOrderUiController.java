@@ -12,6 +12,7 @@ import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class RideOrderUiController {
+
     public interface Callbacks {
         void onUseMyLocation();
         void onPickOnMap();
@@ -46,6 +47,8 @@ public class RideOrderUiController {
     public final View confirmButton;
     public final RecyclerView fromSuggestionsView;
     public final RecyclerView toSuggestionsView;
+    public final View rideOrderOptionsTitle;
+    public final View rideOrderInviteTitle;
 
     public RideOrderUiController(Activity activity) {
         rideOrderSheet = activity.findViewById(R.id.ride_order_sheet);
@@ -69,6 +72,9 @@ public class RideOrderUiController {
         confirmButton = activity.findViewById(R.id.ride_order_confirm);
         fromSuggestionsView = activity.findViewById(R.id.ride_order_from_suggestions);
         toSuggestionsView = activity.findViewById(R.id.ride_order_to_suggestions);
+        rideOrderOptionsTitle = activity.findViewById(R.id.ride_order_options_title);
+        rideOrderInviteTitle = activity.findViewById(R.id.ride_order_invite_title);
+
     }
 
     public void bindAdapters(AutocompleteAdapter fromAdapter, AutocompleteAdapter toAdapter) {
@@ -104,5 +110,24 @@ public class RideOrderUiController {
         toInput.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus) callbacks.onToFocusLost();
         });
+    }
+
+    public void updateGuestState(boolean isGuest) {
+
+        int visibility = isGuest ? View.GONE : View.VISIBLE;
+        if (optionStandard != null) optionStandard.setVisibility(visibility);
+        if (optionLuxury != null) optionLuxury.setVisibility(visibility);
+        if (optionVan != null) optionVan.setVisibility(visibility);
+        if (optionBaby != null) optionBaby.setVisibility(visibility);
+        if (optionPet != null) optionPet.setVisibility(visibility);
+
+        if (scheduleCheck != null) scheduleCheck.setVisibility(visibility);
+        if (hourInput != null) hourInput.setVisibility(visibility);
+        if (minuteInput != null) minuteInput.setVisibility(visibility);
+        if (rideOrderInviteTitle != null) rideOrderInviteTitle.setVisibility(visibility);
+        if (rideOrderOptionsTitle != null) rideOrderOptionsTitle.setVisibility(visibility);
+        if (scheduleContainer != null) scheduleContainer.setVisibility(visibility);
+
+        if (inviteContainer != null) inviteContainer.setVisibility(visibility);
     }
 }
