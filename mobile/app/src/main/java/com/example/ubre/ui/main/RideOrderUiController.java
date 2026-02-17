@@ -49,6 +49,8 @@ public class RideOrderUiController {
     public final RecyclerView toSuggestionsView;
     public final View rideOrderOptionsTitle;
     public final View rideOrderInviteTitle;
+    public View optionsContainer;
+    public View extraOptionsContainer;
 
     public RideOrderUiController(Activity activity) {
         rideOrderSheet = activity.findViewById(R.id.ride_order_sheet);
@@ -74,6 +76,8 @@ public class RideOrderUiController {
         toSuggestionsView = activity.findViewById(R.id.ride_order_to_suggestions);
         rideOrderOptionsTitle = activity.findViewById(R.id.ride_order_options_title);
         rideOrderInviteTitle = activity.findViewById(R.id.ride_order_invite_title);
+        optionsContainer = activity.findViewById(R.id.ride_order_options_container);
+        extraOptionsContainer = activity.findViewById(R.id.ride_order_extra_options);
 
     }
 
@@ -127,6 +131,10 @@ public class RideOrderUiController {
         if (rideOrderInviteTitle != null) rideOrderInviteTitle.setVisibility(visibility);
         if (rideOrderOptionsTitle != null) rideOrderOptionsTitle.setVisibility(visibility);
         if (scheduleContainer != null) scheduleContainer.setVisibility(visibility);
+        
+        if (optionsContainer != null) optionsContainer.setVisibility(visibility);
+        if (extraOptionsContainer != null) extraOptionsContainer.setVisibility(visibility);
+
 
         if (inviteContainer != null) inviteContainer.setVisibility(visibility);
     }
