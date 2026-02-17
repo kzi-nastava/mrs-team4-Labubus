@@ -118,7 +118,7 @@ public class WsConnectionOwner {
             Log.i(TAG, "msg " + topic + " " + payload);
             handleRideReminderNotification(payload);
         });
-        wsManager.subscribe("/topic/current-ride/" + userId, (topic, payload) -> {
+        wsManager.subscribe("/topic/current-rides/" + userId, (topic, payload) -> { // HOLY F************!!!!!!!!!!!!! singlar and plural!!!!!!!!!!!!!!!!!
             Log.i(TAG, "msg " + topic + " " + payload);
             handleCurrentRideNotification(payload);
         });
