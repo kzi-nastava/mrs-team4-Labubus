@@ -206,5 +206,6 @@
         <item name="android:textColor">@color/primary_dark</item>
         <item name="android:fontFamily">@font/poppins_medium</item>
     </style>
+
 </resources>
 

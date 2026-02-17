@@ -8,5 +8,5 @@
     android:paddingTop="12dp"
     android:paddingBottom="12dp"
     android:textColor="@color/text_primary"
-    android:textSize="14sp"
+    android:textSize="@dimen/text_regular"
     android:fontFamily="@font/poppins_regular"/>
