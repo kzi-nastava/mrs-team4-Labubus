@@ -386,9 +386,13 @@ public class RideOrderLogicController {
             View card = activity.getLayoutInflater().inflate(R.layout.stat_card, priceContainer, false);
 
             TextView tvValue = card.findViewById(R.id.stat_value);
+            TextView tvLabel = card.findViewById(R.id.stat_label);
 
             int minutes = (int) Math.ceil(durationSeconds / 60);
-            tvValue.setText(String.format("~%d min", minutes));
+            tvValue.setText(String.format("%d min", minutes));
+            if (tvLabel != null) {
+                tvLabel.setText("Estimated time");
+            }
 
             priceContainer.addView(card);
             priceValue = tvValue;

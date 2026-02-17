@@ -96,7 +96,7 @@ public class RideOrderWaypointsController {
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT
             );
-            rowParams.setMargins(0, dpToPx(6), 0, 0);
+            rowParams.setMargins(dpToPx(12), dpToPx(6), dpToPx(12), 0);
             row.setLayoutParams(rowParams);
 
             stopsContainer.addView(row);

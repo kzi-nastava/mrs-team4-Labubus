@@ -130,7 +130,14 @@ public class RideOrderUiController {
         if (minuteInput != null) minuteInput.setVisibility(visibility);
         if (rideOrderInviteTitle != null) rideOrderInviteTitle.setVisibility(visibility);
         if (rideOrderOptionsTitle != null) rideOrderOptionsTitle.setVisibility(visibility);
-        if (scheduleContainer != null) scheduleContainer.setVisibility(visibility);
+        if (scheduleContainer != null) {
+            if (isGuest) {
+                scheduleContainer.setVisibility(View.GONE);
+            } else {
+                boolean checked = scheduleCheck != null && scheduleCheck.isChecked();
+                scheduleContainer.setVisibility(checked ? View.VISIBLE : View.GONE);
+            }
+        }
         
         if (optionsContainer != null) optionsContainer.setVisibility(visibility);
         if (extraOptionsContainer != null) extraOptionsContainer.setVisibility(visibility);
