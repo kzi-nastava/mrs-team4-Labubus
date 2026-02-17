@@ -37,6 +37,9 @@ import org.osmdroid.views.MapView;
 import com.example.ubre.ui.storages.RidePlanningStorage;
 import com.example.ubre.ui.services.GeocodingService;
 import com.example.ubre.ui.utils.TextNormalizer;
+import com.example.ubre.ui.dtos.WaypointDto;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -474,6 +477,20 @@ public class MainActivity extends AppCompatActivity {
         updateMapSearchVisibility();
         updateGuestRideOrderState();
         updateStartRideState();
+    }
+
+    public void openRideOrderWithWaypoints(List<WaypointDto> waypoints) {
+        if (waypoints == null) {
+            RidePlanningStorage.getInstance().clear();
+        } else {
+            RidePlanningStorage.getInstance().setWaypoints(new java.util.ArrayList<>(waypoints));
+        }
+
+        getSupportFragmentManager().popBackStack(null, getSupportFragmentManager().POP_BACK_STACK_INCLUSIVE);
+        if (rideOrderSheetController != null) {
+            rideOrderSheetController.showExpanded();
+        }
+        updateMapSearchVisibility();
     }
 
     @Override

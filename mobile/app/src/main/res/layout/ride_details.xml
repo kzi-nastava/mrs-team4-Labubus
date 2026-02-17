@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -9,32 +9,64 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
+        android:id="@+id/ride_details_bottom_drawer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/transparent"
-        android:id="@+id/ride_details_content">
+        android:layout_height="520dp"
+        android:orientation="vertical"
+        android:background="@drawable/bg_bottom_sheet_rounded"
+        android:padding="16dp"
+        app:layout_behavior="@string/bottom_sheet_behavior">
 
-        <ScrollView
+        <LinearLayout
+            android:id="@+id/ride_details_handle"
+            android:layout_width="match_parent"
+            android:layout_height="16dp"
+            android:gravity="center">
+
+            <View
+                android:id="@+id/ride_details_handle_bar"
+                android:layout_width="80dp"
+                android:layout_height="6dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@color/surface"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/ride_details_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:layout_marginStart="16dp"
+            android:fontFamily="@font/poppins_medium"
+            android:text="@string/ride_details_title"
+            android:textColor="@color/text_primary"
+            android:textSize="24sp"
+            android:textStyle="bold"/>
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/ride_details_scroll"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintHeight_percent="0.7"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:background="@drawable/bg_bottom_modal"
-            android:id="@+id/ride_details_bottom_drawer"
-            android:padding="35dp"
-            android:paddingTop="50dp">
+            android:layout_weight="1"
+            android:overScrollMode="never"
+            android:fillViewport="true"
+            android:clipToPadding="false"
+            android:paddingBottom="12dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingBottom="30dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
                 android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
+                    android:layout_marginTop="24dp"
                     android:gravity="center_vertical">
 
                     <ImageView
@@ -222,13 +254,13 @@
                     android:layout_height="wrap_content"
                     style="@style/BtnFilled"
                     android:padding="6dp"
-                    android:text="Reorder ride"
+                    android:text="@string/reorder"
                     android:layout_marginTop="15dp"/>
 
             </LinearLayout>
 
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
-</FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

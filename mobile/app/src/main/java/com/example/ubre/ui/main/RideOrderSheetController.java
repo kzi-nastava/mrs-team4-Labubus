@@ -43,6 +43,10 @@ public class RideOrderSheetController {
         }
     }
 
+    public void showExpanded() {
+        sheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+
     public void collapse() {
         if (sheetBehavior.getState() != BottomSheetBehavior.STATE_HIDDEN) {
             sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);

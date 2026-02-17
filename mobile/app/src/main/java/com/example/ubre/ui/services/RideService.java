@@ -16,6 +16,7 @@ import com.example.ubre.ui.storages.RideDetailsStorage;
 import com.example.ubre.ui.storages.RideHistoryStorage;
 import com.example.ubre.ui.storages.UserStorage;
 import com.example.ubre.ui.storages.CurrentRideStorage;
+import com.example.ubre.ui.storages.FavoriteRidesStorage;
 import com.google.gson.Gson;
 
 import java.time.LocalDate;
@@ -178,13 +179,40 @@ public class RideService {
                 if (!response.isSuccessful())
                     Toast.makeText(context, "Failed to favorite/unfavorite ride: " + response.code(), Toast.LENGTH_SHORT).show();
                 else {
+                    boolean newFavoriteState = !ride.favorite;
+                    ride.favorite = newFavoriteState;
+
                     List<RideCardDto> history = RideHistoryStorage.getInstance().getHistoryReadOnly().getValue();
-                    for (RideCardDto card : history) {
-                        if (card.getId().equals(ride.getId())) {
-                            card.favorite = !card.favorite;
+                    if (history != null) {
+                        for (RideCardDto card : history) {
+                            if (card.getId().equals(ride.getId())) {
+                                card.favorite = newFavoriteState;
+                            }
                         }
+                        RideHistoryStorage.getInstance().setHistory(history);
                     }
-                    RideHistoryStorage.getInstance().setHistory(history);
+
+                    List<RideCardDto> favorites = FavoriteRidesStorage.getInstance().getFavoritesReadOnly().getValue();
+                    if (favorites != null) {
+                        java.util.ArrayList<RideCardDto> updated = new java.util.ArrayList<>(favorites);
+                        int foundIndex = -1;
+                        for (int i = 0; i < updated.size(); i++) {
+                            if (updated.get(i).getId().equals(ride.getId())) {
+                                foundIndex = i;
+                                break;
+                            }
+                        }
+                        if (newFavoriteState) {
+                            if (foundIndex == -1) {
+                                updated.add(ride);
+                            } else {
+                                updated.get(foundIndex).favorite = true;
+                            }
+                        } else if (foundIndex != -1) {
+                            updated.remove(foundIndex);
+                        }
+                        FavoriteRidesStorage.getInstance().setFavorites(updated);
+                    }
                 }
             }
 
@@ -199,6 +227,40 @@ public class RideService {
             api.removeFromFavorites("Bearer " + token, userId, ride.getId()).enqueue(callback);
         else
             api.addToFavorites("Bearer " + token, userId, ride.getId()).enqueue(callback);
+    }
+
+    public void getFavorites(Context context, Long userId) throws Exception {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            throw new Exception("User not authenticated");
+        }
+
+        Long resolvedUserId = userId;
+        if (resolvedUserId == null && UserStorage.getInstance().getCurrentUser().getValue() != null) {
+            resolvedUserId = UserStorage.getInstance().getCurrentUser().getValue().getId();
+        }
+        if (resolvedUserId == null) {
+            throw new Exception("User not found");
+        }
+
+        api.getFavoriteRides("Bearer " + token, resolvedUserId).enqueue(new Callback<List<RideCardDto>>() {
+            @Override
+            public void onResponse(Call<List<RideCardDto>> call, Response<List<RideCardDto>> response) {
+                if (!response.isSuccessful()) {
+                    Toast.makeText(context, "Favorites fetching failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                FavoriteRidesStorage.getInstance().setFavorites(response.body() == null ? List.of() : response.body());
+            }
+
+            @Override
+            public void onFailure(Call<List<RideCardDto>> call, Throwable t) {
+                Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("FAVORITES FETCH", t.getMessage());
+            }
+        });
     }
 
     public interface OrderCallback {
