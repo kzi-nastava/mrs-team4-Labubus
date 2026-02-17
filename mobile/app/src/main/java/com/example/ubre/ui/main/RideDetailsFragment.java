@@ -7,22 +7,17 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +36,8 @@ import com.example.ubre.ui.storages.ReviewStorage;
 import com.example.ubre.ui.storages.RideDetailsStorage;
 import com.example.ubre.ui.storages.RideHistoryStorage;
 import com.example.ubre.ui.storages.UserStorage;
+import com.example.ubre.ui.storages.CurrentRideStorage;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.BoundingBox;
@@ -62,6 +59,7 @@ import java.util.List;
 public class RideDetailsFragment extends Fragment {
 
     private MapView map;
+    private boolean showReorder;
 
 
     public RideDetailsFragment() {
@@ -72,6 +70,16 @@ public class RideDetailsFragment extends Fragment {
         RideDetailsFragment fragment = new RideDetailsFragment();
         Bundle args = new Bundle();
         args.putSerializable("RIDEID", rideId);
+        args.putBoolean("SHOW_REORDER", false);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static RideDetailsFragment newInstance(Long rideId, boolean showReorder) {
+        RideDetailsFragment fragment = new RideDetailsFragment();
+        Bundle args = new Bundle();
+        args.putSerializable("RIDEID", rideId);
+        args.putBoolean("SHOW_REORDER", showReorder);
         fragment.setArguments(args);
         return fragment;
     }
@@ -95,59 +103,45 @@ public class RideDetailsFragment extends Fragment {
             );
             map.setVisibility(View.VISIBLE);
 
-            ConstraintLayout content = root.findViewById(R.id.ride_details_content);
-
             MapController controller = (MapController) map.getController();
             controller.setZoom(14.0);
             controller.setCenter(new GeoPoint(45.2671, 19.8335));
 
             Long rideId = (Long) getArguments().getSerializable("RIDEID");
+            showReorder = getArguments().getBoolean("SHOW_REORDER", false);
             SharedPreferences sharedPreferences = getContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
             String role = sharedPreferences.getString("role", "");
             Typeface font = ResourcesCompat.getFont(this.getActivity(), R.font.poppins_regular);
 
-            ScrollView bottomDrawer = root.findViewById(R.id.ride_details_bottom_drawer);
-            bottomDrawer.setOnTouchListener(new View.OnTouchListener() {
-                private int startHeight;
-                private float lastTouchY;
-
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    DisplayMetrics displayMetrics = new DisplayMetrics();
-                    getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            if (event.getY() > 60) {
-                                startHeight = 0;
-                                lastTouchY = 0;
-                                return false;
-                            }
-
-                            startHeight = v.getHeight();
-                            lastTouchY = event.getRawY();
-                            break;
-
-                        case MotionEvent.ACTION_MOVE:
-                            if (startHeight == 0 || lastTouchY == 0)
-                                return false;
-
-                            float dy = event.getRawY() - lastTouchY;
-                            int newHeight = Math.max((int) (startHeight - dy), 140);
-
-                            ConstraintSet constraints = new ConstraintSet();
-                            constraints.clone(content);
-                            constraints.constrainPercentHeight(R.id.ride_details_bottom_drawer, Math.min((float) newHeight / displayMetrics.heightPixels, 0.7f));
-                            constraints.applyTo(content);
-
-                            lastTouchY = event.getRawY();
-                            startHeight = newHeight;
-                            break;
+            View reorderButton = root.findViewById(R.id.ride_details_reorder);
+            if (!showReorder || !role.equals("REGISTERED_USER")) {
+                reorderButton.setVisibility(View.GONE);
+            } else {
+                reorderButton.setVisibility(View.VISIBLE);
+                reorderButton.setOnClickListener(v -> {
+                    RideDto ride = RideDetailsStorage.getInstance().getSelectedRideReadOnly().getValue();
+                    if (ride == null) {
+                        Toast.makeText(getContext(), "Ride details not loaded yet.", Toast.LENGTH_SHORT).show();
+                        return;
                     }
+                    MainActivity activity = (MainActivity) getActivity();
+                    if (activity != null) {
+                        activity.openRideOrderWithWaypoints(ride.getWaypoints());
+                    }
+                });
+                CurrentRideStorage.getInstance().getCurrentRideReadOnly().observe(getViewLifecycleOwner(), currentRide -> {
+                    boolean enabled = currentRide == null;
+                    reorderButton.setEnabled(enabled);
+                    reorderButton.setAlpha(enabled ? 1.0f : 0.5f);
+                });
+            }
 
-                    return true;
-                }
-            });
+            LinearLayout bottomDrawer = root.findViewById(R.id.ride_details_bottom_drawer);
+            BottomSheetBehavior<LinearLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomDrawer);
+            bottomSheetBehavior.setHideable(false);
+            bottomSheetBehavior.setDraggable(true);
+            bottomSheetBehavior.setPeekHeight(toDP(96), true);
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
 
             LinearLayout waypoints = root.findViewById(R.id.ride_details_waypoints);
             LinearLayout firstRow = new LinearLayout(this.getActivity());
@@ -294,8 +288,6 @@ public class RideDetailsFragment extends Fragment {
                 TextView tvValue = card.findViewById(R.id.stat_value);
                 tvValue.setText(String.format("$%.2f", ride.getPrice()));
 
-                if (UserStorage.getInstance().getCurrentUser().getValue().getId().equals(ride.getCreatedBy()));
-                root.findViewById(R.id.ride_details_reorder).setVisibility(View.GONE);
             });
 
             if (role.equals("ADMIN") || role.equals("REGISTERED_USER")) {

@@ -66,6 +66,9 @@ public class MainDrawerController {
             } else if (itemId == R.id.nav_ride_history) {
                 activity.showFragment(RideHistoryFragment.newInstance());
                 return true;
+            } else if (itemId == R.id.nav_favourites) {
+                activity.showFragment(RideFavoritesFragment.newInstance());
+                return true;
             } else if (itemId == R.id.nav_profile_changes) {
                 activity.showFragment(ProfileChangesFragment.newInstance());
                 return true;

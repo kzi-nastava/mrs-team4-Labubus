@@ -38,6 +38,9 @@ public interface RideApi {
     @DELETE("api/rides/{userId}/favorites/{rideId}")
     Call<ResponseBody> removeFromFavorites(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Path("rideId") Long rideId);
 
+    @GET("api/rides/{userId}/favorites")
+    Call<List<RideCardDto>> getFavoriteRides(@Header("Authorization") String authHeader, @Path("userId") Long userId);
+
     @POST("api/rides/order")
     Call<RideDto> orderRide(@Header("Authorization") String authHeader, @Body RideOrderRequest request);
 

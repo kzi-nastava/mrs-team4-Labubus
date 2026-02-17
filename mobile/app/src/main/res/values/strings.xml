@@ -2,7 +2,9 @@
     <string name="app_name">Ubre</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="ride_history">Ride history</string>
-    <string name="my_favourites">My favourites</string>
+    <string name="my_favourites">My favorites</string>
+    <string name="ride_details_title">Ride details</string>
+    <string name="reorder">Reorder</string>
     <string name="account_settings">Account settings</string>
     <string name="reports">Reports</string>
     <string name="log_out">Log out</string>
