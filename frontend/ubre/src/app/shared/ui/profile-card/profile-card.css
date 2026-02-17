@@ -12,6 +12,7 @@
 .profile-card .picture {
     width: 45px;
     aspect-ratio: 1/1;
+    object-fit: cover;
     border-radius: 50%;
 }
 
