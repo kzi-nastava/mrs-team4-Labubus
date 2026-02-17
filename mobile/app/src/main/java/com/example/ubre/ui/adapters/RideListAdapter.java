@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.ubre.R;
 import com.example.ubre.ui.dtos.RideCardDto;
 import com.example.ubre.ui.services.RideService;
@@ -46,10 +45,10 @@ public class RideListAdapter extends RecyclerView.Adapter<RideListAdapter.RideCa
         holder.start.setText(firstStop.length() > 30 ? firstStop.substring(0, 27) + "..." : firstStop);
         String lastStop = ride.getWaypoints().get(ride.getWaypoints().size() - 1).getLabel();
         holder.end.setText(lastStop.length() > 30 ? lastStop.substring(0, 27) + "..." : lastStop);
-        if (ride.favorite)
-            Glide.with(holder.itemView).load(R.drawable.ic_favorite_red).circleCrop().into(holder.icon);
+        if (Boolean.TRUE.equals(ride.favorite))
+            holder.icon.setImageResource(R.drawable.ic_favorite_red);
         else
-            Glide.with(holder.itemView).load(R.drawable.ic_favorite_grey).circleCrop().into(holder.icon);
+            holder.icon.setImageResource(R.drawable.ic_favorite_grey);
         holder.icon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

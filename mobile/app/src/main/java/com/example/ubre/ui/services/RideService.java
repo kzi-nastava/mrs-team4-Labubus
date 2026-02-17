@@ -10,6 +10,7 @@ import com.example.ubre.ui.apis.RideApi;
 import com.example.ubre.ui.dtos.RideCardDto;
 import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.dtos.RideOrderRequest;
+import com.example.ubre.ui.dtos.WaypointDto;
 import com.example.ubre.ui.enums.RideStatus;
 import com.example.ubre.ui.utils.TopToast;
 import com.example.ubre.ui.storages.RideDetailsStorage;
@@ -20,6 +21,8 @@ import com.example.ubre.ui.storages.FavoriteRidesStorage;
 import com.google.gson.Gson;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.ResponseBody;
@@ -179,39 +182,30 @@ public class RideService {
                 if (!response.isSuccessful())
                     Toast.makeText(context, "Failed to favorite/unfavorite ride: " + response.code(), Toast.LENGTH_SHORT).show();
                 else {
-                    boolean newFavoriteState = !ride.favorite;
-                    ride.favorite = newFavoriteState;
+                    boolean newFavoriteState = !Boolean.TRUE.equals(ride.favorite);
 
                     List<RideCardDto> history = RideHistoryStorage.getInstance().getHistoryReadOnly().getValue();
                     if (history != null) {
+                        List<RideCardDto> updatedHistory = new ArrayList<>(history.size());
                         for (RideCardDto card : history) {
-                            if (card.getId().equals(ride.getId())) {
-                                card.favorite = newFavoriteState;
-                            }
+                            boolean isTarget = card.getId().equals(ride.getId());
+                            updatedHistory.add(copyRideCard(card, isTarget ? newFavoriteState : card.favorite));
                         }
-                        RideHistoryStorage.getInstance().setHistory(history);
+                        RideHistoryStorage.getInstance().setHistory(updatedHistory);
                     }
 
                     List<RideCardDto> favorites = FavoriteRidesStorage.getInstance().getFavoritesReadOnly().getValue();
                     if (favorites != null) {
-                        java.util.ArrayList<RideCardDto> updated = new java.util.ArrayList<>(favorites);
-                        int foundIndex = -1;
-                        for (int i = 0; i < updated.size(); i++) {
-                            if (updated.get(i).getId().equals(ride.getId())) {
-                                foundIndex = i;
-                                break;
+                        List<RideCardDto> updatedFavorites = new ArrayList<>();
+                        for (RideCardDto card : favorites) {
+                            if (!card.getId().equals(ride.getId())) {
+                                updatedFavorites.add(copyRideCard(card, card.favorite));
                             }
                         }
                         if (newFavoriteState) {
-                            if (foundIndex == -1) {
-                                updated.add(ride);
-                            } else {
-                                updated.get(foundIndex).favorite = true;
-                            }
-                        } else if (foundIndex != -1) {
-                            updated.remove(foundIndex);
+                            updatedFavorites.add(copyRideCard(ride, true));
                         }
-                        FavoriteRidesStorage.getInstance().setFavorites(updated);
+                        FavoriteRidesStorage.getInstance().setFavorites(updatedFavorites);
                     }
                 }
             }
@@ -371,5 +365,12 @@ public class RideService {
     private boolean looksLikeJson(String body) {
         String s = body.trim();
         return s.startsWith("{") || s.startsWith("[");
+    }
+
+    private RideCardDto copyRideCard(RideCardDto source, Boolean favoriteOverride) {
+        String start = source.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        List<WaypointDto> waypoints = source.getWaypoints() == null ? List.of() : new ArrayList<>(source.getWaypoints());
+        Boolean fav = favoriteOverride != null ? favoriteOverride : source.favorite;
+        return new RideCardDto(source.getId(), start, waypoints, fav);
     }
 }
