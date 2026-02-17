@@ -1,5 +1,6 @@
 package com.ubre.backend.model;
 
+import com.ubre.backend.dto.ChatMessageDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -42,6 +43,11 @@ public class ChatMessage {
         this.text = text;
         this.chat = chat;
         this.sender = sender;
+        this.sentAt = LocalDateTime.now();
+    }
+
+    public ChatMessage(ChatMessageDto dto) {
+        this.text = dto.getText();
         this.sentAt = LocalDateTime.now();
     }
 }

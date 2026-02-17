@@ -9,6 +9,7 @@ import { RideReminderNotification } from '../notifications/ride-reminder-notific
 import { CurrentRideNotification } from '../notifications/current-ride-notification';
 import { VehicleLocationNotification } from '../notifications/vehicle-location-notification';
 import { PanicDto } from '../dtos/panic-dto';
+import { ChatMessageDto } from '../dtos/chat-message-dto';
 
 export type WebSocketConnectionState = 'disconnected' | 'connecting' | 'connected';
 
@@ -210,6 +211,44 @@ export class WebSocketService {
         error: (error) => this.zone.run(() => subscriber.error(error)),
       });
 
+      return () => subscription.unsubscribe();
+    });
+  }
+
+  chatMessageNotifications(userId: number): Observable<ChatMessageDto> {
+    const topic = `/topic/chat/${userId}`;
+    return new Observable<ChatMessageDto>((subscriber) => {
+      const topic$ = this.listenToTopic(topic);
+      const subscription = topic$.subscribe({
+        next: (message) => {
+          try {
+            const payload = JSON.parse(message.body) as ChatMessageDto;
+            this.zone.run(() => subscriber.next(payload));
+          } catch (error) {
+            this.zone.run(() => subscriber.error(error));
+          }
+        },
+        error: (error) => this.zone.run(() => subscriber.error(error)),
+      });
+      return () => subscription.unsubscribe();
+    });
+  }
+
+  adminChatMessageNotifications(): Observable<ChatMessageDto> {
+    const topic = `/topic/chat/admin`;
+    return new Observable<ChatMessageDto>((subscriber) => {
+      const topic$ = this.listenToTopic(topic);
+      const subscription = topic$.subscribe({
+        next: (message) => {
+          try {
+            const payload = JSON.parse(message.body) as ChatMessageDto;
+            this.zone.run(() => subscriber.next(payload));
+          } catch (error) {
+            this.zone.run(() => subscriber.error(error));
+          }
+        },
+        error: (error) => this.zone.run(() => subscriber.error(error)),
+      });
       return () => subscription.unsubscribe();
     });
   }
