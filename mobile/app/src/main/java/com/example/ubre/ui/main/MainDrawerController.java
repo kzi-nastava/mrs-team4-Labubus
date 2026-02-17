@@ -78,6 +78,9 @@ public class MainDrawerController {
             } else if (itemId == R.id.nav_reports) {
                 activity.showFragment(ReportsFragment.newInstance());
                 return true;
+            } else if (itemId == R.id.nav_block_users) {
+                activity.showFragment(BlockUsersFragment.newInstance());
+                return true;
             } else if (itemId == R.id.nav_log_out) {
                 logout();
                 return true;

@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.example.ubre.R;
+import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.WaypointDto;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.services.RouteService;
@@ -191,6 +192,14 @@ class MainObserversBinder {
         UserStorage.getInstance().getCurrentUserAvatar().observe(activity, avatar -> {
             if (drawerController != null) {
                 drawerController.fillDrawerHeader();
+            }
+        });
+
+        UserStorage.getInstance().getBlockNote().observe(activity, note -> {
+            UserDto currentUser = UserStorage.getInstance().getCurrentUser().getValue();
+            boolean isBlocked = currentUser != null && Boolean.TRUE.equals(currentUser.getIsBlocked());
+            if (activity != null) {
+                activity.updateBlockNotice(note, isBlocked);
             }
         });
     }
