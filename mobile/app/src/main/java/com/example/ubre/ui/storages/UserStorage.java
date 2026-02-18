@@ -18,6 +18,7 @@ public class UserStorage {
     private MutableLiveData<VehicleDto> currentUserVehicle = new MutableLiveData<>(null); // drivers only, if not a driver, its empty
     private MutableLiveData<byte[]> currentUserAvatar = new MutableLiveData<>(null);
     private MutableLiveData<Uri> pendingAvatarUri = new MutableLiveData<>(null); // for storing the URI of the new avatar before uploading
+    private MutableLiveData<String> blockNote = new MutableLiveData<>(null);
 
     // user statistics, only visible to drivers on account settings panel
     private MutableLiveData<UserStatsDto> currentUserStats = new MutableLiveData<>(null);
@@ -101,6 +102,18 @@ public class UserStorage {
         currentUserStats.setValue(null);
     }
 
+    public LiveData<String> getBlockNote() {
+        return blockNote;
+    }
+
+    public void setBlockNote(String note) {
+        blockNote.setValue(note);
+    }
+
+    public void clearBlockNote() {
+        blockNote.setValue(null);
+    }
+
 
     // very important method after logout to clear all user related data, and also to be called when app is opened to clear any stale data if exists (if user is not logged in)
     public void clearUserStorage() {
@@ -109,6 +122,7 @@ public class UserStorage {
         clearPendingAvatarUri();
         clearCurrentUserVehicle();
         clearCurrentUserStats();
+        clearBlockNote();
     }
 }
 

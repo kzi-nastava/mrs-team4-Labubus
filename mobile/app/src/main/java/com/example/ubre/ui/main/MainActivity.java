@@ -51,6 +51,11 @@ public class MainActivity extends AppCompatActivity {
     private View btnMapSearch;
     private View btnChat;
     private View btnStartRide;
+    private View blockNotice;
+    private android.widget.TextView blockNoticeTitle;
+    private android.widget.TextView blockNoticeMessage;
+    private String lastBlockNoticeMessage;
+    private boolean isBlockedUser = false;
     private Role currentRole = Role.GUEST;
     private boolean hasCurrentRide = false;
     private DrawerLayout drawer;
@@ -112,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
                 if (mapView != null) mapView.setVisibility(View.INVISIBLE);
                 if (btnMenu != null) btnMenu.setVisibility(View.GONE);
                 updateMapSearchVisibility();
+                updateBlockNoticeVisibility();
                 updateStartRideState();
                 if (btnChat != null) btnChat.setVisibility(View.GONE);
             } else {
@@ -119,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
                 if (mapView != null) mapView.setVisibility(View.VISIBLE);
                 if (btnMenu != null) btnMenu.setVisibility(View.VISIBLE);
                 updateMapSearchVisibility();
+                updateBlockNoticeVisibility();
                 updateStartRideState();
                 if (btnChat != null) btnChat.setVisibility(View.VISIBLE);
             }
@@ -160,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
         if (btnMenu != null) btnMenu.setVisibility(View.GONE);
         if (btnMapSearch != null) btnMapSearch.setVisibility(View.GONE);
         if (btnChat != null) btnChat.setVisibility(View.GONE);
+        updateBlockNoticeVisibility();
 
         getSupportFragmentManager()
                 .beginTransaction()
@@ -188,10 +196,39 @@ public class MainActivity extends AppCompatActivity {
         boolean visible = !hasFragments && allowedRole;
         btnMapSearch.setVisibility(visible ? View.VISIBLE : View.GONE);
         if (visible) {
-            boolean enabled = !hasCurrentRide;
+            boolean enabled = !hasCurrentRide && !isBlockedUser;
             btnMapSearch.setEnabled(enabled);
             btnMapSearch.setAlpha(enabled ? 1.0f : 0.5f);
         }
+    }
+
+    void updateBlockNotice(String note, boolean isBlocked) {
+        isBlockedUser = isBlocked;
+        lastBlockNoticeMessage = note == null ? "" : note.trim();
+        if (lastBlockNoticeMessage.isEmpty()) {
+            lastBlockNoticeMessage = "There is no reason provided";
+        }
+        if (blockNoticeTitle != null) {
+            blockNoticeTitle.setText("You have been blocked");
+        }
+        if (blockNoticeMessage != null) {
+            blockNoticeMessage.setText(lastBlockNoticeMessage);
+        }
+        if (mapView != null) {
+            mapView.setEnabled(!isBlockedUser);
+            mapView.setClickable(!isBlockedUser);
+        }
+        updateMapSearchVisibility();
+        updateBlockNoticeVisibility();
+    }
+
+    void updateBlockNoticeVisibility() {
+        if (blockNotice == null) {
+            return;
+        }
+        boolean hasFragments = getSupportFragmentManager().getBackStackEntryCount() > 0;
+        boolean visible = !hasFragments && isBlockedUser;
+        blockNotice.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     private boolean isRideOrderSheetHidden() {
@@ -215,6 +252,7 @@ public class MainActivity extends AppCompatActivity {
         if (rideOrderSheetController != null) {
             rideOrderSheetController.updateGuestState(currentRole == Role.GUEST || hasCurrentRide);
         }
+        rideOrderUiController.updateGuestState(currentRole == Role.GUEST || hasCurrentRide);
     }
 
     private void updateStartRideState() {
@@ -287,6 +325,9 @@ public class MainActivity extends AppCompatActivity {
         btnMapSearch = findViewById(R.id.btn_map_search);
         btnChat = findViewById(R.id.btn_chat);
         btnStartRide = findViewById(R.id.btn_start_ride);
+        blockNotice = findViewById(R.id.block_notice);
+        blockNoticeTitle = findViewById(R.id.block_notice_title);
+        blockNoticeMessage = findViewById(R.id.block_notice_message);
         if (btnStartRide != null) {
             btnStartRide.setOnClickListener(v -> {
                 if (currentRole != Role.DRIVER) {
@@ -309,6 +350,7 @@ public class MainActivity extends AppCompatActivity {
             });
         }
         updateMapSearchVisibility();
+        updateBlockNoticeVisibility();
         updateStartRideState();
         routeLoadingSpinner = findViewById(R.id.route_loading_spinner);
         loadingIndicatorController = new LoadingIndicatorController(routeLoadingSpinner);

@@ -92,7 +92,7 @@ public class RideOrderLogicController {
         TextView tvLabel = card.findViewById(R.id.stat_label);
 
         tvValue.setText("--");
-        tvLabel.setText("Estimated price");
+        tvLabel.setText(isGuest() ? "Estimated time" : "Estimated price");
 
         priceContainer.addView(card);
         priceValue = tvValue;
@@ -108,7 +108,11 @@ public class RideOrderLogicController {
     public void onRouteInfo(double meters, double durationSeconds, VehicleType selectedVehicleType) {
         lastRouteDistanceMeters = meters;
         lastRouteDurationSeconds = durationSeconds;
-        requestPriceEstimate(selectedVehicleType);
+        if (isGuest()) {
+            showEstimatedTime(durationSeconds);
+        } else {
+            requestPriceEstimate(selectedVehicleType);
+        }
     }
 
     public void onRouteCleared() {
@@ -364,5 +368,34 @@ public class RideOrderLogicController {
 
     public interface TextWatcherFactory {
         android.text.TextWatcher create(int min, int max, View nextFocus);
+    }
+
+    private boolean isGuest() {
+        android.content.SharedPreferences prefs = activity.getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE);
+        String token = prefs.getString("jwt", null);
+        return token == null || token.isEmpty();
+    }
+
+    private void showEstimatedTime(double durationSeconds) {
+        if (priceContainer == null) {
+            return;
+        }
+
+        activity.runOnUiThread(() -> {
+            priceContainer.removeAllViews();
+            View card = activity.getLayoutInflater().inflate(R.layout.stat_card, priceContainer, false);
+
+            TextView tvValue = card.findViewById(R.id.stat_value);
+            TextView tvLabel = card.findViewById(R.id.stat_label);
+
+            int minutes = (int) Math.ceil(durationSeconds / 60);
+            tvValue.setText(String.format("%d min", minutes));
+            if (tvLabel != null) {
+                tvLabel.setText("Estimated time");
+            }
+
+            priceContainer.addView(card);
+            priceValue = tvValue;
+        });
     }
 }

@@ -171,7 +171,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendPassengerRideInvitationEmail(String recipientEmail, Ride ride) {
-        String subject = "Your ride receipt";
+        String subject = "Your ride invitation";
         String body = buildPassengerRideInvitationEmailBody(ride);
 
         MimeMessage message = mailSender.createMimeMessage();

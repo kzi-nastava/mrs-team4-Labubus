@@ -1,0 +1,41 @@
+<app-modal-container class="chatModal" [class.move-up]="open" (backPressed)="onBack()" [title]="(chatService.currentChat$ | async) == null || (userService.getCurrentUser() | async)?.role != 'ADMIN' ? 'Live support' : (chatService.currentChat$ | async)?.user?.name + ' ' + (chatService.currentChat$ | async)?.user?.surname">
+    @if ((userService.getCurrentUser() | async)?.role == "ADMIN" && (chatService.currentChat$ | async) == null) {
+        <div class="userList">
+            @for (chat of (chatService.chats$ | async); track chat.id) {
+                @if (chat.user != null) {
+                    <app-profile-card class="chat-card" [user]="chat.user" [icon]="chat.hasUnreadMessages ? 'unread.svg' : undefined" testIdPrefix="chat" (click)="onSelectChat(chat)"></app-profile-card>
+                }
+            }
+        </div>
+    }
+    @else {
+        <div class="chat">
+            <div class="chatMessages">
+                @if ((chatService.currentChatMessages$ | async); as messages) {
+                    @for (message of messages; track message.id; let i = $index) {
+                        <!-- Note: The message bubble and time are inverted because flex direction is column-reversed -->
+                         
+                        @let prev = i < messages.length - 1 ? messages[i + 1] : null;
+                        <div class="message" [class.other]="message.sender?.id != (userService.getCurrentUser() | async)?.id">
+                            @if (!prev || (message.sender && prev.sender && message.sender.role != prev.sender.role)) {
+                                <div class="sender info">{{ message.sender?.name + ' ' + message.sender?.surname }}</div>
+                            }
+                            <div class="bubble">{{ message.text }}</div>
+                            <div class="bubble-tail">
+                                <div class="overlay"></div>
+                            </div>
+                        </div>
+
+                        @if (!prev || (message.sentAt && prev.sentAt && message.sentAt.getTime() - prev.sentAt.getTime() > 900000)) {
+                            <div class="timestamp info">{{ message.sentAt | date: 'd MMM yyyy h:mm a' }}</div>
+                        }
+                    }
+                }
+            </div>
+            <div class="messageInput">
+                <input type="text" placeholder="Type a message" [(ngModel)]="messageText" [class.error]="error" (focus)="error = false" (keyup.enter)="onSend()">
+                <img src="send.svg" alt="" class="icon" (click)="onSend()">
+            </div>
+        </div>
+    }
+</app-modal-container>

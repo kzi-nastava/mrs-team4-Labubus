@@ -121,10 +121,13 @@
       </app-icon-button>
     }
 
-    <app-icon-button class="chat-button"
-      iconUrl="chat_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
-      (click)="openChat()">
-    </app-icon-button>
+    @if ((userService.getCurrentUser() | async)?.role != "GUEST") {
+      <app-icon-button class="chat-button"
+        iconUrl="chat_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
+        (click)="openChat()"
+        [badge]="((chatService.unreadCount$ | async) ?? 0) > 0"> 
+      </app-icon-button>
+    }
 
     @if ((ridePlanningStore.currentRide$ | async)?.status === RideStatus.IN_PROGRESS && (userService.currentUser$ | async)?.role === Role.REGISTERED_USER) {
       <app-icon-button class="complaint-button"
@@ -680,6 +683,11 @@
       (onError)="onEmmitError($event)"
       (onReorder)="onFavoriteReorder($event)"
       (onRenderWaypoints)="onRenderWaypoints($event)"></app-scheduled-rides>
+
+      <!-- CHAT SHEET -->
+    <app-chat
+    [open]="ui.chatOpen"
+    (onClose)="closeChat()"></app-chat>
 
     <!-- PROFILE CHANGES SHEET -->
     @if ((userService.currentUser$ | async)?.role === Role.ADMIN) {
