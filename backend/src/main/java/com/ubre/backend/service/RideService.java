@@ -38,4 +38,5 @@ public interface RideService {
 
     void activatePanic(Long rideId);
     List<PanicNotification> getPanics();
+    List<RideCardDto> getScheduledRidesUser(Long userId, Integer skip, Integer count, RideQueryDto query);
 }
