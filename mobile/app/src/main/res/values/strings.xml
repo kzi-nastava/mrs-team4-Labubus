@@ -66,6 +66,7 @@
     <string name="ride_options">Ride options</string>
     <string name="statistics">Statistics</string>
     <string name="profile_changes">Profile changes</string>
+    <string name="block_users">Block users</string>
     <string name="account">Account</string>
     <string name="sign_up">Sign up</string>
     <string name="continue_as_guest">Continue as Guest</string>
