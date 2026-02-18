@@ -159,6 +159,8 @@ public class AccountSettingsService {
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     // important toast message to re-login after change
+                    SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+                    sharedPreferences.edit().clear().apply();
                     Toast.makeText(context, "Password changed successfully. Please log in again.", Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(context, "Failed to change password", Toast.LENGTH_SHORT).show();
