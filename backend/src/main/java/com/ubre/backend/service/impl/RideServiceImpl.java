@@ -352,14 +352,56 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
+    public List<RideCardDto> getOngoingRides(Integer skip, Integer count, RideQueryDto query) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if (jwtUser == null)
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unable to get ongoing rides for unauthenticated user");
+
+        if (jwtUser.getRole() != Role.ADMIN)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can get all ongoing rides");
+
+        Pageable pageable = parseToPageable(skip, count, query);
+
+        return rideRepository.findByStatusIn(List.of(RideStatus.IN_PROGRESS), pageable).stream().map(RideCardDto::new).toList();
+    }
+
+    @Override
+    public List<RideCardDto> getUsersOngoingRides(Long userId, Integer skip, Integer count, RideQueryDto query) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if (jwtUser == null)
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unable to get ongoing rides for unauthenticated user");
+
+        if (jwtUser.getRole() != Role.ADMIN)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can get all ongoing rides");
+
+        Pageable pageable = parseToPageable(skip, count, query);
+
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+
+        if (user.get().getRole() == Role.DRIVER) {
+            Driver driver = driverRepository.findById(userId).get();
+            if (query != null && query.getDate() != null)
+                return rideRepository.findByDriverAndStatusInAndStartTimeBetween(driver, List.of(RideStatus.IN_PROGRESS), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
+            return rideRepository.findByDriverAndStatusIn(driver, List.of(RideStatus.IN_PROGRESS), pageable).stream().map(RideCardDto::new).toList();
+        }
+        if (query != null && query.getDate() != null)
+            return rideRepository.findByCreatorAndStatusInAndStartTimeBetween(user.get(), List.of(RideStatus.IN_PROGRESS), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
+        return rideRepository.findByCreatorAndStatusIn(user.get(), List.of(RideStatus.IN_PROGRESS), pageable).stream().map(RideCardDto::new).toList();
+    }
+
+    @Override
     public RideDto getCurrentRide() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to get current ride for unauthenticated user");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unable to get current ride for unauthenticated user");
 
         User jwtUser = (User) auth.getPrincipal();
         if (jwtUser == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to get current ride for unauthenticated user");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unable to get current ride for unauthenticated user");
 
         if (jwtUser.getRole() == Role.DRIVER) {
             Optional<Driver> driver = driverRepository.findById(jwtUser.getId());

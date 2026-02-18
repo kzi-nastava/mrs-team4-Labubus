@@ -153,6 +153,7 @@ public class VehicleServiceImpl implements VehicleService {
         Waypoint newLocation = new Waypoint(waypointDto);
         if (vehicle.getLocation() != null)
             newLocation.setId(vehicle.getLocation().getId());
+        vehicle.setLocation(newLocation);
         waypointRepository.save(newLocation);
 
         Optional<Ride> ride = rideRepository.findFirstByDriverAndStatusOrderByStartTimeAsc(vehicle.getDriver(), RideStatus.IN_PROGRESS);

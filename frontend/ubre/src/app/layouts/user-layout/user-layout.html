@@ -645,6 +645,15 @@
       (onReorder)="onFavoriteReorder($event)"
       (onRenderWaypoints)="onRenderWaypoints($event)"></app-ride-history>
 
+    <!-- ACTIVE RIDES SHEET -->
+    <app-active-rides 
+      class="active-rides" 
+      (onClose)="onActiveRidesBack()" 
+      [open]="ui.showActiveRides" 
+      (onError)="onEmmitError($event)" 
+      (onReorder)="onFavoriteReorder($event)"
+      (onRenderWaypoints)="onRenderWaypoints($event)"></app-active-rides>
+
     <!-- REPORTS SHEET (kao Account settings – u istom side meniju) -->
     <app-sheet
       [open]="ui.showReports"

@@ -38,6 +38,11 @@ export class RideService {
   private scheduledPage : number = 0;
   private fetchingScheduled : boolean = false;
 
+  private active : BehaviorSubject<RideCardDto[]> = new BehaviorSubject<RideCardDto[]>([]);
+  public active$ : Observable<RideCardDto[]> = this.active.asObservable();
+  private activePage : number = 0;
+  private fetchingActive : boolean = false;
+
   fetchHistory(query : RideQueryDto, count : number = 3) : void {
     if (this.fetchingHistory)
       return;
@@ -186,6 +191,40 @@ export class RideService {
         },
       })
     })
+  }
+
+  fetchActive(query : RideQueryDto, count : number = 3) : void {
+    if (this.fetchingActive)
+      return;
+
+    this.fetchingFavorites = true;
+    const params : HttpParams = this.extractParams(query, this.activePage, count);
+
+    if (query.userId !== null) { 
+      this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/ongoing/${query.userId}`, {params}).pipe(take(1)).subscribe((value : RideCardDto[]) => {
+        this.fetchingActive = false;
+        if (value.length == 0)
+              return;
+    
+        this.active.next([...this.favorites.value, ...value]);
+        this.activePage++; 
+      })
+    }
+    else {
+        this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/ongoing`, {params}).pipe(take(1)).subscribe((value : RideCardDto[]) => {
+          this.fetchingActive = false;
+          if (value.length == 0)
+                return;
+      
+          this.active.next([...this.favorites.value, ...value]);
+          this.activePage++; 
+      })
+    }
+  }
+
+  clearActive() {
+    this.active.next([]);
+    this.activePage = 0;
   }
 
   fetchScheduled(query : RideQueryDto, count : number = 3) : void {
