@@ -5,8 +5,11 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.example.ubre.R;
+import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.dtos.UserDto;
+import com.example.ubre.ui.dtos.VehicleIndicatorDto;
 import com.example.ubre.ui.dtos.WaypointDto;
+import com.example.ubre.ui.enums.RideStatus;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.services.RouteService;
 import com.example.ubre.ui.services.WsConnectionOwner;
@@ -14,6 +17,7 @@ import com.example.ubre.ui.storages.CurrentRideStorage;
 import com.example.ubre.ui.storages.ReviewStorage;
 import com.example.ubre.ui.storages.RidePlanningStorage;
 import com.example.ubre.ui.storages.UserStorage;
+import com.example.ubre.ui.storages.VehicleLocationStorage;
 
 import org.osmdroid.views.MapView;
 
@@ -63,6 +67,8 @@ class MainObserversBinder {
         bindCurrentRide();
         bindReviewModal();
         bindUser();
+        bindVehicleLocations();
+        bindRideTracking();
     }
 
     private void bindRidePlanning() {
@@ -106,6 +112,12 @@ class MainObserversBinder {
                 return;
             }
 
+            if (ride.getStatus() == RideStatus.IN_PROGRESS) {
+                mapUiController.clearRideOrderMarkers();
+                RouteService.getInstance().clearRoute(mapView);
+                return;
+            }
+
             List<WaypointDto> waypoints = ride.getWaypoints();
             List<WaypointDto> safeWaypoints = waypoints == null ? new ArrayList<>() : new ArrayList<>(waypoints);
             if (safeWaypoints.isEmpty()) {
@@ -143,6 +155,62 @@ class MainObserversBinder {
             @Override
             public void onRouteCleared() {
                 rideOrderLogicController.onRouteCleared();
+            }
+        });
+    }
+
+    private void bindVehicleLocations() {
+        VehicleLocationStorage.getInstance().getLocationsReadOnly().observe(activity, indicators -> {
+            if (mapUiController == null || indicators == null) {
+                return;
+            }
+            mapUiController.syncVehicleMarkers(indicators);
+
+            RideDto ride = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue();
+            if (ride != null && ride.getStatus() == RideStatus.IN_PROGRESS
+                    && ride.getDriver() != null && ride.getWaypoints() != null) {
+                Long driverId = ride.getDriver().getId();
+                VehicleIndicatorDto driverIndicator = null;
+                for (VehicleIndicatorDto ind : indicators) {
+                    if (ind.getDriverId() != null && ind.getDriverId().equals(driverId)) {
+                        driverIndicator = ind;
+                        break;
+                    }
+                }
+                if (driverIndicator != null && driverIndicator.getLocation() != null) {
+                    List<WaypointDto> routeWaypoints = new ArrayList<>();
+                    // Start from vehicle position
+                    routeWaypoints.add(driverIndicator.getLocation());
+                    // Add unvisited waypoints
+                    for (WaypointDto wp : ride.getWaypoints()) {
+                        if (wp.getVisited() == null || !wp.getVisited()) {
+                            routeWaypoints.add(wp);
+                        }
+                    }
+                    if (routeWaypoints.size() >= 2) {
+                        RouteService.getInstance().drawTrackingRoute(mapView, routeWaypoints);
+                    }
+                }
+            }
+        });
+    }
+
+    private void bindRideTracking() {
+        CurrentRideStorage.getInstance().getCurrentRideReadOnly().observe(activity, ride -> {
+            if (mapUiController == null || mapView == null) {
+                return;
+            }
+            if (ride != null && ride.getStatus() == RideStatus.IN_PROGRESS
+                    && ride.getDriver() != null) {
+                // Enter tracking mode
+                mapUiController.setFollowDriverId(ride.getDriver().getId());
+                if (ride.getWaypoints() != null) {
+                    mapUiController.syncTrackingWaypoints(ride.getWaypoints());
+                }
+            } else {
+                // Exit tracking mode
+                mapUiController.clearTrackingOverlays();
+                RouteService.getInstance().clearTrackingRoute(mapView);
             }
         });
     }
