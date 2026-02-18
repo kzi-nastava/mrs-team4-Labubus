@@ -138,8 +138,6 @@ public class DriverServiceImpl implements DriverService {
             throw new ResponseStatusException(HttpStatus.GONE, "Activation token has expired");
         }
 
-        // TODO: errors such as unauthorized or forbidden
-
         driver.setPassword(passwordEncoder.encode(newPassword));
         driver.setIsActivated(true);
         driver.setStatus(UserStatus.INACTIVE); // Set status to INACTIVE upon activation

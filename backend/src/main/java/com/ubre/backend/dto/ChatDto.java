@@ -1,5 +1,6 @@
 package com.ubre.backend.dto;
 
+import com.ubre.backend.enums.Role;
 import com.ubre.backend.model.Chat;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,6 @@ public class ChatDto {
     public ChatDto(Chat model) {
         this.id = model.getId();
         this.user = new UserDto(model.getUser());
-        this.hasUnreadMessages = model.getMessages().stream().anyMatch(message -> !message.isRead());
+        this.hasUnreadMessages = model.getMessages().stream().anyMatch(message -> !message.isRead() && message.getSender().getRole() != Role.ADMIN);
     }
 }

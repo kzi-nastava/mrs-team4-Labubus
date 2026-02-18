@@ -818,3 +818,21 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.pa-pill-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 6px;
+  cursor: default;
+}
+
+.pa-pill-row .rd-step-value {
+  min-width: 40px;
+}
+
+.pa-footer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}

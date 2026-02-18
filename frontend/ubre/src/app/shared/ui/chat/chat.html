@@ -16,7 +16,7 @@
                         <!-- Note: The message bubble and time are inverted because flex direction is column-reversed -->
                          
                         @let prev = i < messages.length - 1 ? messages[i + 1] : null;
-                        <div class="message" [class.other]="message.sender?.id != (userService.getCurrentUser() | async)?.id">
+                        <div class="message" [class.other]="message.sender && message.sender.role != (userService.getCurrentUser() | async)?.role">
                             @if (!prev || (message.sender && prev.sender && message.sender.role != prev.sender.role)) {
                                 <div class="sender info">{{ message.sender?.name + ' ' + message.sender?.surname }}</div>
                             }
