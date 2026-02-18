@@ -176,6 +176,11 @@ public class MainDrawerController {
         if (token == null) {
             WsConnectionOwner.getInstance(activity.getApplicationContext())
                     .stop("Logout.noToken");
+            UserStorage.getInstance().clearUserStorage();
+            ProfileChangeStorage.getInstance().clearProfileChangeStorage();
+            RidePlanningStorage.getInstance().clear();
+            CurrentRideStorage.getInstance().clear();
+            Toast.makeText(activity.getApplicationContext(), "Logout successful", Toast.LENGTH_SHORT).show();
             goToLogin();
             return;
         }
