@@ -80,6 +80,7 @@ import { ChatService } from '../../services/chat-service';
   })
   export class UserLayout implements OnInit {
 
+
     constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
     
     public userService = inject(UserService);
@@ -115,6 +116,7 @@ import { ChatService } from '../../services/chat-service';
   private rideAssignmentSubscription?: Subscription;
   private rideReminderSubscription?: Subscription;
   private panicSubscription?: Subscription;
+  private driverStatusSubscription?: Subscription;
   private currentRideSubscription?: Subscription; // this subscription represents a current ride, for user and for a driver
 
   @ViewChild(PanicToast) panicToast!: PanicToast;
@@ -171,6 +173,7 @@ import { ChatService } from '../../services/chat-service';
           if (notification.status === NotificationType.PROFILE_CHANGE_REJECTED && notification.user) {
             this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
           }
+
         },
         error: () => {
           this.showToast('Connection error', 'Could not receive profile change updates.');
@@ -1288,21 +1291,6 @@ import { ChatService } from '../../services/chat-service';
     );
   }
 
-
-  onCancelUserClick() {
-    const rideId = this.ridePlanningStore.currentRideSubject$.getValue()!.id;
-    this.rideService.cancelRideUser(rideId).subscribe({
-        next: () => {
-          this.ui.showCancelModal = false;
-          this.ridePlanningStore.currentRideSubject$.next(null);
-          this.showToast('Ride cancelled', 'Ride cancelled successfully.');
-        },
-        error: (err: any) => {
-          this.showToast('Error cancelling ride', err.error.message);
-        }
-      });
-  }
-
   activatePanic() {
     const rideId = this.ridePlanningStore.currentRideSubject$.getValue()!.id;
     this.rideService.activatePanic(rideId).subscribe({
@@ -1342,6 +1330,11 @@ import { ChatService } from '../../services/chat-service';
       }
     });
   }
+
+  onShowToast(toast: Toast) {
+    this.showToast(toast.title, toast.message)
+  }
+
 
 }
 

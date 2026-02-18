@@ -14,6 +14,8 @@ import { UserService } from '../../../services/user-service';
 import { RideHistoryReviews } from "../ride-history-reviews/ride-history-reviews";
 import { RideHistoryComplaints } from "../ride-history-complaints/ride-history-complaints";
 import { RidePlanningStore } from '../../../services/ride-planning/ride-planning-store';
+import { RideService } from '../../../services/ride-service';
+import { Toast } from '../toast/toast';
 
 @Component({
   selector: 'app-ride-details',
@@ -22,6 +24,9 @@ import { RidePlanningStore } from '../../../services/ride-planning/ride-planning
   styleUrl: './ride-details.css',
 })
 export class RideDetails {
+  
+  public rideService = inject(RideService);
+
   @Input({required: true}) ride! : RideDto;
   @Input() user : UserDto = {
         email: '',
@@ -37,6 +42,7 @@ export class RideDetails {
   @Input() testIdPrefix: string | null = null;
   @Output() onError = new EventEmitter<Error>();
   @Output() onReorder = new EventEmitter<RideDto>();
+  @Output() showToast = new EventEmitter<Toast>();
 
   reviewService : ReviewService = inject(ReviewService);
   userService : UserService = inject(UserService);
@@ -55,6 +61,7 @@ export class RideDetails {
   }
 
   ngOnChanges(changes : SimpleChanges): void {
+    console.log(this.ride)
     if (changes['ride']) {
       this.start = new Date(this.ride.startTime)
       this.end = new Date(this.ride.endTime)
@@ -71,4 +78,16 @@ export class RideDetails {
     else
       this.ridePlanningStore.currentRideSubject$.next(null);
   }
+
+  cancelScheduleRide(rideId: number) {
+    this.rideService.cancelRideUser(rideId).subscribe({
+        next: () => {
+          this.showToast.emit({title: 'Ride cancelled', message: 'Ride cancelled successfully.'});
+        },
+        error: (err: any) => {
+          const errorMessage = err.error || 'Error cancelling ride';
+          this.onError.emit(new Error(errorMessage))
+        }
+      });
+    }
 }

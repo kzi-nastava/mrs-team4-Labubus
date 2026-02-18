@@ -49,6 +49,8 @@ public class RideServiceImpl implements RideService {
 
     // Mock data for rides
     List<RideDto> rides = new ArrayList<RideDto>();
+    @Autowired
+    private UserStatusRecordRepository userStatusRecordRepository;
 
     @Override
     public RideDto createRide(Long userId, RideDto rideDto) {
@@ -176,6 +178,15 @@ public class RideServiceImpl implements RideService {
         for (User user : ride.getPassengers()) {
             this.webSocketNotificationService.sendCurrentRideUpdate(user.getId(), currentRideNotification);
             emailService.sendRideCompletedEmail(user.getEmail(), ride);
+        }
+
+        // when driver set that he wants to be inactive after finishing this ride
+        if (ride.getDriver().getPendingInactiveStatus()) {
+            Driver driver = ride.getDriver();
+            driver.setStatus(UserStatus.INACTIVE);
+            UserStatusRecord statusRecord = new UserStatusRecord(driver, UserStatus.INACTIVE, LocalDateTime.now());
+            userStatusRecordRepository.save(statusRecord);
+            userRepository.save(driver);
         }
         return ride.getPrice();
     }
@@ -691,12 +702,31 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
+    public List<RideCardDto> getScheduledRidesUser(Long userId, Integer skip, Integer count, RideQueryDto query) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+
+        Pageable pageable = parseToPageable(skip, count, query);
+
+        if (query != null && query.getDate() != null)
+            return rideRepository.findByCreatorAndStatusInAndStartTimeBetween(user.get(), List.of(RideStatus.PENDING), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
+        return rideRepository.findByCreatorAndStatusIn(user.get(), List.of(RideStatus.PENDING), pageable).stream().map(RideCardDto::new).toList();
+    }
+
+    @Override
     public RideDto cancelRide(Long rideId) {
         Ride ride = this.getRideOrThrow(rideId);
 
         this.checkRidePrivilege(ride.getCreator().getId());
 
+        if (ride.getStatus() == RideStatus.CANCELLED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Ride already cancelled");
+        }
+
         LocalDateTime now = LocalDateTime.now();
+
         if (ride.getStartTime() != null && ride.getStartTime().minusMinutes(10).isBefore(now)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Cannot cancel ride less than 10 minutes before start");
