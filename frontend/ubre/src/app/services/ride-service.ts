@@ -197,27 +197,39 @@ export class RideService {
     if (this.fetchingActive)
       return;
 
-    this.fetchingFavorites = true;
+    this.fetchingActive = true;
     const params : HttpParams = this.extractParams(query, this.activePage, count);
 
-    if (query.userId !== null) { 
-      this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/ongoing/${query.userId}`, {params}).pipe(take(1)).subscribe((value : RideCardDto[]) => {
-        this.fetchingActive = false;
-        if (value.length == 0)
-              return;
-    
-        this.active.next([...this.favorites.value, ...value]);
-        this.activePage++; 
+    if (query.userId !== null) {
+      this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/ongoing/${query.userId}`, {params}).pipe(take(1)).subscribe({
+        next: (value : RideCardDto[]) => {
+          this.fetchingActive = false;
+          if (value.length == 0)
+            return;
+      
+          this.active.next([...this.active.value, ...value]);
+          this.activePage++;
+          },
+          error: err => {
+            console.log(err)
+            this.fetchingActive = false;
+          }
       })
     }
     else {
-        this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/ongoing`, {params}).pipe(take(1)).subscribe((value : RideCardDto[]) => {
+        this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/ongoing`, {params}).pipe(take(1)).subscribe({
+        next: (value : RideCardDto[]) => {
           this.fetchingActive = false;
           if (value.length == 0)
-                return;
+            return;
       
-          this.active.next([...this.favorites.value, ...value]);
-          this.activePage++; 
+          this.active.next([...this.active.value, ...value]);
+          this.activePage++;
+          },
+          error: err => {
+            console.log(err)
+            this.fetchingActive = false;
+          }
       })
     }
   }
