@@ -243,7 +243,7 @@ export class RideService {
     if (this.fetchingScheduled)
       return;
 
-    this.fetchingFavorites = true;
+    this.fetchingScheduled = true;
     const params : HttpParams = this.extractParams(query, this.scheduledPage, count);
     this.userService.getCurrentUser().pipe(take(1)).subscribe({
       next: (currentUser : UserDto) => {
