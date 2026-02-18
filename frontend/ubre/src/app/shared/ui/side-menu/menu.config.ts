@@ -69,7 +69,7 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
     },
     { label: 'Active rides', 
       icon: 'active-rides-primary-text.svg', 
-      action: 'admin-users' 
+      action: 'active-rides' 
     },
     {
       label: 'Account settings',

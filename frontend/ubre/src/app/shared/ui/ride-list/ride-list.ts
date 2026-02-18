@@ -24,6 +24,8 @@ import { WaypointDto } from '../../../dtos/waypoint-dto';
   styleUrl: './ride-list.css',
 })
 export class RideList {
+  @Input() showDateFilter : boolean = true;
+  @Input() showSort : boolean = true;
   @Input() rides : RideCardDto[] | null = [];
   @Input() title : string = "";
   @Input() open : boolean = false;

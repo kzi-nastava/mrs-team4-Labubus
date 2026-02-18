@@ -70,7 +70,8 @@
 /* Sheets (Favourites, Ride history, Reports, Scheduled) above ride-buttons */
 :host .favorite-rides,
 :host .ride-history,
-:host .scheduled-rides {
+:host .scheduled-rides
+:host .active-rides {
   position: relative;
   z-index: 2100;
 }

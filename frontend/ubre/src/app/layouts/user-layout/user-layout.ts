@@ -61,6 +61,7 @@ import { ComplaintService } from '../../services/complaint-service';
 import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides';
 import { Reports } from '../../shared/ui/reports/reports';
 import { BlockUsersList } from '../../features/block-users/block-users-list/block-users-list';
+import { ActiveRides } from '../../shared/ui/active-rides/active-rides';
 import { Chat } from '../../shared/ui/chat/chat';
 import { ChatService } from '../../services/chat-service';
 
@@ -73,7 +74,7 @@ import { ChatService } from '../../services/chat-service';
     AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
     RideOptions, FavoriteRides, DriverCancelDialog,
     ComplaintModal, PanicList, PanicButton, PanicToast,
-    ScheduledRides, Reports, BlockUsersList, Chat],
+    ScheduledRides, Reports, BlockUsersList, Chat, ActiveRides],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -266,6 +267,7 @@ import { ChatService } from '../../services/chat-service';
     showRideHistory: false,
     showFavourites: false,
     showScheduledRides: false,
+    showActiveRides: false,
     showReports: false,
     showCancelModal: false,
     panicListOpen: false,
@@ -357,6 +359,9 @@ import { ChatService } from '../../services/chat-service';
     }
     if (action === 'scheduled') {
       this.openScheduledRides();
+    }
+    if (action === 'active-rides') {
+      this.openActiveRides();
     }
     if (action === 'login') {
       this.router.navigate(['/login']);
@@ -751,6 +756,7 @@ import { ChatService } from '../../services/chat-service';
     this.ui.showFavourites = false;
     this.ui.showReports = false;
     this.ui.showRideHistory = true;
+    this.ui.showActiveRides = false;
     this.ui.menuOpen = false;
   }
 
@@ -802,6 +808,7 @@ import { ChatService } from '../../services/chat-service';
     this.ui.showRideHistory = false;
     this.ui.showReports = false;
     this.ui.showFavourites = true;
+    this.ui.showActiveRides = false;
     this.ui.menuOpen = false;
   }
 
@@ -822,6 +829,7 @@ import { ChatService } from '../../services/chat-service';
     this.ui.showFavourites = false;
     this.ui.showReports = false;
     this.ui.showScheduledRides = true;
+    this.ui.showActiveRides = false;
     this.ui.menuOpen = false;
   }
 
@@ -834,6 +842,7 @@ import { ChatService } from '../../services/chat-service';
     this.ui.showFavourites = false;
     this.ui.showScheduledRides = false;
     this.ui.showReports = true;
+    this.ui.showActiveRides = false;
     this.ui.menuOpen = false;
   }
 
@@ -844,6 +853,26 @@ import { ChatService } from '../../services/chat-service';
 
   closeReports() {
     this.ui.showReports = false;
+  }
+
+  // ACTIVE RIDES SHEET LOGIC
+
+  onActiveRidesBack() {
+    this.ui.showActiveRides = false;
+    this.ui.menuOpen = true;
+  }
+
+  openActiveRides() {
+    this.ui.showRideHistory = false;
+    this.ui.showFavourites = false;
+    this.ui.showReports = false;
+    this.ui.showScheduledRides = false;
+    this.ui.showActiveRides = true;
+    this.ui.menuOpen = false;
+  }
+
+  closeActiveRides() {
+    this.ui.showActiveRides = false;
   }
 
   // CHAT SHEET LOGIC

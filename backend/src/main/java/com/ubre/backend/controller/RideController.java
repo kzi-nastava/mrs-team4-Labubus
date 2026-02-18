@@ -146,6 +146,31 @@ public class RideController {
         return ResponseEntity.status(HttpStatus.OK).body(createdRide);
     }
 
+    @GetMapping(
+            value = "/ongoing/{userId}"
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<RideCardDto>> getOngoingRides(
+            @PathVariable Long userId,
+            @RequestParam(required = false) Integer skip,
+            @RequestParam(required = false) Integer count,
+            @Valid @ModelAttribute RideQueryDto query) {
+        List<RideCardDto> rides = rideService.getUsersOngoingRides(userId, skip, count, query);
+        return ResponseEntity.status(HttpStatus.OK).body(rides);
+    }
+
+    @GetMapping(
+            value = "/ongoing"
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<RideCardDto>> getOngoingRides(
+            @RequestParam(required = false) Integer skip,
+            @RequestParam(required = false) Integer count,
+            @Valid @ModelAttribute RideQueryDto query) {
+        List<RideCardDto> rides = rideService.getOngoingRides(skip, count, query);
+        return ResponseEntity.status(HttpStatus.OK).body(rides);
+    }
+
     @PostMapping(
             value = "/{id}/track",
             consumes = MediaType.APPLICATION_JSON_VALUE

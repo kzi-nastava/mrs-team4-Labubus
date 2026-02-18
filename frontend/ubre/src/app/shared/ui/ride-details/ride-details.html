@@ -54,6 +54,10 @@
             <app-button width="290px" testId="reorder-ride" (clicked)="onReorderClick()">Reorder ride</app-button>
       }
 
+      @if (user.role === 'ADMIN' && ride.status == 'IN_PROGRESS') {
+            <app-button width="290px" testId="track-ride" (clicked)="onToggleTrack()">{{ (ridePlanningStore.currentRide$ | async)?.id === ride.id ? 'Untrack ride' : 'Track ride' }}</app-button>
+      }
+
       @if (user.role === 'REGISTERED_USER' || user.role === 'ADMIN') {
             <app-ride-history-reviews [rideId]="ride.id"></app-ride-history-reviews>
       }
