@@ -336,7 +336,6 @@ public class RideController {
 
 
     // order a ride endpoint, should be protected later by hasRole('USER') or similar, for now ignore
-    // TODO: protect this endpoint later
     @PostMapping(
             value = "/order",
             consumes = MediaType.APPLICATION_JSON_VALUE,

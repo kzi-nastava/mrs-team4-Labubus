@@ -420,7 +420,6 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
-        // todo: implement activate user logic
     }
 
     @Override
@@ -439,7 +438,6 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
-        // todo: implement send passenger request logic via email
     }
 
     @Override

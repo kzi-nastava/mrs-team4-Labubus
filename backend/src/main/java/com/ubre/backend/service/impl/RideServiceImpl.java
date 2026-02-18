@@ -468,7 +468,6 @@ public class RideServiceImpl implements RideService {
 
 
     // most complex method
-    // TODO: make changes later if necessary
     @Override
     public RideDto orderRide(RideOrderDto rideOrderDto) {
 
@@ -529,7 +528,6 @@ public class RideServiceImpl implements RideService {
             // assign the first active driver found
             System.out.println("Found eligible active drivers, assigning the first one");
             assignedDriver = eligibleDrivers.get(0); // we should actually calculate driver distance from starting point, but right now i don't have that data (where vehicle waypoints are stored)
-            // TODO: implement distance calculation later
         } else {
             System.out.println("No eligible active drivers found, looking for on ride drivers with no pending rides");
             // from drivers that are on ride, and has no pending rides, find one that is on ride that has closes end time to now
@@ -558,7 +556,6 @@ public class RideServiceImpl implements RideService {
             if (eligibleDrivers.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable drivers found for the ride");
             }
-            // TODO: assign by least time to current time from ride end time
             assignedDriver = eligibleDrivers.get(0); // placeholder
         }
 
