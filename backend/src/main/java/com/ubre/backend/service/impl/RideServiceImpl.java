@@ -184,6 +184,7 @@ public class RideServiceImpl implements RideService {
         if (ride.getDriver().getPendingInactiveStatus() == Boolean.TRUE) {
             Driver driver = ride.getDriver();
             driver.setStatus(UserStatus.INACTIVE);
+            driver.setPendingInactiveStatus(false);
             UserStatusRecord statusRecord = new UserStatusRecord(driver, UserStatus.INACTIVE, LocalDateTime.now());
             userStatusRecordRepository.save(statusRecord);
             userRepository.save(driver);
