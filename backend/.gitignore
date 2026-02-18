@@ -36,6 +36,7 @@ build/
 # Local Development Configuration
 # ========================================
 application-local.properties
+application-test.properties
 *-local.properties
 
 # Keep the example template

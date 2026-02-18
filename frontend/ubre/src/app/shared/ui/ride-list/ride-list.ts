@@ -24,9 +24,12 @@ import { WaypointDto } from '../../../dtos/waypoint-dto';
   styleUrl: './ride-list.css',
 })
 export class RideList {
+  @Input() showDateFilter : boolean = true;
+  @Input() showSort : boolean = true;
   @Input() rides : RideCardDto[] | null = [];
   @Input() title : string = "";
   @Input() open : boolean = false;
+  @Input() testIdPrefix: string | null = null;
   @Output() onClose = new EventEmitter<void>();
   @Output() onQueryChange = new EventEmitter<RideQueryDto>();
   @Output() onScrollToBottom = new EventEmitter<RideQueryDto>();
@@ -50,7 +53,8 @@ export class RideList {
           role: Role.DRIVER,
           id: 1,
           phone: "1251323523",
-          address: "Test adress 123"
+          address: "Test adress 123",
+          isBlocked: false
         },
         vehicle: { model: 'Toyota Carolla 2021', type: VehicleType.STANDARD, id: 1, seats: 5, babyFriendly: true, petFriendly: false, plates: "123123123" },
         passengers: [],
@@ -62,7 +66,7 @@ export class RideList {
         createdBy: -1
       },);
   detailsOpen = signal<boolean>(false)
-  user = signal<UserDto>({ email: '', name: 'Guest', surname: '', avatarUrl: '', role: Role.GUEST, id: 0, phone: '', address: '' })
+  user = signal<UserDto>({ email: '', name: 'Guest', surname: '', avatarUrl: '', role: Role.GUEST, id: 0, phone: '', address: '', isBlocked: false })
 
   query : RideQueryDto = new RideQueryDto(null, "", false, null);
   page : number = 0;

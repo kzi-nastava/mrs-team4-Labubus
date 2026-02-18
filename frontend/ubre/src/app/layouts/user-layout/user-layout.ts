@@ -3,7 +3,6 @@ import { Map } from '../../services/ride-planning/map/map';
 import { IconButton } from '../../shared/ui/icon-button/icon-button';
 import { SideMenu } from '../../shared/ui/side-menu/side-menu';
 import { Toast } from '../../shared/ui/toast/toast';
-import { Modal } from '../../shared/ui/modal/modal';
 import { ModalContainer } from '../../shared/ui/modal-container/modal-container';
 import { StatCard } from '../../shared/ui/stat-card/stat-card';
 import { Button } from '../../shared/ui/button/button';
@@ -61,17 +60,22 @@ import { ComplaintModal } from '../../shared/ui/complaint-modal/complaint-modal'
 import { ComplaintService } from '../../services/complaint-service';
 import { PricingService } from '../../services/pricing-service';
 import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides';
+import { Reports } from '../../shared/ui/reports/reports';
+import { BlockUsersList } from '../../features/block-users/block-users-list/block-users-list';
+import { ActiveRides } from '../../shared/ui/active-rides/active-rides';
+import { Chat } from '../../shared/ui/chat/chat';
+import { ChatService } from '../../services/chat-service';
 
 @Component({
   selector: 'app-user-layout',
   standalone: true,
   imports: [Map,IconButton,SideMenu,Toast,
-    Modal,ModalContainer,StatCard,Button,
+    ModalContainer,StatCard,Button,
     Sheet,FormsModule,RideHistory,ProfileChangeCard,
     AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
     RideOptions, FavoriteRides, DriverCancelDialog,
     ComplaintModal, PanicList, PanicButton, PanicToast,
-    ScheduledRides],
+    ScheduledRides, Reports, BlockUsersList, Chat, ActiveRides],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
@@ -97,6 +101,7 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
 
     public vehicleService = inject(VehicleService)
     public rideTrackingStore = inject(RideTrackingStore)
+    public chatService = inject(ChatService)
     public pricingService = inject(PricingService);
 
   Role = Role;
@@ -210,7 +215,6 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
       
           if (notification.status === NotificationType.RIDE_STARTED)
             this.showToast('Ride started', 'Your ride has been started successfully.');
-
           
           if (notification.status === NotificationType.RIDE_CANCELLED) 
           
@@ -223,13 +227,12 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
             this.showToast('Ride completed', "Ride completed.");
             this.rideService.getCurrentRide().pipe(take(1)).subscribe((nextRide : RideDto | null) => {
               this.userService.getCurrentUser().pipe(take(1)).subscribe((user : UserDto) => {
-                if (user.role == Role.REGISTERED_USER && this.ridePlanningStore.currentRideSubject$.value != null)
+                if (user.role == Role.REGISTERED_USER && this.ridePlanningStore.currentRideSubject$.value != null && this.ridePlanningStore.currentRideSubject$.value.createdBy == user.id)
                   this.reviewService.newReview(this.ridePlanningStore.currentRideSubject$.value.id)
               })
               this.ridePlanningStore.currentRideSubject$.next(nextRide)
             })
           }
-
 
           if (notification.ride)
             this.ridePlanningStore.currentRideSubject$.next(notification.ride);
@@ -249,7 +252,6 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   }
   ui = {
     menuOpen: false,
-    cdModalOpen: true,
     accountSettingsOpen: false,
     changePasswordOpen: false,
     vehicleInfoOpen: false,
@@ -260,15 +262,19 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
     profileChangesOpen: false,
     reviewModalOpen: of(false),
     complaintModalOpen: of(false),
+    chatOpen: false,
     scheduleTimerOpen: false,
     invitePassengersOpen: false,
     timeEstimate: false,
     showRideHistory: false,
     showFavourites: false,
     showScheduledRides: false,
+    showActiveRides: false,
+    showReports: false,
     showCancelModal: false,
     panicListOpen: false,
     toastPanicOpen: false,
+    blockUsersOpen: false,
     priceAdjustmentOpen: false,
   };
 
@@ -280,7 +286,6 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
 
   toggleDest() {
     this.ridePlanningStore.toggleDestOpen();
-    if (this.ridePlanningStore.destOpen) this.ui.cdModalOpen = false;
   }
 
   onCdProceed() {
@@ -312,13 +317,6 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   closeMenu() {
     this.ui.menuOpen = false;
   }
-  openCdModal() {
-    this.ui.cdModalOpen = true;
-  }
-  closeCdModal() {
-    this.ui.cdModalOpen = false;
-  }
-
   closeAllSidePanels() {
     this.closeMenu();
     this.closeAccountSettings();
@@ -329,7 +327,10 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
     this.closeRideHistory();
     this.closeFavourites();
     this.closeScheduledRides();
+    this.closeReports();
     this.closeProfileChanges();
+    this.closeBlockUsers();
+    this.closeChat();
   }
 
   handleMenuAction(action: string) {
@@ -362,11 +363,17 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
     if (action === 'scheduled') {
       this.openScheduledRides();
     }
+    if (action === 'active-rides') {
+      this.openActiveRides();
+    }
     if (action === 'login') {
       this.router.navigate(['/login']);
     }
     if (action === 'sign-up') {
       this.router.navigate(['/signup']);
+    }
+    if (action === 'reports') {
+      this.openReports();
     }
     if (action === 'profile-changes') {
       this.openProfileChanges();
@@ -376,6 +383,9 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
     }
     if (action === 'admin-panics') {
       this.ui.panicListOpen = true;
+    }
+    if (action === 'block-users') {
+      this.openBlockUsers();
     }
     if (action === 'price-adjustment') {
       this.openPriceAdjustment();
@@ -415,15 +425,6 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   
   hideToast() {
     this.ui.toastOpen = false;
-  }
-
-  onCdModalAction() {
-    this.ui.cdModalOpen = false;
-    this.ridePlanningStore.openDest();
-  }
-
-  openChat() {
-    // Open chat widget
   }
 
   openComplaintModal() {
@@ -759,7 +760,9 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   openRideHistory() {
     this.ui.showScheduledRides = false;
     this.ui.showFavourites = false;
+    this.ui.showReports = false;
     this.ui.showRideHistory = true;
+    this.ui.showActiveRides = false;
     this.ui.menuOpen = false;
   }
 
@@ -789,9 +792,7 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
 
     this.routingService.route(waypoints).pipe(take(1)).subscribe({
       next: (routeInfo) => {
-          console.log(waypoints)
           this.selectedRideWaypoints.next(waypoints)
-          console.log(this.selectedRideWaypoints.value)
           this.selectedRideRoute.next(routeInfo)
         },
         error: (err) => {
@@ -811,7 +812,9 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   openFavourites() {
     this.ui.showScheduledRides = false;
     this.ui.showRideHistory = false;
+    this.ui.showReports = false;
     this.ui.showFavourites = true;
+    this.ui.showActiveRides = false;
     this.ui.menuOpen = false;
   }
 
@@ -830,7 +833,9 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   openScheduledRides() {
     this.ui.showRideHistory = false;
     this.ui.showFavourites = false;
+    this.ui.showReports = false;
     this.ui.showScheduledRides = true;
+    this.ui.showActiveRides = false;
     this.ui.menuOpen = false;
   }
 
@@ -838,9 +843,57 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
     this.ui.showScheduledRides = false;
   }
 
+  openReports() {
+    this.ui.showRideHistory = false;
+    this.ui.showFavourites = false;
+    this.ui.showScheduledRides = false;
+    this.ui.showReports = true;
+    this.ui.showActiveRides = false;
+    this.ui.menuOpen = false;
+  }
 
+  onReportsBack() {
+    this.ui.showReports = false;
+    this.ui.menuOpen = true;
+  }
 
+  closeReports() {
+    this.ui.showReports = false;
+  }
 
+  // ACTIVE RIDES SHEET LOGIC
+
+  onActiveRidesBack() {
+    this.ui.showActiveRides = false;
+    this.ui.menuOpen = true;
+  }
+
+  openActiveRides() {
+    this.ui.showRideHistory = false;
+    this.ui.showFavourites = false;
+    this.ui.showReports = false;
+    this.ui.showScheduledRides = false;
+    this.ui.showActiveRides = true;
+    this.ui.menuOpen = false;
+  }
+
+  closeActiveRides() {
+    this.ui.showActiveRides = false;
+  }
+
+  // CHAT SHEET LOGIC
+
+  openChat() {
+    this.ui.chatOpen = true;
+    if (this.chatService.getCurrentChat() != null)
+      this.chatService.fetchChatMessages()
+  }
+
+  closeChat() {
+    this.ui.chatOpen = false;
+    if (this.chatService.getCurrentChat() != null)
+      this.chatService.setCurrentChatMessages(null);
+  }
 
 
 
@@ -920,10 +973,41 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   }
 
   onScheduleTimerCheckout(timeData: { hours: number; minutes: number; isAM: boolean }) {
+    const scheduledToday = this.scheduledTimeToDateTodayOnly(timeData);
+    const now = new Date();
+
+    if (scheduledToday.getTime() <= now.getTime()) {
+      this.showToast(
+        'Cannot schedule',
+        'You cannot schedule a ride in the past.'
+      );
+      return;
+    }
+
+    const maxHoursAhead = 5;
+    const diffMs = scheduledToday.getTime() - now.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
+    if (diffHours > maxHoursAhead) {
+      this.showToast(
+        'Cannot schedule',
+        'You can only schedule a ride up to 5 hours in advance.'
+      );
+      return;
+    }
+
     this.ui.scheduleTimerOpen = false;
     this.previousScreenBeforeInvite = 'schedule-timer';
     this.ui.invitePassengersOpen = true;
     this.ridePlanningStore.setScheduledTime(timeData);
+  }
+
+  /** Builds Date for selected time as today only (no shift to tomorrow). */
+  private scheduledTimeToDateTodayOnly(time: { hours: number; minutes: number; isAM: boolean }): Date {
+    const hours24 = time.isAM
+      ? (time.hours === 12 ? 0 : time.hours)
+      : (time.hours === 12 ? 12 : time.hours + 12);
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours24, time.minutes, 0, 0);
   }
 
 
@@ -1000,8 +1084,6 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   onFavoriteReorder(ride: RideDto) {
     // close favourites sheet
     this.closeFavourites();
-    // close initial choose-destination modal
-    this.ui.cdModalOpen = false;
     // prepare state for new ride using existing waypoints
     this.ridePlanningStore.clearRidePlanningState();
     this.ridePlanningStore.setWaypoints(ride.waypoints);
@@ -1058,6 +1140,20 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
     this.ui.menuOpen = true;
   }
 
+  openBlockUsers() {
+    this.ui.menuOpen = false;
+    this.ui.blockUsersOpen = true;
+  }
+
+  closeBlockUsers() {
+    this.ui.blockUsersOpen = false;
+  }
+
+  onBlockUsersBack() {
+    this.closeBlockUsers();
+    this.ui.menuOpen = true;
+  }
+
   approveProfileChange(id: number) {
     this.profileChangeService.approve(id);
   }
@@ -1076,7 +1172,6 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
 
   onEstimateTime() {
     this.ui.timeEstimate = false;
-    this.ui.cdModalOpen = true;
     this.ridePlanningStore.setWaypoints([]);
     this.ridePlanningStore.clearRoute();
   }
@@ -1129,10 +1224,9 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
                 latitude: lat,
                 longitude: lon,
                 label: label,
+                visited: false,
                 id: 0,
               };
-
-              console.log("Stop waypoint DTO:", stopWaypoint);
 
               this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
                 next: (price) => {
@@ -1170,10 +1264,9 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
                 latitude: lat,
                 longitude: lon,
                 label: label,
+                visited: false,
                 id: 0,
               };
-
-              console.log("Stop waypoint DTO:", stopWaypoint);
 
               this.rideService.stopRide(ride!.id, stopWaypoint).subscribe({
                 next: (price) => {
@@ -1225,7 +1318,6 @@ import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides'
   }
 
   subscribeToPanicNotifications() {
-    console.log(this.authService.getRole())
     if (this.authService.getRole() === "ADMIN") { 
         this.panicSubscription = this.webSocketService
         .panicNotifications()

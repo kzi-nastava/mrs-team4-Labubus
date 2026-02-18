@@ -1,0 +1,53 @@
+
+.section {
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3648;
+  margin-bottom: 12px;
+}
+
+
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  background: #f7fafc;
+  border-radius: 12px;
+  border: 1px dashed #cbd5e0;
+}
+
+.empty-message {
+  font-size: 14px;
+  color: #a0aec0;
+  margin: 0;
+  font-style: italic;
+}
+
+.complaints-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.complaint-item {
+  background: #fff5f5;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #fed7d7;
+  border-left: 4px solid #fc8181;
+}
+
+.complaint-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #2d3648;
+  margin: 0;
+}
+
+.complaint-text.empty {
+  font-style: italic;
+  color: #a0aec0;
+}

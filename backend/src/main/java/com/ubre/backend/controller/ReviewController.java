@@ -61,4 +61,10 @@ public class ReviewController {
         ReviewDto review = ReviewService.deleteReview(id);
         return new ResponseEntity<>(review, HttpStatus.OK);
     }
+    @GetMapping("/ride/{rideId}")
+    public ResponseEntity<ReviewDto> getReviewsForRide(@PathVariable Long rideId) {
+        ReviewDto review = ReviewService.getReviewsForRide(rideId);
+        return ResponseEntity.ok(review);
+    }
+
 }

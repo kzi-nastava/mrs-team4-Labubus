@@ -134,6 +134,7 @@ export class RidePlanningStore {
             label: this.geocodingService.toLatin(suggestion.display_name),
             latitude: Number(suggestion.lat),
             longitude: Number(suggestion.lon),
+            visited: false,
         };
         this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: [...this.waypoints, wp] });
         this.clearSuggestions();
@@ -150,7 +151,7 @@ export class RidePlanningStore {
         const id = Date.now();
         const fallback = `${lat.toFixed(6)}, ${lon.toFixed(6)}`; // fallback is a fallback for the label, if the label is not found
 
-        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: [...this.waypoints, { id: Number(id), label: fallback, latitude: lat, longitude: lon }] });
+        this.ridePlanningStateSubject$.next({ ...this.ridePlanningStateSubject$.value, waypoints: [...this.waypoints, { id: Number(id), label: fallback, latitude: lat, longitude: lon, visited: false }] });
         
         this.geocodingService.reverse(lat, lon).pipe(take(1)).subscribe({
             next: (label) => {
@@ -186,6 +187,7 @@ export class RidePlanningStore {
                     label: fallback,
                     latitude: latitude,
                     longitude: longitude,
+                    visited: false
                 };
 
                 const currentWaypoints = this.waypoints;

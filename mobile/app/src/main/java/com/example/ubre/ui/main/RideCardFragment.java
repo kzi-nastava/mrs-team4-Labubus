@@ -12,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.example.ubre.R;
 import com.example.ubre.ui.dtos.RideCardDto;
 import com.example.ubre.ui.dtos.RideDto;
@@ -54,10 +53,10 @@ public class RideCardFragment extends Fragment {
         end.setText(lastStop.length() > 30 ? lastStop.substring(0, 27) + "..." : lastStop);
 
         ImageView favoriteIcon = this.getView().findViewById(R.id.ride_card_favorite);
-        if (ride.favorite)
-            Glide.with(this).load(R.drawable.ic_favorite_red).circleCrop().into(favoriteIcon);
+        if (Boolean.TRUE.equals(ride.favorite))
+            favoriteIcon.setImageResource(R.drawable.ic_favorite_red);
         else
-            Glide.with(this).load(R.drawable.ic_favorite_grey).circleCrop().into(favoriteIcon);
+            favoriteIcon.setImageResource(R.drawable.ic_favorite_grey);
         favoriteIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

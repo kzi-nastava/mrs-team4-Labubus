@@ -1,0 +1,177 @@
+:host {
+    display: block;
+  }
+  
+  .reports-content {
+    padding: 8px 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    font-family: var(--font-family);
+  }
+  
+  /* Ugled na Account settings: wrap i sekcije */
+  .rp-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  
+  .rp-field {
+    margin: 4px 0;
+  }
+  .rp-field-date {
+    cursor: pointer;
+    display: block;
+  }
+  
+  .rp-label {
+    font-size: var(--font-size-regular);
+    color: var(--color-text-primary);
+    margin: 0 0 6px 6px;
+  }
+  
+  .rp-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--color-neutral-light-gray);
+    border-radius: 12px;
+    box-sizing: border-box;
+    outline: none;
+    font-size: 14px;
+    background: #fff;
+  }
+  
+  /* Scope select – strelica bliže sadržaju (ne previše na desno) */
+  .rp-select-wrap {
+    position: relative;
+  }
+  
+  .rp-select {
+    width: 100%;
+    height: 44px;
+    padding: 0 36px 0 14px;
+    border: 1px solid var(--color-neutral-light-gray);
+    border-radius: 12px;
+    box-sizing: border-box;
+    outline: none;
+    font-size: 14px;
+    background: #fff;
+    font-family: var(--font-family);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+  }
+  
+  .rp-actions {
+    margin-top: 4px;
+    width: 100%;
+  }
+  .rp-actions::ng-deep app-button {
+    display: block;
+    width: 100%;
+  }
+  .rp-actions::ng-deep .btn {
+    width: 100%;
+  }
+  
+  /* Greška ispod dugmeta, ne iznad */
+  .rp-error {
+    margin: 8px 0 0 0;
+    font-size: 12px;
+    color: #d23b3b;
+    padding-left: 6px;
+  }
+  
+  .rp-loading {
+    text-align: center;
+    padding: 24px;
+    color: var(--color-neutral-dark-gray);
+    font-size: var(--font-size-regular);
+  }
+  
+  /* Summary – kao kartice */
+  .rp-summary {
+    margin: 0;
+  }
+  
+  .rp-summary .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  /* Mini statistike – neutralna pozadina, čitljiv tekst (ne crno na plavo) */
+  .rp-summary .summary-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 10px;
+    background: #f5f5f5;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    min-height: 64px;
+  }
+  
+  .rp-summary .summary-value {
+    font-size: var(--font-size-large, 18px);
+    font-weight: var(--font-weight-medium, 500);
+    color: #1a1a1a;
+  }
+  .rp-summary .summary-value.negative {
+    color: #b71c1c;
+  }
+  
+  .rp-summary .summary-label {
+    font-size: var(--font-size-small, 12px);
+    color: #616161;
+    margin-top: 4px;
+  }
+  
+  /* Grafovi – horizontalni skrol, izlomljena linija, profesionalne boje */
+  .rp-chart-section {
+    margin: 0 0 10px 0;
+    padding: 8px 0 4px 0;
+  }
+  
+  .rp-chart-caption {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #3c4043;
+    line-height: 1.3;
+  }
+  
+  .rp-chart-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+    background: #f8f9fc;
+    padding: 10px 8px 6px 8px;
+  }
+  
+  /* Chart.js – kontejner sa fiksnom visinom, horizontalni skrol */
+  .rp-chart-canvas-wrap {
+    position: relative;
+    height: 160px;
+    min-height: 160px;
+    width: 100%;
+  }
+  .rp-chart-canvas-wrap canvas {
+    display: block;
+  }
+  
+  .rp-no-data {
+    text-align: center;
+    padding: 16px;
+    color: var(--color-neutral-dark-gray);
+    font-size: var(--font-size-regular);
+  }
+  

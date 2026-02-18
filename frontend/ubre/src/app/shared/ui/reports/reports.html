@@ -1,0 +1,114 @@
+<div class="reports-content">
+    <div class="rp-wrap">
+      <label class="rp-field rp-field-date">
+        <span class="rp-label">From</span>
+        <input type="date" [(ngModel)]="dateFrom" class="rp-input" />
+      </label>
+      <label class="rp-field rp-field-date">
+        <span class="rp-label">To</span>
+        <input type="date" [(ngModel)]="dateTo" class="rp-input" />
+      </label>
+      @if (isAdmin) {
+        <div class="rp-field rp-select-wrap">
+          <div class="rp-label">Scope</div>
+          <select [(ngModel)]="scope" class="rp-select">
+            @for (opt of scopeOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+        @if (scope === 'single_user') {
+          <div class="rp-field">
+            <div class="rp-label">User email</div>
+            <input
+              type="email"
+              [(ngModel)]="userEmail"
+              class="rp-input"
+              placeholder="user&#64;example.com" />
+          </div>
+        }
+      }
+      <div class="rp-actions">
+        <app-button
+          type="button"
+          [disabled]="loading"
+          (clicked)="generateReport()">
+          {{ loading ? 'Loading…' : 'Generate report' }}
+        </app-button>
+      </div>
+      @if (errorMessage) {
+        <p class="rp-error">{{ errorMessage }}</p>
+      }
+    </div>
+  
+    @if (loading) {
+      <div class="rp-loading">Loading report…</div>
+    }
+  
+    @if (data && !loading) {
+      <section class="rp-summary">
+          <div class="summary-grid">
+            <div class="summary-item">
+              <span class="summary-value">{{ data.summary.totalRides }}</span>
+              <span class="summary-label">Total rides</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-value">{{ data.summary.totalDistanceKm | number:'1.1-1' }} km</span>
+              <span class="summary-label">Total distance</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-value" [class.negative]="data.summary.totalAmountMoney < 0">
+                {{ formatMoney(data.summary.totalAmountMoney) }}
+              </span>
+              <span class="summary-label">Total amount</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-value">{{ data.summary.averageRidesPerDay | number:'1.1-1' }}</span>
+              <span class="summary-label">Avg rides/day</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-value">{{ data.summary.averageDistancePerDay | number:'1.1-1' }} km</span>
+              <span class="summary-label">Avg distance/day</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-value" [class.negative]="data.summary.averageMoneyPerDay < 0">
+                {{ formatMoney(data.summary.averageMoneyPerDay) }}
+              </span>
+              <span class="summary-label">Avg amount/day</span>
+            </div>
+      </div>
+      </section>
+  
+      @if (data.dailyData.length > 0) {
+        <section class="rp-chart-section">
+          <p class="rp-chart-caption">Number of rides per day in the selected range.</p>
+          <div class="rp-chart-scroll">
+            <div class="rp-chart-canvas-wrap" [style.min-width.px]="chartMinWidth">
+              <canvas #canvasRides></canvas>
+            </div>
+          </div>
+        </section>
+  
+        <section class="rp-chart-section">
+          <p class="rp-chart-caption">Distance traveled per day (km).</p>
+          <div class="rp-chart-scroll">
+            <div class="rp-chart-canvas-wrap" [style.min-width.px]="chartMinWidth">
+              <canvas #canvasDistance></canvas>
+            </div>
+          </div>
+        </section>
+  
+        <section class="rp-chart-section">
+          <p class="rp-chart-caption">Spent (negative) or earned (positive) in dollars per day.</p>
+          <div class="rp-chart-scroll">
+            <div class="rp-chart-canvas-wrap" [style.min-width.px]="chartMinWidth">
+              <canvas #canvasMoney></canvas>
+            </div>
+          </div>
+        </section>
+      } @else {
+        <p class="rp-no-data">No daily data in this range.</p>
+      }
+    }
+  </div>
+  

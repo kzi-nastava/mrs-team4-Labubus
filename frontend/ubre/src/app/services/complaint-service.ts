@@ -34,4 +34,8 @@ export class ComplaintService {
       this.http.post<ComplaintDto>(`${this.BASE_URL}complaints/ride/${this.rideId}`, complaint).subscribe(callback)
     })
   } 
+
+  getComplaintsForRide(rideId: number): Observable<ComplaintDto[]> {
+    return this.http.get<ComplaintDto[]>(`${this.BASE_URL}complaints/ride/${rideId}`);
+  }
 }

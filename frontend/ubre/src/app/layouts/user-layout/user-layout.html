@@ -60,7 +60,7 @@
         </div>
 
         <div class="dest-footer">
-          <button type="button" class="dest-btn dest-btn-filled" (click)="onCdProceed()">Proceed</button>
+          <button type="button" class="dest-btn dest-btn-filled" data-testid="dest-proceed" (click)="onCdProceed()">Proceed</button>
         </div>
       </div>
     }
@@ -94,21 +94,19 @@
       }
     
 
-    <!-- MAIN OVERLAY CONTENT -->
-
-    @if (ui.cdModalOpen) {
-      <app-modal class="cd-modal show"
-        title="Choose a destination"
-        message="Please select a valid destination"
-        buttonText="Continue"
-        (action)="onCdModalAction()">
-      </app-modal>
+    <!-- BLOCK WARNING (toast style, next to status icon) -->
+    @if ((userService.currentUser$ | async)?.isBlocked) {
+      <div class="block-warning-toast" [class.block-warning-toast--passenger]="(userService.currentUser$ | async)?.role === Role.REGISTERED_USER" role="alert">
+        <div class="block-warning-title">You have been blocked</div>
+        <div class="block-warning-msg">{{ (userService.currentUserBlockNote$ | async) ?? 'There is no reason provided' }}</div>
+      </div>
     }
 
     <!-- ICONS -->
 
     <app-icon-button class="menu-button"
       iconUrl="side_navigation_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
+      testId="open-side-menu"
       (click)="openMenu()">
     </app-icon-button>
 
@@ -123,10 +121,13 @@
       </app-icon-button>
     }
 
-    <app-icon-button class="chat-button"
-      iconUrl="chat_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
-      (click)="openChat()">
-    </app-icon-button>
+    @if ((userService.getCurrentUser() | async)?.role != "GUEST") {
+      <app-icon-button class="chat-button"
+        iconUrl="chat_60dp_000000_FILL0_wght400_GRAD0_opsz48.svg"
+        (click)="openChat()"
+        [badge]="((chatService.unreadCount$ | async) ?? 0) > 0"> 
+      </app-icon-button>
+    }
 
     @if ((ridePlanningStore.currentRide$ | async)?.status === RideStatus.IN_PROGRESS && (userService.currentUser$ | async)?.role === Role.REGISTERED_USER) {
       <app-icon-button class="complaint-button"
@@ -191,8 +192,8 @@
       @if ((userService.currentUser$ | async)?.role === Role.REGISTERED_USER) {
         <button 
           class="ride-button"
-          [class.disabled]="!canCancelRide()"
-          [disabled]="!canCancelRide()"
+          [class.disabled]="!canCancelRide() || (userService.currentUser$ | async)?.id !== (this.ridePlanningStore.currentRide$ | async)?.createdBy"
+          [disabled]="!canCancelRide() || (userService.currentUser$ | async)?.id !== (this.ridePlanningStore.currentRide$ | async)?.createdBy"
           (click)="onCancelUserClick()">
           <span class="ride-text">Cancel</span>
         </button> 
@@ -214,7 +215,7 @@
       [open]="ui.menuOpen"
       title="Account"
       [role]="(userService.currentUser$ | async)?.role ?? Role.GUEST"
-      [user]="(userService.currentUser$ | async) ?? { id: 0, role: Role.GUEST, name: '', surname: '', email: '', avatarUrl: 'default-avatar.jpg', phone: '', address: '' }"
+      [user]="(userService.currentUser$ | async) ?? { id: 0, role: Role.GUEST, name: '', surname: '', email: '', avatarUrl: 'default-avatar.jpg', phone: '', address: '', isBlocked: false }"
       [avatarSrc]="(userService.avatarSrc$ | async) ?? 'default-avatar.jpg'"
       (closed)="closeMenu()"
       (action)="handleMenuAction($event)">
@@ -223,8 +224,8 @@
     <!-- CHECKOUT MODAL -->
     @if (ui.checkoutModalOpen) {
       <app-modal-container class="checkout-modal" title="Checkout" [showTitleBar]="true" (backPressed)="onCheckoutModalBack()">
-        <app-stat-card [value]="'$' + (ridePlanningStore.ridePlanningState$ | async)?.price" label="Estimated price" variant="dark"></app-stat-card> <!-- in euro -->
-        <app-button width="290px" (click)="onConfirmRide()">Confirm ride</app-button>
+        <app-stat-card [value]="'$' + (ridePlanningStore.ridePlanningState$ | async)?.price" label="Estimated price" variant="dark" testId="checkout-estimated-price"></app-stat-card> <!-- in euro -->
+        <app-button width="290px" testId="checkout-confirm-ride" (click)="onConfirmRide()">Confirm ride</app-button>
       </app-modal-container>
     }
 
@@ -647,6 +648,24 @@
       (onReorder)="onFavoriteReorder($event)"
       (onRenderWaypoints)="onRenderWaypoints($event)"></app-ride-history>
 
+    <!-- ACTIVE RIDES SHEET -->
+    <app-active-rides 
+      class="active-rides" 
+      (onClose)="onActiveRidesBack()" 
+      [open]="ui.showActiveRides" 
+      (onError)="onEmmitError($event)" 
+      (onReorder)="onFavoriteReorder($event)"
+      (onRenderWaypoints)="onRenderWaypoints($event)"></app-active-rides>
+
+    <!-- REPORTS SHEET (kao Account settings – u istom side meniju) -->
+    <app-sheet
+      [open]="ui.showReports"
+      title="Reports"
+      (closed)="closeReports()"
+      (back)="onReportsBack()">
+      <app-reports (onError)="onEmmitError($event)"></app-reports>
+    </app-sheet>
+
     <!-- FAVORITE RIDES SHEET -->
     <app-favorite-rides
       class="favorite-rides"
@@ -664,6 +683,11 @@
       (onError)="onEmmitError($event)"
       (onReorder)="onFavoriteReorder($event)"
       (onRenderWaypoints)="onRenderWaypoints($event)"></app-scheduled-rides>
+
+      <!-- CHAT SHEET -->
+    <app-chat
+    [open]="ui.chatOpen"
+    (onClose)="closeChat()"></app-chat>
 
     <!-- PROFILE CHANGES SHEET -->
     @if ((userService.currentUser$ | async)?.role === Role.ADMIN) {
@@ -693,6 +717,14 @@
       title="Panic Notifications"
       (back)="ui.panicListOpen=false; ui.menuOpen = true">
       <app-panic-list></app-panic-list>
+    </app-sheet>
+  }
+
+  @if ((userService.currentUser$ | async)?.role === Role.ADMIN) {
+    <app-sheet [open]="ui.blockUsersOpen"
+      title="Block users"
+      (back)="onBlockUsersBack()">
+      <app-block-users-list></app-block-users-list>
     </app-sheet>
   }
 

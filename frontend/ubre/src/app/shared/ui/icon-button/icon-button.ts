@@ -14,4 +14,5 @@ export class IconButton {
   @Input() iconUrl: string | null = null;
   @Input() type: 'red' | 'yellow' | null = null;
   @Input() disabled: boolean = false;
+  @Input() testId: string | null = null;
 }

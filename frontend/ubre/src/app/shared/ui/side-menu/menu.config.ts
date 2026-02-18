@@ -69,7 +69,7 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
     },
     { label: 'Active rides', 
       icon: 'active-rides-primary-text.svg', 
-      action: 'admin-users' 
+      action: 'active-rides' 
     },
     {
       label: 'Account settings',
@@ -100,6 +100,11 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
       label: 'Profile changes',
       icon: 'person_edit_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',
       action: 'profile-changes',
+    },
+    {
+      label: 'Block users',
+      icon: 'person_off_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24.svg',
+      action: 'block-users',
     },
     {
       label: 'Log out',

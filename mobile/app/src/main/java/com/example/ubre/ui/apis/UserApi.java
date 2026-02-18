@@ -1,6 +1,7 @@
 package com.example.ubre.ui.apis;
 
 import com.example.ubre.ui.dtos.UserDto;
+import com.example.ubre.ui.dtos.UserRegistrationDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 
 import java.util.List;
@@ -30,8 +31,23 @@ public interface UserApi {
     // This request just fetches the users based on name search. It is used in admin ride history to provide select options for user filter.
     @GET("api/users")
     Call<List<UserDto>> getUsersByFullName(@Header("Authorization") String authHeader, @Query("fullName") String fullName);
+
+    @GET("api/users/get-all")
+    Call<List<UserDto>> getAllUsers(@Header("Authorization") String authHeader);
+
+    @PUT("api/users/{id}/block")
+    Call<ResponseBody> blockUser(@Header("Authorization") String authHeader, @Path("id") Long id, @Body Object body);
+
+    @PUT("api/users/{id}/unblock")
+    Call<ResponseBody> unblockUser(@Header("Authorization") String authHeader, @Path("id") Long id, @Body Object body);
+
+    @GET("api/users/{id}/block-note")
+    Call<ResponseBody> getBlockNote(@Header("Authorization") String authHeader, @Path("id") Long id);
   
     // get user drivers vehicle
     @GET("api/vehicles/driver/{id}")
     Call<VehicleDto> getUserVehicle(@Header("Authorization") String authHeader, @Path("id") Long id);
+
+    @POST("api/users/register")
+    Call<UserDto> register(@Body UserRegistrationDto registrationDto);
 }

@@ -22,15 +22,16 @@
         type="email"
         [(ngModel)]="currentEmail"
         (keypress)="onEmailKeyPress($event)"
-        placeholder="Enter email">
-      <button type="button" class="add-button" (click)="addEmail()">
+        placeholder="Enter email"
+        data-testid="invite-passengers-email">
+      <button type="button" class="add-button" data-testid="invite-passengers-add" (click)="addEmail()">
         <img src="person_add_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="add">
       </button>
     </div>
   </div>
 
   <div class="footer">
-    <app-button width="100%" (clicked)="onProceed()">
+    <app-button width="100%" testId="invite-passengers-checkout" (clicked)="onProceed()">
       Checkout
     </app-button>
   </div>

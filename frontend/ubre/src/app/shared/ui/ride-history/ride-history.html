@@ -5,7 +5,8 @@ class="ride-history"
 [open]="open" [rides]="rides$ | async" 
 (onQueryChange)="onQueryChange($event)" 
 (onRenderWaypoints)="onRenderWaypoints.emit($event)" 
-title="Ride history" 
+title="Ride history"
+testIdPrefix="history-ride"
 (onError)="onError.emit($event)"
 (onReorder)="onReorder.emit($event)">
 </app-ride-list>
