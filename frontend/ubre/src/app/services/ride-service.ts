@@ -243,7 +243,17 @@ export class RideService {
     
             this.scheduled.next([...this.favorites.value, ...value]);
             this.scheduledPage++; 
-      })}},
+      })}
+      if (currentUser.role == Role.REGISTERED_USER) { 
+          this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/scheduled/user/${currentUser.id}`, {params}).pipe(take(1)).subscribe((value : RideCardDto[]) => {
+            this.fetchingScheduled = false;
+            if (value.length == 0)
+                  return;
+    
+            this.scheduled.next([...this.favorites.value, ...value]);
+            this.scheduledPage++; 
+      })}
+    },
       error : (err) => {
         this.fetchingScheduled = false;
       }

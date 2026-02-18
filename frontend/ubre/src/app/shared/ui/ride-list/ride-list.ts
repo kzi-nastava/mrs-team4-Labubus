@@ -15,6 +15,7 @@ import { UserService } from '../../../services/user-service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { take } from 'rxjs';
 import { WaypointDto } from '../../../dtos/waypoint-dto';
+import { Toast } from '../toast/toast';
 
 
 @Component({
@@ -36,6 +37,8 @@ export class RideList {
   @Output() onError = new EventEmitter<Error>();
   @Output() onReorder = new EventEmitter<RideDto>();
   @Output() onRenderWaypoints = new EventEmitter<WaypointDto[]>();
+  @Output() showToast = new EventEmitter<Toast>();
+  
 
   rideService : RideService = inject(RideService);
   userService : UserService = inject(UserService);

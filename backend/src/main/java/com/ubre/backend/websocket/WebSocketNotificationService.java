@@ -1,8 +1,6 @@
 package com.ubre.backend.websocket;
 
-import com.ubre.backend.dto.CancellationDto;
 import com.ubre.backend.dto.ChatMessageDto;
-import com.ubre.backend.dto.RideDto;
 import com.ubre.backend.model.PanicNotification;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;

@@ -8,6 +8,7 @@ import { RideCardDto } from '../../../dtos/ride-card-dto';
 import { RideQueryDto } from '../../../dtos/ride-query';
 import { RideList } from '../ride-list/ride-list';
 import { AsyncPipe } from '@angular/common';
+import { Toast } from '../toast/toast';
 
 @Component({
   selector: 'app-scheduled-rides',
@@ -22,6 +23,8 @@ export class ScheduledRides {
   @Output() onError = new EventEmitter<Error>();
   @Output() onReorder = new EventEmitter<RideDto>();
   @Output() onRenderWaypoints = new EventEmitter<WaypointDto[]>();
+  @Output() showToast = new EventEmitter<Toast>();
+
 
   rideService : RideService = inject(RideService)
   userService : UserService = inject(UserService)
@@ -44,4 +47,5 @@ export class ScheduledRides {
     
     this.onQueryChange(this.lastQuery);
   }
+
 }

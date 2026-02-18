@@ -367,4 +367,17 @@ public class RideController {
         List<PanicNotification> panics = rideService.getPanics();
         return ResponseEntity.ok(panics);
     }
+
+    @GetMapping(
+            value = "/scheduled/user/{userId}"
+    )
+    @PreAuthorize("#userId == @securityUtil.currentUserId() || hasRole('ADMIN')")
+    public ResponseEntity<List<RideCardDto>> getScheduledRidesUser(
+            @PathVariable Long userId,
+            @RequestParam(required = false) Integer skip,
+            @RequestParam(required = false) Integer count,
+            @Valid @ModelAttribute RideQueryDto query) {
+        List<RideCardDto> createdRide = rideService.getScheduledRidesUser(userId, skip, count, query);
+        return ResponseEntity.status(HttpStatus.OK).body(createdRide);
+    }
 }

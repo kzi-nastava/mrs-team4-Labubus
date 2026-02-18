@@ -51,6 +51,7 @@
       class="details"
       [ride]="selectedRide()"
       [user]="user()"
+      (showToast)="showToast.emit($event)"
       (onError)="onError.emit($event)"
       [testIdPrefix]="testIdPrefix + '-details'"
       (onReorder)="onReorder.emit($event)"></app-ride-details>
