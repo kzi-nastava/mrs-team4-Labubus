@@ -10,15 +10,18 @@ import com.ubre.backend.model.*;
 import com.ubre.backend.repository.RideRepository;
 import com.ubre.backend.repository.UserRepository;
 import com.ubre.backend.repository.VehicleRepository;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.ServletException;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,8 +29,10 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.context.WebApplicationContext;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -36,6 +41,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.core.authority.AuthorityUtils.createAuthorityList;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -43,15 +51,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @Transactional
 public class RideControllerStopRideTest extends AbstractTestNGSpringContextTests {
 
-    private MockMvc mockMvc;
-    @Value("${jwt.secret}")
-    private String jwtSecret;
-
     @Autowired
-    private WebApplicationContext webApplicationContext;
+    private MockMvc mockMvc;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -69,10 +74,8 @@ public class RideControllerStopRideTest extends AbstractTestNGSpringContextTests
     private Passenger passenger;
 
     @BeforeMethod
+    @Transactional
     public void setUp() {
-        this.mockMvc = MockMvcBuilders
-                .webAppContextSetup(webApplicationContext)
-                .build();
 
         driver = new Driver();
         driver.setEmail("driver@test.com");
@@ -129,10 +132,16 @@ public class RideControllerStopRideTest extends AbstractTestNGSpringContextTests
 
         ride = rideRepository.save(ride);
         testRideId = ride.getId();
+
+        Authentication auth = Mockito.mock(Authentication.class);
+        when(auth.getPrincipal()).thenReturn(driver);
+        when(auth.getName()).thenReturn(driver.getEmail());
+        SecurityContext context = Mockito.mock(SecurityContext.class);
+        when(context.getAuthentication()).thenReturn(auth);
+        SecurityContextHolder.setContext(context);
     }
 
     @Test(description = "Should successfully stop ride and return calculated price")
-    @WithMockUser(username = "driver@test.com", roles = "DRIVER")
     public void shouldStopRideSuccessfully() throws Exception {
 
         WaypointDto stopLocation = new WaypointDto();
@@ -140,7 +149,12 @@ public class RideControllerStopRideTest extends AbstractTestNGSpringContextTests
         stopLocation.setLatitude(45.1);
         stopLocation.setLongitude(19.1);
 
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                driver, null, createAuthorityList("ROLE_DRIVER")
+        );
+
         mockMvc.perform(put("/api/rides/{rideId}/stop", testRideId)
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(stopLocation)))
                 .andExpect(status().isOk())
@@ -153,7 +167,6 @@ public class RideControllerStopRideTest extends AbstractTestNGSpringContextTests
     }
 
     @Test(description = "Should handle concurrent stop requests gracefully")
-    @WithMockUser(username = "driver@test.com", roles = "DRIVER")
     public void shouldHandleConcurrentStopRequests() throws Exception {
 
         WaypointDto stopLocation = new WaypointDto();
@@ -161,26 +174,36 @@ public class RideControllerStopRideTest extends AbstractTestNGSpringContextTests
         stopLocation.setLatitude(45.1);
         stopLocation.setLongitude(19.1);
 
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                driver, null, createAuthorityList("ROLE_DRIVER")
+        );
+
         mockMvc.perform(put("/api/rides/{rideId}/stop", testRideId)
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(stopLocation)))
                 .andExpect(status().isOk());
 
         mockMvc.perform(put("/api/rides/{rideId}/stop", testRideId)
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(stopLocation)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test(description = "Should return 404 NOT_FOUND when ride does not exist")
-    @WithMockUser(username = "driver@test.com", roles = "DRIVER")
     public void shouldReturn404WhenRideNotFound() throws Exception {
         WaypointDto stopLocation = new WaypointDto();
         stopLocation.setLabel("Stop");
         stopLocation.setLatitude(45.1);
         stopLocation.setLongitude(19.1);
 
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                driver, null, createAuthorityList("ROLE_DRIVER")
+        );
+
         mockMvc.perform(put("/api/rides/{rideId}/stop", 99999L)
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(stopLocation)))
                 .andExpect(status().isNotFound());
@@ -193,16 +216,13 @@ public class RideControllerStopRideTest extends AbstractTestNGSpringContextTests
         stopLocation.setLatitude(45.1);
         stopLocation.setLongitude(19.1);
 
-        Assert.assertThrows(
-                ServletException.class,
-                () -> mockMvc.perform(put("/api/rides/{rideId}/stop", testRideId)
+        mockMvc.perform(put("/api/rides/{rideId}/stop", testRideId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(stopLocation)))
-        );
+                .andExpect(status().isUnauthorized());
     }
 
     @Test(description = "Should return 400 BAD_REQUEST when ride is not in progress")
-    @WithMockUser(username = "driver@test.com", roles = "DRIVER")
     public void shouldReturn400WhenRideNotInProgress() throws Exception {
         Ride ride = rideRepository.findById(testRideId).orElseThrow();
         ride.setStatus(RideStatus.COMPLETED);
@@ -213,72 +233,94 @@ public class RideControllerStopRideTest extends AbstractTestNGSpringContextTests
         stopLocation.setLatitude(45.1);
         stopLocation.setLongitude(19.1);
 
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                driver, null, createAuthorityList("ROLE_DRIVER")
+        );
+
         mockMvc.perform(put("/api/rides/{rideId}/stop", testRideId)
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(stopLocation)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test(description = "Should return 400 BAD_REQUEST when latitude is null")
-    @WithMockUser(username = "driver@test.com", roles = "DRIVER")
     public void shouldReturn400WhenLatitudeIsNull() throws Exception {
         WaypointDto invalidWaypoint = new WaypointDto();
         invalidWaypoint.setLabel("Stop");
         invalidWaypoint.setLatitude(null);
         invalidWaypoint.setLongitude(19.1);
 
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                driver, null, createAuthorityList("ROLE_DRIVER")
+        );
+
         mockMvc.perform(put("/api/rides/{rideId}/stop", testRideId)
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidWaypoint)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test(description = "Should return 400 BAD_REQUEST when longitude is null")
-    @WithMockUser(username = "driver@test.com", roles = "DRIVER")
     public void shouldReturn400WhenLongitudeIsNull() throws Exception {
         WaypointDto invalidWaypoint = new WaypointDto();
         invalidWaypoint.setLabel("Stop");
         invalidWaypoint.setLatitude(45.1);
         invalidWaypoint.setLongitude(null);
 
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                driver, null, createAuthorityList("ROLE_DRIVER")
+        );
+
         mockMvc.perform(put("/api/rides/{rideId}/stop", testRideId)
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidWaypoint)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test(description = "Should return 400 BAD_REQUEST when request body is empty")
-    @WithMockUser(username = "driver@test.com", roles = "DRIVER")
     public void shouldReturn400WhenRequestBodyEmpty() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                driver, null, createAuthorityList("ROLE_DRIVER")
+        );
         mockMvc.perform(put("/api/rides/{rideId}/stop", testRideId)
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test(description = "Should return 400 BAD_REQUEST when JSON is malformed")
-    @WithMockUser(username = "driver@test.com", roles = "DRIVER")
     public void shouldReturn400WhenJsonMalformed() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                driver, null, createAuthorityList("ROLE_DRIVER")
+        );
         mockMvc.perform(put("/api/rides/{rideId}/stop", testRideId)
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{invalid json}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test(description = "Should accept waypoint without label")
-    @WithMockUser(username = "driver@test.com", roles = "DRIVER")
     public void shouldAcceptWaypointWithoutLabel() throws Exception {
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                driver, null, createAuthorityList("ROLE_DRIVER")
+        );
+
         WaypointDto waypointNoLabel = new WaypointDto();
         waypointNoLabel.setLabel(null);
         waypointNoLabel.setLatitude(45.1);
         waypointNoLabel.setLongitude(19.1);
 
         mockMvc.perform(put("/api/rides/{rideId}/stop", testRideId)
+                        .with(authentication(auth))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(waypointNoLabel)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isNumber());
     }
-
 
 }
