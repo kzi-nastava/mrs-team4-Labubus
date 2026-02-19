@@ -28,6 +28,7 @@ import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.dtos.WaypointDto;
+import com.example.ubre.ui.enums.RideStatus;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.services.RideService;
 import com.example.ubre.ui.services.RouteService;
@@ -342,6 +343,30 @@ public class RideDetailsFragment extends Fragment {
                 RideService.getInstance().getRideDetails(getContext(), rideId);
             } catch (Exception e) {
                 throw new RuntimeException(e);
+            }
+
+            Button trackButton = root.findViewById(R.id.ride_details_track);
+
+            if (role.equals("ADMIN")) {
+                RideDetailsStorage.getInstance().getSelectedRideReadOnly().observe(getViewLifecycleOwner(), ride -> {
+                    if (ride == null) return;
+                    boolean inProgress = ride.getStatus() == RideStatus.IN_PROGRESS;
+                    trackButton.setVisibility(inProgress ? View.VISIBLE : View.GONE);
+                });
+
+                trackButton.setOnClickListener(v -> {
+                    RideDto ride = RideDetailsStorage.getInstance().getSelectedRideReadOnly().getValue();
+                    if (ride == null) return;
+
+                    RideDto current = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue();
+                    if (current != null && current.getId().equals(ride.getId())) {
+                        CurrentRideStorage.getInstance().clear();
+                    } else {
+                        CurrentRideStorage.getInstance().setCurrentRide(ride);
+                    }
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                });
             }
         }
 

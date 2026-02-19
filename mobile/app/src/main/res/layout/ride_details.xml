@@ -259,6 +259,16 @@
                     android:visibility="gone"/>
 
                 <Button
+                    android:id="@+id/ride_details_track"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/BtnOutlined"
+                    android:padding="6dp"
+                    android:text="Toggle track"
+                    android:layout_marginTop="10dp"
+                    android:visibility="gone"/>
+
+                <Button
                     android:id="@+id/ride_details_reorder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
