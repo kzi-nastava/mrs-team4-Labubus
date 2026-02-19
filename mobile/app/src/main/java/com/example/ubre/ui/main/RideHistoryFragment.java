@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -59,6 +63,11 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
     private Long userId;
     private Integer page;
     private Integer count;
+    private SensorManager sensorManager;
+    private Sensor accelerometer;
+    private static final float SHAKE_THRESHOLD = 12f;
+    private static final int SHAKE_SLOP_TIME = 500;
+    private long lastShakeTime;
 
     public RideHistoryFragment() {
 
@@ -90,6 +99,13 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
         };
 
         datePickerDialog = new DatePickerDialog(getActivity(), eventHandler, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+        SharedPreferences sharedPreferences = requireContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String role = sharedPreferences.getString("role", "");
+        if (role.equals("REGISTERED_USER")) {
+            sensorManager = (SensorManager) requireContext().getSystemService(Context.SENSOR_SERVICE);
+            accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            sensorManager.registerListener(shakeListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
+        }
     }
 
     @Override
@@ -234,6 +250,9 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if (sensorManager != null) {
+            sensorManager.unregisterListener(shakeListener);
+        }
         RideHistoryStorage.getInstance().setFilterUsers(List.of());
         RideHistoryStorage.getInstance().clearHistory();
     }
@@ -269,4 +288,29 @@ public class RideHistoryFragment extends Fragment implements RideListAdapter.OnI
         Fragment f = RideDetailsFragment.newInstance(ride.getId());
         activity.showFragment(f);
     }
+
+    private final SensorEventListener shakeListener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+
+            float acceleration = (float) Math.sqrt(x * x + y * y + z * z) - SensorManager.GRAVITY_EARTH;
+
+            if (acceleration > SHAKE_THRESHOLD) {
+                long now = System.currentTimeMillis();
+                if (now - lastShakeTime > SHAKE_SLOP_TIME) {
+                    lastShakeTime = now;
+                    sortAscending = !sortAscending;
+                    sortBy = "startTime";
+                    resetCards();
+                    rotate(getView().findViewById(R.id.sort_direction), sortAscending ? 180 : 360);
+                }
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+    };
 }
