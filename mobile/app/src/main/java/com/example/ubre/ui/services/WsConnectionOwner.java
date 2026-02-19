@@ -212,9 +212,7 @@ public class WsConnectionOwner {
 
     private void onRideReminder(String time) {
         String safeTime = time == null || time.trim().isEmpty() ? "soon" : time.trim();
-        mainHandler.post(() ->
-                TopToast.show(appContext, "Ride reminder", "You have a ride scheduled at " + safeTime + ".")
-        );
+        mainHandler.post(() -> NotificationHelper.showRide(appContext, "Ride reminder", "You have a ride scheduled at " + safeTime + "."));
     }
 
     private void handleCurrentRideNotification(String payload) {
@@ -232,16 +230,19 @@ public class WsConnectionOwner {
             onTimeForRide(notification);
         } else if (notification.getStatus() == NotificationType.RIDE_STARTED) {
             onRideStarted();
+        } else if (notification.getStatus() == NotificationType.RIDE_CANCELLED) {
+            onRideCancelled();
         }
     }
 
     private void onTimeForRide(CurrentRideNotification notification) {
         mainHandler.post(() -> {
-            TopToast.show(appContext, "Get ready", "Your ride is starting soon...");
+            NotificationHelper.showRide(appContext, "Get ready", "Your ride is starting soon...");
             if (notification != null && notification.getRide() != null) {
                 CurrentRideStorage.getInstance().setCurrentRide(notification.getRide());
             }
         });
+
     }
 
     private void onRideStarted() {
@@ -259,5 +260,11 @@ public class WsConnectionOwner {
             return;
         }
         mainHandler.post(() -> NotificationHelper.showPanic(appContext, "Panic activated", "Ride #" + notification.getRideId()));
+    }
+
+    private void onRideCancelled() {
+        mainHandler.post(() ->
+                TopToast.show(appContext, "Ride", "Your ride has been cancelled")
+        );
     }
 }
