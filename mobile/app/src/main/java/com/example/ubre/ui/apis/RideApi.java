@@ -1,5 +1,6 @@
 package com.example.ubre.ui.apis;
 
+import com.example.ubre.ui.dtos.PanicNotificationDto;
 import com.example.ubre.ui.dtos.RideCardDto;
 import com.example.ubre.ui.dtos.RideDto;
 
@@ -18,6 +19,7 @@ import retrofit2.http.Body;
 import java.time.LocalDateTime;
 import java.util.List;
 import com.example.ubre.ui.dtos.RideOrderRequest;
+import com.example.ubre.ui.dtos.WaypointDto;
 
 public interface RideApi {
     @Headers({
@@ -55,4 +57,24 @@ public interface RideApi {
 
     @GET("api/rides/ongoing/{userId}")
     Call<List<RideCardDto>> getActiveRidesByUser(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Query("skip") Integer skip, @Query("count") Integer count, @Query("sortBy") String sort, @Query("ascending") Boolean ascending);
+    
+    @PUT("api/rides/{id}/stop")
+    Call<ResponseBody> stopRide(@Header("Authorization") String authHeader, @Path("id") Long id, @Body WaypointDto waypoint);
+    
+    @POST("api/rides/{id}/panic")
+    Call<ResponseBody> activatePanic(@Header("Authorization") String authHeader, @Path("id") Long id);
+
+    @GET("api/rides/panic")
+    Call<List<PanicNotificationDto>> getPanics(@Header("Authorization") String authHeader);
+
+    @GET("api/rides/scheduled/user/{userId}")
+    Call<List<RideCardDto>> getScheduledRides(
+            @Header("Authorization") String authHeader,
+            @Path("userId") Long userId,
+            @Query("skip") Integer skip,
+            @Query("count") Integer count
+    );
+
+    @PUT("api/rides/{rideId}/cancel/user")
+    Call<Void> cancelRide(@Header("Authorization") String authHeader, @Path("rideId") Long rideId);
 }

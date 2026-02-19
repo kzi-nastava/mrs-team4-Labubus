@@ -249,6 +249,16 @@
                     android:orientation="vertical"/>
 
                 <Button
+                    android:id="@+id/ride_details_cancel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/BtnOutlined"
+                    android:padding="6dp"
+                    android:text="Cancel ride"
+                    android:layout_marginTop="10dp"
+                    android:visibility="gone"/>
+
+                <Button
                     android:id="@+id/ride_details_reorder"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
