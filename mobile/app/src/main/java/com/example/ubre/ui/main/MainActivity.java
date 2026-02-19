@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
                 updateMapSearchVisibility();
                 updateBlockNoticeVisibility();
                 updateStartRideState();
-                if (btnChat != null) btnChat.setVisibility(View.GONE);
+                updateChatButtonVisibility();
                 if (btnComplaint != null) btnComplaint.setVisibility(View.GONE);
                 if (btnPanic != null) btnPanic.setVisibility(View.GONE);
             } else {
@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
                 updateMapSearchVisibility();
                 updateBlockNoticeVisibility();
                 updateStartRideState();
-                if (btnChat != null) btnChat.setVisibility(View.VISIBLE);
+                updateChatButtonVisibility();
                 updateComplaintButtonVisibility();
                 updatePanicBtnVisibility(hasCurrentRide);
             }
@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (btnMenu != null) btnMenu.setVisibility(View.GONE);
         if (btnMapSearch != null) btnMapSearch.setVisibility(View.GONE);
-        if (btnChat != null) btnChat.setVisibility(View.GONE);
+        updateChatButtonVisibility();
         if (btnComplaint != null) btnComplaint.setVisibility(View.GONE);
         if (btnCancelDriver != null) btnCancelDriver.setVisibility(View.GONE);
         if (btnPanic != null) btnPanic.setVisibility(View.GONE);
@@ -391,6 +391,10 @@ public class MainActivity extends AppCompatActivity {
         btnMenu = findViewById(R.id.btn_menu);
         btnMapSearch = findViewById(R.id.btn_map_search);
         btnChat = findViewById(R.id.btn_chat);
+        if (btnChat != null) {
+            btnChat.setOnClickListener(v -> showFragment(ChatFragment.newInstance()));
+            btnChat.setVisibility(View.GONE);
+        }
         btnComplaint = findViewById(R.id.btn_complaint);
         btnStartRide = findViewById(R.id.btn_start_ride);
         blockNotice = findViewById(R.id.block_notice);
@@ -611,9 +615,16 @@ public class MainActivity extends AppCompatActivity {
     void setCurrentRole(Role role) {
         currentRole = role == null ? Role.GUEST : role;
         updateStartRideState();
+        updateChatButtonVisibility();
         updateComplaintButtonVisibility();
     }
 
+    private void updateChatButtonVisibility() {
+        if (btnChat == null) return;
+        boolean hasFragments = getSupportFragmentManager().getBackStackEntryCount() > 0;
+        boolean isLoggedIn = currentRole != Role.GUEST;
+        btnChat.setVisibility(!hasFragments && isLoggedIn ? View.VISIBLE : View.GONE);
+    }
     void setCurrentRideActive(boolean active) {
         hasCurrentRide = active;
         if (hasCurrentRide) {

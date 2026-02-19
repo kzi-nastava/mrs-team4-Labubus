@@ -216,6 +216,31 @@ public class UserService {
         });
     }
 
+    public void searchActiveRideFilterUsers(String fullName) throws Exception {
+        UserApi userApi = ApiClient.getClient().create(UserApi.class);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            throw new Exception("User not authenticated");
+        }
+
+        userApi.getUsersByFullName("Bearer " + token, fullName).enqueue(new Callback<List<UserDto>>() {
+            @Override
+            public void onResponse(Call<List<UserDto>> call, Response<List<UserDto>> response) {
+                if (!response.isSuccessful())
+                    Toast.makeText(context, "User fetching failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                else
+                    com.example.ubre.ui.storages.ActiveRidesStorage.getInstance().setFilterUsers(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<List<UserDto>> call, Throwable t) {
+                Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     public interface SimpleCallback {
         void onSuccess();
         void onFailure();

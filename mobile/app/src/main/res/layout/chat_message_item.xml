@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/chat_message_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingVertical="2dp">
+
+    <TextView
+        android:id="@+id/chat_message_timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textSize="11sp"
+        android:textColor="#888888"
+        android:fontFamily="@font/poppins_regular"
+        android:paddingVertical="4dp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/chat_message_sender"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="11sp"
+        android:textColor="#666666"
+        android:fontFamily="@font/poppins_regular"
+        android:paddingBottom="2dp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/chat_message_bubble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxWidth="260dp"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="8dp"
+        android:textSize="14sp"
+        android:fontFamily="@font/poppins_regular"
+        android:background="@drawable/bg_chat_bubble_other"
+        android:textColor="@color/text_primary"/>
+
+</LinearLayout>

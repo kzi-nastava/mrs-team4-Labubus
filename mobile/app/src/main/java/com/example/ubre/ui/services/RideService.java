@@ -13,6 +13,7 @@ import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.dtos.RideOrderRequest;
 import com.example.ubre.ui.dtos.WaypointDto;
 import com.example.ubre.ui.enums.RideStatus;
+import com.example.ubre.ui.storages.ActiveRidesStorage;
 import com.example.ubre.ui.main.MainActivity;
 import com.example.ubre.ui.utils.TopToast;
 import com.example.ubre.ui.storages.RideDetailsStorage;
@@ -325,6 +326,36 @@ public class RideService {
                 Log.e("START RIDE", t.getMessage());
             }
         });
+    }
+
+    public void getActiveRidesPage(Context context, Long userId, Integer skip, Integer count, String sortBy, Boolean ascending) throws Exception {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            throw new Exception("User not authenticated");
+        }
+
+        Callback<List<RideCardDto>> callback = new Callback<List<RideCardDto>>() {
+            @Override
+            public void onResponse(Call<List<RideCardDto>> call, Response<List<RideCardDto>> response) {
+                if (!response.isSuccessful())
+                    Toast.makeText(context, "Active rides fetching failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                else
+                    ActiveRidesStorage.getInstance().extendActiveRides(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<List<RideCardDto>> call, Throwable t) {
+                Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("ACTIVE RIDES FETCH", t.getMessage());
+            }
+        };
+
+        if (userId != null)
+            api.getActiveRidesByUser("Bearer " + token, userId, skip, count, sortBy, ascending).enqueue(callback);
+        else
+            api.getActiveRides("Bearer " + token, skip, count, sortBy, ascending).enqueue(callback);
     }
 
     public void stopRide(Context context, Long rideId, WaypointDto stopLocation) throws Exception {
