@@ -13,6 +13,7 @@ import com.example.ubre.ui.notifications.ProfileChangeNotification;
 import com.example.ubre.ui.notifications.RideAssignmentNotification;
 import com.example.ubre.ui.notifications.CurrentRideNotification;
 import com.example.ubre.ui.notifications.RideReminderNotification;
+import com.example.ubre.ui.utils.NotificationHelper;
 import com.example.ubre.ui.utils.TopToast;
 import com.example.ubre.ui.storages.CurrentRideStorage;
 import com.google.gson.Gson;
@@ -30,6 +31,7 @@ public class WsConnectionOwner {
     private boolean connectIssued = false;
     private long lastRequestAtMs = 0L;
     private static final long DEBOUNCE_MS = 1000L;
+
 
     private WsConnectionOwner(Context context) {
         this.appContext = context.getApplicationContext();
@@ -129,7 +131,6 @@ public class WsConnectionOwner {
 
         if (role.equals("ADMIN")) {
             wsManager.subscribe("/topic/panic", (topic, payload) -> {
-                Log.i(TAG, "msg " + topic + " " + payload);
                 handlePanicNotification(payload);
             });
         }
@@ -257,8 +258,6 @@ public class WsConnectionOwner {
             Log.e(TAG, "Failed to parse ride assignment notification", e);
             return;
         }
-        mainHandler.post(() ->
-                TopToast.show(appContext, "Panic activated", "Ride id: " + notification.getRideId().toString())
-        );
+        mainHandler.post(() -> NotificationHelper.showPanic(appContext, "Panic activated", "Ride #" + notification.getRideId()));
     }
 }
