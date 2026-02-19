@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_ride_card">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Please specify the reason for ending the ride"
+        android:fontFamily="@font/poppins_medium"
+        android:textSize="16sp"
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/btn_reason_no_show"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="User didn't show up"
+        android:textAllCaps="false"
+        android:fontFamily="@font/poppins_regular"
+        android:layout_marginBottom="10dp"
+        style="@style/BtnOutlined"/>
+
+    <Button
+        android:id="@+id/btn_reason_vehicle"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Vehicle issue"
+        android:textAllCaps="false"
+        android:fontFamily="@font/poppins_regular"
+        android:layout_marginBottom="10dp"
+        style="@style/BtnOutlined"/>
+
+    <Button
+        android:id="@+id/btn_reason_other"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Driver feels unwell"
+        android:textAllCaps="false"
+        android:fontFamily="@font/poppins_regular"
+        android:layout_marginBottom="20dp"
+        style="@style/BtnOutlined"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_dialog_cancel"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Cancel"
+            android:textAllCaps="false"
+            android:fontFamily="@font/poppins_medium"
+            android:layout_marginEnd="8dp"
+            style="@style/BtnOutlined"/>
+
+        <Button
+            android:id="@+id/btn_dialog_ok"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="OK"
+            android:textAllCaps="false"
+            android:fontFamily="@font/poppins_medium"
+            android:enabled="false"
+            android:alpha="0.5"
+            style="@style/BtnFilled"/>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import com.example.ubre.ui.apis.ApiClient;
 import com.example.ubre.ui.apis.RideApi;
+import com.example.ubre.ui.dtos.CancellationDto;
 import com.example.ubre.ui.dtos.RideCardDto;
 import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.dtos.RideOrderRequest;
@@ -503,6 +504,39 @@ public class RideService {
             public void onFailure(Call<Void> call, Throwable t) {
                 Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("CANCEL RIDE", t.getMessage());
+            }
+        });
+    }
+
+    public void cancelRideDriver(Context context, Long rideId, String reason) throws Exception {
+        SharedPreferences prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = prefs.getString("jwt", null);
+
+        if (token == null) throw new Exception("User not authenticated");
+        if (rideId == null || rideId == 0L) throw new Exception("Invalid ride id");
+
+        api.cancelRideDriver("Bearer " + token, rideId, new CancellationDto(reason)).enqueue(new Callback<RideDto>() {
+            @Override
+            public void onResponse(Call<RideDto> call, Response<RideDto> response) {
+                if (!response.isSuccessful()) {
+                    try {
+                        String message = response.errorBody() != null
+                                ? response.errorBody().string()
+                                : "Error " + response.code();
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Toast.makeText(context, "Error " + response.code(), Toast.LENGTH_SHORT).show();
+                    }
+                    return;
+                }
+                CurrentRideStorage.getInstance().clear();
+                TopToast.show(context, "Ride cancelled", "Ride has been cancelled.");
+            }
+
+            @Override
+            public void onFailure(Call<RideDto> call, Throwable t) {
+                Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("CANCEL DRIVER", t.getMessage());
             }
         });
     }

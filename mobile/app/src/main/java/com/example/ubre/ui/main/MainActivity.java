@@ -1,5 +1,6 @@
 package com.example.ubre.ui.main;
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.AutomaticZenRule;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -10,10 +11,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -150,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
                 updateStartRideState();
                 if (btnChat != null) btnChat.setVisibility(View.VISIBLE);
                 updateComplaintButtonVisibility();
-                if (btnPanic != null && canActivatePanic()) btnPanic.setVisibility(View.VISIBLE);
+                updatePanicBtnVisibility(hasCurrentRide);
             }
         });
 
@@ -191,6 +195,8 @@ public class MainActivity extends AppCompatActivity {
         if (btnMapSearch != null) btnMapSearch.setVisibility(View.GONE);
         if (btnChat != null) btnChat.setVisibility(View.GONE);
         if (btnComplaint != null) btnComplaint.setVisibility(View.GONE);
+        if (btnCancelDriver != null) btnCancelDriver.setVisibility(View.GONE);
+        if (btnPanic != null) btnPanic.setVisibility(View.GONE);
         updateBlockNoticeVisibility();
 
         getSupportFragmentManager()
@@ -284,6 +290,7 @@ public class MainActivity extends AppCompatActivity {
         boolean isDriver = currentRole == Role.DRIVER;
         boolean hasFragments = getSupportFragmentManager().getBackStackEntryCount() > 0;
         btnStartRide.setVisibility(isDriver && !hasFragments ? View.VISIBLE : View.GONE);
+        btnCancelDriver.setVisibility(isDriver && !hasFragments ? View.VISIBLE : View.GONE);
         if (isDriver && hasCurrentRide) {
             RideDto ride = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue();
             if (ride == null) {
@@ -422,6 +429,13 @@ public class MainActivity extends AppCompatActivity {
                 if (ride != null && ride.getId() != null) {
                     ComplaintStorage.getInstance().setRideId(ride.getId());
                 }
+            });
+        }
+
+
+        if (btnCancelDriver != null) {
+            btnCancelDriver.setOnClickListener(v -> {
+                showCancelDialog();
             });
         }
 
@@ -726,5 +740,63 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void showCancelDialog() {
+
+        RideDto ride = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue();
+        if (ride == null) {
+            return;
+        }
+        Long rideId = ride.getId();
+        if (rideId == null || rideId == 0L) {
+            return;
+        }
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_cancel_ride, null);
+        builder.setView(dialogView);
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+        dialog.show();
+
+        final String[] selectedReason = {null};
+
+        Button btnNoShow = dialogView.findViewById(R.id.btn_reason_no_show);
+        Button btnVehicle = dialogView.findViewById(R.id.btn_reason_vehicle);
+        Button btnOther = dialogView.findViewById(R.id.btn_reason_other);
+        Button btnOk = dialogView.findViewById(R.id.btn_dialog_ok);
+        Button btnCancel = dialogView.findViewById(R.id.btn_dialog_cancel);
+
+        View.OnClickListener reasonClickListener = v -> {
+            btnNoShow.setSelected(false);
+            btnVehicle.setSelected(false);
+            btnOther.setSelected(false);
+
+            v.setSelected(true);
+            btnOk.setEnabled(true);
+            btnOk.setAlpha(1.0f);
+
+            if (v.getId() == R.id.btn_reason_no_show) selectedReason[0] = "User didn't show up";
+            else if (v.getId() == R.id.btn_reason_vehicle) selectedReason[0] = "Vehicle issue";
+            else selectedReason[0] = "Other";
+        };
+
+        btnNoShow.setOnClickListener(reasonClickListener);
+        btnVehicle.setOnClickListener(reasonClickListener);
+        btnOther.setOnClickListener(reasonClickListener);
+
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        btnOk.setOnClickListener(v -> {
+            dialog.dismiss();
+            try {
+                RideService.getInstance().cancelRideDriver(this, rideId, selectedReason[0]);
+            } catch (Exception e) {
+                Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 
 }
