@@ -3,6 +3,7 @@
     <group android:id="@+id/role_options">
         <item android:id="@+id/nav_ride_history" android:title="@string/ride_history" android:icon="@drawable/ic_ride_history"/>
         <item android:id="@+id/nav_favourites" android:title="@string/my_favourites" android:icon="@drawable/ic_favorite"/>
+        <item android:id="@+id/nav_scheduled" android:title="@string/scheduled_rides" android:icon="@drawable/ic_calendar"/>
         <item android:id="@+id/nav_account_settings" android:title="@string/account_settings" android:icon="@drawable/ic_settings"/>
         <item android:id="@+id/nav_reports" android:title="@string/reports" android:icon="@drawable/ic_reports"/>
     </group>
