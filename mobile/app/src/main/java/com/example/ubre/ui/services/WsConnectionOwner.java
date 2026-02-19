@@ -385,8 +385,12 @@ public class WsConnectionOwner {
     }
 
     private void onRideCancelled() {
-        mainHandler.post(() ->
-                TopToast.show(appContext, "Ride", "Your ride has been cancelled")
-        );
+        mainHandler.post(() -> {
+            TopToast.show(appContext, "Ride", "Your ride has been cancelled");
+            SharedPreferences prefs = appContext.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+            if (prefs.getString("role", "").equals("REGISTERED_USER")) {
+                CurrentRideStorage.getInstance().clear();
+            }
+        });
     }
 }

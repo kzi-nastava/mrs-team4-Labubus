@@ -1,5 +1,6 @@
 package com.example.ubre.ui.apis;
 
+import com.example.ubre.ui.dtos.CancellationDto;
 import com.example.ubre.ui.dtos.PanicNotificationDto;
 import com.example.ubre.ui.dtos.RideCardDto;
 import com.example.ubre.ui.dtos.RideDto;
@@ -71,4 +72,9 @@ public interface RideApi {
 
     @PUT("api/rides/{rideId}/cancel/user")
     Call<Void> cancelRide(@Header("Authorization") String authHeader, @Path("rideId") Long rideId);
+
+    @PUT("api/rides/{rideId}/cancel/driver")
+    Call<RideDto> cancelRideDriver(@Header("Authorization") String authHeader,
+                                   @Path("rideId") Long rideId,
+                                   @Body CancellationDto body);
 }
