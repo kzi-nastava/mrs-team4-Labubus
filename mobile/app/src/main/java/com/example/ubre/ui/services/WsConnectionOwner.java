@@ -43,6 +43,7 @@ public class WsConnectionOwner {
     private Long currentUserId;
     private boolean subscriptionsRegistered = false;
     private boolean connectIssued = false;
+    private boolean vehicleLocationSubscribed = false;
     private long lastRequestAtMs = 0L;
     private static final long DEBOUNCE_MS = 1000L;
 
@@ -57,6 +58,25 @@ public class WsConnectionOwner {
             instance = new WsConnectionOwner(context);
         }
         return instance;
+    }
+
+    public synchronized void connectPublic() {
+        Log.i(TAG, "connectPublic requested");
+        if (wsManager == null) {
+            String wsUrl = StompWebSocketManager.buildSockJsWebSocketUrl(
+                    ApiClient.SERVICE_API_PATH, "/ws");
+            wsManager = new StompWebSocketManager(appContext, wsUrl);
+            wsManager.setStateListener(state -> {
+                if (state == StompWebSocketManager.State.CONNECTED) {
+                    connectIssued = false;
+                }
+            });
+        }
+        if (!connectIssued && currentUserId == null && !subscriptionsRegistered) {
+            wsManager.connect();
+            connectIssued = true;
+        }
+        subscribeVehicleLocations();
     }
 
     public synchronized void requestConnectForUser(Long userId, String source) {
@@ -95,6 +115,7 @@ public class WsConnectionOwner {
                 wsManager.disconnect();
             }
             subscriptionsRegistered = false;
+            vehicleLocationSubscribed = false;
             connectIssued = false;
         }
 
@@ -115,14 +136,27 @@ public class WsConnectionOwner {
         }
         currentUserId = null;
         subscriptionsRegistered = false;
+        vehicleLocationSubscribed = false;
         connectIssued = false;
         lastRequestAtMs = 0L;
+        connectPublic();
+    }
+
+    private void subscribeVehicleLocations() {
+        if (wsManager == null || vehicleLocationSubscribed) {
+            return;
+        }
+        vehicleLocationSubscribed = true;
+        wsManager.subscribe("/topic/vehicle-locations", (topic, payload) -> {
+            handleVehicleLocationNotification(payload);
+        });
     }
 
     private void registerUserSubscriptions(Long userId) {
         if (wsManager == null) {
             return;
         }
+        subscribeVehicleLocations();
         wsManager.subscribe("/topic/profile-changes/" + userId, (topic, payload) -> {
             Log.i(TAG, "msg " + topic + " " + payload);
             handleProfileChangeNotification(payload);
@@ -140,9 +174,6 @@ public class WsConnectionOwner {
             handleCurrentRideNotification(payload);
         });
         wsManager.subscribe("/topic/panic", (topic, payload) -> Log.i(TAG, "msg " + topic + " " + payload));
-        wsManager.subscribe("/topic/vehicle-locations", (topic, payload) -> {
-            handleVehicleLocationNotification(payload);
-        });
     }
 
     private void handleProfileChangeNotification(String payload) {

@@ -31,6 +31,9 @@ public class RouteService {
         void onRouteInfo(double meters, double durationSeconds);
         void onRouteCleared();
     }
+    public interface TrackingEtaListener {
+        void onEta(int seconds);
+    }
 
     private static final String TAG = "RouteService";
     private static final String OSRM_BASE_URL = "https://router.project-osrm.org/";
@@ -48,6 +51,7 @@ public class RouteService {
     private long lastTrackingRouteRequestTime = 0;
     private RouteLoadingListener loadingListener;
     private RouteInfoListener routeInfoListener;
+    private TrackingEtaListener trackingEtaListener;
 
     private RouteService() {
         Retrofit retrofit = new Retrofit.Builder()
@@ -70,6 +74,10 @@ public class RouteService {
 
     public void setRouteInfoListener(RouteInfoListener listener) {
         this.routeInfoListener = listener;
+    }
+
+    public void setTrackingEtaListener(TrackingEtaListener listener) {
+        this.trackingEtaListener = listener;
     }
 
     public void drawRoute(MapView mapView, List<WaypointDto> waypoints) {
@@ -256,6 +264,12 @@ public class RouteService {
                     if (routes.size() == 0) return;
 
                     JsonObject firstRoute = routes.get(0).getAsJsonObject();
+
+                    if (trackingEtaListener != null && firstRoute.has("duration")) {
+                        int durationSec = (int) firstRoute.get("duration").getAsDouble();
+                        mapView.post(() -> trackingEtaListener.onEta(durationSec));
+                    }
+
                     JsonArray coordinates = firstRoute.getAsJsonObject("geometry").getAsJsonArray("coordinates");
 
                     List<GeoPoint> routePoints = new ArrayList<>();

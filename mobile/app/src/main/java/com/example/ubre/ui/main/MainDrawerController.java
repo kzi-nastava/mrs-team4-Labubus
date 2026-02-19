@@ -22,6 +22,7 @@ import com.example.ubre.ui.apis.LoginApi;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.services.WsConnectionOwner;
+import com.example.ubre.ui.storages.ComplaintStorage;
 import com.example.ubre.ui.storages.CurrentRideStorage;
 import com.example.ubre.ui.storages.ProfileChangeStorage;
 import com.example.ubre.ui.storages.RidePlanningStorage;
@@ -176,6 +177,7 @@ public class MainDrawerController {
         if (token == null) {
             WsConnectionOwner.getInstance(activity.getApplicationContext())
                     .stop("Logout.noToken");
+            ComplaintStorage.getInstance().setRideId(null);
             goToLogin();
             return;
         }
@@ -192,6 +194,7 @@ public class MainDrawerController {
                     ProfileChangeStorage.getInstance().clearProfileChangeStorage();
                     RidePlanningStorage.getInstance().clear();
                     CurrentRideStorage.getInstance().clear();
+                    ComplaintStorage.getInstance().setRideId(null);
                     Toast.makeText(activity.getApplicationContext(), "Logout successful", Toast.LENGTH_SHORT).show();
                     goToLogin();
                 } else {

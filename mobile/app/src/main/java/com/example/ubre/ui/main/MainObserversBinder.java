@@ -14,6 +14,7 @@ import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.services.RouteService;
 import com.example.ubre.ui.services.WsConnectionOwner;
 import com.example.ubre.ui.storages.CurrentRideStorage;
+import com.example.ubre.ui.storages.ComplaintStorage;
 import com.example.ubre.ui.storages.ReviewStorage;
 import com.example.ubre.ui.storages.RidePlanningStorage;
 import com.example.ubre.ui.storages.UserStorage;
@@ -36,6 +37,7 @@ class MainObserversBinder {
     private final MainDrawerController drawerController;
     private boolean bound = false;
     private Long lastReviewRideId = null;
+    private Long lastComplaintRideId = null;
 
     MainObserversBinder(
             MainActivity activity,
@@ -66,6 +68,7 @@ class MainObserversBinder {
         bindRoute();
         bindCurrentRide();
         bindReviewModal();
+        bindComplaintModal();
         bindUser();
         bindVehicleLocations();
         bindRideTracking();
@@ -196,6 +199,12 @@ class MainObserversBinder {
     }
 
     private void bindRideTracking() {
+        RouteService.getInstance().setTrackingEtaListener(seconds -> {
+            if (mapUiController != null) {
+                int minutes = (int) Math.ceil(seconds / 60.0);
+                mapUiController.showEtaOnFollowedDriver(minutes);
+            }
+        });
         CurrentRideStorage.getInstance().getCurrentRideReadOnly().observe(activity, ride -> {
             if (mapUiController == null || mapView == null) {
                 return;
@@ -225,6 +234,23 @@ class MainObserversBinder {
                 activity.showModal(new ReviewModalFragment());
             } else {
                 lastReviewRideId = null;
+                FrameLayout modalContainer = activity.findViewById(R.id.modal_container);
+                modalContainer.setVisibility(View.GONE);
+                modalContainer.removeAllViews();
+            }
+        });
+    }
+
+    private void bindComplaintModal() {
+        ComplaintStorage.getInstance().getRideId().observe(activity, rideId -> {
+            if (rideId != null) {
+                if (lastComplaintRideId != null && lastComplaintRideId.equals(rideId)) {
+                    return;
+                }
+                lastComplaintRideId = rideId;
+                activity.showModal(ComplaintModalFragment.newInstance());
+            } else {
+                lastComplaintRideId = null;
                 FrameLayout modalContainer = activity.findViewById(R.id.modal_container);
                 modalContainer.setVisibility(View.GONE);
                 modalContainer.removeAllViews();

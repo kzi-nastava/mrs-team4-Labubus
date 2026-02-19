@@ -243,7 +243,26 @@ public class MapUiController {
         trackingWaypointMarkers.clear();
     }
 
+    public void showEtaOnFollowedDriver(int minutes) {
+        if (followDriverId == null) return;
+        Marker marker = vehicleMarkers.get(followDriverId);
+        if (marker == null) return;
+        marker.setTitle("~ " + minutes + " min left");
+        if (marker.getInfoWindow() == null) {
+            marker.setInfoWindow(new org.osmdroid.views.overlay.infowindow.MarkerInfoWindow(
+                    org.osmdroid.library.R.layout.bonuspack_bubble, map));
+        }
+        marker.showInfoWindow();
+    }
+
     public void clearTrackingOverlays() {
+        if (followDriverId != null) {
+            Marker tracked = vehicleMarkers.get(followDriverId);
+            if (tracked != null) {
+                tracked.closeInfoWindow();
+                tracked.setInfoWindow(null);
+            }
+        }
         clearTrackingWaypoints();
         followDriverId = null;
         map.invalidate();

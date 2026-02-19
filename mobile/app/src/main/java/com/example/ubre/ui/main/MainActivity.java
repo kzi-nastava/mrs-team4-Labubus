@@ -25,10 +25,12 @@ import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.enums.RideStatus;
 import com.example.ubre.ui.services.RideService;
+import com.example.ubre.ui.storages.ComplaintStorage;
 import com.example.ubre.ui.storages.CurrentRideStorage;
 import com.example.ubre.ui.storages.ProfileChangeStorage;
 import com.example.ubre.ui.storages.ReviewStorage;
 import com.example.ubre.ui.storages.UserStorage;
+import com.example.ubre.ui.services.WsConnectionOwner;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 import androidx.recyclerview.widget.RecyclerView;
@@ -52,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private View btnMenu;
     private View btnMapSearch;
     private View btnChat;
+    private View btnComplaint;
     private View btnStartRide;
     private View blockNotice;
     private android.widget.TextView blockNoticeTitle;
@@ -122,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
                 updateBlockNoticeVisibility();
                 updateStartRideState();
                 if (btnChat != null) btnChat.setVisibility(View.GONE);
+                if (btnComplaint != null) btnComplaint.setVisibility(View.GONE);
             } else {
                 findViewById(R.id.fragment_container).setVisibility(View.GONE);
                 if (mapView != null) mapView.setVisibility(View.VISIBLE);
@@ -130,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
                 updateBlockNoticeVisibility();
                 updateStartRideState();
                 if (btnChat != null) btnChat.setVisibility(View.VISIBLE);
+                updateComplaintButtonVisibility();
             }
         });
 
@@ -145,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
         bindRideOrderUi();
         bindObservers();
         loadUserIfAuthenticated();
+        WsConnectionOwner.getInstance(getApplicationContext()).connectPublic();
     }
 
     @Override
@@ -168,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
         if (btnMenu != null) btnMenu.setVisibility(View.GONE);
         if (btnMapSearch != null) btnMapSearch.setVisibility(View.GONE);
         if (btnChat != null) btnChat.setVisibility(View.GONE);
+        if (btnComplaint != null) btnComplaint.setVisibility(View.GONE);
         updateBlockNoticeVisibility();
 
         getSupportFragmentManager()
@@ -336,6 +343,7 @@ public class MainActivity extends AppCompatActivity {
         btnMenu = findViewById(R.id.btn_menu);
         btnMapSearch = findViewById(R.id.btn_map_search);
         btnChat = findViewById(R.id.btn_chat);
+        btnComplaint = findViewById(R.id.btn_complaint);
         btnStartRide = findViewById(R.id.btn_start_ride);
         blockNotice = findViewById(R.id.block_notice);
         blockNoticeTitle = findViewById(R.id.block_notice_title);
@@ -364,9 +372,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+        if (btnComplaint != null) {
+            btnComplaint.setOnClickListener(v -> {
+                RideDto ride = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue();
+                if (ride != null && ride.getId() != null) {
+                    ComplaintStorage.getInstance().setRideId(ride.getId());
+                }
+            });
+        }
         updateMapSearchVisibility();
         updateBlockNoticeVisibility();
         updateStartRideState();
+        updateComplaintButtonVisibility();
         routeLoadingSpinner = findViewById(R.id.route_loading_spinner);
         loadingIndicatorController = new LoadingIndicatorController(routeLoadingSpinner);
     }
@@ -524,6 +541,7 @@ public class MainActivity extends AppCompatActivity {
     void setCurrentRole(Role role) {
         currentRole = role == null ? Role.GUEST : role;
         updateStartRideState();
+        updateComplaintButtonVisibility();
     }
 
     void setCurrentRideActive(boolean active) {
@@ -534,6 +552,25 @@ public class MainActivity extends AppCompatActivity {
         updateMapSearchVisibility();
         updateGuestRideOrderState();
         updateStartRideState();
+        updateComplaintButtonVisibility();
+    }
+
+    void updateComplaintButtonVisibility() {
+        if (btnComplaint == null) {
+            return;
+        }
+        boolean hasFragments = getSupportFragmentManager().getBackStackEntryCount() > 0;
+        if (hasFragments) {
+            btnComplaint.setVisibility(View.GONE);
+            return;
+        }
+        boolean isUser = currentRole == Role.REGISTERED_USER;
+        boolean rideInProgress = false;
+        if (hasCurrentRide) {
+            RideDto ride = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue();
+            rideInProgress = ride != null && ride.getStatus() == RideStatus.IN_PROGRESS;
+        }
+        btnComplaint.setVisibility(isUser && rideInProgress ? View.VISIBLE : View.GONE);
     }
 
     public void openRideOrderWithWaypoints(List<WaypointDto> waypoints) {
