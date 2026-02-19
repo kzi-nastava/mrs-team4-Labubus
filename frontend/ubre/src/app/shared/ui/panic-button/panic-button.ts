@@ -8,10 +8,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 })
 export class PanicButton {
   @Input() disabled: boolean = false;
-  @Output() click = new EventEmitter<void>();
+  @Output() panicClick = new EventEmitter<void>();
   onClick() {
     if (!this.disabled) {
-      this.click.emit();
+      this.panicClick.emit();
     }
   }
 }
