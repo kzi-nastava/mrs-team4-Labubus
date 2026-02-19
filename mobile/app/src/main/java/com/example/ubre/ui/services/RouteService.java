@@ -31,17 +31,27 @@ public class RouteService {
         void onRouteInfo(double meters, double durationSeconds);
         void onRouteCleared();
     }
+    public interface TrackingEtaListener {
+        void onEta(int seconds);
+    }
 
     private static final String TAG = "RouteService";
     private static final String OSRM_BASE_URL = "https://router.project-osrm.org/";
 
+    private static final long TRACKING_ROUTE_THROTTLE_MS = 3000;
+
     private static RouteService instance;
     private final OSRMApi osrmApi;
     private Polyline lastRoutePolyline;
+    private Polyline trackingRoutePolyline;
     private Call<JsonObject> lastRouteCall;
+    private Call<JsonObject> lastTrackingRouteCall;
     private int routeRequestSeq = 0;
+    private int trackingRouteRequestSeq = 0;
+    private long lastTrackingRouteRequestTime = 0;
     private RouteLoadingListener loadingListener;
     private RouteInfoListener routeInfoListener;
+    private TrackingEtaListener trackingEtaListener;
 
     private RouteService() {
         Retrofit retrofit = new Retrofit.Builder()
@@ -64,6 +74,10 @@ public class RouteService {
 
     public void setRouteInfoListener(RouteInfoListener listener) {
         this.routeInfoListener = listener;
+    }
+
+    public void setTrackingEtaListener(TrackingEtaListener listener) {
+        this.trackingEtaListener = listener;
     }
 
     public void drawRoute(MapView mapView, List<WaypointDto> waypoints) {
@@ -209,6 +223,100 @@ public class RouteService {
         }
         if (routeInfoListener != null) {
             routeInfoListener.onRouteCleared();
+        }
+    }
+
+    public void drawTrackingRoute(MapView mapView, List<WaypointDto> waypoints) {
+        if (waypoints == null || waypoints.size() < 2) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        if (now - lastTrackingRouteRequestTime < TRACKING_ROUTE_THROTTLE_MS) {
+            return;
+        }
+        lastTrackingRouteRequestTime = now;
+
+        if (lastTrackingRouteCall != null && !lastTrackingRouteCall.isCanceled()) {
+            lastTrackingRouteCall.cancel();
+        }
+        final int requestId = ++trackingRouteRequestSeq;
+
+        StringBuilder coordsBuilder = new StringBuilder();
+        for (int i = 0; i < waypoints.size(); i++) {
+            if (i > 0) coordsBuilder.append(";");
+            coordsBuilder.append(waypoints.get(i).getLongitude())
+                    .append(",")
+                    .append(waypoints.get(i).getLatitude());
+        }
+
+        lastTrackingRouteCall = osrmApi.getRoute(coordsBuilder.toString(), "full", "geojson");
+        lastTrackingRouteCall.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                if (requestId != trackingRouteRequestSeq) {
+                    return;
+                }
+                if (!response.isSuccessful() || response.body() == null) {
+                    return;
+                }
+                try {
+                    JsonArray routes = response.body().getAsJsonArray("routes");
+                    if (routes.size() == 0) return;
+
+                    JsonObject firstRoute = routes.get(0).getAsJsonObject();
+
+                    if (trackingEtaListener != null && firstRoute.has("duration")) {
+                        int durationSec = (int) firstRoute.get("duration").getAsDouble();
+                        mapView.post(() -> trackingEtaListener.onEta(durationSec));
+                    }
+
+                    JsonArray coordinates = firstRoute.getAsJsonObject("geometry").getAsJsonArray("coordinates");
+
+                    List<GeoPoint> routePoints = new ArrayList<>();
+                    for (JsonElement element : coordinates) {
+                        JsonArray coord = element.getAsJsonArray();
+                        routePoints.add(new GeoPoint(coord.get(1).getAsDouble(), coord.get(0).getAsDouble()));
+                    }
+
+                    mapView.post(() -> {
+                        Polyline polyline = new Polyline();
+                        polyline.setPoints(routePoints);
+                        polyline.getOutlinePaint().setColor(Color.parseColor("#2196F3"));
+                        polyline.getOutlinePaint().setStrokeWidth(12f);
+                        polyline.getOutlinePaint().setAntiAlias(true);
+                        polyline.getOutlinePaint().setStrokeCap(android.graphics.Paint.Cap.ROUND);
+                        polyline.getOutlinePaint().setStrokeJoin(android.graphics.Paint.Join.ROUND);
+
+                        if (trackingRoutePolyline != null) {
+                            mapView.getOverlays().remove(trackingRoutePolyline);
+                        }
+                        mapView.getOverlays().add(0, polyline);
+                        trackingRoutePolyline = polyline;
+                        mapView.invalidate();
+                    });
+                } catch (Exception e) {
+                    Log.e(TAG, "Error parsing tracking route", e);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if (call.isCanceled()) return;
+                Log.e(TAG, "Tracking route request failed", t);
+            }
+        });
+    }
+
+    public void clearTrackingRoute(MapView mapView) {
+        if (lastTrackingRouteCall != null && !lastTrackingRouteCall.isCanceled()) {
+            lastTrackingRouteCall.cancel();
+        }
+        trackingRouteRequestSeq++;
+        lastTrackingRouteRequestTime = 0;
+        if (trackingRoutePolyline != null) {
+            mapView.getOverlays().remove(trackingRoutePolyline);
+            mapView.invalidate();
+            trackingRoutePolyline = null;
         }
     }
 }
