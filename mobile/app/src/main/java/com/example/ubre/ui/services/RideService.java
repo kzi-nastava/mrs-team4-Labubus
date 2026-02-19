@@ -25,6 +25,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -401,6 +402,70 @@ public class RideService {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("PANIC", t.getMessage());
+            }
+        });
+    }
+
+    public void getScheduledRides(Context context, Long userId, Integer skip, Integer count, Consumer<List<RideCardDto>> onSuccess) throws Exception {
+        SharedPreferences prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = prefs.getString("jwt", null);
+
+        if (token == null) throw new Exception("User not authenticated");
+        if (userId == null) throw new Exception("Invalid user id");
+
+        api.getScheduledRides("Bearer " + token, userId, skip, count).enqueue(new Callback<List<RideCardDto>>() {
+            @Override
+            public void onResponse(Call<List<RideCardDto>> call, Response<List<RideCardDto>> response) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    try {
+                        String error = response.errorBody() != null
+                                ? response.errorBody().string()
+                                : "Error " + response.code();
+                        Toast.makeText(context, error, Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Toast.makeText(context, "Error " + response.code(), Toast.LENGTH_SHORT).show();
+                    }
+                    return;
+                }
+                onSuccess.accept(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<List<RideCardDto>> call, Throwable t) {
+                Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("SCHEDULED FETCH", t.getMessage());
+            }
+        });
+    }
+
+    public void cancelRide(Context context, Long rideId) throws Exception {
+        SharedPreferences prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = prefs.getString("jwt", null);
+
+        if (token == null) throw new Exception("User not authenticated");
+        if (rideId == null || rideId == 0L) throw new Exception("Invalid ride id");
+
+        api.cancelRide("Bearer " + token, rideId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (!response.isSuccessful()) {
+                    try {
+                        String message = response.errorBody() != null
+                                ? response.errorBody().string()
+                                : "Error " + response.code();
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Toast.makeText(context, "Error " + response.code(), Toast.LENGTH_SHORT).show();
+                    }
+                    return;
+                }
+                TopToast.show(context, "Ride cancelled", "Your ride has been cancelled.");
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("CANCEL RIDE", t.getMessage());
             }
         });
     }

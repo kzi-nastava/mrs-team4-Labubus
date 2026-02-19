@@ -57,4 +57,14 @@ public interface RideApi {
     @GET("api/rides/panic")
     Call<List<PanicNotificationDto>> getPanics(@Header("Authorization") String authHeader);
 
+    @GET("api/rides/scheduled/user/{userId}")
+    Call<List<RideCardDto>> getScheduledRides(
+            @Header("Authorization") String authHeader,
+            @Path("userId") Long userId,
+            @Query("skip") Integer skip,
+            @Query("count") Integer count
+    );
+
+    @PUT("api/rides/{rideId}/cancel/user")
+    Call<Void> cancelRide(@Header("Authorization") String authHeader, @Path("rideId") Long rideId);
 }
