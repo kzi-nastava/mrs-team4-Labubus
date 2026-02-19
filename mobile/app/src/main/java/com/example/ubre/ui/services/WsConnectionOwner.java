@@ -196,7 +196,7 @@ public class WsConnectionOwner {
             wsManager.subscribe("/topic/chat/admin", (topic, payload) -> {
                 Log.i(TAG, "msg " + topic + " " + payload);
                 handleChatMessage(payload);
-            })
+            });
         }
         
         SharedPreferences prefs = appContext.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
@@ -302,7 +302,7 @@ public class WsConnectionOwner {
         if (notification.getStatus() == NotificationType.TIME_FOR_A_RIDE) {
             onTimeForRide(notification);
         } else if (notification.getStatus() == NotificationType.RIDE_STARTED) {
-            onRideStarted();
+            onRideStarted(notification);
         } else if (notification.getStatus() == NotificationType.RIDE_CANCELLED) {
             onRideCancelled(notification);
         } else if (notification.getStatus() == NotificationType.RIDE_ACCEPTED) {
