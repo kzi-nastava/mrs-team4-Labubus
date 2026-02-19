@@ -9,7 +9,8 @@
     "test": "ng test",
     "test:ci": "ng test --no-watch --include=\"**/*.spec.ts\" --browsers=ChromeHeadless",
     "test:ci:pass": "ng test --no-watch --include=\"**/driver-registration-service.spec.ts\" --include=\"**/user-layout.spec.ts\" --browsers=ChromeHeadless",
-    "test:bogdan": "ng test --no-watch --include=\"**/driver-registration-service.spec.ts\" --include=\"**/user-layout.spec.ts\" --browsers=ChromeHeadless"
+    "test:bogdan": "ng test --no-watch --include=\"**/driver-registration-service.spec.ts\" --include=\"**/user-layout.spec.ts\" --browsers=ChromeHeadless",
+    "test:miljan": "ng test --no-watch --include=\"**/review-service.spec.ts\" --include=\"**/review-modal.spec.ts\" --browsers=ChromeHeadless"
   },
   "prettier": {
     "printWidth": 100,

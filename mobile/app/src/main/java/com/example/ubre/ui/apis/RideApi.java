@@ -1,5 +1,6 @@
 package com.example.ubre.ui.apis;
 
+import com.example.ubre.ui.dtos.PanicNotificationDto;
 import com.example.ubre.ui.dtos.RideCardDto;
 import com.example.ubre.ui.dtos.RideDto;
 
@@ -53,4 +54,11 @@ public interface RideApi {
 
     @PUT("api/rides/{id}/stop")
     Call<ResponseBody> stopRide(@Header("Authorization") String authHeader, @Path("id") Long id, @Body WaypointDto waypoint);
+    
+    @POST("api/rides/{id}/panic")
+    Call<ResponseBody> activatePanic(@Header("Authorization") String authHeader, @Path("id") Long id);
+
+    @GET("api/rides/panic")
+    Call<List<PanicNotificationDto>> getPanics(@Header("Authorization") String authHeader);
+
 }

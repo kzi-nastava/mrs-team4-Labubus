@@ -86,10 +86,16 @@
     <string name="forgot_password">Forgot password?</string>
     <string name="remember_me">Remember me</string>
     <string name="don_t_have_an_account">Don\'t have an account?</string>
+    <string name="price_per_km">Price per km</string>
+    <string name="base_price_per_type">Base price per type</string>
+    <string name="standard">Standard</string>
+    <string name="luxury">Luxury</string>
+    <string name="van">Van</string>
     <string name="driver_photo">Driver photo</string>
     <string name="attach_photo">Attach photo</string>
     <string name="register_driver">Register driver</string>
     <string name="cancel">Cancel</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="no_panic_notifications">No panic notifications</string>
 </resources>

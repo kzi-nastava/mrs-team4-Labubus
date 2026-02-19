@@ -3,6 +3,8 @@ package com.ubre.backend.controller;
 import com.ubre.backend.dto.*;
 import com.ubre.backend.enums.VehicleType;
 import com.ubre.backend.model.PanicNotification;
+import com.ubre.backend.model.VehicleTypePricing;
+import com.ubre.backend.service.PricingService;
 import com.ubre.backend.service.RideService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,9 @@ public class RideController {
 
     @Autowired
     private RideService rideService;
+
+    @Autowired
+    private PricingService pricingService;
 
     // just change status of a ride from pending to a in progress
     @PostMapping(value = "/{id}/start",
@@ -146,6 +151,31 @@ public class RideController {
         return ResponseEntity.status(HttpStatus.OK).body(createdRide);
     }
 
+    @GetMapping(
+            value = "/ongoing/{userId}"
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<RideCardDto>> getOngoingRides(
+            @PathVariable Long userId,
+            @RequestParam(required = false) Integer skip,
+            @RequestParam(required = false) Integer count,
+            @Valid @ModelAttribute RideQueryDto query) {
+        List<RideCardDto> rides = rideService.getUsersOngoingRides(userId, skip, count, query);
+        return ResponseEntity.status(HttpStatus.OK).body(rides);
+    }
+
+    @GetMapping(
+            value = "/ongoing"
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<RideCardDto>> getOngoingRides(
+            @RequestParam(required = false) Integer skip,
+            @RequestParam(required = false) Integer count,
+            @Valid @ModelAttribute RideQueryDto query) {
+        List<RideCardDto> rides = rideService.getOngoingRides(skip, count, query);
+        return ResponseEntity.status(HttpStatus.OK).body(rides);
+    }
+
     @PostMapping(
             value = "/{id}/track",
             consumes = MediaType.APPLICATION_JSON_VALUE
@@ -267,35 +297,30 @@ public class RideController {
 //    }
 //
 
-    // TODO: implement price fetching from database later
     @PostMapping(value = "/price-estimate",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Double> estimatePrice(@RequestBody Map<String, Double> options) {
-        Double standard = 5.0; // base fare for standard vehicle (in dollars)
-        Double van = 8.0; // base fare for van vehicle
-        Double luxury = 20.0; // base fare for luxury vehicle
-        Double perKm = 1.2; // per kilometer rate (in dollars)
-
         Double dist = options.get("distance"); // in meters
-        Double vehicleType = options.get("vehicleType"); // 0 - standard, 1 - van, 2 - luxury
+        Double vehicleTypeNum = options.get("vehicleType"); // 0 - standard, 1 - van, 2 - luxury
 
         // if there is no distance or vehicle type in the request, return bad request (if they are null for example)
-        if (dist == null || vehicleType == null) {
+        if (dist == null || vehicleTypeNum == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
-        double baseFare;
-        if (vehicleType == 0) {
-            baseFare = standard;
-        } else if (vehicleType == 1) {
-            baseFare = van;
+        VehicleType type;
+        if (vehicleTypeNum == 0) {
+            type = VehicleType.STANDARD;
+        } else if (vehicleTypeNum == 1) {
+            type = VehicleType.VAN;
         } else {
-            baseFare = luxury;
+            type = VehicleType.LUXURY;
         }
-        double price = baseFare + (perKm * (dist / 1000));
-        // rounding to 2 decimal places
+
+        VehicleTypePricing pricing = pricingService.getPricingForType(type);
+        double price = pricing.getBasePrice() + (pricing.getPricePerKm() * (dist / 1000));
         price = Math.round(price * 100.0) / 100.0;
         return ResponseEntity.status(HttpStatus.OK).body(price);
     }
@@ -311,7 +336,6 @@ public class RideController {
 
 
     // order a ride endpoint, should be protected later by hasRole('USER') or similar, for now ignore
-    // TODO: protect this endpoint later
     @PostMapping(
             value = "/order",
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -341,5 +365,18 @@ public class RideController {
     public ResponseEntity<List<PanicNotification>> getPanics() {
         List<PanicNotification> panics = rideService.getPanics();
         return ResponseEntity.ok(panics);
+    }
+
+    @GetMapping(
+            value = "/scheduled/user/{userId}"
+    )
+    @PreAuthorize("#userId == @securityUtil.currentUserId() || hasRole('ADMIN')")
+    public ResponseEntity<List<RideCardDto>> getScheduledRidesUser(
+            @PathVariable Long userId,
+            @RequestParam(required = false) Integer skip,
+            @RequestParam(required = false) Integer count,
+            @Valid @ModelAttribute RideQueryDto query) {
+        List<RideCardDto> createdRide = rideService.getScheduledRidesUser(userId, skip, count, query);
+        return ResponseEntity.status(HttpStatus.OK).body(createdRide);
     }
 }

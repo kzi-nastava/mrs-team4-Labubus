@@ -151,7 +151,7 @@
         <app-panic-button 
           [class.disabled]="!(ridePlanningStore.currentRide$ | async)"
           [disabled]="!(ridePlanningStore.currentRide$ | async)"
-          (click)="activatePanic()">
+          (panicClick)="activatePanic()">
         </app-panic-button> 
       }
       
@@ -185,17 +185,6 @@
           [disabled]="!canStopRide()"
           (click)="onStopRideClick()">
           <span class="ride-text">Stop</span>
-        </button> 
-      }
-
-      <!-- CANCEL RIDE BUTTON (USERS ONLY) -->
-      @if ((userService.currentUser$ | async)?.role === Role.REGISTERED_USER) {
-        <button 
-          class="ride-button"
-          [class.disabled]="!canCancelRide() || (userService.currentUser$ | async)?.id !== (this.ridePlanningStore.currentRide$ | async)?.createdBy"
-          [disabled]="!canCancelRide() || (userService.currentUser$ | async)?.id !== (this.ridePlanningStore.currentRide$ | async)?.createdBy"
-          (click)="onCancelUserClick()">
-          <span class="ride-text">Cancel</span>
         </button> 
       }
 
@@ -648,6 +637,15 @@
       (onReorder)="onFavoriteReorder($event)"
       (onRenderWaypoints)="onRenderWaypoints($event)"></app-ride-history>
 
+    <!-- ACTIVE RIDES SHEET -->
+    <app-active-rides 
+      class="active-rides" 
+      (onClose)="onActiveRidesBack()" 
+      [open]="ui.showActiveRides" 
+      (onError)="onEmmitError($event)" 
+      (onReorder)="onFavoriteReorder($event)"
+      (onRenderWaypoints)="onRenderWaypoints($event)"></app-active-rides>
+
     <!-- REPORTS SHEET (kao Account settings – u istom side meniju) -->
     <app-sheet
       [open]="ui.showReports"
@@ -671,6 +669,7 @@
       class="scheduled-rides"
       (onClose)="onScheduledRidesBack()"
       [open]="ui.showScheduledRides"
+      (showToast)="onShowToast($event)"
       (onError)="onEmmitError($event)"
       (onReorder)="onFavoriteReorder($event)"
       (onRenderWaypoints)="onRenderWaypoints($event)"></app-scheduled-rides>
@@ -707,7 +706,7 @@
     <app-sheet [open]="ui.panicListOpen"
       title="Panic Notifications"
       (back)="ui.panicListOpen=false; ui.menuOpen = true">
-      <app-panic-list></app-panic-list>
+      <app-panic-list [open]="ui.panicListOpen"></app-panic-list>
     </app-sheet>
   }
 
@@ -716,6 +715,62 @@
       title="Block users"
       (back)="onBlockUsersBack()">
       <app-block-users-list></app-block-users-list>
+    </app-sheet>
+  }
+
+  @if ((userService.currentUser$ | async)?.role === Role.ADMIN && pricingService.draft) {
+    <app-sheet
+      [open]="ui.priceAdjustmentOpen"
+      title="Price adjustment"
+      (closed)="closePriceAdjustment()"
+      (back)="onPriceAdjustmentBack()">
+
+      <div class="rd-wrap">
+
+        <div class="rd-row">
+          <div class="rd-row-label">Price per km</div>
+          <div class="rd-stepper">
+            <button class="rd-step" type="button" (click)="decPriceField('pricePerKm')">−</button>
+            <div class="rd-step-value">{{ pricingService.draft!.pricePerKm }}</div>
+            <button class="rd-step" type="button" (click)="incPriceField('pricePerKm')">+</button>
+          </div>
+        </div>
+
+        <div class="rd-section-title"><span>Base price per type</span></div>
+
+        <div class="rd-pill pa-pill-row">
+          <span>Standard</span>
+          <div class="rd-stepper">
+            <button class="rd-step" type="button" (click)="decPriceField('standardBasePrice')">−</button>
+            <div class="rd-step-value">{{ pricingService.draft!.standardBasePrice }}</div>
+            <button class="rd-step" type="button" (click)="incPriceField('standardBasePrice')">+</button>
+          </div>
+        </div>
+
+        <div class="rd-pill pa-pill-row">
+          <span>Luxury</span>
+          <div class="rd-stepper">
+            <button class="rd-step" type="button" (click)="decPriceField('luxuryBasePrice')">−</button>
+            <div class="rd-step-value">{{ pricingService.draft!.luxuryBasePrice }}</div>
+            <button class="rd-step" type="button" (click)="incPriceField('luxuryBasePrice')">+</button>
+          </div>
+        </div>
+
+        <div class="rd-pill pa-pill-row">
+          <span>Van</span>
+          <div class="rd-stepper">
+            <button class="rd-step" type="button" (click)="decPriceField('vanBasePrice')">−</button>
+            <div class="rd-step-value">{{ pricingService.draft!.vanBasePrice }}</div>
+            <button class="rd-step" type="button" (click)="incPriceField('vanBasePrice')">+</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="footer-actions" sheetFooter>
+        <app-button (clicked)="savePriceAdjustment()">Save</app-button>
+        <app-button variant="outlined" (clicked)="discardPriceAdjustment()">Discard</app-button>
+      </div>
     </app-sheet>
   }
 

@@ -12,6 +12,7 @@ import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.dtos.RideOrderRequest;
 import com.example.ubre.ui.dtos.WaypointDto;
 import com.example.ubre.ui.enums.RideStatus;
+import com.example.ubre.ui.main.MainActivity;
 import com.example.ubre.ui.utils.TopToast;
 import com.example.ubre.ui.storages.RideDetailsStorage;
 import com.example.ubre.ui.storages.RideHistoryStorage;
@@ -257,6 +258,7 @@ public class RideService {
         });
     }
 
+
     public interface OrderCallback {
         void onSuccess(RideDto ride);
         void onError(String message);
@@ -409,5 +411,34 @@ public class RideService {
         List<WaypointDto> waypoints = source.getWaypoints() == null ? List.of() : new ArrayList<>(source.getWaypoints());
         Boolean fav = favoriteOverride != null ? favoriteOverride : source.favorite;
         return new RideCardDto(source.getId(), start, waypoints, fav);
+    }
+
+    public void activatePanic(Context context, Long rideId) throws Exception {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            throw new Exception("User not authenticated");
+        }
+        if (rideId == null || rideId == 0L) {
+            throw new Exception("Invalid ride id");
+        }
+
+        api.activatePanic("Bearer " + token, rideId).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (!response.isSuccessful()) {
+                    Toast.makeText(context, "Panic activation failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                TopToast.show(context, "Panic activated", "Admins are notified.");
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("PANIC", t.getMessage());
+            }
+        });
     }
 }

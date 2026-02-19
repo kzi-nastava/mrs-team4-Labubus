@@ -38,6 +38,11 @@ export class RideService {
   private scheduledPage : number = 0;
   private fetchingScheduled : boolean = false;
 
+  private active : BehaviorSubject<RideCardDto[]> = new BehaviorSubject<RideCardDto[]>([]);
+  public active$ : Observable<RideCardDto[]> = this.active.asObservable();
+  private activePage : number = 0;
+  private fetchingActive : boolean = false;
+
   fetchHistory(query : RideQueryDto, count : number = 3) : void {
     if (this.fetchingHistory)
       return;
@@ -188,11 +193,57 @@ export class RideService {
     })
   }
 
+  fetchActive(query : RideQueryDto, count : number = 3) : void {
+    if (this.fetchingActive)
+      return;
+
+    this.fetchingActive = true;
+    const params : HttpParams = this.extractParams(query, this.activePage, count);
+
+    if (query.userId !== null) {
+      this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/ongoing/${query.userId}`, {params}).pipe(take(1)).subscribe({
+        next: (value : RideCardDto[]) => {
+          this.fetchingActive = false;
+          if (value.length == 0)
+            return;
+      
+          this.active.next([...this.active.value, ...value]);
+          this.activePage++;
+          },
+          error: err => {
+            console.log(err)
+            this.fetchingActive = false;
+          }
+      })
+    }
+    else {
+        this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/ongoing`, {params}).pipe(take(1)).subscribe({
+        next: (value : RideCardDto[]) => {
+          this.fetchingActive = false;
+          if (value.length == 0)
+            return;
+      
+          this.active.next([...this.active.value, ...value]);
+          this.activePage++;
+          },
+          error: err => {
+            console.log(err)
+            this.fetchingActive = false;
+          }
+      })
+    }
+  }
+
+  clearActive() {
+    this.active.next([]);
+    this.activePage = 0;
+  }
+
   fetchScheduled(query : RideQueryDto, count : number = 3) : void {
     if (this.fetchingScheduled)
       return;
 
-    this.fetchingFavorites = true;
+    this.fetchingScheduled = true;
     const params : HttpParams = this.extractParams(query, this.scheduledPage, count);
     this.userService.getCurrentUser().pipe(take(1)).subscribe({
       next: (currentUser : UserDto) => {
@@ -204,7 +255,17 @@ export class RideService {
     
             this.scheduled.next([...this.favorites.value, ...value]);
             this.scheduledPage++; 
-      })}},
+      })}
+      if (currentUser.role == Role.REGISTERED_USER) { 
+          this.http.get<RideCardDto[]>(`${this.BASE_URL}rides/scheduled/user/${currentUser.id}`, {params}).pipe(take(1)).subscribe((value : RideCardDto[]) => {
+            this.fetchingScheduled = false;
+            if (value.length == 0)
+                  return;
+    
+            this.scheduled.next([...this.favorites.value, ...value]);
+            this.scheduledPage++; 
+      })}
+    },
       error : (err) => {
         this.fetchingScheduled = false;
       }

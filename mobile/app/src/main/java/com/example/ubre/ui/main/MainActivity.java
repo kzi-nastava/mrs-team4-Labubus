@@ -1,7 +1,14 @@
 package com.example.ubre.ui.main;
+import android.Manifest;
+import android.app.AutomaticZenRule;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -10,6 +17,7 @@ import android.widget.ProgressBar;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -31,6 +39,7 @@ import com.example.ubre.ui.storages.ProfileChangeStorage;
 import com.example.ubre.ui.storages.ReviewStorage;
 import com.example.ubre.ui.storages.UserStorage;
 import com.example.ubre.ui.services.WsConnectionOwner;
+import com.example.ubre.ui.utils.NotificationHelper;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 import androidx.recyclerview.widget.RecyclerView;
@@ -96,10 +105,15 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar routeLoadingSpinner;
     private LoadingIndicatorController loadingIndicatorController;
     private AutocompleteController autocompleteController;
+    private View btnPanic;
+    private View btnCancelDriver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        NotificationHelper.createChannels(this);
+        requestNotificationPermission();
+
         // getWindow().setDecorFitsSystemWindows(false);
         getWindow().setNavigationBarColor(Color.TRANSPARENT);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
@@ -126,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
                 updateStartRideState();
                 if (btnChat != null) btnChat.setVisibility(View.GONE);
                 if (btnComplaint != null) btnComplaint.setVisibility(View.GONE);
+                if (btnPanic != null) btnPanic.setVisibility(View.GONE);
             } else {
                 findViewById(R.id.fragment_container).setVisibility(View.GONE);
                 if (mapView != null) mapView.setVisibility(View.VISIBLE);
@@ -135,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 updateStartRideState();
                 if (btnChat != null) btnChat.setVisibility(View.VISIBLE);
                 updateComplaintButtonVisibility();
+                if (btnPanic != null && canActivatePanic()) btnPanic.setVisibility(View.VISIBLE);
             }
         });
 
@@ -279,19 +295,45 @@ public class MainActivity extends AppCompatActivity {
                 btnStartRide.setBackground(ContextCompat.getDrawable(this, R.drawable.btn_stop_ride));
                 btnStartRide.setEnabled(true);
                 btnStartRide.setAlpha(1.0f);
+
+                btnCancelDriver.setEnabled(false);
+                btnCancelDriver.setAlpha(0.5f);
             } else {
                 // Start ride mode
                 ((com.google.android.material.button.MaterialButton) btnStartRide).setText("Start this ride");
                 btnStartRide.setBackground(ContextCompat.getDrawable(this, R.drawable.btn_start_ride));
                 btnStartRide.setEnabled(true);
                 btnStartRide.setAlpha(1.0f);
+
+                btnCancelDriver.setEnabled(true);
+                btnCancelDriver.setAlpha(1.0f);
             }
         } else if (isDriver) {
             ((com.google.android.material.button.MaterialButton) btnStartRide).setText("Start this ride");
             btnStartRide.setBackground(ContextCompat.getDrawable(this, R.drawable.btn_start_ride));
             btnStartRide.setEnabled(false);
             btnStartRide.setAlpha(0.5f);
+
+            btnCancelDriver.setEnabled(false);
+            btnCancelDriver.setAlpha(0.5f);
         }
+
+        // btnCancelDriver.setVisibility(isDriver && !hasFragments ? View.VISIBLE : View.GONE);
+        // if (isDriver) {
+        //     boolean canStart = hasCurrentRide;
+        //     if (canStart) {
+        //         if (CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue() == null) {
+        //             canStart = false;
+        //         } else if (CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue().getStatus() == RideStatus.IN_PROGRESS) {
+        //             canStart = false;
+        //         }
+        //     }
+        //     btnStartRide.setEnabled(canStart);
+        //     btnStartRide.setAlpha(canStart ? 1.0f : 0.5f);
+
+        //     btnCancelDriver.setEnabled(canStart);
+        //     btnCancelDriver.setAlpha(canStart ? 1.0f : 0.5f);
+        // }
     }
 
     private boolean canGuestAddWaypoint() {
@@ -347,6 +389,9 @@ public class MainActivity extends AppCompatActivity {
         blockNotice = findViewById(R.id.block_notice);
         blockNoticeTitle = findViewById(R.id.block_notice_title);
         blockNoticeMessage = findViewById(R.id.block_notice_message);
+        btnPanic = findViewById(R.id.btn_panic);
+        btnCancelDriver = findViewById(R.id.btn_cancel_driver);
+
         if (btnStartRide != null) {
             btnStartRide.setOnClickListener(v -> {
                 if (currentRole != Role.DRIVER || !hasCurrentRide) {
@@ -379,10 +424,22 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
+        if (btnPanic != null) {
+            btnPanic.setOnClickListener(v -> {
+                if (!canActivatePanic()) return;
+                Long rideId = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue().getId();
+                try {
+                    RideService.getInstance().activatePanic(this, rideId);
+                } catch (Exception ignored) {}
+            });
+        }
+
         updateMapSearchVisibility();
         updateBlockNoticeVisibility();
         updateStartRideState();
         updateComplaintButtonVisibility();
+        updatePanicBtnVisibility(hasCurrentRide);
         routeLoadingSpinner = findViewById(R.id.route_loading_spinner);
         loadingIndicatorController = new LoadingIndicatorController(routeLoadingSpinner);
     }
@@ -552,6 +609,7 @@ public class MainActivity extends AppCompatActivity {
         updateGuestRideOrderState();
         updateStartRideState();
         updateComplaintButtonVisibility();
+        updatePanicBtnVisibility(hasCurrentRide);
     }
 
     void updateComplaintButtonVisibility() {
@@ -571,6 +629,7 @@ public class MainActivity extends AppCompatActivity {
         }
         btnComplaint.setVisibility(isUser && rideInProgress ? View.VISIBLE : View.GONE);
     }
+
 
     public void openRideOrderWithWaypoints(List<WaypointDto> waypoints) {
         if (waypoints == null) {
@@ -630,6 +689,41 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (mapLayerController != null) {
             mapLayerController.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    private void updatePanicBtnVisibility(boolean hasCurrentRide) {
+        SharedPreferences prefs = this.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String role = prefs.getString("role", "");
+
+        boolean isAllowedRole = role.equals("DRIVER") || role.equals("REGISTERED_USER");
+        if (!isAllowedRole) {
+            btnPanic.setVisibility(View.GONE);
+            return;
+        }
+
+        btnPanic.setVisibility(View.VISIBLE);
+        btnPanic.setEnabled(hasCurrentRide);
+        btnPanic.setAlpha(hasCurrentRide ? 1.0f : 0.5f);
+    }
+
+    private boolean canActivatePanic() {
+        if (currentRole != Role.DRIVER && currentRole != Role.REGISTERED_USER) return false;
+        if (!hasCurrentRide) return false;
+
+        Long rideId = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue() != null
+                ? CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue().getId()
+                : null;
+        return rideId != null && rideId != 0L;
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+            }
         }
     }
 

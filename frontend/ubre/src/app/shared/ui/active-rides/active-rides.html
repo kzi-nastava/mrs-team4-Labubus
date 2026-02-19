@@ -1,0 +1,13 @@
+<app-ride-list 
+class="active-rides" 
+(onClose)="onClose.emit()" 
+(onScrollToBottom)="onScrollToBottom($event)" 
+[open]="open" [rides]="rides$ | async" 
+(onQueryChange)="onQueryChange($event)" 
+(onRenderWaypoints)="onRenderWaypoints.emit($event)" 
+title="Active rides"
+testIdPrefix="active-rides"
+(onError)="onError.emit($event)"
+(onReorder)="onReorder.emit($event)"
+[showDateFilter]="false">
+</app-ride-list>

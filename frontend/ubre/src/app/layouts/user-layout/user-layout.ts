@@ -58,9 +58,11 @@ import { PanicButton } from "../../shared/ui/panic-button/panic-button";
 import { PanicToast } from '../../features/panic/panic-toast/panic-toast';
 import { ComplaintModal } from '../../shared/ui/complaint-modal/complaint-modal';
 import { ComplaintService } from '../../services/complaint-service';
+import { PricingService } from '../../services/pricing-service';
 import { ScheduledRides } from '../../shared/ui/scheduled-rides/scheduled-rides';
 import { Reports } from '../../shared/ui/reports/reports';
 import { BlockUsersList } from '../../features/block-users/block-users-list/block-users-list';
+import { ActiveRides } from '../../shared/ui/active-rides/active-rides';
 import { Chat } from '../../shared/ui/chat/chat';
 import { ChatService } from '../../services/chat-service';
 
@@ -73,11 +75,12 @@ import { ChatService } from '../../services/chat-service';
     AsyncPipe,ReviewModal,ScheduleTimer,InvitePassengers,
     RideOptions, FavoriteRides, DriverCancelDialog,
     ComplaintModal, PanicList, PanicButton, PanicToast,
-    ScheduledRides, Reports, BlockUsersList, Chat],
+    ScheduledRides, Reports, BlockUsersList, Chat, ActiveRides],
     templateUrl: './user-layout.html',
     styleUrl: './user-layout.css',
   })
   export class UserLayout implements OnInit {
+
 
     constructor(private cdr: ChangeDetectorRef, private http: HttpClient, private router: Router) {}
     
@@ -100,6 +103,7 @@ import { ChatService } from '../../services/chat-service';
     public vehicleService = inject(VehicleService)
     public rideTrackingStore = inject(RideTrackingStore)
     public chatService = inject(ChatService)
+    public pricingService = inject(PricingService);
 
   Role = Role;
   VehicleType = VehicleType;
@@ -114,6 +118,7 @@ import { ChatService } from '../../services/chat-service';
   private rideAssignmentSubscription?: Subscription;
   private rideReminderSubscription?: Subscription;
   private panicSubscription?: Subscription;
+  private driverStatusSubscription?: Subscription;
   private currentRideSubscription?: Subscription; // this subscription represents a current ride, for user and for a driver
 
   @ViewChild(PanicToast) panicToast!: PanicToast;
@@ -170,6 +175,7 @@ import { ChatService } from '../../services/chat-service';
           if (notification.status === NotificationType.PROFILE_CHANGE_REJECTED && notification.user) {
             this.showToast('Profile change rejected', 'Your profile change request has been rejected.');
           }
+
         },
         error: () => {
           this.showToast('Connection error', 'Could not receive profile change updates.');
@@ -266,11 +272,13 @@ import { ChatService } from '../../services/chat-service';
     showRideHistory: false,
     showFavourites: false,
     showScheduledRides: false,
+    showActiveRides: false,
     showReports: false,
     showCancelModal: false,
     panicListOpen: false,
     toastPanicOpen: false,
     blockUsersOpen: false,
+    priceAdjustmentOpen: false,
   };
 
   private previousScreenBeforeInvite: 'schedule-timer' | 'ride-options' | null = null;
@@ -358,6 +366,9 @@ import { ChatService } from '../../services/chat-service';
     if (action === 'scheduled') {
       this.openScheduledRides();
     }
+    if (action === 'active-rides') {
+      this.openActiveRides();
+    }
     if (action === 'login') {
       this.router.navigate(['/login']);
     }
@@ -379,7 +390,10 @@ import { ChatService } from '../../services/chat-service';
     if (action === 'block-users') {
       this.openBlockUsers();
     }
-   
+    if (action === 'price-adjustment') {
+      this.openPriceAdjustment();
+    }
+
     this.closeMenu();
   }
   
@@ -751,6 +765,7 @@ import { ChatService } from '../../services/chat-service';
     this.ui.showFavourites = false;
     this.ui.showReports = false;
     this.ui.showRideHistory = true;
+    this.ui.showActiveRides = false;
     this.ui.menuOpen = false;
   }
 
@@ -802,6 +817,7 @@ import { ChatService } from '../../services/chat-service';
     this.ui.showRideHistory = false;
     this.ui.showReports = false;
     this.ui.showFavourites = true;
+    this.ui.showActiveRides = false;
     this.ui.menuOpen = false;
   }
 
@@ -822,6 +838,7 @@ import { ChatService } from '../../services/chat-service';
     this.ui.showFavourites = false;
     this.ui.showReports = false;
     this.ui.showScheduledRides = true;
+    this.ui.showActiveRides = false;
     this.ui.menuOpen = false;
   }
 
@@ -834,6 +851,7 @@ import { ChatService } from '../../services/chat-service';
     this.ui.showFavourites = false;
     this.ui.showScheduledRides = false;
     this.ui.showReports = true;
+    this.ui.showActiveRides = false;
     this.ui.menuOpen = false;
   }
 
@@ -844,6 +862,26 @@ import { ChatService } from '../../services/chat-service';
 
   closeReports() {
     this.ui.showReports = false;
+  }
+
+  // ACTIVE RIDES SHEET LOGIC
+
+  onActiveRidesBack() {
+    this.ui.showActiveRides = false;
+    this.ui.menuOpen = true;
+  }
+
+  openActiveRides() {
+    this.ui.showRideHistory = false;
+    this.ui.showFavourites = false;
+    this.ui.showReports = false;
+    this.ui.showScheduledRides = false;
+    this.ui.showActiveRides = true;
+    this.ui.menuOpen = false;
+  }
+
+  closeActiveRides() {
+    this.ui.showActiveRides = false;
   }
 
   // CHAT SHEET LOGIC
@@ -1259,21 +1297,6 @@ import { ChatService } from '../../services/chat-service';
     );
   }
 
-
-  onCancelUserClick() {
-    const rideId = this.ridePlanningStore.currentRideSubject$.getValue()!.id;
-    this.rideService.cancelRideUser(rideId).subscribe({
-        next: () => {
-          this.ui.showCancelModal = false;
-          this.ridePlanningStore.currentRideSubject$.next(null);
-          this.showToast('Ride cancelled', 'Ride cancelled successfully.');
-        },
-        error: (err: any) => {
-          this.showToast('Error cancelling ride', err.error.message);
-        }
-      });
-  }
-
   activatePanic() {
     const rideId = this.ridePlanningStore.currentRideSubject$.getValue()!.id;
     this.rideService.activatePanic(rideId).subscribe({
@@ -1313,6 +1336,56 @@ import { ChatService } from '../../services/chat-service';
       }
     });
   }
+
+
+  // PRICE ADJUSTMENT SHEET LOGIC
+  openPriceAdjustment() {
+    this.pricingService.loadPricing();
+    this.ui.priceAdjustmentOpen = true;
+  }
+
+  closePriceAdjustment() {
+    this.ui.priceAdjustmentOpen = false;
+  }
+
+  onPriceAdjustmentBack() {
+    this.closePriceAdjustment();
+    this.ui.menuOpen = true;
+  }
+
+  incPriceField(field: 'pricePerKm' | 'standardBasePrice' | 'luxuryBasePrice' | 'vanBasePrice') {
+    if (this.pricingService.draft) {
+      this.pricingService.draft[field] = +(this.pricingService.draft[field] + 1).toFixed(2);
+    }
+  }
+
+  decPriceField(field: 'pricePerKm' | 'standardBasePrice' | 'luxuryBasePrice' | 'vanBasePrice') {
+    if (this.pricingService.draft && this.pricingService.draft[field] > 0) {
+      this.pricingService.draft[field] = +(this.pricingService.draft[field] - 1).toFixed(2);
+    }
+  }
+
+  savePriceAdjustment() {
+    this.pricingService.savePricing().pipe(take(1)).subscribe({
+      next: () => {
+        this.showToast('Pricing updated', 'Ride prices have been updated successfully.');
+        this.closePriceAdjustment();
+      },
+      error: (err: any) => {
+        this.showToast('Error', err.error || 'Could not update pricing.');
+      }
+    });
+  }
+
+  discardPriceAdjustment() {
+    this.pricingService.discardChanges();
+    this.closePriceAdjustment();
+  }
+
+  onShowToast(toast: Toast) {
+    this.showToast(toast.title, toast.message)
+  }
+
 
 }
 

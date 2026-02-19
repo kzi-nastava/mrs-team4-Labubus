@@ -19,6 +19,11 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
       action: 'favourites',
     },
     {
+      label: 'Scheduled rides',
+      icon: 'scheduled.svg',
+      action: 'scheduled',
+    },
+    {
       label: 'Account settings',
       icon: 'settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',
       action: 'account-settings',
@@ -69,17 +74,17 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
     },
     { label: 'Active rides', 
       icon: 'active-rides-primary-text.svg', 
-      action: 'admin-users' 
+      action: 'active-rides' 
     },
     {
       label: 'Account settings',
       icon: 'settings_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg',
       action: 'account-settings',
     },
-    { 
-      label: 'Price adjustment', 
-      icon: 'price-adjustment-primary-text.svg', 
-      action: 'admin-users' 
+    {
+      label: 'Price adjustment',
+      icon: 'price-adjustment-primary-text.svg',
+      action: 'price-adjustment'
     },
     {
       label: 'Register a driver',
