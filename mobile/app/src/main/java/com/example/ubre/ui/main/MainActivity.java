@@ -1,7 +1,11 @@
 package com.example.ubre.ui.main;
+import android.app.AutomaticZenRule;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -91,6 +95,8 @@ public class MainActivity extends AppCompatActivity {
     private ProgressBar routeLoadingSpinner;
     private LoadingIndicatorController loadingIndicatorController;
     private AutocompleteController autocompleteController;
+    private View btnPanic;
+    private View btnCancelDriver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -262,6 +268,7 @@ public class MainActivity extends AppCompatActivity {
         boolean isDriver = currentRole == Role.DRIVER;
         boolean hasFragments = getSupportFragmentManager().getBackStackEntryCount() > 0;
         btnStartRide.setVisibility(isDriver && !hasFragments ? View.VISIBLE : View.GONE);
+        btnCancelDriver.setVisibility(isDriver && !hasFragments ? View.VISIBLE : View.GONE);
         if (isDriver) {
             boolean canStart = hasCurrentRide;
             if (canStart) {
@@ -273,6 +280,9 @@ public class MainActivity extends AppCompatActivity {
             }
             btnStartRide.setEnabled(canStart);
             btnStartRide.setAlpha(canStart ? 1.0f : 0.5f);
+
+            btnCancelDriver.setEnabled(canStart);
+            btnCancelDriver.setAlpha(canStart ? 1.0f : 0.5f);
         }
     }
 
@@ -328,6 +338,9 @@ public class MainActivity extends AppCompatActivity {
         blockNotice = findViewById(R.id.block_notice);
         blockNoticeTitle = findViewById(R.id.block_notice_title);
         blockNoticeMessage = findViewById(R.id.block_notice_message);
+        btnPanic = findViewById(R.id.btn_panic);
+        btnCancelDriver = findViewById(R.id.btn_cancel_driver);
+
         if (btnStartRide != null) {
             btnStartRide.setOnClickListener(v -> {
                 if (currentRole != Role.DRIVER) {
@@ -349,9 +362,21 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
+        if (btnPanic != null) {
+            btnPanic.setOnClickListener(v -> {
+                if (!canActivatePanic()) return;
+                Long rideId = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue().getId();
+                try {
+                    RideService.getInstance().activatePanic(this, rideId);
+                } catch (Exception ignored) {}
+            });
+        }
+
         updateMapSearchVisibility();
         updateBlockNoticeVisibility();
         updateStartRideState();
+        updatePanicBtnVisibility(hasCurrentRide);
         routeLoadingSpinner = findViewById(R.id.route_loading_spinner);
         loadingIndicatorController = new LoadingIndicatorController(routeLoadingSpinner);
     }
@@ -519,7 +544,9 @@ public class MainActivity extends AppCompatActivity {
         updateMapSearchVisibility();
         updateGuestRideOrderState();
         updateStartRideState();
+        updatePanicBtnVisibility(hasCurrentRide);
     }
+
 
     public void openRideOrderWithWaypoints(List<WaypointDto> waypoints) {
         if (waypoints == null) {
@@ -541,6 +568,31 @@ public class MainActivity extends AppCompatActivity {
         if (mapLayerController != null) {
             mapLayerController.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+    }
+
+    private void updatePanicBtnVisibility(boolean hasCurrentRide) {
+        SharedPreferences prefs = this.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String role = prefs.getString("role", "");
+
+        boolean isAllowedRole = role.equals("DRIVER") || role.equals("REGISTERED_USER");
+        if (!isAllowedRole) {
+            btnPanic.setVisibility(View.GONE);
+            return;
+        }
+
+        btnPanic.setVisibility(View.VISIBLE);
+        btnPanic.setEnabled(hasCurrentRide);
+        btnPanic.setAlpha(hasCurrentRide ? 1.0f : 0.5f);
+    }
+
+    private boolean canActivatePanic() {
+        if (currentRole != Role.DRIVER && currentRole != Role.REGISTERED_USER) return false;
+        if (!hasCurrentRide) return false;
+
+        Long rideId = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue() != null
+                ? CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue().getId()
+                : null;
+        return rideId != null && rideId != 0L;
     }
 
 }
