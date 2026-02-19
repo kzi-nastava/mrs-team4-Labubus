@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
                 updateMapSearchVisibility();
                 updateBlockNoticeVisibility();
                 updateStartRideState();
-                if (btnChat != null) btnChat.setVisibility(View.GONE);
+                updateChatButtonVisibility();
             } else {
                 findViewById(R.id.fragment_container).setVisibility(View.GONE);
                 if (mapView != null) mapView.setVisibility(View.VISIBLE);
@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
                 updateMapSearchVisibility();
                 updateBlockNoticeVisibility();
                 updateStartRideState();
-                if (btnChat != null) btnChat.setVisibility(View.VISIBLE);
+                updateChatButtonVisibility();
             }
         });
 
@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (btnMenu != null) btnMenu.setVisibility(View.GONE);
         if (btnMapSearch != null) btnMapSearch.setVisibility(View.GONE);
-        if (btnChat != null) btnChat.setVisibility(View.GONE);
+        updateChatButtonVisibility();
         updateBlockNoticeVisibility();
 
         getSupportFragmentManager()
@@ -324,6 +324,10 @@ public class MainActivity extends AppCompatActivity {
         btnMenu = findViewById(R.id.btn_menu);
         btnMapSearch = findViewById(R.id.btn_map_search);
         btnChat = findViewById(R.id.btn_chat);
+        if (btnChat != null) {
+            btnChat.setOnClickListener(v -> showFragment(ChatFragment.newInstance()));
+            btnChat.setVisibility(View.GONE);
+        }
         btnStartRide = findViewById(R.id.btn_start_ride);
         blockNotice = findViewById(R.id.block_notice);
         blockNoticeTitle = findViewById(R.id.block_notice_title);
@@ -509,8 +513,15 @@ public class MainActivity extends AppCompatActivity {
     void setCurrentRole(Role role) {
         currentRole = role == null ? Role.GUEST : role;
         updateStartRideState();
+        updateChatButtonVisibility();
     }
 
+    private void updateChatButtonVisibility() {
+        if (btnChat == null) return;
+        boolean hasFragments = getSupportFragmentManager().getBackStackEntryCount() > 0;
+        boolean isLoggedIn = currentRole != Role.GUEST;
+        btnChat.setVisibility(!hasFragments && isLoggedIn ? View.VISIBLE : View.GONE);
+    }
     void setCurrentRideActive(boolean active) {
         hasCurrentRide = active;
         if (hasCurrentRide) {

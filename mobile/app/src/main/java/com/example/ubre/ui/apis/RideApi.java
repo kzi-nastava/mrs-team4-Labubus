@@ -49,4 +49,10 @@ public interface RideApi {
 
     @POST("api/rides/{id}/start")
     Call<ResponseBody> startRide(@Header("Authorization") String authHeader, @Path("id") Long id);
+
+    @GET("api/rides/ongoing")
+    Call<List<RideCardDto>> getActiveRides(@Header("Authorization") String authHeader, @Query("skip") Integer skip, @Query("count") Integer count, @Query("sortBy") String sort, @Query("ascending") Boolean ascending);
+
+    @GET("api/rides/ongoing/{userId}")
+    Call<List<RideCardDto>> getActiveRidesByUser(@Header("Authorization") String authHeader, @Path("userId") Long userId, @Query("skip") Integer skip, @Query("count") Integer count, @Query("sortBy") String sort, @Query("ascending") Boolean ascending);
 }

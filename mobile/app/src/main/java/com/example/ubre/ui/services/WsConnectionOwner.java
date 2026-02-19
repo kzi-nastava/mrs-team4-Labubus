@@ -14,6 +14,12 @@ import com.example.ubre.ui.notifications.CurrentRideNotification;
 import com.example.ubre.ui.notifications.RideReminderNotification;
 import com.example.ubre.ui.utils.TopToast;
 import com.example.ubre.ui.storages.CurrentRideStorage;
+import com.example.ubre.ui.dtos.ChatMessageDto;
+import com.example.ubre.ui.dtos.ChatDto;
+import com.example.ubre.ui.storages.ChatStorage;
+import com.example.ubre.ui.storages.UserStorage;
+import com.example.ubre.ui.dtos.UserDto;
+import com.example.ubre.ui.enums.Role;
 import com.google.gson.Gson;
 
 public class WsConnectionOwner {
@@ -124,6 +130,20 @@ public class WsConnectionOwner {
             handleCurrentRideNotification(payload);
         });
         wsManager.subscribe("/topic/panic", (topic, payload) -> Log.i(TAG, "msg " + topic + " " + payload));
+
+        // Chat subscriptions
+        wsManager.subscribe("/topic/chat/" + userId, (topic, payload) -> {
+            Log.i(TAG, "msg " + topic + " " + payload);
+            handleChatMessage(payload);
+        });
+        // Admin also subscribes to the admin topic
+        UserDto currentUser = UserStorage.getInstance().getCurrentUser().getValue();
+        if (currentUser != null && currentUser.getRole() == Role.ADMIN) {
+            wsManager.subscribe("/topic/chat/admin", (topic, payload) -> {
+                Log.i(TAG, "msg " + topic + " " + payload);
+                handleChatMessage(payload);
+            });
+        }
     }
 
     private void handleProfileChangeNotification(String payload) {
@@ -221,6 +241,14 @@ public class WsConnectionOwner {
             onTimeForRide(notification);
         } else if (notification.getStatus() == NotificationType.RIDE_STARTED) {
             onRideStarted();
+        } else if (notification.getStatus() == NotificationType.RIDE_CANCELLED) {
+            onRideCancelled(notification);
+        } else if (notification.getStatus() == NotificationType.RIDE_ACCEPTED) {
+            onRideAccepted(notification);
+        } else if (notification.getStatus() == NotificationType.RIDE_REJECTED) {
+            onRideRejected();
+        } else if (notification.getStatus() == NotificationType.PASSENGER_LINKED) {
+            onPassengerLinked(notification);
         }
     }
 
@@ -237,5 +265,69 @@ public class WsConnectionOwner {
         mainHandler.post(() ->
                 TopToast.show(appContext, "Ride started", "Your ride has been started successfully.")
         );
+    }
+
+    private void onRideCancelled(CurrentRideNotification notification) {
+        mainHandler.post(() -> {
+            String reason = notification.getReason();
+            String msg = (reason != null && !reason.trim().isEmpty())
+                    ? "Your ride was cancelled: " + reason.trim()
+                    : "Your ride was cancelled.";
+            TopToast.show(appContext, "Ride cancelled", msg);
+            CurrentRideStorage.getInstance().clear();
+        });
+    }
+
+    private void onRideAccepted(CurrentRideNotification notification) {
+        mainHandler.post(() -> {
+            TopToast.show(appContext, "Ride accepted", "A driver has accepted your ride.");
+            if (notification != null && notification.getRide() != null) {
+                CurrentRideStorage.getInstance().setCurrentRide(notification.getRide());
+            }
+        });
+    }
+
+    private void onRideRejected() {
+        mainHandler.post(() -> {
+            TopToast.show(appContext, "Ride rejected", "Your ride has been rejected.");
+            CurrentRideStorage.getInstance().clear();
+        });
+    }
+
+    private void onPassengerLinked(CurrentRideNotification notification) {
+        mainHandler.post(() -> {
+            TopToast.show(appContext, "Ride invitation", "You've been linked to a ride.");
+            if (notification != null && notification.getRide() != null) {
+                CurrentRideStorage.getInstance().setCurrentRide(notification.getRide());
+            }
+        });
+    }
+
+    private void handleChatMessage(String payload) {
+        ChatMessageDto message;
+        try {
+            message = gson.fromJson(payload, ChatMessageDto.class);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to parse chat message", e);
+            return;
+        }
+        if (message == null) return;
+
+        mainHandler.post(() -> {
+            ChatDto currentChat = ChatStorage.getInstance().getCurrentChatValue();
+            if (currentChat != null && currentChat.getId() != null
+                    && currentChat.getId().equals(message.getChatId())) {
+                // Currently viewing this chat — add message and auto-mark as read
+                ChatStorage.getInstance().addMessageToTop(message);
+                UserDto currentUser = UserStorage.getInstance().getCurrentUser().getValue();
+                if (currentUser != null && message.getSender() != null
+                        && currentUser.getRole() != message.getSender().getRole()) {
+                    ChatService.getInstance().markAsRead(appContext, message.getId());
+                }
+            } else {
+                // Not viewing this chat — increment unread
+                ChatStorage.getInstance().incrementUnread();
+            }
+        });
     }
 }
