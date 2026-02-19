@@ -1,9 +1,12 @@
 package com.example.ubre.ui.main;
+import android.Manifest;
 import android.app.AutomaticZenRule;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -14,6 +17,7 @@ import android.widget.ProgressBar;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -31,6 +35,7 @@ import com.example.ubre.ui.services.RideService;
 import com.example.ubre.ui.storages.CurrentRideStorage;
 import com.example.ubre.ui.storages.ProfileChangeStorage;
 import com.example.ubre.ui.storages.UserStorage;
+import com.example.ubre.ui.utils.NotificationHelper;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.textfield.TextInputEditText;
 import androidx.recyclerview.widget.RecyclerView;
@@ -101,6 +106,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        NotificationHelper.createChannels(this);
+        requestNotificationPermission();
+
         // getWindow().setDecorFitsSystemWindows(false);
         getWindow().setNavigationBarColor(Color.TRANSPARENT);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
@@ -126,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
                 updateBlockNoticeVisibility();
                 updateStartRideState();
                 if (btnChat != null) btnChat.setVisibility(View.GONE);
+                if (btnPanic != null) btnPanic.setVisibility(View.GONE);
             } else {
                 findViewById(R.id.fragment_container).setVisibility(View.GONE);
                 if (mapView != null) mapView.setVisibility(View.VISIBLE);
@@ -134,6 +143,7 @@ public class MainActivity extends AppCompatActivity {
                 updateBlockNoticeVisibility();
                 updateStartRideState();
                 if (btnChat != null) btnChat.setVisibility(View.VISIBLE);
+                if (btnPanic != null && canActivatePanic()) btnPanic.setVisibility(View.VISIBLE);
             }
         });
 
@@ -593,6 +603,16 @@ public class MainActivity extends AppCompatActivity {
                 ? CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue().getId()
                 : null;
         return rideId != null && rideId != 0L;
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+            }
+        }
     }
 
 }
