@@ -98,7 +98,10 @@ public class MainDrawerController {
             } else if (itemId == R.id.nav_panic_notifications) {
                 activity.showFragment(PanicNotificationsFragment.newInstance());
                 return true;
-            }
+            } else if (itemId == R.id.nav_scheduled) {
+            activity.showFragment(ScheduledRidesFragment.newInstance());
+            return true;
+        }
 
             return true;
         });

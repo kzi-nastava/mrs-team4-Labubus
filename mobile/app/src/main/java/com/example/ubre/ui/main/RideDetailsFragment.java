@@ -16,6 +16,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -84,6 +85,16 @@ public class RideDetailsFragment extends Fragment {
         return fragment;
     }
 
+    public static RideDetailsFragment newInstance(Long rideId, boolean showReorder, boolean showCancel) {
+        RideDetailsFragment fragment = new RideDetailsFragment();
+        Bundle args = new Bundle();
+        args.putSerializable("RIDEID", rideId);
+        args.putBoolean("SHOW_REORDER", showReorder);
+        args.putBoolean("SHOW_CANCEL", showCancel);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,9 +120,27 @@ public class RideDetailsFragment extends Fragment {
 
             Long rideId = (Long) getArguments().getSerializable("RIDEID");
             showReorder = getArguments().getBoolean("SHOW_REORDER", false);
+
+
             SharedPreferences sharedPreferences = getContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
             String role = sharedPreferences.getString("role", "");
             Typeface font = ResourcesCompat.getFont(this.getActivity(), R.font.poppins_regular);
+
+            boolean showCancel = getArguments().getBoolean("SHOW_CANCEL", false);
+            Button cancelButton = root.findViewById(R.id.ride_details_cancel);
+
+            if (showCancel && role.equals("REGISTERED_USER")) {
+                cancelButton.setVisibility(View.VISIBLE);
+                cancelButton.setOnClickListener(v -> {
+                    try {
+                        RideService.getInstance().cancelRide(requireContext(), rideId);
+                    } catch (Exception e) {
+                        Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                cancelButton.setVisibility(View.GONE);
+            }
 
             View reorderButton = root.findViewById(R.id.ride_details_reorder);
             if (!showReorder || !role.equals("REGISTERED_USER")) {
