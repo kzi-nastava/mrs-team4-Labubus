@@ -5,15 +5,20 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.example.ubre.R;
+import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.dtos.UserDto;
+import com.example.ubre.ui.dtos.VehicleIndicatorDto;
 import com.example.ubre.ui.dtos.WaypointDto;
+import com.example.ubre.ui.enums.RideStatus;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.services.RouteService;
 import com.example.ubre.ui.services.WsConnectionOwner;
 import com.example.ubre.ui.storages.CurrentRideStorage;
+import com.example.ubre.ui.storages.ComplaintStorage;
 import com.example.ubre.ui.storages.ReviewStorage;
 import com.example.ubre.ui.storages.RidePlanningStorage;
 import com.example.ubre.ui.storages.UserStorage;
+import com.example.ubre.ui.storages.VehicleLocationStorage;
 
 import org.osmdroid.views.MapView;
 
@@ -32,6 +37,7 @@ class MainObserversBinder {
     private final MainDrawerController drawerController;
     private boolean bound = false;
     private Long lastReviewRideId = null;
+    private Long lastComplaintRideId = null;
 
     MainObserversBinder(
             MainActivity activity,
@@ -62,7 +68,10 @@ class MainObserversBinder {
         bindRoute();
         bindCurrentRide();
         bindReviewModal();
+        bindComplaintModal();
         bindUser();
+        bindVehicleLocations();
+        bindRideTracking();
     }
 
     private void bindRidePlanning() {
@@ -103,6 +112,12 @@ class MainObserversBinder {
                         RouteService.getInstance().clearRoute(mapView);
                     }
                 }
+                return;
+            }
+
+            if (ride.getStatus() == RideStatus.IN_PROGRESS) {
+                mapUiController.clearRideOrderMarkers();
+                RouteService.getInstance().clearRoute(mapView);
                 return;
             }
 
@@ -147,6 +162,68 @@ class MainObserversBinder {
         });
     }
 
+    private void bindVehicleLocations() {
+        VehicleLocationStorage.getInstance().getLocationsReadOnly().observe(activity, indicators -> {
+            if (mapUiController == null || indicators == null) {
+                return;
+            }
+            mapUiController.syncVehicleMarkers(indicators);
+
+            RideDto ride = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue();
+            if (ride != null && ride.getStatus() == RideStatus.IN_PROGRESS
+                    && ride.getDriver() != null && ride.getWaypoints() != null) {
+                Long driverId = ride.getDriver().getId();
+                VehicleIndicatorDto driverIndicator = null;
+                for (VehicleIndicatorDto ind : indicators) {
+                    if (ind.getDriverId() != null && ind.getDriverId().equals(driverId)) {
+                        driverIndicator = ind;
+                        break;
+                    }
+                }
+                if (driverIndicator != null && driverIndicator.getLocation() != null) {
+                    List<WaypointDto> routeWaypoints = new ArrayList<>();
+                    // Start from vehicle position
+                    routeWaypoints.add(driverIndicator.getLocation());
+                    // Add unvisited waypoints
+                    for (WaypointDto wp : ride.getWaypoints()) {
+                        if (wp.getVisited() == null || !wp.getVisited()) {
+                            routeWaypoints.add(wp);
+                        }
+                    }
+                    if (routeWaypoints.size() >= 2) {
+                        RouteService.getInstance().drawTrackingRoute(mapView, routeWaypoints);
+                    }
+                }
+            }
+        });
+    }
+
+    private void bindRideTracking() {
+        RouteService.getInstance().setTrackingEtaListener(seconds -> {
+            if (mapUiController != null) {
+                int minutes = (int) Math.ceil(seconds / 60.0);
+                mapUiController.showEtaOnFollowedDriver(minutes);
+            }
+        });
+        CurrentRideStorage.getInstance().getCurrentRideReadOnly().observe(activity, ride -> {
+            if (mapUiController == null || mapView == null) {
+                return;
+            }
+            if (ride != null && ride.getStatus() == RideStatus.IN_PROGRESS
+                    && ride.getDriver() != null) {
+                // Enter tracking mode
+                mapUiController.setFollowDriverId(ride.getDriver().getId());
+                if (ride.getWaypoints() != null) {
+                    mapUiController.syncTrackingWaypoints(ride.getWaypoints());
+                }
+            } else {
+                // Exit tracking mode
+                mapUiController.clearTrackingOverlays();
+                RouteService.getInstance().clearTrackingRoute(mapView);
+            }
+        });
+    }
+
     private void bindReviewModal() {
         ReviewStorage.getInstance().getRideId().observe(activity, rideId -> {
             if (rideId != null) {
@@ -157,6 +234,23 @@ class MainObserversBinder {
                 activity.showModal(new ReviewModalFragment());
             } else {
                 lastReviewRideId = null;
+                FrameLayout modalContainer = activity.findViewById(R.id.modal_container);
+                modalContainer.setVisibility(View.GONE);
+                modalContainer.removeAllViews();
+            }
+        });
+    }
+
+    private void bindComplaintModal() {
+        ComplaintStorage.getInstance().getRideId().observe(activity, rideId -> {
+            if (rideId != null) {
+                if (lastComplaintRideId != null && lastComplaintRideId.equals(rideId)) {
+                    return;
+                }
+                lastComplaintRideId = rideId;
+                activity.showModal(ComplaintModalFragment.newInstance());
+            } else {
+                lastComplaintRideId = null;
                 FrameLayout modalContainer = activity.findViewById(R.id.modal_container);
                 modalContainer.setVisibility(View.GONE);
                 modalContainer.removeAllViews();

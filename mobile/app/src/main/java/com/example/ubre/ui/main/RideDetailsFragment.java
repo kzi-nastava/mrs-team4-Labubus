@@ -317,6 +317,8 @@ public class RideDetailsFragment extends Fragment {
                 TextView tvValue = card.findViewById(R.id.stat_value);
                 tvValue.setText(String.format("$%.2f", ride.getPrice()));
 
+                if (UserStorage.getInstance().getCurrentUser().getValue().getId().equals(ride.getCreatedBy()));
+                root.findViewById(R.id.ride_details_reorder).setVisibility(View.GONE);
             });
 
             if (role.equals("ADMIN") || role.equals("REGISTERED_USER")) {

@@ -10,11 +10,14 @@ public class WaypointDto implements Serializable {
     private String label;
     private Double latitude;
     private Double longitude;
+    private Boolean visited;
+
     public WaypointDto(Long id, String label, Double latitude, Double longitude) {
         this.id = id;
         this.label = label;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.visited = false;
     }
 
     public Long getId() {
@@ -35,5 +38,14 @@ public class WaypointDto implements Serializable {
 
     public Double getLongitude() {
         return longitude;
+    }
+
+
+    public Boolean getVisited() {
+        return visited;
+    }
+
+    public void setVisited(Boolean visited) {
+        this.visited = visited;
     }
 }

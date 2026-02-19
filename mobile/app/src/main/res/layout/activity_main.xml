@@ -99,6 +99,19 @@
                 android:includeFontPadding="false"/>
         </LinearLayout>
 
+        <ImageButton
+            android:id="@+id/btn_complaint"
+            android:src="@drawable/ic_complaint"
+            style="@style/IconButtonWhite"
+            android:foreground="@null"
+            android:elevation="0dp"
+            android:stateListAnimator="@animator/press_lift"
+            android:visibility="gone"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintBottom_toTopOf="@id/btn_chat"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
 
         <!-- chat menu icon bottom right -->
         <ImageButton
