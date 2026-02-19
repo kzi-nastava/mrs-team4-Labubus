@@ -280,7 +280,7 @@ public class WsConnectionOwner {
         if (notification.getStatus() == NotificationType.TIME_FOR_A_RIDE) {
             onTimeForRide(notification);
         } else if (notification.getStatus() == NotificationType.RIDE_STARTED) {
-            onRideStarted();
+            onRideStarted(notification);
         } else if (notification.getStatus() == NotificationType.RIDE_CANCELLED) {
             onRideCancelled();
         } else if (notification.getStatus() == NotificationType.RIDE_COMPLETED) {
