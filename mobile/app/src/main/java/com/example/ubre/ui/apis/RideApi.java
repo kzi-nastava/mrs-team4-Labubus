@@ -18,6 +18,7 @@ import retrofit2.http.Body;
 import java.time.LocalDateTime;
 import java.util.List;
 import com.example.ubre.ui.dtos.RideOrderRequest;
+import com.example.ubre.ui.dtos.WaypointDto;
 
 public interface RideApi {
     @Headers({
@@ -49,4 +50,7 @@ public interface RideApi {
 
     @POST("api/rides/{id}/start")
     Call<ResponseBody> startRide(@Header("Authorization") String authHeader, @Path("id") Long id);
+
+    @PUT("api/rides/{id}/stop")
+    Call<ResponseBody> stopRide(@Header("Authorization") String authHeader, @Path("id") Long id, @Body WaypointDto waypoint);
 }

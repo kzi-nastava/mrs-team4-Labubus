@@ -323,6 +323,43 @@ public class RideService {
         });
     }
 
+    public void stopRide(Context context, Long rideId, WaypointDto stopLocation) throws Exception {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String token = sharedPreferences.getString("jwt", null);
+
+        if (token == null) {
+            throw new Exception("User not authenticated");
+        }
+        if (rideId == null || rideId == 0L) {
+            throw new Exception("Invalid ride id");
+        }
+
+        api.stopRide("Bearer " + token, rideId, stopLocation).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (!response.isSuccessful()) {
+                    Toast.makeText(context, "Stop ride failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                String priceStr = "";
+                try {
+                    if (response.body() != null) {
+                        priceStr = response.body().string().trim();
+                    }
+                } catch (Exception ignored) {
+                }
+                TopToast.show(context, "Ride ended", "Final price: " + priceStr);
+                CurrentRideStorage.getInstance().clear();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(context, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("STOP RIDE", t.getMessage());
+            }
+        });
+    }
+
     private String buildOrderErrorMessage(Response<?> response, Throwable t) {
         if (response != null) {
             int code = response.code();

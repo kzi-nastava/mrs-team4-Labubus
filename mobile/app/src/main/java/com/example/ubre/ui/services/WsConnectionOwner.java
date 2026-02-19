@@ -1,12 +1,16 @@
 package com.example.ubre.ui.services;
 
+import static java.security.AccessController.getContext;
+
 import android.content.Context;
 import android.util.Log;
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.Toast;
 
 import com.example.ubre.ui.apis.ApiClient;
 import com.example.ubre.ui.dtos.RideDto;
+import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleIndicatorDto;
 import com.example.ubre.ui.dtos.WaypointDto;
 import com.example.ubre.ui.enums.RideStatus;
@@ -17,11 +21,15 @@ import com.example.ubre.ui.notifications.ProfileChangeNotification;
 import com.example.ubre.ui.notifications.RideAssignmentNotification;
 import com.example.ubre.ui.notifications.CurrentRideNotification;
 import com.example.ubre.ui.notifications.RideReminderNotification;
+import com.example.ubre.ui.storages.ReviewStorage;
+import com.example.ubre.ui.storages.RideDetailsStorage;
+import com.example.ubre.ui.storages.UserStorage;
 import com.example.ubre.ui.storages.VehicleLocationStorage;
 import com.example.ubre.ui.utils.TopToast;
 import com.example.ubre.ui.storages.CurrentRideStorage;
 import com.google.gson.Gson;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class WsConnectionOwner {
@@ -260,6 +268,11 @@ public class WsConnectionOwner {
     private void onRideCompleted() {
         mainHandler.post(() -> {
             TopToast.show(appContext, "Ride completed", "Your ride has been completed.");
+            UserDto user = UserStorage.getInstance().getCurrentUser().getValue();
+            RideDto ride = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue();
+            if (user != null && ride != null && ride.getCreatedBy().equals(user.getId()))
+                ReviewStorage.getInstance().setRideId(ride.getId());
+
             CurrentRideStorage.getInstance().clear();
         });
     }
@@ -313,11 +326,6 @@ public class WsConnectionOwner {
             }
         }
 
-        // Push vehicle locations to storage (must be on main thread for LiveData)
-        mainHandler.post(() -> {
-                    TopToast.show(appContext, "Ride started", "Your ride has been started successfully.");
-                    VehicleLocationStorage.getInstance().setLocations(indicators);
-                }
-        );
+        mainHandler.post(() -> {VehicleLocationStorage.getInstance().setLocations(indicators);});
     }
 }
