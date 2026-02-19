@@ -352,6 +352,16 @@ public class RideDetailsFragment extends Fragment {
                     if (ride == null) return;
                     boolean inProgress = ride.getStatus() == RideStatus.IN_PROGRESS;
                     trackButton.setVisibility(inProgress ? View.VISIBLE : View.GONE);
+                    RideDto current = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue();
+                    boolean isTracking = current != null && current.getId().equals(ride.getId());
+                    trackButton.setText(isTracking ? "Untrack ride" : "Track ride");
+                });
+
+                CurrentRideStorage.getInstance().getCurrentRideReadOnly().observe(getViewLifecycleOwner(), current -> {
+                    RideDto ride = RideDetailsStorage.getInstance().getSelectedRideReadOnly().getValue();
+                    if (ride == null) return;
+                    boolean isTracking = current != null && current.getId().equals(ride.getId());
+                    trackButton.setText(isTracking ? "Untrack ride" : "Track ride");
                 });
 
                 trackButton.setOnClickListener(v -> {

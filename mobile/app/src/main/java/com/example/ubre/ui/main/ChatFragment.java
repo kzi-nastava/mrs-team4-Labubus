@@ -19,12 +19,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.ubre.R;
+import com.example.ubre.ui.apis.ApiClient;
+import com.example.ubre.ui.apis.UserApi;
 import com.example.ubre.ui.dtos.ChatDto;
 import com.example.ubre.ui.dtos.ChatMessageDto;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.services.ChatService;
 import com.example.ubre.ui.storages.ChatStorage;
 import com.example.ubre.ui.storages.UserStorage;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -210,12 +217,37 @@ public class ChatFragment extends Fragment {
             UserDto user = chat.getUser();
             if (user != null) {
                 holder.name.setText(user.getName() + " " + user.getSurname());
-                Glide.with(holder.itemView.getContext())
-                        .load(R.drawable.img_default_avatar)
-                        .circleCrop()
-                        .into(holder.avatar);
+                Context ctx = holder.itemView.getContext();
+
+                // Load default avatar first
+                Glide.with(ctx).load(R.drawable.img_default_avatar).circleCrop().into(holder.avatar);
+
+                // Then load actual avatar dynamically
+                holder.avatar.setTag(user.getId());
+                android.content.SharedPreferences sp = ctx.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+                String token = sp.getString("jwt", null);
+                if (token != null && user.getId() != null) {
+                    UserApi userApi = ApiClient.getClient().create(UserApi.class);
+                    userApi.getUserAvatar("Bearer " + token, user.getId()).enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            try {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    byte[] bytes = response.body().bytes();
+                                    if (holder.avatar.getTag() != null && holder.avatar.getTag().equals(user.getId())) {
+                                        Glide.with(ctx).asBitmap().load(bytes).circleCrop().into(holder.avatar);
+                                    }
+                                }
+                            } catch (Exception ignored) {}
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {}
+                    });
+                }
             } else {
                 holder.name.setText("Unknown user");
+                Glide.with(holder.itemView.getContext()).load(R.drawable.img_default_avatar).circleCrop().into(holder.avatar);
             }
             holder.unread.setVisibility(Boolean.TRUE.equals(chat.getHasUnreadMessages()) ? View.VISIBLE : View.GONE);
             holder.itemView.setOnClickListener(v -> listener.onChatSelected(chat));

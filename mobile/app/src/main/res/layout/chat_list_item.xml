@@ -4,31 +4,43 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:padding="16dp"
-    android:background="?android:attr/selectableItemBackground">
+    android:background="@drawable/bg_input"
+    android:padding="@dimen/padding_regular"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="4dp">
 
     <ImageView
         android:id="@+id/chat_item_avatar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
         android:src="@drawable/img_default_avatar"
+        android:background="@drawable/bg_avatar"
         android:scaleType="centerCrop"/>
 
-    <TextView
-        android:id="@+id/chat_item_name"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginStart="12dp"
-        android:textSize="16sp"
-        android:textColor="@color/text_primary"
-        android:fontFamily="@font/poppins_regular"/>
+        android:layout_marginStart="10dp"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/chat_item_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/text_regular"
+            android:textColor="@color/text_primary"
+            android:fontFamily="@font/poppins_regular"/>
+
+    </LinearLayout>
 
     <View
         android:id="@+id/chat_item_unread"
-        android:layout_width="10dp"
-        android:layout_height="10dp"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
         android:background="@drawable/bg_icon_red"
+        android:layout_gravity="center_vertical"
         android:visibility="gone"/>
 
 </LinearLayout>
