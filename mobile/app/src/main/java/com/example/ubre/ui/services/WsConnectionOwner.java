@@ -1,17 +1,19 @@
 package com.example.ubre.ui.services;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.os.Handler;
 import android.os.Looper;
 
 import com.example.ubre.ui.apis.ApiClient;
-import com.example.ubre.ui.services.UserService;
+import com.example.ubre.ui.dtos.PanicNotificationDto;
 import com.example.ubre.ui.enums.NotificationType;
 import com.example.ubre.ui.notifications.ProfileChangeNotification;
 import com.example.ubre.ui.notifications.RideAssignmentNotification;
 import com.example.ubre.ui.notifications.CurrentRideNotification;
 import com.example.ubre.ui.notifications.RideReminderNotification;
+import com.example.ubre.ui.utils.NotificationHelper;
 import com.example.ubre.ui.utils.TopToast;
 import com.example.ubre.ui.storages.CurrentRideStorage;
 import com.google.gson.Gson;
@@ -29,6 +31,7 @@ public class WsConnectionOwner {
     private boolean connectIssued = false;
     private long lastRequestAtMs = 0L;
     private static final long DEBOUNCE_MS = 1000L;
+
 
     private WsConnectionOwner(Context context) {
         this.appContext = context.getApplicationContext();
@@ -123,8 +126,16 @@ public class WsConnectionOwner {
             Log.i(TAG, "msg " + topic + " " + payload);
             handleCurrentRideNotification(payload);
         });
-        wsManager.subscribe("/topic/panic", (topic, payload) -> Log.i(TAG, "msg " + topic + " " + payload));
+        SharedPreferences prefs = appContext.getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
+        String role = prefs.getString("role", "");
+
+        if (role.equals("ADMIN")) {
+            wsManager.subscribe("/topic/panic", (topic, payload) -> {
+                handlePanicNotification(payload);
+            });
+        }
     }
+
 
     private void handleProfileChangeNotification(String payload) {
         ProfileChangeNotification notification;
@@ -237,5 +248,16 @@ public class WsConnectionOwner {
         mainHandler.post(() ->
                 TopToast.show(appContext, "Ride started", "Your ride has been started successfully.")
         );
+    }
+
+    private void handlePanicNotification(String payload) {
+        PanicNotificationDto notification;
+        try {
+            notification = gson.fromJson(payload, PanicNotificationDto.class);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to parse ride assignment notification", e);
+            return;
+        }
+        mainHandler.post(() -> NotificationHelper.showPanic(appContext, "Panic activated", "Ride #" + notification.getRideId()));
     }
 }

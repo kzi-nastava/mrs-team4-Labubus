@@ -56,7 +56,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@id/btn_menu"
             />
-
         <LinearLayout
             android:id="@+id/block_notice"
             android:layout_width="0dp"
@@ -100,6 +99,7 @@
                 android:includeFontPadding="false"/>
         </LinearLayout>
 
+
         <!-- chat menu icon bottom right -->
         <ImageButton
             android:id="@+id/btn_chat"
@@ -114,13 +114,48 @@
             app:layout_constraintEnd_toEndOf="parent"
             />
 
-        <com.google.android.material.button.MaterialButton
+
+        <ImageButton
+            android:id="@+id/btn_panic"
+            android:layout_width="@dimen/icon_regular"
+            android:layout_height="@dimen/icon_regular"
+            android:src="@drawable/ic_warning_surface"
+            style="@style/IconButtonWhite"
+            android:background="@drawable/btn_panic"
+            android:foreground="@null"
+            android:elevation="0dp"
+            android:stateListAnimator="@animator/press_lift"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:enabled="false"
+            android:alpha="0.5"/>
+
+        <ImageButton
+            android:id="@+id/btn_cancel_driver"
+            android:layout_width="@dimen/icon_regular"
+            android:layout_height="@dimen/icon_regular"
+            android:src="@drawable/ic_cancel"
+            style="@style/IconButtonWhite"
+            android:background="@drawable/btn_cancel"
+            android:foreground="@null"
+            android:elevation="0dp"
+            android:stateListAnimator="@animator/press_lift"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintStart_toStartOf="@id/btn_panic"
+            app:layout_constraintBottom_toTopOf="@id/btn_panic"
+            android:enabled="false"
+            android:alpha="0.5"
+            />
+
+            <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_start_ride"
             android:layout_width="0dp"
             android:layout_height="@dimen/icon_regular"
-            android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
+            android:layout_marginStart="8dp"
             android:text="Start this ride"
             android:enabled="false"
             android:alpha="0.5"
@@ -134,9 +169,8 @@
             android:background="@drawable/btn_start_ride"
             app:backgroundTint="@null"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btn_chat"
-            />
+            app:layout_constraintStart_toEndOf="@id/btn_panic"
+            app:layout_constraintEnd_toStartOf="@id/btn_chat" />
 
         <ProgressBar
             android:id="@+id/route_loading_spinner"

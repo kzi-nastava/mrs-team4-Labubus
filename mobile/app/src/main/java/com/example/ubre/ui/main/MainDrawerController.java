@@ -94,6 +94,9 @@ public class MainDrawerController {
             } else if (itemId == R.id.nav_register) {
                 goToLogin();
                 return true;
+            } else if (itemId == R.id.nav_panic_notifications) {
+                activity.showFragment(PanicNotificationsFragment.newInstance());
+                return true;
             }
 
             return true;
@@ -214,4 +217,6 @@ public class MainDrawerController {
             }
         });
     }
+
+
 }
