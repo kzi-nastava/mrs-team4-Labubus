@@ -34,8 +34,9 @@ public class UserDto implements Serializable {
     @NotBlank(message = "Address cannot be blank")
     private String address;
     private UserStatus status;
+    private Boolean isBlocked;
 
-    public UserDto(Long id, Role role, String avatarUrl, String email, String name, String surname, String phone, String address, UserStatus status) {
+    public UserDto(Long id, Role role, String avatarUrl, String email, String name, String surname, String phone, String address, UserStatus status, Boolean isBlocked) {
         this.id = id;
         this.role = role;
         this.avatarUrl = avatarUrl;
@@ -45,6 +46,7 @@ public class UserDto implements Serializable {
         this.phone = phone;
         this.address = address;
         this.status = status;
+        this.isBlocked = isBlocked;
     }
 
     public UserDto(User user) {
@@ -57,5 +59,6 @@ public class UserDto implements Serializable {
         this.phone = user.getPhone();
         this.address = user.getAddress();
         this.status = user.getStatus();
+        this.isBlocked = user.getIsBlocked();
     }
 }

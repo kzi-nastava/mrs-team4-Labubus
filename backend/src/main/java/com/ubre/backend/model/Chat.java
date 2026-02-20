@@ -1,5 +1,6 @@
 package com.ubre.backend.model;
 
+import com.ubre.backend.dto.ChatDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,5 +38,9 @@ public class Chat {
     public Chat(User user) {
         this.user = user;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public Chat(ChatDto dto) {
+        this.id = dto.getId();
     }
 }

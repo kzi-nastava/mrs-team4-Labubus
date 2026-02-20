@@ -7,22 +7,18 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,14 +28,18 @@ import com.example.ubre.ui.dtos.RideDto;
 import com.example.ubre.ui.dtos.UserDto;
 import com.example.ubre.ui.dtos.VehicleDto;
 import com.example.ubre.ui.dtos.WaypointDto;
+import com.example.ubre.ui.enums.RideStatus;
 import com.example.ubre.ui.enums.Role;
 import com.example.ubre.ui.services.RideService;
+import com.example.ubre.ui.services.RouteService;
 import com.example.ubre.ui.services.UserService;
 import com.example.ubre.ui.services.VehicleService;
 import com.example.ubre.ui.storages.ReviewStorage;
 import com.example.ubre.ui.storages.RideDetailsStorage;
 import com.example.ubre.ui.storages.RideHistoryStorage;
 import com.example.ubre.ui.storages.UserStorage;
+import com.example.ubre.ui.storages.CurrentRideStorage;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.BoundingBox;
@@ -61,6 +61,7 @@ import java.util.List;
 public class RideDetailsFragment extends Fragment {
 
     private MapView map;
+    private boolean showReorder;
 
 
     public RideDetailsFragment() {
@@ -71,6 +72,26 @@ public class RideDetailsFragment extends Fragment {
         RideDetailsFragment fragment = new RideDetailsFragment();
         Bundle args = new Bundle();
         args.putSerializable("RIDEID", rideId);
+        args.putBoolean("SHOW_REORDER", false);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static RideDetailsFragment newInstance(Long rideId, boolean showReorder) {
+        RideDetailsFragment fragment = new RideDetailsFragment();
+        Bundle args = new Bundle();
+        args.putSerializable("RIDEID", rideId);
+        args.putBoolean("SHOW_REORDER", showReorder);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static RideDetailsFragment newInstance(Long rideId, boolean showReorder, boolean showCancel) {
+        RideDetailsFragment fragment = new RideDetailsFragment();
+        Bundle args = new Bundle();
+        args.putSerializable("RIDEID", rideId);
+        args.putBoolean("SHOW_REORDER", showReorder);
+        args.putBoolean("SHOW_CANCEL", showCancel);
         fragment.setArguments(args);
         return fragment;
     }
@@ -94,59 +115,63 @@ public class RideDetailsFragment extends Fragment {
             );
             map.setVisibility(View.VISIBLE);
 
-            ConstraintLayout content = root.findViewById(R.id.ride_details_content);
-
             MapController controller = (MapController) map.getController();
             controller.setZoom(14.0);
             controller.setCenter(new GeoPoint(45.2671, 19.8335));
 
             Long rideId = (Long) getArguments().getSerializable("RIDEID");
+            showReorder = getArguments().getBoolean("SHOW_REORDER", false);
+
+
             SharedPreferences sharedPreferences = getContext().getSharedPreferences("app_prefs", Context.MODE_PRIVATE);
             String role = sharedPreferences.getString("role", "");
             Typeface font = ResourcesCompat.getFont(this.getActivity(), R.font.poppins_regular);
 
-            ScrollView bottomDrawer = root.findViewById(R.id.ride_details_bottom_drawer);
-            bottomDrawer.setOnTouchListener(new View.OnTouchListener() {
-                private int startHeight;
-                private float lastTouchY;
+            boolean showCancel = getArguments().getBoolean("SHOW_CANCEL", false);
+            Button cancelButton = root.findViewById(R.id.ride_details_cancel);
 
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    DisplayMetrics displayMetrics = new DisplayMetrics();
-                    getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            if (event.getY() > 60) {
-                                startHeight = 0;
-                                lastTouchY = 0;
-                                return false;
-                            }
-
-                            startHeight = v.getHeight();
-                            lastTouchY = event.getRawY();
-                            break;
-
-                        case MotionEvent.ACTION_MOVE:
-                            if (startHeight == 0 || lastTouchY == 0)
-                                return false;
-
-                            float dy = event.getRawY() - lastTouchY;
-                            int newHeight = Math.max((int) (startHeight - dy), 140);
-
-                            ConstraintSet constraints = new ConstraintSet();
-                            constraints.clone(content);
-                            constraints.constrainPercentHeight(R.id.ride_details_bottom_drawer, Math.min((float) newHeight / displayMetrics.heightPixels, 0.7f));
-                            constraints.applyTo(content);
-
-                            lastTouchY = event.getRawY();
-                            startHeight = newHeight;
-                            break;
+            if (showCancel && role.equals("REGISTERED_USER")) {
+                cancelButton.setVisibility(View.VISIBLE);
+                cancelButton.setOnClickListener(v -> {
+                    try {
+                        RideService.getInstance().cancelRide(requireContext(), rideId);
+                    } catch (Exception e) {
+                        Toast.makeText(requireContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
+                });
+            } else {
+                cancelButton.setVisibility(View.GONE);
+            }
 
-                    return true;
-                }
-            });
+            View reorderButton = root.findViewById(R.id.ride_details_reorder);
+            if (!showReorder || !role.equals("REGISTERED_USER")) {
+                reorderButton.setVisibility(View.GONE);
+            } else {
+                reorderButton.setVisibility(View.VISIBLE);
+                reorderButton.setOnClickListener(v -> {
+                    RideDto ride = RideDetailsStorage.getInstance().getSelectedRideReadOnly().getValue();
+                    if (ride == null) {
+                        Toast.makeText(getContext(), "Ride details not loaded yet.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    MainActivity activity = (MainActivity) getActivity();
+                    if (activity != null) {
+                        activity.openRideOrderWithWaypoints(ride.getWaypoints());
+                    }
+                });
+                CurrentRideStorage.getInstance().getCurrentRideReadOnly().observe(getViewLifecycleOwner(), currentRide -> {
+                    boolean enabled = currentRide == null;
+                    reorderButton.setEnabled(enabled);
+                    reorderButton.setAlpha(enabled ? 1.0f : 0.5f);
+                });
+            }
+
+            LinearLayout bottomDrawer = root.findViewById(R.id.ride_details_bottom_drawer);
+            BottomSheetBehavior<LinearLayout> bottomSheetBehavior = BottomSheetBehavior.from(bottomDrawer);
+            bottomSheetBehavior.setHideable(false);
+            bottomSheetBehavior.setDraggable(true);
+            bottomSheetBehavior.setPeekHeight(toDP(96), true);
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
 
             LinearLayout waypoints = root.findViewById(R.id.ride_details_waypoints);
             LinearLayout firstRow = new LinearLayout(this.getActivity());
@@ -238,7 +263,7 @@ public class RideDetailsFragment extends Fragment {
 
                 LinearLayout markers = root.findViewById(R.id.ride_details_markers);
                 markers.removeAllViews();
-                if (ride.getPanic()) {
+                if (Boolean.TRUE.equals(ride.getPanic())) {
                     ImageView panicIndicator = new ImageView(this.getActivity());
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(toDP(30), toDP(30));
                     params.setMargins(toDP(5), 0, 0, 0);
@@ -265,7 +290,7 @@ public class RideDetailsFragment extends Fragment {
                 vehicleInfo.removeAllViews();
                 if (role.equals("ADMIN") || role.equals("REGISTERED_USER") && ride.getDriver() != null) {
                     UserDto driver = ride.getDriver();
-                    ProfileCardFragment profileCard = ProfileCardFragment.newInstance(driver.getId(), driver.getName(), "", R.drawable.ic_review);
+                    ProfileCardFragment profileCard = ProfileCardFragment.newInstance(driver.getId(), driver.getName() + " " + driver.getSurname(), "", R.drawable.ic_review);
                     root.findViewById(R.id.ride_details_driver_section).setVisibility(View.VISIBLE);
                     this.getActivity().getSupportFragmentManager().beginTransaction().add(R.id.ride_details_driver, profileCard).commit();
                 }
@@ -279,7 +304,7 @@ public class RideDetailsFragment extends Fragment {
                 if (role.equals("ADMIN") || role.equals("DRIVER") && !ride.getPassengers().isEmpty()) {
                     for (int i = 0; i < ride.getPassengers().size(); i++) {
                         UserDto passenger = ride.getPassengers().get(i);
-                        ProfileCardFragment profileCard = ProfileCardFragment.newInstance(passenger.getId(), passenger.getName(), "", i == 0 ? R.drawable.ic_ordering_customer : -1);
+                        ProfileCardFragment profileCard = ProfileCardFragment.newInstance(passenger.getId(), passenger.getName() + " " + passenger.getSurname(), "", i == 0 ? R.drawable.ic_ordering_customer : -1);
                         root.findViewById(R.id.ride_details_passenger_section).setVisibility(View.VISIBLE);
                         this.getActivity().getSupportFragmentManager().beginTransaction().add(R.id.ride_details_passengers, profileCard).commit();
                     }
@@ -318,6 +343,30 @@ public class RideDetailsFragment extends Fragment {
                 RideService.getInstance().getRideDetails(getContext(), rideId);
             } catch (Exception e) {
                 throw new RuntimeException(e);
+            }
+
+            Button trackButton = root.findViewById(R.id.ride_details_track);
+
+            if (role.equals("ADMIN")) {
+                RideDetailsStorage.getInstance().getSelectedRideReadOnly().observe(getViewLifecycleOwner(), ride -> {
+                    if (ride == null) return;
+                    boolean inProgress = ride.getStatus() == RideStatus.IN_PROGRESS;
+                    trackButton.setVisibility(inProgress ? View.VISIBLE : View.GONE);
+                });
+
+                trackButton.setOnClickListener(v -> {
+                    RideDto ride = RideDetailsStorage.getInstance().getSelectedRideReadOnly().getValue();
+                    if (ride == null) return;
+
+                    RideDto current = CurrentRideStorage.getInstance().getCurrentRideReadOnly().getValue();
+                    if (current != null && current.getId().equals(ride.getId())) {
+                        CurrentRideStorage.getInstance().clear();
+                    } else {
+                        CurrentRideStorage.getInstance().setCurrentRide(ride);
+                    }
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                });
             }
         }
 
@@ -374,6 +423,9 @@ public class RideDetailsFragment extends Fragment {
         BoundingBox boundingBox = new BoundingBox(north, east, south, west);
         map.zoomToBoundingBox(boundingBox, true, 200);
         map.invalidate();
+
+        // Crtanje rute između tačaka - koristi OSRM API i prikazuje na mapi, miljane proveri
+        RouteService.getInstance().drawRoute(map, waypoints);
     }
       
     public void onDestroyView() {
@@ -385,4 +437,5 @@ public class RideDetailsFragment extends Fragment {
     private int toDP(int value) {
         return  (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,  value, this.getResources().getDisplayMetrics());
     }
+
 }

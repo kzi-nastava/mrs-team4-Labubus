@@ -22,12 +22,14 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
     List<Ride> findByCreatorAndStatusInAndStartTimeBetween(User creator, Collection<RideStatus> statuses, LocalDateTime startStartTime, LocalDateTime endStartTime, Pageable pageable);
     List<Ride> findByDriverAndStatusInAndStartTimeBetween(Driver driver, Collection<RideStatus> statuses, LocalDateTime startStartTime, LocalDateTime endStartTime, Pageable pageable);
     List<Ride> findByStatusInAndStartTimeBetween(Collection<RideStatus> statuses, LocalDateTime startStartTime, LocalDateTime endStartTime, Pageable pageable);
+    List<Ride> findByStatusInAndStartTimeBetween(Collection<RideStatus> statuses, LocalDateTime startStartTime, LocalDateTime endStartTime);
     List<Ride> findByCreatorAndFavoriteTrue(User creator, Pageable pageable);
     List<Ride> findByCreatorAndFavoriteTrueAndStartTimeBetween(User creator, LocalDateTime startStartTime, LocalDateTime endStartTime, Pageable pageable);
     Optional<Ride> findFirstByDriverAndStatusOrderByStartTimeAsc(Driver driver, RideStatus status);
     Optional<Ride> findFirstByCreatorAndStatusOrderByStartTimeAsc(User creator, RideStatus status);
     Optional<Ride> findFirstByDriverAndStatusAndStartTimeBeforeOrderByStartTimeAsc(Driver driver, RideStatus status, LocalDateTime max);
     Optional<Ride> findFirstByCreatorAndStatusAndStartTimeBeforeOrderByStartTimeAsc(User creator, RideStatus status, LocalDateTime max);
+    Optional<Ride> findFirstByPassengersIdAndStatusOrderByStartTimeAsc(Long id, RideStatus status);
 
 //    List<Ride> findByRideStatus(RideStatus status);
     
@@ -42,5 +44,9 @@ public interface RideRepository extends JpaRepository<Ride, Long> {
 
     // find rides by ride status
     List<Ride> findByStatus(RideStatus status);
+
+    // find rides by driver id
+    List<Ride> findByDriverId(Long driverId);
+    List<Ride> findByDriverIdAndStatus(Long driverId, RideStatus status);
 
 }

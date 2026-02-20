@@ -1,0 +1,20 @@
+<div class="section">
+  <div class="section-title">Complaints</div>
+@if (complaints && complaints.length > 0) {
+  <div class="complaints-list">
+    @for (complaint of complaints; track complaint.id) {
+    <div class="complaint-item">
+      @if (complaint.text && complaint.text.trim() !== '') {
+      <p class="complaint-text">{{ complaint.text }}</p>
+      } @else {
+      <p class="complaint-text empty">No details provided</p>
+      }
+    </div>
+    }
+  </div>
+  } @else {
+  <div class="empty-state">
+    <p class="empty-message">No complaints for this ride</p>
+  </div>
+  }
+</div>

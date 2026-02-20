@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ReviewServiceImpl implements ReviewService {
@@ -138,5 +139,28 @@ public class ReviewServiceImpl implements ReviewService {
 
         reviewRepository.delete(review.get());
         return new ReviewDto(review.get());
+    }
+
+    @Override
+    public ReviewDto getReviewsForRide(Long rideId) {
+        Ride ride = rideRepository.findById(rideId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ride not found"));
+
+        Review review = ride.getReview();
+
+        if (review == null)
+            return null;
+
+        return mapToDto(review);
+    }
+
+    private ReviewDto mapToDto(Review review) {
+        ReviewDto dto = new ReviewDto();
+        dto.setId(review.getId());
+        dto.setDriverId(review.getDriver().getId());
+        dto.setUserId(review.getUser().getId());
+        dto.setRating(review.getRating());
+        dto.setText(review.getText());
+        return dto;
     }
 }

@@ -1,0 +1,27 @@
+<div class="section">
+  <div class="section-title">Reviews</div>
+
+  @if (review) {
+  <div class="reviews-list">
+    <div class="review-item">
+      <div class="review-header">
+        <div class="review-info">
+          <div class="rating">
+            <span class="stars">{{ getStars(review.rating) }}</span>
+            <span class="rating-value">{{ review.rating }}/5</span>
+          </div>
+        </div>
+      </div>
+      @if (review.text && review.text.trim() !== '') {
+      <p class="review-text">{{ review.text }}</p>
+      } @else {
+      <p class="review-text empty">No comment provided</p>
+      }
+    </div>
+  </div>
+  } @else {
+  <div class="empty-state">
+    <p class="empty-message">No reviews for this ride</p>
+  </div>
+  }
+</div>

@@ -224,7 +224,6 @@ export class Map implements AfterViewInit, OnChanges {
   }
 
   private renderRoute(): void {
-    console.log('renderRoute', this.routeGeometry);
     this.routeLayer.clearLayers();
     if (!this.routeGeometry) return;
 
@@ -264,11 +263,13 @@ export class Map implements AfterViewInit, OnChanges {
     }
 
     for (const w of this.currentRideWaypoints) {
-      const m = L.marker([w.latitude, w.longitude], {
-        icon: this.waypointIcon,
-      }).addTo(this.currentRideWaypointsLayer);
+      if (!w.visited) {
+        const m = L.marker([w.latitude, w.longitude], {
+          icon: this.waypointIcon,
+        }).addTo(this.currentRideWaypointsLayer);
 
-      m.bindPopup(w.label);
+        m.bindPopup(w.label);
+      }
     }
   }
 

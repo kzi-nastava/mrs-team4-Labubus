@@ -28,6 +28,8 @@ public interface RideService {
     List<RideCardDto> getRideHistory(Integer skip, Integer count, RideQueryDto query);
     List<RideCardDto> getMyRideHistory(Long userId, Integer skip, Integer count, RideQueryDto query);
     List<RideCardDto> getScheduledRides(Long driverId, Integer skip, Integer count, RideQueryDto query);
+    List<RideCardDto> getOngoingRides(Integer skip, Integer count, RideQueryDto query);
+    List<RideCardDto> getUsersOngoingRides(Long userId, Integer skip, Integer count, RideQueryDto query);
     RideDto getCurrentRide();
     void trackRide(Long id);
 
@@ -36,4 +38,5 @@ public interface RideService {
 
     void activatePanic(Long rideId);
     List<PanicNotification> getPanics();
+    List<RideCardDto> getScheduledRidesUser(Long userId, Integer skip, Integer count, RideQueryDto query);
 }

@@ -14,4 +14,5 @@ public interface ComplaintService {
     ComplaintDto createComplaint(Long rideId, ComplaintDto complaintDto) throws ResponseStatusException;
     ComplaintDto updateComplaint(Long id, ComplaintDto complaintDto) throws ResponseStatusException;
     ComplaintDto deleteComplaint(Long id) throws ResponseStatusException;
+    List<ComplaintDto> getComplaintsForRide(Long rideId);
 }

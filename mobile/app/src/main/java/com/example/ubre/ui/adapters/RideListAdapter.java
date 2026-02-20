@@ -9,9 +9,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.example.ubre.R;
 import com.example.ubre.ui.dtos.RideCardDto;
 import com.example.ubre.ui.services.RideService;
@@ -45,10 +45,10 @@ public class RideListAdapter extends RecyclerView.Adapter<RideListAdapter.RideCa
         holder.start.setText(firstStop.length() > 30 ? firstStop.substring(0, 27) + "..." : firstStop);
         String lastStop = ride.getWaypoints().get(ride.getWaypoints().size() - 1).getLabel();
         holder.end.setText(lastStop.length() > 30 ? lastStop.substring(0, 27) + "..." : lastStop);
-        if (ride.favorite)
-            Glide.with(holder.itemView).load(R.drawable.ic_favorite_red).circleCrop().into(holder.icon);
+        if (Boolean.TRUE.equals(ride.favorite))
+            holder.icon.setImageResource(R.drawable.ic_favorite_red);
         else
-            Glide.with(holder.itemView).load(R.drawable.ic_favorite_grey).circleCrop().into(holder.icon);
+            holder.icon.setImageResource(R.drawable.ic_favorite_grey);
         holder.icon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -95,8 +95,38 @@ public class RideListAdapter extends RecyclerView.Adapter<RideListAdapter.RideCa
     }
 
     public void updateItems(List<RideCardDto> rides) {
-        this.rides = rides;
-        notifyDataSetChanged();
+        List<RideCardDto> old = this.rides == null ? List.of() : new java.util.ArrayList<>(this.rides);
+        List<RideCardDto> updated = rides == null ? List.of() : new java.util.ArrayList<>(rides);
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() {
+                return old.size();
+            }
+
+            @Override
+            public int getNewListSize() {
+                return updated.size();
+            }
+
+            @Override
+            public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+                return old.get(oldItemPosition).getId().equals(updated.get(newItemPosition).getId());
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+                RideCardDto o = old.get(oldItemPosition);
+                RideCardDto n = updated.get(newItemPosition);
+                if (!o.getId().equals(n.getId())) return false;
+                if (o.favorite == null && n.favorite != null) return false;
+                if (o.favorite != null && !o.favorite.equals(n.favorite)) return false;
+                if (o.getStartTime() != null && n.getStartTime() != null && !o.getStartTime().equals(n.getStartTime()))
+                    return false;
+                return true;
+            }
+        });
+        this.rides = updated;
+        diff.dispatchUpdatesTo(this);
     }
 
     public interface  OnItemClickedListener {

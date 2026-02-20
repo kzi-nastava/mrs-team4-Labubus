@@ -76,7 +76,8 @@ public class WebSecurityConfig {
                                             "/api/users/{id}/avatar",
                                             "/api/auth/activate",
                             "/api/auth/forgot-password", 
-                             "/api/auth/reset-password").permitAll()
+                             "/api/auth/reset-password", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/rides/price-estimate").permitAll()
             .requestMatchers("/error").permitAll()
             .requestMatchers(
                 "/",

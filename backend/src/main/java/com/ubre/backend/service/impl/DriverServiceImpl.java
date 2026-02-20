@@ -69,7 +69,8 @@ public class DriverServiceImpl implements DriverService {
                     driver.getSurname(),
                     driver.getPhone(),
                     driver.getAddress(),
-                    driver.getStatus()
+                    driver.getStatus(),
+                    driver.getIsBlocked()
             );
             driverDtos.add(dto);
         }
@@ -91,7 +92,8 @@ public class DriverServiceImpl implements DriverService {
                     driver.getSurname(),
                     driver.getPhone(),
                     driver.getAddress(),
-                    driver.getStatus()
+                    driver.getStatus(),
+                    driver.getIsBlocked()
             );
             driverDtos.add(dto);
         }
@@ -112,7 +114,8 @@ public class DriverServiceImpl implements DriverService {
                 driver.getSurname(),
                 driver.getPhone(),
                 driver.getAddress(),
-                driver.getStatus()
+                driver.getStatus(),
+                driver.getIsBlocked()
         );
     }
 
@@ -134,8 +137,6 @@ public class DriverServiceImpl implements DriverService {
         if (driver.getActivationTokenExpiry().isBefore(LocalDateTime.now())) {
             throw new ResponseStatusException(HttpStatus.GONE, "Activation token has expired");
         }
-
-        // TODO: errors such as unauthorized or forbidden
 
         driver.setPassword(passwordEncoder.encode(newPassword));
         driver.setIsActivated(true);
@@ -228,7 +229,8 @@ public class DriverServiceImpl implements DriverService {
                 savedDriver.getSurname(),
                 savedDriver.getPhone(),
                 savedDriver.getAddress(),
-                savedDriver.getStatus()
+                savedDriver.getStatus(),
+                savedDriver.getIsBlocked()
         );
     }
 
@@ -331,7 +333,8 @@ public class DriverServiceImpl implements DriverService {
                 driver.getSurname(),
                 driver.getPhone(),
                 driver.getAddress(),
-                driver.getStatus()
+                driver.getStatus(),
+                driver.getIsBlocked()
         )));
     }
 

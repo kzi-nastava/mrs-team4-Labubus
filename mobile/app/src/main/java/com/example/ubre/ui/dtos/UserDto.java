@@ -17,8 +17,9 @@ public class UserDto implements Serializable {
     private String phone;
     private String address;
     private UserStatus status;
+    private Boolean isBlocked;
 
-    public UserDto(Long id, Role role, String avatarUrl, String email, String name, String surname, String phone, String address, UserStatus status) {
+    public UserDto(Long id, Role role, String avatarUrl, String email, String name, String surname, String phone, String address, UserStatus status, Boolean isBlocked) {
         this.id = id;
         this.role = role;
         this.avatarUrl = avatarUrl;
@@ -28,6 +29,7 @@ public class UserDto implements Serializable {
         this.phone = phone;
         this.address = address;
         this.status = status;
+        this.isBlocked = isBlocked;
     }
 
     // copy constructor
@@ -41,6 +43,7 @@ public class UserDto implements Serializable {
         this.phone = other.phone;
         this.address = other.address;
         this.status = other.status;
+        this.isBlocked = other.isBlocked;
     }
 
     // getters
@@ -68,6 +71,7 @@ public class UserDto implements Serializable {
     public String getAddress() {
         return address;
     }
+    public Boolean getIsBlocked() {return isBlocked;}
 
     // setters
 
@@ -101,5 +105,9 @@ public class UserDto implements Serializable {
     }
     public void setStatus(UserStatus status) {
         this.status = status;
+    }
+
+    public void setBlocked(Boolean blocked) {
+        this.isBlocked = blocked;
     }
 }

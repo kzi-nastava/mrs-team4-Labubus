@@ -1,17 +1,12 @@
 package com.ubre.backend.service.impl;
 
 import com.ubre.backend.dto.*;
-import com.ubre.backend.enums.NotificationType;
-import com.ubre.backend.enums.RideStatus;
-import com.ubre.backend.enums.Role;
-import com.ubre.backend.enums.UserStatus;
+import com.ubre.backend.enums.*;
 import com.ubre.backend.model.*;
-import com.ubre.backend.repository.DriverRepository;
-import com.ubre.backend.repository.PanicRepository;
-import com.ubre.backend.repository.RideRepository;
-import com.ubre.backend.repository.UserRepository;
+import com.ubre.backend.repository.*;
 import com.ubre.backend.service.EmailService;
 import com.ubre.backend.service.RideService;
+import com.ubre.backend.service.VehicleService;
 import com.ubre.backend.websocket.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -23,9 +18,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RideServiceImpl implements RideService {
@@ -43,9 +44,13 @@ public class RideServiceImpl implements RideService {
     private PanicRepository panicRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private WaypointRepository waypointRepository;
 
     // Mock data for rides
     List<RideDto> rides = new ArrayList<RideDto>();
+    @Autowired
+    private UserStatusRecordRepository userStatusRecordRepository;
 
     @Override
     public RideDto createRide(Long userId, RideDto rideDto) {
@@ -98,10 +103,12 @@ public class RideServiceImpl implements RideService {
         ride.setStatus(RideStatus.IN_PROGRESS);
         ride.getDriver().setStatus(UserStatus.ON_RIDE);
         rideRepository.save(ride);
-        webSocketNotificationService.sendCurrentRideUpdate(ride.getCreator().getId(), new CurrentRideNotification(
-                NotificationType.RIDE_STARTED.name(),
-                new RideDto(ride)
-        ));
+        for (User passenger : ride.getPassengers()) {
+            webSocketNotificationService.sendCurrentRideUpdate(passenger.getId(), new CurrentRideNotification(
+                    NotificationType.RIDE_STARTED.name(),
+                    new RideDto(ride)
+            ));
+        }
     }
 
     @Override
@@ -138,49 +145,102 @@ public class RideServiceImpl implements RideService {
         if (ride.getStatus() != RideStatus.IN_PROGRESS)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ride is not in progress");
 
-        Waypoint endLocation = new Waypoint(
-                waypoint.getLabel(),
-                waypoint.getLatitude(),
-                waypoint.getLongitude()
-        );
-
         ride.setEndTime(LocalDateTime.now());
-        ride.getWaypoints().add(endLocation);
         ride.setStatus(RideStatus.COMPLETED);
         ride.getDriver().setStatus(UserStatus.ACTIVE);
+
+        if (ride.getWaypoints().stream().allMatch( w ->w.getVisited() == null || !w.getVisited())) {
+            ride.setPrice(0.0);
+            ride.setDistance(0.0);
+        }
+        else if (ride.getWaypoints().stream().anyMatch(w ->w.getVisited() == null || !w.getVisited())) {
+
+            Waypoint endLocation = new Waypoint(
+                    waypoint.getLabel(),
+                    waypoint.getLatitude(),
+                    waypoint.getLongitude(),
+                    true
+            );
+
+            ride.getWaypoints().removeIf(w ->w.getVisited() == null || !w.getVisited());
+            ride.getWaypoints().add(endLocation);
+            ride.setDistance(this.estimateDistance(ride));
+            ride.setPrice(this.estimateNewPrice(ride));
+        }
+
+        rideRepository.save(ride);
 
         CurrentRideNotification currentRideNotification = new CurrentRideNotification(
                 NotificationType.RIDE_COMPLETED.name(),
                 null
         );
 
-        Double newPrice = this.estimateNewPrice(ride);
-        this.webSocketNotificationService.sendCurrentRideUpdate(ride.getCreator().getId(), currentRideNotification);
-        for (User user : ride.getPassengers())
+        for (User user : ride.getPassengers()) {
+            this.webSocketNotificationService.sendCurrentRideUpdate(user.getId(), currentRideNotification);
             emailService.sendRideCompletedEmail(user.getEmail(), ride);
-        return newPrice;
+        }
+
+        // when driver set that he wants to be inactive after finishing this ride
+        if (ride.getDriver().getPendingInactiveStatus() == Boolean.TRUE) {
+            Driver driver = ride.getDriver();
+            driver.setStatus(UserStatus.INACTIVE);
+            driver.setPendingInactiveStatus(false);
+            UserStatusRecord statusRecord = new UserStatusRecord(driver, UserStatus.INACTIVE, LocalDateTime.now());
+            userStatusRecordRepository.save(statusRecord);
+            userRepository.save(driver);
+        }
+        return ride.getPrice();
     }
 
     private double estimateNewPrice(Ride ride) {
-        LocalDateTime start = ride.getStartTime();
-        LocalDateTime end = LocalDateTime.now();
+        double STANDARD_BASE_FARE = 5.0;
+        double VAN_BASE_FARE = 8.0;
+        double LUXURY_BASE_FARE = 20.0;
+        double PER_KM_RATE = 1.2;
 
-        long elapsedMinutes = Duration.between(start, end).toMinutes();
+        double baseFare;
+        VehicleType vehicleType = ride.getDriver().getVehicle().getType();
 
-        long standardMinutes = 20;
+        if (vehicleType == VehicleType.STANDARD) {
+            baseFare = STANDARD_BASE_FARE;
+        } else if (vehicleType == VehicleType.VAN) {
+            baseFare = VAN_BASE_FARE;
+        } else {
+            baseFare = LUXURY_BASE_FARE;
+        }
 
-        double factor = (double) elapsedMinutes / standardMinutes;
-
-        factor = Math.max(0.5, Math.min(factor, 1.0));
-
-        double price = ride.getPrice() * factor;
-
+        double price = baseFare + (PER_KM_RATE * ride.getDistance());
         double finalPrice = Math.round(price * 100.0) / 100.0;
 
-        ride.setPrice(finalPrice);
-        rideRepository.save(ride);
-
         return finalPrice;
+    }
+
+    private double estimateDistance(Ride ride) {
+
+        StringBuilder URL = new StringBuilder("https://routing.openstreetmap.de/routed-car/route/v1/driving/");
+        for (Waypoint w : ride.getWaypoints())
+            URL.append(w.getLatitude()).append(",").append(w.getLongitude()).append(";");
+        URL.setLength(URL.length()-1);
+        URL.append("?overview=full&geometries=geojson&steps=false");
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(URL.toString()))
+                .method("GET", HttpRequest.BodyPublishers.noBody())
+                .build();
+        HttpResponse<String> response = null;
+
+        try {
+            response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        String responseString = response.body();
+
+        int summaryIdx =responseString.indexOf("summary")+9;
+        int distanceIdx=responseString.indexOf("distance",summaryIdx)+10;
+        int dis=responseString.indexOf("}",distanceIdx);
+
+        return Double.parseDouble(responseString.substring(distanceIdx,dis));
     }
 
 
@@ -304,14 +364,56 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
+    public List<RideCardDto> getOngoingRides(Integer skip, Integer count, RideQueryDto query) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if (jwtUser == null)
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unable to get ongoing rides for unauthenticated user");
+
+        if (jwtUser.getRole() != Role.ADMIN)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can get all ongoing rides");
+
+        Pageable pageable = parseToPageable(skip, count, query);
+
+        return rideRepository.findByStatusIn(List.of(RideStatus.IN_PROGRESS), pageable).stream().map(RideCardDto::new).toList();
+    }
+
+    @Override
+    public List<RideCardDto> getUsersOngoingRides(Long userId, Integer skip, Integer count, RideQueryDto query) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if (jwtUser == null)
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unable to get ongoing rides for unauthenticated user");
+
+        if (jwtUser.getRole() != Role.ADMIN)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only admins can get all ongoing rides");
+
+        Pageable pageable = parseToPageable(skip, count, query);
+
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+
+        if (user.get().getRole() == Role.DRIVER) {
+            Driver driver = driverRepository.findById(userId).get();
+            if (query != null && query.getDate() != null)
+                return rideRepository.findByDriverAndStatusInAndStartTimeBetween(driver, List.of(RideStatus.IN_PROGRESS), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
+            return rideRepository.findByDriverAndStatusIn(driver, List.of(RideStatus.IN_PROGRESS), pageable).stream().map(RideCardDto::new).toList();
+        }
+        if (query != null && query.getDate() != null)
+            return rideRepository.findByCreatorAndStatusInAndStartTimeBetween(user.get(), List.of(RideStatus.IN_PROGRESS), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
+        return rideRepository.findByCreatorAndStatusIn(user.get(), List.of(RideStatus.IN_PROGRESS), pageable).stream().map(RideCardDto::new).toList();
+    }
+
+    @Override
     public RideDto getCurrentRide() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to get current ride for unauthenticated user");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unable to get current ride for unauthenticated user");
 
         User jwtUser = (User) auth.getPrincipal();
         if (jwtUser == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to get current ride for unauthenticated user");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unable to get current ride for unauthenticated user");
 
         if (jwtUser.getRole() == Role.DRIVER) {
             Optional<Driver> driver = driverRepository.findById(jwtUser.getId());
@@ -335,6 +437,10 @@ public class RideServiceImpl implements RideService {
                 return new RideDto(ride.get());
 
             ride = rideRepository.findFirstByCreatorAndStatusAndStartTimeBeforeOrderByStartTimeAsc(user.get(), RideStatus.PENDING, LocalDateTime.now().plusMinutes(1));
+            if (ride.isPresent())
+                return new RideDto(ride.get());
+
+            ride = rideRepository.findFirstByPassengersIdAndStatusOrderByStartTimeAsc(user.get().getId(), RideStatus.IN_PROGRESS);
             return ride.map(RideDto::new).orElse(null);
         }
     }
@@ -363,31 +469,49 @@ public class RideServiceImpl implements RideService {
 
 
     // most complex method
-    // TODO: make changes later if necessary
     @Override
     public RideDto orderRide(RideOrderDto rideOrderDto) {
+
         // if there are no waypoints throw error
         if (rideOrderDto.getWaypoints() == null || rideOrderDto.getWaypoints().size() == 1 || rideOrderDto.getWaypoints().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one waypoint is required to order a ride");
         }
+
         // if creator id is null or zero throw error
         if (rideOrderDto.getCreatorId() == null || rideOrderDto.getCreatorId() == 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Creator id is required to order a ride");
         }
 
+        // print in console current step - debugging
+        System.out.println("Ordering ride for creator id: " + rideOrderDto.getCreatorId());
+
         Boolean existsDriverWithActiveStatus = driverRepository.existsDriverWithActiveStatus(); // activer or on ride, same thing
         if (!existsDriverWithActiveStatus) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No available drivers found for the ride");
         }
+
+        System.out.println("There are drivers with active status");
         Boolean areAllDriversOnRideWithPendingRides = driverRepository.areAllDriversOnRideWithPendingRides();
         if (areAllDriversOnRideWithPendingRides) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "All drivers are currently busy");
         }
 
+        System.out.println("There are drivers that are not on ride or have no pending rides");
+
         // at this point, we can create the ride from a active driver or one that is not on ride, and has no pending rides
         // first try to find active driver
         Driver assignedDriver = null;
-        List<Driver> activeDrivers = driverRepository.findByStatus(UserStatus.ACTIVE);
+        List<Driver> activeDrivers = driverRepository.findByStatus(UserStatus.ACTIVE)
+                .stream()
+                .filter(d -> !Boolean.TRUE.equals(d.getIsBlocked()))
+                .toList();
+
+        // print all active drivers in pretty format
+        System.out.println("Active drivers:");
+        for (Driver d : activeDrivers) {
+            System.out.println("Driver ID: " + d.getId() + ", Name: " + d.getName() + ", Active past 24 hours: " + (d.getStats() != null ? d.getStats().getActivePast24Hours() : "N/A") + " minutes, Vehicle type: " + (d.getVehicle() != null ? d.getVehicle().getType() : "N/A") + ", Baby friendly: " + (d.getVehicle() != null ? d.getVehicle().getBabyFriendly() : "N/A") + ", Pet friendly: " + (d.getVehicle() != null ? d.getVehicle().getPetFriendly() : "N/A"));
+        }
+
         List<Driver> eligibleDrivers = activeDrivers.stream()
                 .filter(d -> d.getStats() != null && d.getStats().getActivePast24Hours() <= 480 && d.getVehicle() != null // at most 8 hours active in past 24 hours
                         && d.getVehicle().getType() == rideOrderDto.getVehicleType()
@@ -395,14 +519,25 @@ public class RideServiceImpl implements RideService {
                         && (!rideOrderDto.getPetFriendly() || d.getVehicle().getPetFriendly())
                 ).toList();
 
+        // print eligible drivers in pretty format
+        System.out.println("Eligible active drivers (after filtration):");
+        for (Driver d : eligibleDrivers) {
+            System.out.println("Driver ID: " + d.getId() + ", Name: " + d.getName() + ", Active past 24 hours: " + (d.getStats() != null ? d.getStats().getActivePast24Hours() : "N/A") + " minutes, Vehicle type: " + (d.getVehicle() != null ? d.getVehicle().getType() : "N/A") + ", Baby friendly: " + (d.getVehicle() != null ? d.getVehicle().getBabyFriendly() : "N/A") + ", Pet friendly: " + (d.getVehicle() != null ? d.getVehicle().getPetFriendly() : "N/A"));
+        }
+
         if (!eligibleDrivers.isEmpty()) {
             // assign the first active driver found
+            System.out.println("Found eligible active drivers, assigning the first one");
             assignedDriver = eligibleDrivers.get(0); // we should actually calculate driver distance from starting point, but right now i don't have that data (where vehicle waypoints are stored)
-            // TODO: implement distance calculation later
         } else {
+            System.out.println("No eligible active drivers found, looking for on ride drivers with no pending rides");
             // from drivers that are on ride, and has no pending rides, find one that is on ride that has closes end time to now
-            List<Driver> onRideDrivers = driverRepository.findByStatus(UserStatus.ON_RIDE);
-           // eliminate all that has a ride that has scheduled time in future
+            List<Driver> onRideDrivers = driverRepository.findByStatus(UserStatus.ON_RIDE)
+                    .stream()
+                    .filter(d -> !Boolean.TRUE.equals(d.getIsBlocked()))
+                    .collect(Collectors.toList());
+
+            // eliminate all that has a ride that has scheduled time in future
             List<Ride> pendingRides = rideRepository.findByStatus(RideStatus.ACCEPTED);
             // for every ride, if driver is in onRideDrivers, remove him from onRideDrivers
             for (Ride ride : pendingRides) {
@@ -417,20 +552,29 @@ public class RideServiceImpl implements RideService {
                             && d.getStats() != null && d.getStats().getActivePast24Hours() <= 480 // at most 8 hours active in past 24 hours
                     ).toList();
 
+            System.out.println("Found " + eligibleDrivers.size() + " eligible on-ride drivers with no pending rides");
+
             if (eligibleDrivers.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable drivers found for the ride");
             }
-            // TODO: assign by least time to current time from ride end time
             assignedDriver = eligibleDrivers.get(0); // placeholder
         }
+
+        System.out.println("Driver assigned, checking if its null");
 
         if (assignedDriver == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No suitable drivers found for the ride");
         }
 
+        System.out.println("Driver assigned successfully, creating ride entity");
+
         // create ride entity and save to database
         Ride newRide = new Ride();
         User creator = userRepository.findById(rideOrderDto.getCreatorId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Creator user not found"));
+        // quick check if creator is blocked, if yes, throw error
+        if (Boolean.TRUE.equals(creator.getIsBlocked())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is blocked from creating rides");
+        }
         // start time comes from frontend in string format ready for conversion in LocalDateTime
         String t = rideOrderDto.getScheduledTime();
 
@@ -449,6 +593,7 @@ public class RideServiceImpl implements RideService {
 
         List<User> passengers = new ArrayList<>();
 
+        passengers.add(creator);
         for (String email : rideOrderDto.getPassengersEmails()) {
             userRepository.findByEmail(email)
                     .ifPresent(passengers::add);
@@ -482,6 +627,7 @@ public class RideServiceImpl implements RideService {
         createdRideDto.setDistance(newRide.getDistance());
         createdRideDto.setPrice(newRide.getPrice());
         createdRideDto.setStatus(newRide.getStatus());
+        createdRideDto.setCreatedBy(creator.getId());
 
         webSocketNotificationService.sendRideAssigned(assignedDriver.getId(), new RideAssignmentNotification(
                 NotificationType.RIDE_ASSIGNED.name(),
@@ -493,9 +639,12 @@ public class RideServiceImpl implements RideService {
         }
 
         // schedule a current ride upadte
-        rideReminderService.sendCurrentRideUpdate(rideOrderDto.getCreatorId(), createdRideDto, newRide.getStartTime());
         rideReminderService.sendCurrentRideUpdate(assignedDriver.getId(), createdRideDto, newRide.getStartTime());
-
+        for (User passenger : passengers) {
+            rideReminderService.sendCurrentRideUpdate(passenger.getId(), createdRideDto, newRide.getStartTime());
+            if (!passenger.getId().equals(newRide.getCreator().getId()))
+                emailService.sendPassengerRideInvitationEmail(passenger.getEmail(), newRide);
+        }
 
         return createdRideDto;
     }
@@ -551,12 +700,31 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
+    public List<RideCardDto> getScheduledRidesUser(Long userId, Integer skip, Integer count, RideQueryDto query) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+
+        Pageable pageable = parseToPageable(skip, count, query);
+
+        if (query != null && query.getDate() != null)
+            return rideRepository.findByCreatorAndStatusInAndStartTimeBetween(user.get(), List.of(RideStatus.PENDING), query.getDate(), query.getDate().plusDays(1), pageable).stream().map(RideCardDto::new).toList();
+        return rideRepository.findByCreatorAndStatusIn(user.get(), List.of(RideStatus.PENDING), pageable).stream().map(RideCardDto::new).toList();
+    }
+
+    @Override
     public RideDto cancelRide(Long rideId) {
         Ride ride = this.getRideOrThrow(rideId);
 
         this.checkRidePrivilege(ride.getCreator().getId());
 
+        if (ride.getStatus() == RideStatus.CANCELLED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Ride already cancelled");
+        }
+
         LocalDateTime now = LocalDateTime.now();
+
         if (ride.getStartTime() != null && ride.getStartTime().minusMinutes(10).isBefore(now)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Cannot cancel ride less than 10 minutes before start");
@@ -575,7 +743,8 @@ public class RideServiceImpl implements RideService {
 
     private void checkRidePrivilege(Long userId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) auth.getPrincipal();
+        String username = auth.getName();
+        User user = userRepository.findByEmail(username).orElseThrow();
 
         if (!userId.equals(user.getId()))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Not your ride");

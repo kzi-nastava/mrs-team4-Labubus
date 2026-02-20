@@ -1,0 +1,52 @@
+<div class="bu-wrap">
+  @if (loading) {
+    <div class="bu-loading">Loading users…</div>
+  } @else if (error) {
+    <div class="bu-error">{{ error }}</div>
+    <button type="button" class="bu-retry" (click)="loadUsers()">Retry</button>
+  } @else {
+    <div class="bu-list">
+      @for (user of users; track user.id) {
+        <div class="bu-card" [class.bu-card-blocked]="user.isBlocked" [class.bu-card-expanded]="expandingForBlock?.id === user.id">
+          <div class="bu-card-top">
+            <div class="bu-info">
+              <span class="bu-name">{{ user.name }} {{ user.surname }}</span>
+              <span class="bu-meta">{{ user.email }} · {{ roleLabel(user.role) }}</span>
+            </div>
+            <div class="bu-actions">
+              @if (user.isBlocked) {
+                <button type="button" class="bu-btn bu-btn-unblock" (click)="unblock(user)">
+                  Unblock
+                </button>
+              } @else if (expandingForBlock?.id === user.id) {
+                <button type="button" class="bu-btn bu-btn-cancel" (click)="cancelBlockNote()">
+                  Cancel
+                </button>
+              } @else {
+                <button type="button" class="bu-btn bu-btn-block" (click)="openBlockNote(user)">
+                  Block
+                </button>
+              }
+            </div>
+          </div>
+          @if (expandingForBlock?.id === user.id) {
+            <div class="bu-note-wrap">
+              <label class="bu-note-label">Message (reason for blocking)</label>
+              <textarea
+                class="bu-note-input"
+                placeholder="Optional note for the user..."
+                [(ngModel)]="blockNote"
+                rows="3"></textarea>
+              <button type="button" class="bu-btn bu-btn-block bu-btn-confirm" (click)="confirmBlock(user)">
+                Block user
+              </button>
+            </div>
+          }
+        </div>
+      }
+      @empty {
+        <div class="bu-empty">No users found.</div>
+      }
+    </div>
+  }
+</div>

@@ -40,16 +40,34 @@
       @if (user.role === 'REGISTERED_USER' || user.role === 'ADMIN') {
             <div class="section">
                   <div class="section-title"> Driver</div>
-                  <app-profile-card [user]="ride.driver" icon="review-primary-text.svg" (onAction)="onOpenReview(ride.id)"></app-profile-card>
+                  <app-profile-card [user]="ride.driver" icon="review-primary-text.svg" (onAction)="onOpenReview(ride.id)" [testIdPrefix]="testIdPrefix + '-driver'"></app-profile-card>
             </div>
             <div class="section">
                   <div class="section-title"> Vehicle</div>
                   <app-vehicle-card [driverId]="ride.driver.id"></app-vehicle-card>
             </div>
       }
+      
 
       <app-stat-card [value]="'$' + ride.price" label="Final price" variant="dark"></app-stat-card>
-      @if (ride.passengers.length > 0 && user.id === ride.passengers[0].id) {
-            <app-button width="290px" (clicked)="onReorderClick()">Reorder ride</app-button>
+
+      @if (user.role === 'ADMIN' && ride.status == 'IN_PROGRESS') {
+            <app-button width="290px" testId="track-ride" (clicked)="onToggleTrack()">{{ (ridePlanningStore.currentRide$ | async)?.id === ride.id ? 'Untrack ride' : 'Track ride' }}</app-button>
+      }
+
+      @if (user.role === 'REGISTERED_USER' || user.role === 'ADMIN') {
+            <app-ride-history-reviews [rideId]="ride.id"></app-ride-history-reviews>
+      }
+
+      @if (user.role === 'REGISTERED_USER' || user.role === 'ADMIN') {
+            <app-ride-history-complaints [rideId]="ride.id"></app-ride-history-complaints>
+            
+      }
+
+      @if (user.role === 'REGISTERED_USER') {
+            @if (ride.status=="PENDING") {
+                  <app-button width="290px" (clicked)="cancelScheduleRide(ride.id)">Cancel</app-button>
+            }
+            <app-button width="290px" testId="reorder-ride" (clicked)="onReorderClick()">Reorder ride</app-button>
       }
 </app-modal-container>

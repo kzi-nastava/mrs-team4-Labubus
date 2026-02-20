@@ -13,6 +13,7 @@ import { RideCardDto } from '../../../dtos/ride-card-dto';
 export class ProfileCard {
   user = input.required<UserDto>();
   icon = input<string>();
+  @Input() testIdPrefix : string | null = null;
   @Output() onAction = new EventEmitter<void>();
 
   userService : UserService = inject(UserService);

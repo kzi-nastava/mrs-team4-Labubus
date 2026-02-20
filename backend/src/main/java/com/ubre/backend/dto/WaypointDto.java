@@ -22,12 +22,22 @@ public class WaypointDto implements Serializable {
     private Double latitude;
     @NotNull(message = "Longitude cannot be null")
     private Double longitude;
+    private Boolean visited;
 
     public WaypointDto(Long id, String label, double latitude, double longitude) {
         this.id = id;
         this.label = label;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.visited = false;
+    }
+
+    public WaypointDto(Long id, String label, double latitude, double longitude, Boolean visited) {
+        this.id = id;
+        this.label = label;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.visited = visited;
     }
 
     public WaypointDto(Waypoint model) {
@@ -35,5 +45,6 @@ public class WaypointDto implements Serializable {
         this.label = model.getLabel();
         this.latitude = model.getLatitude();
         this.longitude = model.getLongitude();
+        this.visited = model.getVisited();
     }
 }

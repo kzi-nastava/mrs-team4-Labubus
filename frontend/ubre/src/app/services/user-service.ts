@@ -13,11 +13,14 @@ export class UserService {
   private readonly http = inject(HttpClient);
   private readonly api = 'http://localhost:8080/api';
 
-  private readonly currentUserSubject = new BehaviorSubject<UserDto>({ email: '', name: 'Guest', surname: '', avatarUrl: 'default-avatar.jpg', role: Role.GUEST, id: 0, phone: '', address: '' });
+  private readonly currentUserSubject = new BehaviorSubject<UserDto>({ email: '', name: 'Guest', surname: '', avatarUrl: 'default-avatar.jpg', role: Role.GUEST, id: 0, phone: '', address: '', isBlocked: false });
   readonly currentUser$ = this.currentUserSubject.asObservable();
 
   private readonly avatarSrcSubject = new BehaviorSubject<string>('default-avatar.jpg');
   readonly avatarSrc$ = this.avatarSrcSubject.asObservable();
+
+  private readonly blockNoteSubject = new BehaviorSubject<string | null>(null);
+  readonly currentUserBlockNote$ = this.blockNoteSubject.asObservable();
 
   private currentUserVehicleSubject = new BehaviorSubject<VehicleDto>({ id: 0, model: '', type: VehicleType.STANDARD, seats: 0, babyFriendly: false, petFriendly: false, plates: '' });
   readonly currentUserVehicle$ = this.currentUserVehicleSubject.asObservable();
@@ -46,20 +49,34 @@ export class UserService {
     return this.http.get<VehicleDto>(`${this.api}/vehicles/driver/${driverId}`);
   }
 
+  /** GET /users/{id}/block-note — text/plain; prazan string ako nema beleške */
+  getBlockNote(userId: number): Observable<string> {
+    return this.http.get(`${this.api}/users/${userId}/block-note`, { responseType: 'text' });
+  }
+
 
 
   // --- actions ---
   setCurrentUserById(id: number) {
     if (id === 0 || id === null) {
-      this.currentUserSubject.next({ id: 0, role: Role.GUEST, name: 'Guest', surname: '', email: '', avatarUrl: 'default-avatar.jpg', phone: '', address: '' });
+      this.currentUserSubject.next({ id: 0, role: Role.GUEST, name: 'Guest', surname: '', email: '', avatarUrl: 'default-avatar.jpg', phone: '', address: '', isBlocked: false });
+      this.blockNoteSubject.next(null);
       return;
     }
     this.getUserById(id).pipe(take(1)).subscribe({
       next: user => {
         this.currentUserSubject.next(user);
-        this.loadAvatar(user.id); 
+        this.loadAvatar(user.id);
         if (user.role === Role.DRIVER) {
-          this.loadUserVehicle(user.id); 
+          this.loadUserVehicle(user.id);
+        }
+        if (user.isBlocked) {
+          this.getBlockNote(user.id).pipe(take(1)).subscribe({
+            next: text => this.blockNoteSubject.next((text?.trim() || '') ? text.trim() : 'There is no reason provided'),
+            error: () => this.blockNoteSubject.next('There is no reason provided'),
+          });
+        } else {
+          this.blockNoteSubject.next(null);
         }
       },
       error: err => {

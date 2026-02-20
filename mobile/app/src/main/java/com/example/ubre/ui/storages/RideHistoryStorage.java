@@ -27,13 +27,20 @@ public class RideHistoryStorage {
     public LiveData<List<RideCardDto>> getHistoryReadOnly() {return history;}
 
     public void setHistory(List<RideCardDto> history) {
-        this.history.setValue(history);
+        if (history == null) {
+            this.history.setValue(new ArrayList<>());
+        } else {
+            this.history.setValue(new ArrayList<>(history));
+        }
     }
 
     public void extendHistory(List<RideCardDto> rides) {
         List<RideCardDto> temp = history.getValue();
-        temp.addAll(rides);
-        history.setValue(temp);
+        List<RideCardDto> updated = temp == null ? new ArrayList<>() : new ArrayList<>(temp);
+        if (rides != null) {
+            updated.addAll(rides);
+        }
+        history.setValue(updated);
     }
 
     public void clearHistory() {

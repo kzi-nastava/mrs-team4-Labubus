@@ -12,6 +12,7 @@ export class RideCard {
   @Input() ride : RideCardDto | null = null;
   @Input() iconUrl : string = "http://localhost:4200/favorite_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg"
   @Input() selected : boolean = false;
+  @Input() testId: string | null = null;
   @Output() select = new EventEmitter<any>();
   @Output() action = new EventEmitter<any>();
 

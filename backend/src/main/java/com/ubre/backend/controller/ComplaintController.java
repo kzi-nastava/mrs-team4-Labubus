@@ -61,4 +61,10 @@ public class ComplaintController {
         ComplaintDto complaint = ComplaintService.deleteComplaint(id);
         return new ResponseEntity<>(complaint, HttpStatus.OK);
     }
+    @GetMapping(value = "/ride/{rideId}")
+    public ResponseEntity<List<ComplaintDto>> getComplaintsForRide(@PathVariable Long rideId) {
+        List<ComplaintDto> complaints = ComplaintService.getComplaintsForRide(rideId);
+        return ResponseEntity.ok(complaints);
+    }
+
 }
