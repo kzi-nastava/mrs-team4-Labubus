@@ -28,7 +28,7 @@ export class DriverActivation implements OnInit {
   errorMessage = '';
   token = '';
   email = '';
-  private readonly api = 'http://localhost:8080/api';
+  private readonly api = 'http://ubre-api.notixdms.com:8080/api';
 
   resetForm = new FormGroup(
     {

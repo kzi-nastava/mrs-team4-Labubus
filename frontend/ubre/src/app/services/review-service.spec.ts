@@ -72,7 +72,7 @@ describe('ReviewService', () => {
       }
     })
 
-    const req = httpMock.expectOne(`http://localhost:8080/api/reviews/ride/1`);
+    const req = httpMock.expectOne(`http://ubre-api.notixdms.com:8080/api/reviews/ride/1`);
     expect(req.request.body).toEqual(expectedBody)
 
     req.flush(expectedBody)
@@ -90,7 +90,7 @@ describe('ReviewService', () => {
       }
     })
 
-    const req = httpMock.expectNone(`http://localhost:8080/api/reviews/ride/1`);
+    const req = httpMock.expectNone(`http://ubre-api.notixdms.com:8080/api/reviews/ride/1`);
   })
 
   it('should not submit without ride id', () => {
@@ -103,6 +103,6 @@ describe('ReviewService', () => {
       }
     })
 
-    const req = httpMock.expectNone(`http://localhost:8080/api/reviews/ride/1`);
+    const req = httpMock.expectNone(`http://ubre-api.notixdms.com:8080/api/reviews/ride/1`);
   })
 });

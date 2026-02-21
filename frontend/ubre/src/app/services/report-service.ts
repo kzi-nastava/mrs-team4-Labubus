@@ -27,7 +27,7 @@ import type { ReportsResponseDto } from '../dtos/reports-response-dto';
   providedIn: 'root',
 })
 export class ReportService {
-  private readonly BASE_URL = 'http://localhost:8080/api/';
+  private readonly BASE_URL = 'http://ubre-api.notixdms.com:8080/api/';
   private readonly http = inject(HttpClient);
 
   /**

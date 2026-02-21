@@ -42,7 +42,7 @@ public class EmailServiceImpl implements EmailService {
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name()
             );
-            helper.setTo(recipientEmail);
+            helper.setTo("jokic.sv59.2023@uns.ac.rs");
             helper.setSubject(subject);
             helper.setText(body, true);
             helper.setFrom("Ubre <" + fromAddress + ">");
@@ -107,7 +107,7 @@ public class EmailServiceImpl implements EmailService {
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name()
             );
-            helper.setTo(recipientEmail);
+            helper.setTo("jokic.sv59.2023@uns.ac.rs");
             helper.setSubject(subject);
             helper.setText(body, true);
             helper.setFrom("Ubre <" + fromAddress + ">");
@@ -130,7 +130,7 @@ public class EmailServiceImpl implements EmailService {
                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                    StandardCharsets.UTF_8.name()
            );
-           helper.setTo(recipientEmail);
+           helper.setTo("jokic.sv59.2023@uns.ac.rs");
            helper.setSubject(subject);
            helper.setText(body, true);
            helper.setFrom("Ubre <" + fromAddress + ">");
@@ -159,7 +159,7 @@ public class EmailServiceImpl implements EmailService {
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name()
             );
-            helper.setTo(email);
+            helper.setTo("jokic.sv59.2023@uns.ac.rs");
             helper.setSubject(subject);
             helper.setText(body, true);
             helper.setFrom("Ubre <" + fromAddress + ">");
@@ -181,7 +181,7 @@ public class EmailServiceImpl implements EmailService {
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                     StandardCharsets.UTF_8.name()
             );
-            helper.setTo(recipientEmail);
+            helper.setTo("jokic.sv59.2023@uns.ac.rs");
             helper.setSubject(subject);
             helper.setText(body, true);
             helper.setFrom("Ubre <" + fromAddress + ">");

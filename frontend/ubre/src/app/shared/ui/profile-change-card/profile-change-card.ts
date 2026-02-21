@@ -18,7 +18,7 @@ export class ProfileChangeCard {
   @Output() reject = new EventEmitter<number>();
 
   private readonly http = inject(HttpClient);
-  private readonly api = 'http://localhost:8080/api';
+  private readonly api = 'http://ubre-api.notixdms.com:8080/api';
 
   leaving = false;
 

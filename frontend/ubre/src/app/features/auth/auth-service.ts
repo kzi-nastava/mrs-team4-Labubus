@@ -17,7 +17,7 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  apiHost = 'http://localhost:8080/';
+  apiHost = 'http://ubre-api.notixdms.com:8080/';
 
   isLoggedIn(): boolean {
     return !!localStorage.getItem('accessToken');

@@ -14,7 +14,7 @@ type FieldErrors = Partial<Record<
 export class ChangePasswordService {
     private readonly http = inject(HttpClient);
     private readonly userService = inject(UserService);
-    private readonly api = 'http://localhost:8080/api';
+    private readonly api = 'http://ubre-api.notixdms.com:8080/api';
 
     // errors, such as too short, required or mismatch
     fieldErrors: FieldErrors | null = null;
