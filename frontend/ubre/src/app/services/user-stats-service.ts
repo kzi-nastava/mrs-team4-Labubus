@@ -9,7 +9,7 @@ import { UserService } from './user-service';
 export class UserStatsService {
     private readonly http = inject(HttpClient);
     private readonly userService = inject(UserService);
-    private readonly api = 'http://localhost:8080/api';
+    private readonly api = 'http://ubre-api.notixdms.com:8080/api';
 
     // user stats for current user, subject and observable
     private readonly currentUserStatsSubject = new BehaviorSubject<UserStatsDto>({ userId: 0, activePast24Hours: 0, numberOfRides: 0, distanceTravelled: 0, moneySpent: 0, moneyEarned: 0 });

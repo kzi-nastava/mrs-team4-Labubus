@@ -13,7 +13,7 @@ import { UserDto } from '../dtos/user-dto';
 @Injectable({ providedIn: 'root' })
 export class BlockUsersService {
   private readonly http = inject(HttpClient);
-  private readonly api = 'http://localhost:8080/api';
+  private readonly api = 'http://ubre-api.notixdms.com:8080/api';
 
   getUsers(): Observable<UserDto[]> {
     return this.http.get<UserDto[]>(`${this.api}/users/get-all`);

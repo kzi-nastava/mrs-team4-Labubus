@@ -20,7 +20,7 @@ import { RouteInfo } from './ride-planning/ride-types';
 })
 export class VehicleService {
   
-    private readonly BASE_URL : string = "http://localhost:8080/api/";
+    private readonly BASE_URL : string = "http://ubre-api.notixdms.com:8080/api/";
     private readonly http = inject(HttpClient);
     private readonly webSocketService : WebSocketService = inject(WebSocketService);
     private readonly rideTrackingStore : RideTrackingStore = inject(RideTrackingStore);

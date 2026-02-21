@@ -9,7 +9,7 @@ import { UserDto } from '../dtos/user-dto';
   providedIn: 'root',
 })
 export class ComplaintService {
-  private readonly BASE_URL : string = "http://localhost:8080/api/";
+  private readonly BASE_URL : string = "http://ubre-api.notixdms.com:8080/api/";
   private readonly userService : UserService = inject(UserService);
   private readonly http = inject(HttpClient);
 

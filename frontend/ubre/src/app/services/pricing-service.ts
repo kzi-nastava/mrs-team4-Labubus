@@ -6,7 +6,7 @@ import { VehicleTypePricingDto } from '../dtos/vehicle-type-pricing-dto';
 @Injectable({ providedIn: 'root' })
 export class PricingService {
   private readonly http = inject(HttpClient);
-  private readonly api = 'http://localhost:8080/api/pricing';
+  private readonly api = 'http://ubre-api.notixdms.com:8080/api/pricing';
 
   private pricingSubject = new BehaviorSubject<VehicleTypePricingDto | null>(null);
   pricing$ = this.pricingSubject.asObservable();

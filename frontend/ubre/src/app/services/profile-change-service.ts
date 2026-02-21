@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 @Injectable({ providedIn: 'root' })
 export class ProfileChangeService {
   private readonly http = inject(HttpClient);
-  private readonly api = 'http://localhost:8080/api';
+  private readonly api = 'http://ubre-api.notixdms.com:8080/api';
   private readonly profileChangesSubject = new BehaviorSubject<ProfileChangeDto[]>([]);
   readonly profileChanges$ = this.profileChangesSubject.asObservable();
 

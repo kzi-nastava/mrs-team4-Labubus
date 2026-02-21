@@ -201,7 +201,7 @@ describe('DriverRegistrationService', () => {
       });
       expect(service.fieldErrors).toBeDefined();
       expect(service.fieldErrors?.email).toBe('Required');
-      httpMock.expectNone('http://localhost:8080/api/drivers');
+      httpMock.expectNone('http://ubre-api.notixdms.com:8080/api/drivers');
     });
 
     it('should POST to /api/drivers with exact draft payload on valid submit', () => {
@@ -212,7 +212,7 @@ describe('DriverRegistrationService', () => {
         expect(user.role).toBe(Role.DRIVER);
       });
 
-      const req = httpMock.expectOne('http://localhost:8080/api/drivers');
+      const req = httpMock.expectOne('http://ubre-api.notixdms.com:8080/api/drivers');
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(draft);
       req.flush({ id: 1, role: Role.DRIVER, name: draft.name, surname: draft.surname, email: draft.email, avatarUrl: '', phone: draft.phone, address: draft.address });
@@ -223,7 +223,7 @@ describe('DriverRegistrationService', () => {
       service.setDraft(validDraft());
       service.register('password123').subscribe();
 
-      const req = httpMock.expectOne('http://localhost:8080/api/drivers');
+      const req = httpMock.expectOne('http://ubre-api.notixdms.com:8080/api/drivers');
       req.flush({ id: 1, role: Role.DRIVER, name: 'John', surname: 'Doe', email: 'driver@example.com', avatarUrl: '', phone: '+381601234567', address: 'Street 1' });
       expect(service.fieldErrors).toBeNull();
       expect(service.getDraftSnapshot().email).toBe('');

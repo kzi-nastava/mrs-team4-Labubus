@@ -18,7 +18,7 @@ export class SseService {
   ) {
     this.es?.close();
     const token = this.authService.getToken();
-    this.es = new EventSourcePolyfill(`http://localhost:8080/api/users/sse?userId=${userId}`, { headers: { 'Authorization': `Bearer ${token}` }, heartbeatTimeout: 60000 });
+    this.es = new EventSourcePolyfill(`http://ubre-api.notixdms.com:8080/api/users/sse?userId=${userId}`, { headers: { 'Authorization': `Bearer ${token}` }, heartbeatTimeout: 60000 });
 
     this.es.addEventListener('PROFILE_CHANGE_APPROVED', (e: any) => {
       const user = JSON.parse(e.data) as UserDto;

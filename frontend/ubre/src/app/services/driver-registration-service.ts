@@ -15,8 +15,8 @@ type FieldErrors = Partial<Record<
 @Injectable({ providedIn: 'root' })
 export class DriverRegistrationService {
   private readonly http = inject(HttpClient);
-  private readonly driversApi = 'http://localhost:8080/api/drivers';
-  private readonly usersApi = 'http://localhost:8080/api/users';
+  private readonly driversApi = 'http://ubre-api.notixdms.com:8080/api/drivers';
+  private readonly usersApi = 'http://ubre-api.notixdms.com:8080/api/users';
 
   private readonly avatarSrcSubject = new BehaviorSubject<string>('');
   readonly avatarSrc$ = this.avatarSrcSubject.asObservable();

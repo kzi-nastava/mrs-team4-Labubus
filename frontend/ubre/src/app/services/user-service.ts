@@ -11,7 +11,7 @@ import { VehicleType } from '../enums/vehicle-type';
 export class UserService {
   
   private readonly http = inject(HttpClient);
-  private readonly api = 'http://localhost:8080/api';
+  private readonly api = 'http://ubre-api.notixdms.com:8080/api';
 
   private readonly currentUserSubject = new BehaviorSubject<UserDto>({ email: '', name: 'Guest', surname: '', avatarUrl: 'default-avatar.jpg', role: Role.GUEST, id: 0, phone: '', address: '', isBlocked: false });
   readonly currentUser$ = this.currentUserSubject.asObservable();

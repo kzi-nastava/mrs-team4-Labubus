@@ -21,7 +21,7 @@ type FieldErrors = Partial<Record<
 export class AccountSettingsService {
     private readonly userService = inject(UserService);
     private readonly http = inject(HttpClient);
-    private readonly api = 'http://localhost:8080/api';
+    private readonly api = 'http://ubre-api.notixdms.com:8080/api';
 
     draft: UserDto | null = null;
     fieldErrors: FieldErrors | null = null;

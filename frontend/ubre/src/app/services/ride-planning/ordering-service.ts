@@ -9,7 +9,7 @@ import { RideDto } from "../../dtos/ride-dto";
 @Injectable({ providedIn: 'root' })
 export class OrderingService {
     private readonly http = inject(HttpClient);
-    private readonly api = 'http://localhost:8080/api';
+    private readonly api = 'http://ubre-api.notixdms.com:8080/api';
 
     // we send 0 as standard, 1 as van, 2 as luxury
     estimatePrice(distance: number, vehicleType: VehicleType): Observable<number> {

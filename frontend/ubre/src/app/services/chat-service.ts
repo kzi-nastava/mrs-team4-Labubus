@@ -12,7 +12,7 @@ import { Role } from '../enums/role';
   providedIn: 'root',
 })
 export class ChatService {
-  private readonly BASE_URL : string = "http://localhost:8080/api/";
+  private readonly BASE_URL : string = "http://ubre-api.notixdms.com:8080/api/";
   private readonly http = inject(HttpClient);
   private readonly userService = inject(UserService)
   private readonly websocketService = inject(WebSocketService)
